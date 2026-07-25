@@ -2,20 +2,29 @@ export type BlogPost = {
   slug: string;
   title: string;
   excerpt: string;
+  /**
+   * ISO 8601 (`YYYY-MM-DD`).
+   *
+   * Previously a display string like "March 30, 2025", which
+   * `blogPostingSchema` passed straight through to `datePublished`. Schema.org
+   * requires ISO 8601, so Google's Rich Results test rejected the value and
+   * none of the posts was eligible for an article rich result (audit F5).
+   * Render it with `formatPostDate`, never directly.
+   */
   date: string;
   category: string;
   cover: string;
   body: { heading?: string; paragraphs: string[] }[];
 };
 
-export const posts: BlogPost[] = [
+const allPosts: BlogPost[] = [
   {
     slug: "why-non-eu-companies-struggle-with-european-payments",
     title:
       "Why Non-EU Companies Struggle To Receive Payments From European Clients — And How An EU IBAN Solves The Problem",
     excerpt:
       "Why European clients hesitate to pay non-EU accounts, and how a local IBAN removes the friction, delays, and lost margin.",
-    date: "March 30, 2025",
+    date: "2025-03-30",
     category: "Business",
     cover: "/images/blog-1.png",
     body: [
@@ -52,7 +61,7 @@ export const posts: BlogPost[] = [
     title: "The FX Savings Playbook For Import-Export Businesses In 2026",
     excerpt:
       "How to cut foreign-exchange costs on every international payment — practical strategies and tools for 2026.",
-    date: "February 20, 2026",
+    date: "2026-02-20",
     category: "Business",
     cover: "/images/blog-2.png",
     body: [
@@ -98,7 +107,7 @@ export const posts: BlogPost[] = [
       "How FX Rates Impact Cross-Border Payouts — And How To Save Up To 87% On Every Transfer",
     excerpt:
       "The hidden cost of FX spreads and the simple rule that will save your business thousands.",
-    date: "January 16, 2026",
+    date: "2026-01-16",
     category: "Treasury",
     cover: "/images/blog-3.png",
     body: [
@@ -140,7 +149,7 @@ export const posts: BlogPost[] = [
     title: "The Rise Of Multi-Currency Accounts For Global Freelancers — Why You Need One",
     excerpt:
       "Freelancers in 100+ countries are switching to multi-currency IBANs. Here's what changed in 2026.",
-    date: "April 12, 2026",
+    date: "2026-04-12",
     category: "Freelance",
     cover: "/images/blog-4.png",
     body: [
@@ -182,7 +191,7 @@ export const posts: BlogPost[] = [
     title: "Amazon FBA Payouts: Why Cross-Border Sellers Now Need A European IBAN",
     excerpt:
       "Marketplaces tightened payout rules in 2026. A European IBAN is no longer optional for cross-border sellers.",
-    date: "March 30, 2026",
+    date: "2026-03-30",
     category: "E-commerce",
     cover: "/images/blog-5.png",
     body: [
@@ -223,7 +232,7 @@ export const posts: BlogPost[] = [
     title: "How To Build A Modern Treasury System For Import-Export Businesses",
     excerpt:
       "A practical five-step playbook to consolidate accounts, hold currencies, hedge FX, and accelerate growth in 2026.",
-    date: "March 30, 2026",
+    date: "2026-03-30",
     category: "Treasury",
     cover: "/images/blog-6.png",
     body: [
@@ -268,7 +277,41 @@ export const posts: BlogPost[] = [
   },
 ];
 
+/**
+ * Every post, newest first.
+ *
+ * The declared order ran 2025-03-30, 2026-02-20, 2026-01-16, 2026-04-12,
+ * 2026-03-30, 2026-03-30 — so the blog index opened with a 16-month-old
+ * article and the newest sat fourth, which reads as abandoned and is the wrong
+ * internal-linking signal for crawlers (audit F4). Sorting here rather than at
+ * each call site means every consumer — the index, the featured slot, the
+ * sitemap — agrees on the order.
+ *
+ * `Array.prototype.sort` is stable, so the two posts sharing 2026-03-30 keep
+ * their declared order rather than swapping between builds.
+ */
+export const posts: BlogPost[] = [...allPosts].sort((a, b) =>
+  a.date < b.date ? 1 : a.date > b.date ? -1 : 0,
+);
+
+/** The newest post, promoted to the hero slot on the index. */
 export const featuredPost = posts[0];
+
+/**
+ * A post's date as displayed to a reader.
+ *
+ * Mirrors the pattern already used for FX dates in `RateTicker`: parse the
+ * date at UTC midnight so it cannot shift a day in a negative-offset timezone,
+ * and format for the reader rather than storing a formatted string.
+ */
+export function formatPostDate(date: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${date}T00:00:00Z`));
+}
 
 /** Estimated reading time in minutes, derived from the post body (~200 wpm). */
 export function readingTimeMinutes(post: BlogPost): number {
