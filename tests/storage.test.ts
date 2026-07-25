@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 // Type-only: erased at compile time, so it cannot trigger module evaluation
 // before DATA_DIR is set below.
-import type { StoredSubmission, SubmissionStore } from "@/lib/storage";
+import type { StoredSubmission } from "@/lib/storage";
 
 // DATA_DIR is read when lib/storage is first imported, so it has to be set
 // before the dynamic import below — hence top-level await rather than a plain
@@ -12,8 +12,14 @@ import type { StoredSubmission, SubmissionStore } from "@/lib/storage";
 const TMP_DIR = path.join(os.tmpdir(), `marsa-storage-${process.pid}-${Date.now()}`);
 process.env.DATA_DIR = TMP_DIR;
 
-const { createStore, FileSubmissionStore, PostgresSubmissionStore, searchText } =
-  await import("@/lib/storage");
+const {
+  createStore,
+  FileSubmissionStore,
+  PostgresSubmissionStore,
+  StorageConfigError,
+  StorageWriteError,
+  searchText,
+} = await import("@/lib/storage");
 
 const lead: StoredSubmission = {
   id: "abc123",
@@ -47,8 +53,9 @@ afterEach(() => {
 });
 
 describe("createStore — provider selection", () => {
-  it("uses the file store when no database is configured", () => {
+  it("uses the file store when no database is configured (development)", () => {
     expect(createStore({})).toBeInstanceOf(FileSubmissionStore);
+    expect(createStore({ NODE_ENV: "development" })).toBeInstanceOf(FileSubmissionStore);
   });
 
   it("requires BOTH the url and the service key to use postgres", () => {
@@ -66,6 +73,24 @@ describe("createStore — provider selection", () => {
     expect(createStore({}).durable).toBe(false);
     expect(createStore(pgEnv).durable).toBe(true);
   });
+
+  it("refuses to build a non-durable store in production, naming the variables", () => {
+    expect(() => createStore({ NODE_ENV: "production" })).toThrow(StorageConfigError);
+    expect(() => createStore({ NODE_ENV: "production" })).toThrow(/SUPABASE_URL/);
+    expect(() => createStore({ NODE_ENV: "production" })).toThrow(/SUPABASE_SERVICE_ROLE_KEY/);
+  });
+
+  it("refuses in production when only half the pair is set", () => {
+    expect(() =>
+      createStore({ NODE_ENV: "production", SUPABASE_URL: pgEnv.SUPABASE_URL }),
+    ).toThrow(StorageConfigError);
+  });
+
+  it("is satisfied in production once both variables are present", () => {
+    expect(createStore({ ...pgEnv, NODE_ENV: "production" })).toBeInstanceOf(
+      PostgresSubmissionStore,
+    );
+  });
 });
 
 describe("searchText", () => {
@@ -78,8 +103,8 @@ describe("FileSubmissionStore", () => {
   it("persists, lists, filters and counts submissions", async () => {
     const store = new FileSubmissionStore();
 
-    expect(await store.save(lead)).toEqual({ persisted: true });
-    expect(await store.save(contact)).toEqual({ persisted: true });
+    await expect(store.save(lead)).resolves.toBeUndefined();
+    await expect(store.save(contact)).resolves.toBeUndefined();
 
     const all = await store.list();
     expect(all.total).toBe(2);
@@ -109,6 +134,23 @@ describe("FileSubmissionStore", () => {
     expect(page.total).toBe(2);
   });
 
+  it("throws instead of reporting success when the write fails", async () => {
+    // A directory where `subscribe.jsonl` should be makes appendFile fail with
+    // EISDIR, standing in for the read-only filesystem of a serverless deploy.
+    await fs.mkdir(path.join(TMP_DIR, "subscribe.jsonl"), { recursive: true });
+    const store = new FileSubmissionStore();
+    const subscribe: StoredSubmission = {
+      id: "ghi789",
+      kind: "subscribe",
+      createdAt: "2026-07-25T09:00:00.000Z",
+      data: { email: "nina@example.com" },
+    };
+
+    await expect(store.save(subscribe)).rejects.toBeInstanceOf(StorageWriteError);
+
+    await fs.rm(path.join(TMP_DIR, "subscribe.jsonl"), { recursive: true, force: true });
+  });
+
   it("skips corrupted lines instead of failing the whole read", async () => {
     await fs.appendFile(path.join(TMP_DIR, "lead.jsonl"), "{not json}\n", "utf8");
     const store = new FileSubmissionStore();
@@ -130,21 +172,8 @@ describe("PostgresSubmissionStore", () => {
     }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const fallback: SubmissionStore = {
-      provider: "file",
-      durable: false,
-      save: vi.fn(async () => ({ persisted: true })),
-      list: vi.fn(async () => ({ items: [], total: 0 })),
-      stats: vi.fn(async () => ({
-        total: 0,
-        byKind: { lead: 0, contact: 0, subscribe: 0 },
-        last7Days: 0,
-      })),
-      health: vi.fn(async () => ({ ok: true })),
-    };
-
-    const store = new PostgresSubmissionStore(cfg, fallback);
-    expect(await store.save(lead)).toEqual({ persisted: true });
+    const store = new PostgresSubmissionStore(cfg);
+    await expect(store.save(lead)).resolves.toBeUndefined();
 
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe("https://project.supabase.co/rest/v1/submissions");
@@ -152,10 +181,9 @@ describe("PostgresSubmissionStore", () => {
     expect(body.id).toBe("abc123");
     expect(body.kind).toBe("lead");
     expect(body.search).toContain("jane@acme.com");
-    expect(fallback.save).not.toHaveBeenCalled();
   });
 
-  it("never loses a submission when the database rejects the insert", async () => {
+  it("throws rather than silently falling back when the database rejects the insert", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => ({
@@ -165,27 +193,43 @@ describe("PostgresSubmissionStore", () => {
         headers: new Headers(),
       })),
     );
-    const saved: StoredSubmission[] = [];
-    const fallback: SubmissionStore = {
-      provider: "file",
-      durable: false,
-      save: async (s) => {
-        saved.push(s);
-        return { persisted: true };
-      },
-      list: async () => ({ items: [], total: 0 }),
-      stats: async () => ({
-        total: 0,
-        byKind: { lead: 0, contact: 0, subscribe: 0 },
-        last7Days: 0,
-      }),
-      health: async () => ({ ok: true }),
-    };
 
-    const store = new PostgresSubmissionStore(cfg, fallback);
-    expect(await store.save(lead)).toEqual({ persisted: true });
-    expect(saved).toHaveLength(1);
-    expect(saved[0].id).toBe("abc123");
+    const store = new PostgresSubmissionStore(cfg);
+    await expect(store.save(lead)).rejects.toBeInstanceOf(StorageWriteError);
+  });
+
+  it("throws when the table does not exist yet on a fresh project", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 404,
+        text: async () =>
+          '{"code":"PGRST205","message":"Could not find the table \'public.submissions\'"}',
+        headers: new Headers(),
+      })),
+    );
+
+    const store = new PostgresSubmissionStore(cfg);
+    await expect(store.save(lead)).rejects.toBeInstanceOf(StorageWriteError);
+  });
+
+  it("does not leak the database response body in the thrown error message", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 400,
+        text: async () =>
+          '{"code":"23514","message":"violates check constraint submissions_kind_check"}',
+        headers: new Headers(),
+      })),
+    );
+
+    const store = new PostgresSubmissionStore(cfg);
+    await expect(store.save(lead)).rejects.toThrow(
+      /^database insert failed for lead submission abc123$/,
+    );
   });
 
   it("builds a filtered, paginated query and reads the total from Content-Range", async () => {
@@ -200,7 +244,7 @@ describe("PostgresSubmissionStore", () => {
     }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const store = new PostgresSubmissionStore(cfg, new FileSubmissionStore());
+    const store = new PostgresSubmissionStore(cfg);
     const page = await store.list({ kind: "lead", q: "acme", limit: 10, offset: 20 });
 
     expect(page.total).toBe(42);
@@ -221,7 +265,7 @@ describe("PostgresSubmissionStore", () => {
         throw new Error("ECONNREFUSED");
       }),
     );
-    const store = new PostgresSubmissionStore(cfg, new FileSubmissionStore());
+    const store = new PostgresSubmissionStore(cfg);
     const health = await store.health();
     expect(health.ok).toBe(false);
     expect(health.detail).toContain("ECONNREFUSED");

@@ -16,13 +16,29 @@ import {
  *   • PostgreSQL (Supabase, or any PostgREST endpoint) when SUPABASE_URL and
  *     SUPABASE_SERVICE_ROLE_KEY are set — the production path: durable,
  *     queryable, and shared across serverless instances.
- *   • Newline-delimited JSON under DATA_DIR otherwise — the zero-config local
- *     path, so `npm run dev` works with no credentials at all.
+ *   • Newline-delimited JSON under DATA_DIR — the zero-config path for LOCAL
+ *     DEVELOPMENT ONLY, so `npm run dev` works with no credentials at all.
  *
  * Both implement the same read side (`list`, `stats`), so the admin screens do
  * not care which one is live. Email notification is deliberately NOT a storage
  * provider: sending mail is a side effect (see lib/notify.ts), and a store that
  * only emails is a store that loses data.
+ *
+ * ── The storage contract ────────────────────────────────────────────────────
+ * `save()` resolves ONLY when the submission is durably stored. Any other
+ * outcome throws `StorageWriteError`. There is deliberately no "accepted but
+ * not persisted" result: that value existed before, the API forwarded it
+ * honestly, and the client ignored it — so visitors were shown "Application
+ * received" for leads that only ever reached a log line.
+ *
+ * The two rules that follow from it:
+ *   1. The database store does NOT fall back to disk. A fallback write on a
+ *      serverless instance is either impossible (read-only filesystem) or
+ *      worse than useless — a row on one container's ephemeral disk that
+ *      /admin cannot see and a redeploy erases, reported as success.
+ *   2. Production without a configured database is a configuration error, not
+ *      a degraded mode. `createStore` refuses to build a non-durable store
+ *      when NODE_ENV is production, naming the variables that are missing.
  */
 
 export type SubmissionKind = "subscribe" | "lead" | "contact";
@@ -57,12 +73,41 @@ export type SubmissionStats = {
   last7Days: number;
 };
 
+/**
+ * Thrown when a submission could not be stored. The `message` is safe to log
+ * but is NEVER sent to the browser: callers translate it into a fixed,
+ * non-revealing string (see lib/api-forms.ts). `cause` carries the underlying
+ * error — database body, filesystem errno — for server-side diagnosis only.
+ */
+export class StorageWriteError extends Error {
+  constructor(
+    message: string,
+    readonly cause?: unknown,
+  ) {
+    super(message);
+    this.name = "StorageWriteError";
+  }
+}
+
+/** Thrown when the environment cannot produce a durable store in production. */
+export class StorageConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "StorageConfigError";
+  }
+}
+
 export interface SubmissionStore {
   /** Provider name, surfaced by /api/health and the admin UI. */
   readonly provider: string;
   /** True when submissions survive a redeploy. */
   readonly durable: boolean;
-  save(submission: StoredSubmission): Promise<{ persisted: boolean }>;
+  /**
+   * Persist a submission. Resolves only once the record is durably stored;
+   * throws `StorageWriteError` otherwise. Never resolves for a write that did
+   * not happen.
+   */
+  save(submission: StoredSubmission): Promise<void>;
   list(query?: SubmissionQuery): Promise<SubmissionPage>;
   stats(): Promise<SubmissionStats>;
   /** Cheap reachability probe for the health endpoint. */
@@ -96,21 +141,24 @@ export class FileSubmissionStore implements SubmissionStore {
   readonly provider = "file";
   readonly durable = false;
 
-  async save(submission: StoredSubmission): Promise<{ persisted: boolean }> {
+  async save(submission: StoredSubmission): Promise<void> {
     const line = `${JSON.stringify(submission)}\n`;
     try {
       await fs.mkdir(DATA_DIR, { recursive: true });
       await fs.appendFile(path.join(DATA_DIR, `${submission.kind}.jsonl`), line, "utf8");
-      return { persisted: true };
     } catch (err) {
-      // Read-only FS or permission issue — keep the record in the logs so it
-      // is recoverable, and let the caller treat the submission as accepted.
-      console.warn(
-        `[storage] could not persist ${submission.kind} submission ${submission.id} to disk; logging instead.`,
+      // A read-only or unwritable DATA_DIR means the record does not exist
+      // anywhere. Log it so it is recoverable from the platform logs, then
+      // throw — the visitor must not be told this succeeded.
+      console.error(
+        `[storage] could not write ${submission.kind} submission ${submission.id} to ${DATA_DIR}.`,
         err instanceof Error ? err.message : err,
       );
       console.info(`[submission:${submission.kind}]`, line.trim());
-      return { persisted: false };
+      throw new StorageWriteError(
+        `file store could not write ${submission.kind} submission ${submission.id}`,
+        err,
+      );
     }
   }
 
@@ -195,12 +243,9 @@ export class PostgresSubmissionStore implements SubmissionStore {
   readonly provider = "postgres";
   readonly durable = true;
 
-  constructor(
-    private readonly cfg: PostgrestConfig,
-    private readonly fallback: SubmissionStore,
-  ) {}
+  constructor(private readonly cfg: PostgrestConfig) {}
 
-  async save(submission: StoredSubmission): Promise<{ persisted: boolean }> {
+  async save(submission: StoredSubmission): Promise<void> {
     try {
       await insertRow<SubmissionRow>(this.cfg, TABLE, {
         id: submission.id,
@@ -210,15 +255,24 @@ export class PostgresSubmissionStore implements SubmissionStore {
         meta: submission.meta ?? null,
         search: searchText(submission),
       });
-      return { persisted: true };
     } catch (err) {
-      // A database hiccup must never lose a lead: write it to disk/logs and
-      // still report success to the visitor.
+      // No fallback to disk. On a serverless instance that write either fails
+      // outright or lands on an ephemeral container the admin cannot read and
+      // a redeploy erases — reporting either as success is how leads went
+      // missing. Log the real reason (table missing, RLS rejection, timeout)
+      // and let the caller turn it into a visible error.
+      //
+      // The full error text can include the PostgREST response body, so it is
+      // logged server-side only and never carried to the browser.
       console.error(
-        `[storage] database insert failed for ${submission.kind} ${submission.id}; using fallback store.`,
+        `[storage] database insert failed for ${submission.kind} ${submission.id}.`,
         err instanceof Error ? err.message : err,
       );
-      return this.fallback.save(submission);
+      console.info(`[submission:${submission.kind}]`, JSON.stringify(submission));
+      throw new StorageWriteError(
+        `database insert failed for ${submission.kind} submission ${submission.id}`,
+        err,
+      );
     }
   }
 
@@ -266,13 +320,31 @@ export class PostgresSubmissionStore implements SubmissionStore {
 
 /* ------------------------------------------------------------- selection -- */
 
-/** Build a store from an environment. Pure and injectable for testing. */
+export const MISSING_DB_CONFIG_MESSAGE =
+  "Submission storage is not configured. Set SUPABASE_URL and " +
+  "SUPABASE_SERVICE_ROLE_KEY (both are required; neither may be prefixed with " +
+  "NEXT_PUBLIC_) and apply db/schema.sql to the project. Refusing to start with " +
+  "a non-durable store in production, because form submissions would be lost.";
+
+/**
+ * Build a store from an environment. Pure and injectable for testing.
+ *
+ * Throws `StorageConfigError` in production when no database is configured.
+ * Silently degrading to the file store is the bug this replaces: on a
+ * read-only serverless filesystem it accepts submissions and drops them.
+ */
 export function createStore(
   env: Record<string, string | undefined> = process.env,
 ): SubmissionStore {
-  const file = new FileSubmissionStore();
   const cfg = getPostgrestConfig(env);
-  return cfg ? new PostgresSubmissionStore(cfg, file) : file;
+  if (cfg) return new PostgresSubmissionStore(cfg);
+
+  if (env.NODE_ENV === "production") {
+    throw new StorageConfigError(MISSING_DB_CONFIG_MESSAGE);
+  }
+
+  // Local development only: zero-config, writes JSONL under DATA_DIR.
+  return new FileSubmissionStore();
 }
 
 let store: SubmissionStore | null = null;

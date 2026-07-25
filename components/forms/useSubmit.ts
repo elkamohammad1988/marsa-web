@@ -36,11 +36,26 @@ export function useFormSubmit(endpoint: string): SubmitReturn {
         body: JSON.stringify(payload),
       });
 
-      const data: { ok?: boolean; error?: string; errors?: Record<string, string> } = await res
-        .json()
-        .catch(() => ({}));
+      const data: {
+        ok?: boolean;
+        persisted?: boolean;
+        error?: string;
+        errors?: Record<string, string>;
+      } = await res.json().catch(() => ({}));
 
       if (res.ok) {
+        // A 2xx is not on its own proof the submission was stored. The API
+        // returns 503 when storage fails, but this check is the backstop: if a
+        // response ever reports a non-durable write, it is an error state, not
+        // a success screen. Showing "we'll be in touch" for a record that does
+        // not exist is the one outcome this form must never produce.
+        if (data.ok === false || data.persisted === false) {
+          setMessage(
+            "We could not save your details, so nothing has been recorded. Please try again.",
+          );
+          setState("error");
+          return false;
+        }
         setState("success");
         return true;
       }
