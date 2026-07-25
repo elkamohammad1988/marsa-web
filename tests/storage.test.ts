@@ -157,6 +157,17 @@ describe("FileSubmissionStore", () => {
     const page = await store.list({ kind: "lead" });
     expect(page.total).toBe(1);
   });
+
+  it("does not put the absolute data directory path in the health detail", async () => {
+    // Previously `writing to ${DATA_DIR}`, returned verbatim by the
+    // unauthenticated /api/health, describing the server's filesystem (S2).
+    const health = await new FileSubmissionStore().health();
+
+    expect(health.ok).toBe(true);
+    expect(health.detail).toBe("file store writable");
+    expect(health.detail).not.toContain(TMP_DIR);
+    expect(health.detail).not.toContain(path.sep);
+  });
 });
 
 describe("PostgresSubmissionStore", () => {
@@ -265,9 +276,37 @@ describe("PostgresSubmissionStore", () => {
         throw new Error("ECONNREFUSED");
       }),
     );
+    vi.spyOn(console, "error").mockImplementation(() => {});
     const store = new PostgresSubmissionStore(cfg);
     const health = await store.health();
     expect(health.ok).toBe(false);
-    expect(health.detail).toContain("ECONNREFUSED");
+  });
+
+  it("does not put the upstream error text in the health detail", async () => {
+    // /api/health is unauthenticated. A PostgrestError message carries the HTTP
+    // status, the table name and up to 300 characters of the response body,
+    // which for Postgres errors names columns, constraints and hints (S2).
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 400,
+        text: async () =>
+          '{"code":"42703","message":"column submissions.secret_column does not exist"}',
+        headers: new Headers(),
+      })),
+    );
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const health = await new PostgresSubmissionStore(cfg).health();
+
+    expect(health.ok).toBe(false);
+    expect(health.detail).toBe("database unreachable");
+    expect(health.detail).not.toContain("secret_column");
+    expect(health.detail).not.toContain("submissions");
+    expect(health.detail).not.toContain("42703");
+
+    // Removed from the caller's view, not discarded.
+    expect(error.mock.calls.flat().map(String).join(" ")).toContain("secret_column");
   });
 });
