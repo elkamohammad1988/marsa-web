@@ -139,7 +139,15 @@ export async function rpc<T>(
   return (text ? JSON.parse(text) : null) as T;
 }
 
-/** PostgREST wildcard escaping for `ilike` filters. */
+/**
+ * PostgREST wildcard escaping for `ilike` filters.
+ *
+ * `*` is included because PostgREST translates it into SQL's `%` — without it,
+ * an admin searching for `acme*corp` got a wildcard match instead of a literal
+ * one (audit S8). There is no injection risk either way: `encodeURIComponent`
+ * at the call site neutralises `&` and `=`, so no extra query parameter can be
+ * smuggled in. This is about the search returning what was asked for.
+ */
 export function escapeLike(value: string): string {
-  return value.replace(/[%_,()]/g, " ").trim();
+  return value.replace(/[%_,()*]/g, " ").trim();
 }
