@@ -183,7 +183,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
       </div>
 
       {error ? (
-        <p className="mt-6 rounded-card border border-line bg-card p-5 text-sm text-red-600 dark:text-red-400">
+        <p className="mt-6 rounded-card border border-line bg-card p-5 text-sm text-danger">
           {error}
         </p>
       ) : items.length === 0 ? (

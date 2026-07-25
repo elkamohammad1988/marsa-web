@@ -57,7 +57,7 @@ export function AdminLoginForm() {
         className="h-11 rounded-xl border border-line bg-canvas px-4 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-brand-strong"
       />
       {error && (
-        <p id="admin-error" role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p id="admin-error" role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}

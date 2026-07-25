@@ -72,7 +72,7 @@ export function IbanChecker() {
           aria-live="polite"
           className={cn(
             "mt-6 rounded-card border p-5",
-            result.valid ? "border-success/30 bg-success/5" : "border-red-200 bg-red-50",
+            result.valid ? "border-success/30 bg-success/5" : "border-danger/30 bg-danger/[0.06]",
           )}
         >
           {result.valid ? (
@@ -106,13 +106,13 @@ export function IbanChecker() {
             </>
           ) : (
             <>
-              <div className="flex items-center gap-2 text-red-600">
+              <div className="flex items-center gap-2 text-danger">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
                   <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
                 <span className="font-semibold">Invalid IBAN</span>
               </div>
-              <p className="mt-2 text-sm text-red-700">{result.reason}</p>
+              <p className="mt-2 text-sm text-danger">{result.reason}</p>
               {value.trim() && (
                 <p className="mt-3 font-mono text-xs text-ink-subtle">{formatIban(value)}</p>
               )}
