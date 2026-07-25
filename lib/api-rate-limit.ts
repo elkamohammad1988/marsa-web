@@ -49,12 +49,6 @@ export const ADMIN_LOGIN_GLOBAL = {
   windowMs: 15 * 60_000,
 } as const;
 
-/**
- * Deliberately tight. This one guards a shared secret against brute force, and
- * a legitimate viewer loads the page once and then reads it.
- */
-export const STATS_RATE_LIMIT = { limit: 10, windowMs: 60_000 } as const;
-
 /** Seconds until the window resets, floored at 1 so the header is never "0". */
 export function retryAfterSeconds(resetAt: number): number {
   return Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));

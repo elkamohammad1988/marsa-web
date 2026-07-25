@@ -3,7 +3,7 @@ import { FUNNEL_LABELS, type FunnelReport } from "@/lib/analytics";
 
 /**
  * Renders the demo funnel (stat cards + per-step bars). Shared by the admin
- * dashboard (/admin/funnel) and the token-gated /demo/stats view so the
+ * dashboard (/admin/funnel) so the
  * visualisation lives in exactly one place.
  */
 export function FunnelView({ report, provider }: { report: FunnelReport; provider: string }) {
