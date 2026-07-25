@@ -6,27 +6,59 @@ import {
   getAdminConfig,
   sessionCookieOptions,
 } from "@/lib/admin-auth";
-import { clientKey, rateLimit } from "@/lib/rate-limit";
+import { clientKey, rateLimitShared } from "@/lib/rate-limit";
+import {
+  ADMIN_LOGIN_TIERS,
+  ADMIN_LOGIN_GLOBAL,
+  retryAfterSeconds,
+} from "@/lib/api-rate-limit";
 
 export const runtime = "nodejs";
 
 /**
  * Password login for the admin area.
  *
- * Rate-limited per IP (in-memory is the right tier here: it must keep working
- * even when the database is the thing that is broken) and deliberately vague in
- * its failure message — no distinction between "admin disabled" and "wrong
- * password" leaks to an attacker.
+ * Deliberately vague in its failure message — no distinction between "admin
+ * disabled" and "wrong password" leaks to an attacker.
+ *
+ * The limiter is `rateLimitShared`, not `rateLimit` (audit S1). The previous
+ * comment argued in-memory was correct here "because it must keep working even
+ * when the database is the thing that is broken". That property is real, and
+ * `rateLimitShared` already provides it: on any RPC failure it logs and returns
+ * the in-memory result. What in-memory alone could not provide is a limit that
+ * holds across instances — its buckets live in a module-level Map, so every
+ * concurrent serverless instance enforced its own 5-per-minute window, and
+ * concurrency is attacker-controllable. The effective ceiling was 5/min ×
+ * instances, not 5/min.
  */
 export async function POST(request: Request) {
-  const rl = rateLimit(clientKey(request.headers, "admin-login"), {
-    limit: 5,
-    windowMs: 60_000,
-  });
-  if (!rl.ok) {
+  const ip = clientKey(request.headers, "");
+
+  // Every tier on every attempt, plus a global ceiling for attempts spread
+  // across many addresses. Checked together so the response can name the
+  // longest wait rather than the first one that tripped.
+  const verdicts = await Promise.all([
+    ...ADMIN_LOGIN_TIERS.map((tier) =>
+      rateLimitShared(`${tier.scope}${ip}`, { limit: tier.limit, windowMs: tier.windowMs }),
+    ),
+    rateLimitShared(ADMIN_LOGIN_GLOBAL.key, {
+      limit: ADMIN_LOGIN_GLOBAL.limit,
+      windowMs: ADMIN_LOGIN_GLOBAL.windowMs,
+    }),
+  ]);
+
+  const blocked = verdicts.filter((v) => !v.ok);
+  if (blocked.length) {
+    const resetAt = Math.max(...blocked.map((v) => v.resetAt));
     return NextResponse.json(
-      { error: "Too many attempts. Try again in a minute." },
-      { status: 429, headers: { "Retry-After": "60" } },
+      { error: "Too many attempts. Try again later." },
+      {
+        status: 429,
+        headers: {
+          "retry-after": String(retryAfterSeconds(resetAt)),
+          "cache-control": "no-store",
+        },
+      },
     );
   }
 

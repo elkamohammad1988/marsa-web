@@ -5,28 +5,50 @@ import {
   getAdminConfig,
   safeEqual,
   verifySessionToken,
+  MIN_PASSWORD_LENGTH,
+  MIN_SECRET_LENGTH,
 } from "@/lib/admin-auth";
 
 const SECRET = "0123456789abcdef0123456789abcdef";
-const config = { password: "correct-horse", secret: SECRET };
+// 16 characters — the floor raised from 8 by audit S1. One shared password
+// with no lockout and no second factor guards every submitted person's name,
+// email, country and company.
+const PASSWORD = "correct-horse-16";
+const config = { password: PASSWORD, secret: SECRET };
 
 describe("getAdminConfig", () => {
   it("stays disabled unless both values are present", () => {
     expect(getAdminConfig({})).toBeNull();
-    expect(getAdminConfig({ ADMIN_PASSWORD: "correct-horse" })).toBeNull();
+    expect(getAdminConfig({ ADMIN_PASSWORD: PASSWORD })).toBeNull();
     expect(getAdminConfig({ ADMIN_SESSION_SECRET: SECRET })).toBeNull();
   });
 
   it("rejects weak values rather than running with them", () => {
     expect(getAdminConfig({ ADMIN_PASSWORD: "short", ADMIN_SESSION_SECRET: SECRET })).toBeNull();
+    // The old floor was 8. A password that used to be accepted must not be.
     expect(
-      getAdminConfig({ ADMIN_PASSWORD: "correct-horse", ADMIN_SESSION_SECRET: "tooshort" }),
+      getAdminConfig({ ADMIN_PASSWORD: "eightch!", ADMIN_SESSION_SECRET: SECRET }),
     ).toBeNull();
+    expect(
+      getAdminConfig({ ADMIN_PASSWORD: "a".repeat(MIN_PASSWORD_LENGTH - 1), ADMIN_SESSION_SECRET: SECRET }),
+    ).toBeNull();
+    expect(
+      getAdminConfig({ ADMIN_PASSWORD: PASSWORD, ADMIN_SESSION_SECRET: "tooshort" }),
+    ).toBeNull();
+  });
+
+  it("accepts a password of exactly the minimum length", () => {
+    expect(
+      getAdminConfig({
+        ADMIN_PASSWORD: "b".repeat(MIN_PASSWORD_LENGTH),
+        ADMIN_SESSION_SECRET: "c".repeat(MIN_SECRET_LENGTH),
+      }),
+    ).not.toBeNull();
   });
 
   it("accepts a strong pair", () => {
     expect(
-      getAdminConfig({ ADMIN_PASSWORD: "correct-horse", ADMIN_SESSION_SECRET: SECRET }),
+      getAdminConfig({ ADMIN_PASSWORD: PASSWORD, ADMIN_SESSION_SECRET: SECRET }),
     ).toEqual(config);
   });
 });
@@ -42,7 +64,7 @@ describe("safeEqual", () => {
 
 describe("checkPassword", () => {
   it("accepts the configured password and nothing else", async () => {
-    expect(await checkPassword("correct-horse", config)).toBe(true);
+    expect(await checkPassword(PASSWORD, config)).toBe(true);
     expect(await checkPassword("wrong-horse", config)).toBe(false);
     expect(await checkPassword("", config)).toBe(false);
     expect(await checkPassword(undefined, config)).toBe(false);
