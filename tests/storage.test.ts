@@ -19,6 +19,7 @@ const {
   StorageConfigError,
   StorageWriteError,
   searchText,
+  newId,
 } = await import("@/lib/storage");
 
 const lead: StoredSubmission = {
@@ -90,6 +91,29 @@ describe("createStore — provider selection", () => {
     expect(createStore({ ...pgEnv, NODE_ENV: "production" })).toBeInstanceOf(
       PostgresSubmissionStore,
     );
+  });
+});
+
+describe("newId", () => {
+  const UUID_V4 =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+  it("returns a cryptographically random UUID", () => {
+    // Previously `${Date.now().toString(36)}-${Math.random()...}` (audit S10).
+    expect(newId()).toMatch(UUID_V4);
+  });
+
+  it("does not encode submission ordering in the identifier", () => {
+    // The old timestamp prefix meant two references disclosed which arrived
+    // first. These are shown to recipients as "Reference" in notification mail.
+    const ids = Array.from({ length: 50 }, () => newId());
+    const sorted = [...ids].sort();
+    expect(sorted).not.toEqual(ids);
+  });
+
+  it("does not collide across many calls", () => {
+    const ids = new Set(Array.from({ length: 10_000 }, () => newId()));
+    expect(ids.size).toBe(10_000);
   });
 });
 

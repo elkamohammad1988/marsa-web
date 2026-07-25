@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { MarsaMark } from "@/components/icons/Logo";
 import { cn } from "@/lib/utils";
+import { hasRejectedNonEssential } from "@/lib/consent";
 import {
   DEMO_COUNTRIES,
   DEMO_SCRIPT,
@@ -121,6 +122,10 @@ export function DemoFlow() {
     if (!funnelStep || sentRef.current.has(funnelStep) || !sessionId) return;
     sentRef.current.add(funnelStep);
     if (typeof navigator !== "undefined" && navigator.doNotTrack === "1") return;
+    // Honour an explicit refusal. Until now the banner's "Reject
+    // non-essential" wrote a decision that nothing read, so a visitor who
+    // refused was tracked through the funnel anyway (audit S7).
+    if (hasRejectedNonEssential()) return;
     void fetch("/api/demo/events", {
       method: "POST",
       headers: { "content-type": "application/json" },

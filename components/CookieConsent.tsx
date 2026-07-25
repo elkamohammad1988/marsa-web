@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-
-const STORAGE_KEY = "marsa-cookie-consent";
+import { CONSENT_STORAGE_KEY as STORAGE_KEY } from "@/lib/consent";
 
 /** Fired so analytics/marketing scripts can react to a consent decision. */
 function broadcast(value: "accepted" | "rejected") {

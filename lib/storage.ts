@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import {
   countRows,
@@ -369,8 +370,16 @@ export function getStore(): SubmissionStore {
   return store;
 }
 
-/** Collision-resistant id without pulling in a uuid dependency. */
+/**
+ * Primary key for a submission, also shown to recipients as "Reference" in the
+ * notification email.
+ *
+ * Cryptographically random rather than `Math.random()` (audit S10). The old
+ * form was `${Date.now().toString(36)}-${Math.random().toString(36)}`, which
+ * both disclosed submission ordering in the timestamp prefix and drew the rest
+ * from a predictable generator. `randomUUID` is in the standard library, so
+ * this still costs no dependency.
+ */
 export function newId(): string {
-  const rand = Math.random().toString(36).slice(2, 10);
-  return `${Date.now().toString(36)}-${rand}`;
+  return randomUUID();
 }

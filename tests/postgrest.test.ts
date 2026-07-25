@@ -314,6 +314,15 @@ describe("escapeLike", () => {
     expect(escapeLike("(a)")).toBe("a");
   });
 
+  it("neutralises PostgREST's own `*` wildcard", () => {
+    // PostgREST translates `*` into SQL's `%` for ilike filters, so an admin
+    // searching `acme*corp` previously got a wildcard match rather than the
+    // literal string they typed (audit S8).
+    expect(escapeLike("acme*corp")).toBe("acme corp");
+    expect(escapeLike("*")).toBe("");
+    expect(escapeLike("*acme*")).toBe("acme");
+  });
+
   it("trims the result so a fully-escaped term does not become whitespace", () => {
     expect(escapeLike("  acme  ")).toBe("acme");
     expect(escapeLike("%%%")).toBe("");
