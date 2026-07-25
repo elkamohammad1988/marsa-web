@@ -54,7 +54,7 @@ Postgres is spoken over HTTP; auth uses WebCrypto HMAC. Nothing else is pulled i
 ```
 app/
   page.tsx                 Home (hero, live rate ticker, corridor map, sections)
-  demo/                    Interactive sandbox + token-gated /demo/stats funnel
+  demo/                    Interactive sandbox
   admin/                   HMAC-auth dashboard: submissions, CSV export, funnel
   api/
     rates/ rates/history   Live ECB FX (server-cached)
@@ -100,8 +100,9 @@ npm audit --omit=dev   # 0 vulnerabilities
 
 Optional production wiring (all in `.env.example`): `SUPABASE_URL` +
 `SUPABASE_SERVICE_ROLE_KEY` (apply `db/schema.sql` once), `RESEND_API_KEY` +
-`RESEND_FROM` for email, `ADMIN_PASSWORD` + `ADMIN_SESSION_SECRET` for `/admin`,
-`DEMO_STATS_TOKEN` for a shareable `/demo/stats` link.
+`RESEND_FROM` for email, `ADMIN_PASSWORD` + `ADMIN_SESSION_SECRET` for `/admin`.
+The environment is validated at server start, so a half-configured pair fails
+loudly in production rather than degrading in silence.
 
 ## Verified quality
 
