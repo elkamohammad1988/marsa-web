@@ -176,7 +176,7 @@ export function GetStartedForm({ defaultType = "personal", defaultPlan }: Props)
       </Button>
 
       {message && state === "error" && (
-        <p className="mt-3 text-sm font-medium text-red-600" role="alert">
+        <p className="mt-3 text-sm font-medium text-danger" role="alert">
           {message}
         </p>
       )}

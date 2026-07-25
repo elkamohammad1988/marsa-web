@@ -15,7 +15,7 @@ const control =
   "disabled:cursor-not-allowed disabled:opacity-60";
 
 function borderClass(hasError?: boolean): string {
-  return hasError ? "border-red-400" : "border-line";
+  return hasError ? "border-danger/60" : "border-line";
 }
 
 function FieldShell({
@@ -53,7 +53,7 @@ function FieldShell({
         </p>
       )}
       {error && (
-        <p id={errorId} className="mt-1.5 text-xs font-medium text-red-600" role="alert">
+        <p id={errorId} className="mt-1.5 text-xs font-medium text-danger" role="alert">
           {error}
         </p>
       )}
@@ -182,7 +182,7 @@ export function CheckboxField({ label, error, className, id, ...props }: Checkbo
         </label>
       </div>
       {error && (
-        <p id={`${fieldId}-error`} className="mt-1.5 text-xs font-medium text-red-600" role="alert">
+        <p id={`${fieldId}-error`} className="mt-1.5 text-xs font-medium text-danger" role="alert">
           {error}
         </p>
       )}
