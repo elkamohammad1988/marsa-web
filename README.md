@@ -74,7 +74,7 @@ lib/
   admin-auth.ts            HMAC-signed session cookies, constant-time compare
   csv.ts                   RFC-4180 + formula-injection-safe CSV
   legal.ts / site.ts       Env-gated regulatory copy, site config
-db/schema.sql              Postgres schema (submissions, demo_events, rate limit)
+db/migrations/            Numbered, append-only Postgres migrations (see db/README.md)
 ```
 
 Design principle throughout: **provider selection by environment**. With zero
@@ -99,7 +99,7 @@ npm audit --omit=dev   # 0 vulnerabilities
 ```
 
 Optional production wiring (all in `.env.example`): `SUPABASE_URL` +
-`SUPABASE_SERVICE_ROLE_KEY` (apply `db/schema.sql` once), `RESEND_API_KEY` +
+`SUPABASE_SERVICE_ROLE_KEY` (run `npm run db:migrate` once), `RESEND_API_KEY` +
 `RESEND_FROM` for email, `ADMIN_PASSWORD` + `ADMIN_SESSION_SECRET` for `/admin`.
 The environment is validated at server start, so a half-configured pair fails
 loudly in production rather than degrading in silence.
