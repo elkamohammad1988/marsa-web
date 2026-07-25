@@ -1,13 +1,22 @@
--- Marsa — database schema
+-- 001_initial_schema.sql
 --
 -- Target: PostgreSQL 14+ behind PostgREST (Supabase works out of the box).
--- Apply once, from the Supabase SQL editor or `psql -f db/schema.sql`.
+-- Apply with the runner in db/README.md, or paste into the Supabase SQL editor.
 -- Every statement is idempotent, so re-running it is safe.
 --
 -- Security model: Row Level Security is ON with no policies, so the anon /
 -- public key can read nothing. The app talks to this database only from server
 -- code using the service-role key, which bypasses RLS. Never expose that key
 -- to the browser.
+
+-- Applied-migration ledger. Every migration records itself at the end, so a
+-- database can report what it has rather than being guessed at (audit P4).
+create table if not exists public.schema_migrations (
+  version     text primary key,
+  applied_at  timestamptz not null default now()
+);
+
+alter table public.schema_migrations enable row level security;
 
 create extension if not exists pg_trgm;
 
@@ -104,3 +113,6 @@ begin
   return p_limit - v_count;
 end;
 $$;
+
+insert into public.schema_migrations (version) values ('001')
+  on conflict (version) do nothing;

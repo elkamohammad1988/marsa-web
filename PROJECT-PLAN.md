@@ -474,7 +474,7 @@ to launch — they are not blockers for any batch.
 |---|---|---|---|
 | ~~H1~~ | ~~Authenticate the GitHub CLI~~ | — | **RESOLVED** |
 | [H2](#h2--rotate-the-supabase-secret-key) | Rotate the Supabase secret key | security hygiene | Now |
-| [H3](#h3--apply-the-initial-database-schema) | Apply the initial database schema | Batches 2, 3, 9 | Now |
+| [H3](#h3--apply-the-database-migrations--not-yet-done) | **Apply the database migrations** (verified: 0 of 3 applied) | Batches 2, 3, 9 | **Now** |
 | [H4](#h4--apply-pending-database-migrations-p4-b3-b4-b7) | Apply pending migrations | Batch 9 | When Batch 9 lands |
 | [H5](#h5--enable-point-in-time-recovery-and-test-one-restore-p4) | Enable PITR and test one restore | P4 | Before launch |
 | [H6](#h6--point-an-uptime-monitor-at-apihealth-p3) | Uptime monitor on `/api/health` | P3 | **deploy-time** |
@@ -535,21 +535,37 @@ Verify: `npm run dev`, then open `http://localhost:3000/api/health` — the
 
 ---
 
-<a id="h3--apply-the-initial-database-schema"></a>
-### H3 — Apply the initial database schema
+<a id="h3--apply-the-database-migrations--not-yet-done"></a>
+### H3 — Apply the database migrations · **not yet done**
 
-Needed before the shared rate limiter (Batches 2 and 3) can work at all — it
-calls the `check_rate_limit()` function defined in this file.
+Verified 2026-07-25 by running `npm run db:migrate -- --dry` against your
+project: **0 migrations applied, 3 pending.** The schema has never been applied,
+so the `submissions` table does not exist yet and the shared rate limiter has no
+`check_rate_limit()` to call.
+
+Nothing is broken by that today — the app refuses to start in production without
+a durable store, and local development uses the file store. But no submission
+can be stored in Postgres until this is done.
 
 1. **supabase.com/dashboard** → your project.
-2. Left sidebar → **SQL Editor** (the `>_` icon).
-3. Click **+ New query**.
-4. Open `db/schema.sql` from this repo, copy its entire contents, paste into the
-   editor.
-5. Click **Run** (or Ctrl+Enter). Every statement is idempotent — re-running is safe.
-6. Confirm *Success. No rows returned*.
+2. Left sidebar → **SQL Editor** (the `>_` icon) → **+ New query**.
+3. Open `db/migrations/001_initial_schema.sql`, copy all of it, paste, click
+   **Run** (or Ctrl+Enter). Confirm *Success. No rows returned*.
+4. Repeat for `002_rate_limit_window_index.sql`, then
+   `003_aggregate_functions.sql`. **In that order** — each assumes its
+   predecessors have run.
 
-Verify — paste and run this; expect three rows, each with `locked_down = true`:
+Every file is idempotent and records itself in `schema_migrations`, so a
+re-run is a no-op and the ledger stays correct however you apply them.
+
+**Verify** — from the project root:
+
+```sh
+npm run db:migrate -- --dry
+```
+
+Expect *"3 migration(s) already applied. Nothing to do."* Then confirm the
+security model is intact, expecting `locked_down = true` on every row:
 
 ```sql
 select c.relname as table_name,
@@ -560,10 +576,13 @@ from pg_class c
 join pg_namespace n on n.oid = c.relnamespace
 left join pg_policy p on p.polrelid = c.oid
 where n.nspname = 'public'
-  and c.relname in ('submissions', 'demo_events', 'rate_limit_hits')
+  and c.relname in ('submissions','demo_events','rate_limit_hits','schema_migrations')
 group by c.relname, c.relrowsecurity
 order by c.relname;
 ```
+
+Optionally schedule the rate-limit purge so it never sits in a visitor's
+request — see the last section of `db/README.md`.
 
 ---
 
@@ -701,7 +720,7 @@ message, an issue, or a commit:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-For a separate preview database, repeat [H3](#h3--apply-the-initial-database-schema)
+For a separate preview database, repeat [H3](#h3--apply-the-database-migrations--not-yet-done)
 against a second Supabase project.
 
 Verify after deploying: `https://<your-domain>/api/health` returns 200 with

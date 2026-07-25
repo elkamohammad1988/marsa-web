@@ -6,6 +6,7 @@ import {
   escapeLike,
   getPostgrestConfig,
   insertRow,
+  rpc,
   selectRows,
   type PostgrestConfig,
 } from "@/lib/postgrest";
@@ -301,7 +302,44 @@ export class PostgresSubmissionStore implements SubmissionStore {
     return { items: rows.map(rowToSubmission), total };
   }
 
+  /**
+   * All four numbers in one round trip (audit B4).
+   *
+   * This previously fired four independent HEAD counts. `Promise.all` made
+   * wall-clock one round trip rather than four, but it was still four TLS
+   * handshakes and four PostgREST invocations per render of a force-dynamic
+   * page — and it is the shape that becomes an N+1 the moment someone adds
+   * per-row detail.
+   *
+   * Falls back to the four counts when `submission_stats()` is absent, so a
+   * database without migration 003 still renders the admin dashboard.
+   */
   async stats(): Promise<SubmissionStats> {
+    try {
+      const rows = await rpc<
+        { lead: number; contact: number; subscribe: number; last_7_days: number }[]
+      >(this.cfg, "submission_stats", {});
+      const row = Array.isArray(rows) ? rows[0] : undefined;
+      if (row) {
+        const byKind = {
+          lead: Number(row.lead) || 0,
+          contact: Number(row.contact) || 0,
+          subscribe: Number(row.subscribe) || 0,
+        };
+        return {
+          total: byKind.lead + byKind.contact + byKind.subscribe,
+          byKind,
+          last7Days: Number(row.last_7_days) || 0,
+        };
+      }
+    } catch (err) {
+      console.warn(
+        "[storage] submission_stats() unavailable; falling back to four counts. " +
+          "Apply db/migrations/003_aggregate_functions.sql.",
+        err instanceof Error ? err.message : err,
+      );
+    }
+
     const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
     const [lead, contact, subscribe, last7Days] = await Promise.all([
       countRows(this.cfg, TABLE, "kind=eq.lead"),
@@ -339,7 +377,7 @@ export class PostgresSubmissionStore implements SubmissionStore {
 export const MISSING_DB_CONFIG_MESSAGE =
   "Submission storage is not configured. Set SUPABASE_URL and " +
   "SUPABASE_SERVICE_ROLE_KEY (both are required; neither may be prefixed with " +
-  "NEXT_PUBLIC_) and apply db/schema.sql to the project. Refusing to start with " +
+  "NEXT_PUBLIC_) and apply db/migrations/ to the project. Refusing to start with " +
   "a non-durable store in production, because form submissions would be lost.";
 
 /**

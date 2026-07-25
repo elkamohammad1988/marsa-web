@@ -4,6 +4,7 @@ import {
   countRows,
   getPostgrestConfig,
   insertRow,
+  rpc,
   selectRows,
   type PostgrestConfig,
 } from "@/lib/postgrest";
@@ -73,7 +74,18 @@ export function computeFunnel(events: DemoEvent[]): FunnelReport {
     if (set && e.sessionId) set.add(e.sessionId);
   }
 
-  const counts = FUNNEL_STEPS.map((s) => perStep.get(s)!.size);
+  return buildFunnelReport(FUNNEL_STEPS.map((s) => perStep.get(s)!.size));
+}
+
+/**
+ * Build the report from per-step unique-session counts, positionally aligned to
+ * `FUNNEL_STEPS`.
+ *
+ * Split out from `computeFunnel` so Postgres can supply the counts directly
+ * (audit B3). Counting distinct sessions is the only part that needed the raw
+ * rows; the percentages and drop-offs never did.
+ */
+export function buildFunnelReport(counts: number[]): FunnelReport {
   const starts = counts[0];
   const completions = counts[counts.length - 1];
 
@@ -175,7 +187,39 @@ class PostgresDemoAnalyticsStore implements DemoAnalyticsStore {
     }
   }
 
+  /**
+   * Aggregate in Postgres, one round trip, exact at any volume (audit B3).
+   *
+   * The previous implementation pulled up to 20,000 rows over HTTP on every
+   * page view and counted them in Node. Past 20,000 events it kept the most
+   * RECENT rows, dropping early sessions' 'start' events while keeping their
+   * later steps — so `starts` undercounted and completionRate could exceed
+   * 100%, silently.
+   *
+   * Falls back to that row scan when `demo_funnel()` is not present, so a
+   * database that has not had migration 003 applied still renders rather than
+   * erroring. The fallback is the old behaviour, truncation included; the log
+   * line is what tells an operator to run the migration.
+   */
   async funnel(): Promise<FunnelReport> {
+    try {
+      const rows = await rpc<{ step: FunnelStep; sessions: number }[]>(
+        this.cfg,
+        "demo_funnel",
+        {},
+      );
+      if (Array.isArray(rows)) {
+        const bySt = new Map(rows.map((r) => [r.step, Number(r.sessions) || 0]));
+        return buildFunnelReport(FUNNEL_STEPS.map((s) => bySt.get(s) ?? 0));
+      }
+    } catch (err) {
+      console.warn(
+        "[analytics] demo_funnel() unavailable; falling back to the row scan. " +
+          "Apply db/migrations/003_aggregate_functions.sql.",
+        err instanceof Error ? err.message : err,
+      );
+    }
+
     const { rows } = await selectRows<EventRow>(
       this.cfg,
       TABLE,

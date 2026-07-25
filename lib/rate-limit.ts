@@ -8,7 +8,7 @@ import { getPostgrestConfig, rpc } from "@/lib/postgrest";
  * guarantee.
  *
  * `rateLimitShared` upgrades that to a cross-instance limit by calling the
- * `check_rate_limit` Postgres function (see db/schema.sql) when a database is
+ * `check_rate_limit` Postgres function (see db/migrations/) when a database is
  * configured. If the database is unreachable it degrades to the in-memory
  * result rather than locking everybody out — a form that rejects real users is
  * a worse outcome than one that lets a burst through.
