@@ -1,0 +1,115 @@
+# ---------------------------------------------------------------------------
+# Dependencies
+# ---------------------------------------------------------------------------
+node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/install-state.gz
+
+# ---------------------------------------------------------------------------
+# Next.js / build output
+# ---------------------------------------------------------------------------
+.next/
+out/
+build/
+dist/
+next-env.d.ts.bak
+*.tsbuildinfo
+
+# ---------------------------------------------------------------------------
+# Environment — never commit real values.
+# .env.example is the documented template and IS tracked.
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------------------
+# Local form-submission storage (FileSubmissionStore fallback).
+# Contains personal data from real submissions. Must never leave the machine.
+# ---------------------------------------------------------------------------
+.data/
+
+# ---------------------------------------------------------------------------
+# Vercel — links this checkout to a Vercel account. Machine-local, not shared.
+# ---------------------------------------------------------------------------
+.vercel/
+
+# ---------------------------------------------------------------------------
+# Test coverage
+# ---------------------------------------------------------------------------
+coverage/
+*.lcov
+.nyc_output/
+
+# ---------------------------------------------------------------------------
+# Logs
+# ---------------------------------------------------------------------------
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ---------------------------------------------------------------------------
+# Credentials / keys — belt and braces; none of these should ever be created
+# inside the repo in the first place.
+# ---------------------------------------------------------------------------
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+.npmrc
+.netrc
+
+# ---------------------------------------------------------------------------
+# OS junk
+# ---------------------------------------------------------------------------
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ---------------------------------------------------------------------------
+# Editor / tooling junk
+# ---------------------------------------------------------------------------
+.idea/
+*.swp
+*.swo
+*~
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.claude/*.lock
+.claude/settings.local.json
+
+# ---------------------------------------------------------------------------
+# Source assets (Figma screenshot exports — not needed for the deploy)
+# ---------------------------------------------------------------------------
+scren/
+screens/
+
+# ---------------------------------------------------------------------------
+# Generated portfolio screenshots.
+#
+# scripts/capture.mjs and scripts/render-icon.mjs write into this directory
+# (OUT_ROOT / out). Nothing in app/, components/, lib/ or next.config.ts reads
+# from it, so the output is regenerable and stays out of git — 44 MB of it.
+# The four shots embedded in README.md are the exception and ARE tracked.
+#
+# Regenerate locally with:  npm run build && npm start   (then) node scripts/capture.mjs
+# ---------------------------------------------------------------------------
+portfolio-screenshots/*
+!portfolio-screenshots/br-home.png
+!portfolio-screenshots/br-demo-convert.png
+!portfolio-screenshots/br-demo-done.png
+!portfolio-screenshots/br-375-demo.png

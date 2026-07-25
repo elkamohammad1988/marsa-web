@@ -1,0 +1,411 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Marsa design tokens — "Black Rose": metallic magenta on near-black.
+ *
+ * Values are space-separated RGB channels so Tailwind's `<alpha-value>` opacity
+ * modifiers keep working (see tailwind.config.ts). The site is dark-only;
+ * `.dark` mirrors `:root` so the pre-paint theme script can never desync it.
+ *
+ * Magenta roles:
+ *   • `--brand` (#CC1F86) is the fill — CTAs, progress rail, logo tile, large
+ *     key numbers. It carries `--on-brand` white text (5.1:1). Button hover
+ *     darkens to `--brand-deep` (#B81A78) so white stays ≥6:1 — the "metallic
+ *     pop" comes from a glow, not a lighter fill that would fail contrast.
+ *   • `--brand-strong` / `--accent` (#EE4FA5, accent-bright) is the bright
+ *     magenta for TEXT, links, highlights and focus rings on the dark bg
+ *     (5.6:1). `--brand-soft` (#7A1250) is the dim/secondary accent.
+ */
+@layer base {
+  :root {
+    /* Surfaces — near-black with a magenta undertone (dark by default) */
+    --canvas: 12 8 11; /* #0C080B — page background */
+    --card: 20 10 16; /* #140A10 — cards, sections */
+    --surface-cream: 20 10 16; /* sections (was the light alt; now dark) */
+    --surface-cream-2: 26 12 20;
+    --surface-tint: 33 16 32; /* #211020 — inputs, inner panels, sandbox banner */
+    --surface-tint-2: 26 12 22;
+    --surface-navy: 10 7 10; /* deepest band for spotlight/hero */
+    --surface-navy-2: 20 10 16;
+
+    /* Brand — "black rose" metallic magenta. */
+    --brand: 204 31 134; /* #CC1F86 — CTA, progress, logo, key numbers */
+    --brand-deep: 184 26 120; /* #B81A78 — button hover fill (keeps white ≥6:1) */
+    --brand-soft: 122 18 80; /* #7A1250 — accent-dim / secondary / in-progress */
+    --brand-strong: 238 79 165; /* #EE4FA5 — accent-bright: text/links/rings/highlights */
+    --accent: 238 79 165; /* #EE4FA5 */
+    --accent-soft: 122 18 80; /* #7A1250 */
+
+    /* Semantic */
+    --success: 127 191 138; /* #7FBF8A — 8.6:1 on the near-black bg */
+    --success-strong: 127 191 138;
+    --warning: 224 184 74; /* readable amber on dark */
+    --danger: 232 138 138; /* readable red on dark */
+
+    /* Metallic CTA gradient (vertical) + the text colour that rides on it.
+       Top #CE2A8C is the AA-safe near-equivalent of the requested #E23A9B
+       (white on #E23A9B is only 3.95:1; on #CE2A8C it is 4.85:1). */
+    --cta-from: 206 42 140; /* #CE2A8C */
+    --cta-to: 165 21 106; /* #A5156A (white 7.1:1) */
+    --on-brand: 255 255 255; /* #FFFFFF on magenta (≥4.85:1 across the gradient) */
+
+    /* Text */
+    --ink: 246 234 241; /* #F6EAF1 — headings + body */
+    --ink-muted: 169 127 151; /* #A97F97 — 5.5:1 on the near-black bg */
+    --ink-subtle: 174 130 150; /* #AE8296 — ≥4.5:1 on every surface (real text) */
+
+    /* Borders */
+    --line: 46 16 36; /* #2E1024 — hairline */
+    --line-dark: 71 25 58; /* #47193A — emphasis */
+
+    /* Chart (full colour strings — consumed via var() in RateChart) */
+    --chart-line: #ee4fa5;
+    --chart-grid: #2e1024;
+    --chart-axis: #a97f97;
+    --chart-tooltip-bg: #140a10;
+    --chart-tooltip-border: #2e1024;
+    --chart-tooltip-fg: #f6eaf1;
+
+    color-scheme: dark;
+  }
+
+  /**
+   * The site is dark-only ("black rose"). `.dark` mirrors `:root` exactly so
+   * that if the pre-paint theme script adds the class (e.g. the OS prefers
+   * dark) nothing changes — there is no light theme to fall out of sync.
+   */
+  .dark {
+    --canvas: 12 8 11;
+    --card: 20 10 16;
+    --surface-cream: 20 10 16;
+    --surface-cream-2: 26 12 20;
+    --surface-tint: 33 16 32;
+    --surface-tint-2: 26 12 22;
+    --surface-navy: 10 7 10;
+    --surface-navy-2: 20 10 16;
+
+    --brand: 204 31 134;
+    --brand-deep: 184 26 120;
+    --brand-soft: 122 18 80;
+    --brand-strong: 238 79 165;
+    --accent: 238 79 165;
+    --accent-soft: 122 18 80;
+
+    --success: 127 191 138;
+    --success-strong: 127 191 138;
+    --warning: 224 184 74;
+    --danger: 232 138 138;
+
+    --cta-from: 206 42 140;
+    --cta-to: 165 21 106;
+    --on-brand: 255 255 255;
+
+    --ink: 246 234 241;
+    --ink-muted: 169 127 151;
+    --ink-subtle: 174 130 150;
+
+    --line: 46 16 36;
+    --line-dark: 71 25 58;
+
+    --chart-line: #ee4fa5;
+    --chart-grid: #2e1024;
+    --chart-axis: #a97f97;
+    --chart-tooltip-bg: #140a10;
+    --chart-tooltip-border: #2e1024;
+    --chart-tooltip-fg: #f6eaf1;
+
+    color-scheme: dark;
+  }
+
+  * {
+    border-color: rgb(var(--line));
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply relative bg-canvas text-ink font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+  }
+
+  /* Premium display type: tight tracking, balanced wrapping. */
+  h1, h2, h3, h4 {
+    @apply font-display text-ink;
+    letter-spacing: -0.021em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Anchored sections clear the sticky navbar when jumped to. */
+  :target {
+    scroll-margin-top: 6rem;
+  }
+
+  ::selection {
+    background: rgb(var(--brand) / 0.35);
+    color: rgb(var(--ink));
+  }
+
+  /* Respect users who prefer reduced motion. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hidden {
+    scrollbar-width: none;
+  }
+
+  /* Frosted glass (navbar). Solid fallback first, then glass where supported. */
+  .glass {
+    background: rgb(var(--card) / 0.92);
+  }
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass {
+      background: rgb(var(--card) / 0.66);
+      backdrop-filter: blur(12px) saturate(150%);
+      -webkit-backdrop-filter: blur(12px) saturate(150%);
+    }
+  }
+
+  /**
+   * Glass panel for the demo card + sandbox banner: translucent surface, blur,
+   * and a 1px inner top highlight. Falls back to a solid surface where
+   * backdrop-filter is unsupported (the highlight still applies).
+   */
+  .glass-panel {
+    background: rgb(var(--card) / 0.95);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-panel {
+      background: rgb(var(--surface-tint) / 0.55);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+    }
+  }
+
+  /**
+   * Atmospheric magenta glow (#3A0F2B → transparent) behind the hero and the
+   * top of the page. Bounded to the top ~1100px and absolutely positioned (not
+   * fixed) so it paints once and never re-composites on scroll — keeps LCP fast.
+   */
+  .atmosphere-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1100px;
+    z-index: -10;
+    pointer-events: none;
+    background-image:
+      radial-gradient(72% 60% at 50% -6%, rgba(58, 15, 43, 0.9) 0%, rgba(58, 15, 43, 0.3) 32%, transparent 64%),
+      radial-gradient(38% 34% at 84% 6%, rgba(204, 31, 134, 0.1) 0%, transparent 58%);
+  }
+
+  /* Faint magenta glow on key numbers (converted amount, payout, balances). */
+  .num-glow {
+    text-shadow: 0 0 16px rgba(238, 79, 165, 0.35);
+  }
+
+  /**
+   * Brand gradient clipped to text. Only legible on DARK surfaces (light rose
+   * on charcoal); never use it for informational text on light backgrounds.
+   */
+  .text-gradient {
+    background-image: linear-gradient(
+      120deg,
+      rgb(var(--brand-soft)),
+      rgb(var(--brand)) 55%,
+      rgb(var(--brand-deep))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /**
+   * Hero headline: white → rose gradient. `color` is set to an accessible solid
+   * (ink, 17:1 on the dark hero) FIRST, so if background-clip:text is
+   * unsupported the headline is a legible solid. Both gradient stops are ≥4.5:1
+   * on the hero surface, so the clipped version is accessible too.
+   */
+  .text-gradient-hero {
+    color: rgb(var(--ink));
+    background-image: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #f6eaf1 42%,
+      #f4a9d0 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .text-gradient-hero {
+      color: transparent;
+    }
+  }
+
+  /**
+   * The logo tile: a fixed blush gradient with a charcoal mark in BOTH themes.
+   * A mark that changes colour with the theme stops being a mark; charcoal on
+   * blush clears 6.7:1. `currentColor` on the mark inherits this.
+   */
+  .logo-tile {
+    background-image: linear-gradient(135deg, #ee4fa5 0%, #7a1250 100%);
+    color: #ffffff;
+  }
+
+  /* Subtle dotted grid, fades toward the edges. */
+  .bg-grid {
+    background-image: radial-gradient(rgb(var(--ink) / 0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+    -webkit-mask-image: radial-gradient(70% 60% at 50% 40%, #000 0%, transparent 100%);
+    mask-image: radial-gradient(70% 60% at 50% 40%, #000 0%, transparent 100%);
+  }
+
+  /* Fine film grain — kills banding across large tinted areas. */
+  .bg-noise::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.18;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  }
+
+  /**
+   * Gradient hairline border: magenta strong along the TOP edge, fading out
+   * toward the bottom. Painted into the padding box with a mask so it reads as
+   * a 1px rim on any surface.
+   */
+  .gradient-ring {
+    position: relative;
+  }
+  .gradient-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      180deg,
+      rgb(var(--brand-strong) / 0.7) 0%,
+      rgb(var(--brand) / 0.18) 26%,
+      rgb(var(--line) / 1) 62%,
+      rgb(var(--line) / 0.6) 100%
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: background 0.2s ease;
+  }
+  /* When a gradient-ring card also lifts on hover, brighten the top edge. */
+  .card-hover.gradient-ring:hover::before {
+    background: linear-gradient(
+      180deg,
+      rgb(var(--brand-strong) / 0.95) 0%,
+      rgb(var(--brand) / 0.3) 28%,
+      rgb(var(--line) / 1) 64%,
+      rgb(var(--line) / 0.6) 100%
+    );
+  }
+
+  /* Hairline divider. */
+  .divider-gradient {
+    background: linear-gradient(90deg, transparent, rgb(var(--line)), transparent);
+  }
+
+  /* Lift-on-hover for interactive cards — raises to elevation level 2. */
+  .card-hover {
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-3px);
+    border-color: rgb(var(--brand) / 0.4);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 20px 44px -18px rgba(0, 0, 0, 0.65),
+      0 16px 44px -18px rgba(204, 31, 134, 0.2);
+  }
+
+  /* Soft magenta glow on completed progress-rail segments. */
+  .rail-done {
+    box-shadow: 0 0 10px 0 rgba(238, 79, 165, 0.4);
+  }
+
+  /* Skeleton shimmer for loading states. */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: rgb(var(--ink) / 0.06);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--brand-strong) / 0.14) 45%,
+      rgb(255 255 255 / 0.05) 50%,
+      transparent
+    );
+    animation: skeleton-sweep 1.6s ease-in-out infinite;
+  }
+  @keyframes skeleton-sweep {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after {
+      animation: none;
+    }
+  }
+
+  /**
+   * Scroll reveal. Elements start shifted and transparent; <Reveal> adds
+   * `.is-visible` when they enter the viewport. Reduced motion shows them
+   * immediately rather than leaving them blank.
+   */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
