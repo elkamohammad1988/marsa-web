@@ -7,7 +7,7 @@ import { Heading } from "@/components/ui/Heading";
 import { Button } from "@/components/ui/Button";
 import { BlogCard } from "@/components/sections/BlogCard";
 import { Pagination } from "@/components/sections/Pagination";
-import { posts, featuredPost } from "@/lib/blog";
+import { posts, featuredPost, formatPostDate } from "@/lib/blog";
 import { clampPage, pageCount, paginate } from "@/lib/pagination";
 
 export const metadata: Metadata = buildMetadata({
@@ -60,7 +60,7 @@ export default async function BlogListPage({
                 <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-10">
                   <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                     <div className="max-w-3xl">
-                      <div className="text-xs">{featuredPost.date}</div>
+                      <div className="text-xs">{formatPostDate(featuredPost.date)}</div>
                       <h2 className="mt-2 text-balance text-2xl font-semibold md:text-3xl lg:text-4xl">
                         {featuredPost.title}
                       </h2>

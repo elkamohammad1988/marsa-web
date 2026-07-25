@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export type AccordionEntry = {
@@ -14,14 +14,31 @@ type AccordionProps = {
   className?: string;
 };
 
+/**
+ * Every panel is rendered and collapsed with the `hidden` attribute, rather
+ * than conditionally mounted.
+ *
+ * Two things depended on that (audit F6). `FAQ.tsx` emits `faqSchema(items)`
+ * containing every answer, but with `{open && …}` only the first answer
+ * existed in the HTML — markup asserting content the page does not contain
+ * risks the rich result being dropped. And because the panel did not exist
+ * when collapsed, the trigger had `aria-expanded` with no `aria-controls`
+ * target to point at, so a screen reader announced a control that referred to
+ * nothing.
+ */
 export function Accordion({ items, tone = "light", className }: AccordionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  // Stable across server and client render, and unique per instance so two
+  // accordions on one page cannot collide.
+  const baseId = useId();
 
   const isDark = tone === "dark";
   return (
     <div className={cn("flex flex-col", className)}>
       {items.map((item, i) => {
         const open = openIndex === i;
+        const panelId = `${baseId}-panel-${i}`;
+        const triggerId = `${baseId}-trigger-${i}`;
         return (
           <div
             key={i}
@@ -33,12 +50,14 @@ export function Accordion({ items, tone = "light", className }: AccordionProps) 
           >
             <button
               type="button"
+              id={triggerId}
               onClick={() => setOpenIndex(open ? null : i)}
               className={cn(
                 "flex w-full items-center justify-between gap-4 py-5 text-left text-base font-medium md:text-lg",
                 isDark ? "text-white" : "text-ink",
               )}
               aria-expanded={open}
+              aria-controls={panelId}
             >
               <span>{item.question}</span>
               <span
@@ -63,16 +82,18 @@ export function Accordion({ items, tone = "light", className }: AccordionProps) 
                 </svg>
               </span>
             </button>
-            {open && (
-              <div
-                className={cn(
-                  "pb-5 pr-12 text-sm md:text-base",
-                  isDark ? "text-white/75" : "text-ink-muted",
-                )}
-              >
-                {item.answer}
-              </div>
-            )}
+            <div
+              id={panelId}
+              role="region"
+              aria-labelledby={triggerId}
+              hidden={!open}
+              className={cn(
+                "pb-5 pr-12 text-sm md:text-base",
+                isDark ? "text-white/75" : "text-ink-muted",
+              )}
+            >
+              {item.answer}
+            </div>
           </div>
         );
       })}

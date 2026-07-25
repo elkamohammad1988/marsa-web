@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { BlogCard } from "@/components/sections/BlogCard";
 import { CTACard } from "@/components/sections/CTACard";
 import { JsonLd } from "@/components/JsonLd";
-import { posts, readingTimeMinutes } from "@/lib/blog";
+import { posts, readingTimeMinutes, formatPostDate } from "@/lib/blog";
 import { buildMetadata } from "@/lib/seo";
 import { blogPostingSchema, breadcrumbSchema } from "@/lib/schema";
 
@@ -69,7 +69,7 @@ export default async function BlogPostPage({
             {post.title}
           </Heading>
           <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-ink-muted">
-            <span>{post.date}</span>
+            <span>{formatPostDate(post.date)}</span>
             <span aria-hidden>•</span>
             <span>{post.category}</span>
             <span aria-hidden>•</span>

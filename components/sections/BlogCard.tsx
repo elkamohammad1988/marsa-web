@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import type { BlogPost } from "@/lib/blog";
+import { formatPostDate, type BlogPost } from "@/lib/blog";
 
 export function BlogCard({ post }: { post: BlogPost }) {
   return (
@@ -16,7 +16,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
         />
       </Link>
       <div className="flex flex-1 flex-col p-5">
-        <div className="text-xs text-ink-muted">{post.date}</div>
+        <div className="text-xs text-ink-muted">{formatPostDate(post.date)}</div>
         <h3 className="mt-2 line-clamp-3 text-base font-semibold text-ink">
           <Link href={`/blog/${post.slug}`} className="hover:text-brand-strong">
             {post.title}
