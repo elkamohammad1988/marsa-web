@@ -12,7 +12,7 @@ production `npm audit` on every push to `main` and every pull request.
 Everything else in the audit — **S1–S10, B1–B10, F1–F10, P3–P9** — is tracked
 below. 37 findings, 19 batches.
 
-Last updated: 2026-07-25.
+Last updated: 2026-07-25. **9 PRs merged, 16 findings closed.** See [`PROGRESS.md`](./PROGRESS.md).
 
 ---
 
@@ -117,20 +117,20 @@ Batch 16 and cannot start until assets exist.
 | # | Batch | Findings | Status |
 |---|---|---|---|
 | 0 | Submissions are never silently lost | B1 | **DONE** ([#1](https://github.com/elkamohammad1988/marsa-web/pull/1)) |
-| 1 | Test the security boundary | P5a | `TODO` |
-| 2 | Public endpoint exposure & abuse limits | S2, S6, S4 | `TODO` |
-| 3 | Admin authentication boundary | S1, S5, S9 | `TODO` |
-| 4 | Small security & privacy corrections | S8, S10, S7 | `TODO` |
-| 5 | Content-Security-Policy | S3 | `TODO` |
-| 6 | Accessible error states | F2, F3, F8 | `TODO` |
-| 7 | Fail loudly on misconfiguration | B8 | `TODO` |
+| 1 | Test the security boundary | P5a | **DONE** ([#3](https://github.com/elkamohammad1988/marsa-web/pull/3)) |
+| 2 | Public endpoint exposure & abuse limits | S2, S6, S4* | **DONE** ([#4](https://github.com/elkamohammad1988/marsa-web/pull/4)) |
+| 3 | Admin authentication boundary | S1, S5, S9 | **BLOCKED-ON-ME** ([H17](#h17--approve-the-admin-authentication-batch-s1-s5-s9)) |
+| 4 | Small security & privacy corrections | S8, S10, S7 | **DONE** ([#5](https://github.com/elkamohammad1988/marsa-web/pull/5)) |
+| 5 | Content-Security-Policy | S3 | **DONE** ([#6](https://github.com/elkamohammad1988/marsa-web/pull/6)) |
+| 6 | Accessible error states | F2, F3, F8 | **DONE** ([#7](https://github.com/elkamohammad1988/marsa-web/pull/7)) |
+| 7 | Fail loudly on misconfiguration | B8 | **DONE** ([#8](https://github.com/elkamohammad1988/marsa-web/pull/8)) |
 | 8 | Migration infrastructure | P4 | `TODO` |
-| 9 | Database correctness & round trips | B7, B3, B4 | `TODO` |
+| 9 | Database correctness & round trips | B7, B3, B4 | `TODO` (code only; applying = [H4](#h4--apply-pending-database-migrations-p4-b3-b4-b7)) |
 | 10 | Observability | B2, P3 | `TODO` |
-| 11 | Retention & erasure | B10, P9 | `TODO` |
+| 11 | Retention & erasure | B10, P9 | `TODO` (period = [H12](#h12--decide-data-retention-periods-b10)) |
 | 12 | Storage internals | B6, B5, B9 | `TODO` |
 | 13 | End-to-end smoke tests | P5b | `TODO` |
-| 14 | Blog dates, ordering & structured data | F5, F4, F6 | `TODO` |
+| 14 | Blog dates, ordering & structured data | F5, F4, F6 | **DONE** ([#9](https://github.com/elkamohammad1988/marsa-web/pull/9)) |
 | 15 | Markup honesty & artifact weight | F10, F9 | `TODO` |
 | 16 | Imagery & cookie banner | F1, F7 | **BLOCKED-ON-ME** |
 | 17 | ESLint 9 migration | P6 | `TODO` |
@@ -487,7 +487,8 @@ to launch — they are not blockers for any batch.
 | [H13](#h13--deploy-time-connect-the-host-to-the-repository) | Connect the host to the repository | deploy provenance | **deploy-time** |
 | [H14](#h14--decide-whether-demostats-should-exist) | Decide `/demo/stats`' fate | S4 | Before Batch 2 |
 | [H15](#h15--verify-a-resend-sender-domain) | Verify a Resend sender | notifications | Before launch |
-| [H16](#h16--review-each-merged-pr) | Review each merged PR | oversight | Ongoing |
+| [H17](#h17--approve-the-admin-authentication-batch-s1-s5-s9) | **Approve the admin auth batch** | **Batch 3 (S1, High)** | **Now** |
+| [H16](#h16--review-and-merge-each-pr) | Review each merged PR | oversight | Ongoing |
 
 ---
 
@@ -884,6 +885,58 @@ stored and nobody is told about it.
    The sender address must be on the verified domain or delivery fails silently.
 
 Verify: submit the contact form on production and confirm the email arrives.
+
+---
+
+<a id="h17--approve-the-admin-authentication-batch-s1-s5-s9"></a>
+### H17 — Approve the admin authentication batch · S1, S5, S9 · **blocks Batch 3**
+
+Your standing instruction is to stop and ask before anything touching
+authentication, admin access or session handling. Batch 3 is entirely that, so
+it is planned but not started. It is the largest remaining security item —
+**S1 is a High** — and one guessed password exposes the name, email, country
+and company of every person who ever used a form.
+
+Here is exactly what I would change, so you can approve or amend it:
+
+1. **Move admin login from the in-memory limiter to `rateLimitShared`**, at
+   5 attempts per 15 minutes. Today it uses `rateLimit`, whose buckets live in
+   a module-level `Map`, so each serverless instance enforces its own window and
+   concurrency is attacker-controlled — the effective ceiling is 5/min × the
+   number of instances, not 5/min. The existing comment defends in-memory on the
+   grounds it "must keep working even when the database is the thing that is
+   broken"; `rateLimitShared` already preserves that, degrading to the in-memory
+   result on RPC failure. Batch 1 added a test pinning exactly that degradation.
+2. **Add a persisted failure counter with exponential backoff**, keyed on IP
+   *and* a global counter, so attempts spread across many IPs still trip a
+   ceiling.
+3. **Raise the minimum `ADMIN_PASSWORD` length from 8 to 16.** Note the
+   consequence: an existing shorter password stops working and the admin area
+   closes until it is changed. The value in your `.env.local` is 32 characters
+   and already complies.
+4. **Add `middleware.ts`** with `matcher: ['/admin/:path*', '/api/admin/:path*']`
+   verifying the session cookie signature. Today every protected route calls
+   `isAdminRequest()` itself. All four current call sites are correct, so this
+   is not a live vulnerability — but the pattern is deny-by-omission, and a new
+   `app/admin/anything/page.tsx` that forgets the call would be silently
+   world-readable with no error and no log line. In-route checks stay as
+   defence in depth.
+5. **Reject cross-site `POST /api/admin/logout`** via `Sec-Fetch-Site` or an
+   `Origin` check. Nuisance-level only: `SameSite=Lax` stops the session cookie
+   being *sent*, but the response's `Set-Cookie` clearing it is still honoured,
+   so a malicious page can force an admin logout.
+
+**Reply "go" to approve all five**, or name the ones you want. I will not touch
+this code otherwise.
+
+Two related items are held for the same reason, both session handling:
+
+- **S4's cookie exchange** — swapping `/demo/stats?token=…` for an httpOnly
+  cookie on first use, so the token appears in one log line rather than every
+  one. Interacts with [H14](#h14--decide-whether-demostats-should-exist).
+- **P7's revocation** — a `token_version` claim compared against an env var, so
+  a single admin session can be killed without rotating `ADMIN_SESSION_SECRET`
+  and invalidating every session at once.
 
 ---
 
