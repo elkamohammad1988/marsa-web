@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStore } from "@/lib/storage";
+import { getStore, type SubmissionStore } from "@/lib/storage";
 import { getNotifierConfig } from "@/lib/notify";
 import { getAdminConfig } from "@/lib/admin-auth";
 import { getPostgrestConfig } from "@/lib/postgrest";
@@ -17,11 +17,22 @@ export const dynamic = "force-dynamic";
  * credentials, only whether each one is present.
  */
 export async function GET() {
-  const store = getStore();
   const startedAt = Date.now();
 
+  // getStore() now throws in production when no database is configured. That
+  // is precisely the condition this endpoint exists to report, so catch it and
+  // answer 503 with the reason rather than letting the probe 500.
+  let store: SubmissionStore | null = null;
+  let storeError: string | null = null;
+  try {
+    store = getStore();
+  } catch (err) {
+    storeError =
+      err instanceof Error ? err.message : "submission storage is not configured";
+  }
+
   const [storage, fx] = await Promise.all([
-    store.health(),
+    store ? store.health() : Promise.resolve({ ok: false, detail: storeError ?? undefined }),
     getLatestRate("EUR", "USD").then(
       (r) => ({ ok: true, detail: `ECB rates as of ${r.date}` }),
       (err: unknown) => ({
@@ -32,7 +43,11 @@ export async function GET() {
   ]);
 
   const checks = {
-    storage: { ...storage, provider: store.provider, durable: store.durable },
+    storage: {
+      ...storage,
+      provider: store?.provider ?? "none",
+      durable: store?.durable ?? false,
+    },
     fx,
     notifications: {
       ok: true,
