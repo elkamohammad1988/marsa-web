@@ -111,7 +111,7 @@ Measured on the production build (see [CASE-STUDY.md](CASE-STUDY.md) for method)
 |---|---|
 | Lighthouse `/` (desktop) | **Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100** |
 | Lighthouse `/demo` (desktop) | **100 · 100 · 100 · 100** |
-| axe-core (WCAG 2.0/2.1 A+AA) | **29 routes, 0 violations** |
+| axe-core (WCAG 2.0/2.1 A+AA) | **29 routes, 0 violations** — automated crawl of each route in its default state; does not cover states reached only by interaction, including form validation errors after a failed submit |
 | Responsive (375 / 768 / 1440) | No horizontal overflow on any route |
 | Unit tests | **94 / 94 passing** |
 | Types / lint / audit | tsc clean · lint clean · 0 vulnerabilities · zero `any` |

@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Every step below is a hard gate: GitHub Actions fails the job on the first
+# step that exits non-zero, so a red check means exactly one named step broke.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Pinned to 24.x: `next` 15.5 requires >=20, `vitest` 4 requires
+      # ^20 || ^22 || >=24, and 24.x is the toolchain package-lock.json was
+      # generated with. Bump this and package.json "engines" together.
+      - name: Set up Node.js 24.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npx next lint
+
+      - name: Unit tests
+        run: npx vitest run
+
+      - name: Production build
+        run: npm run build
+
+      # Production dependency tree only. The dev tree carries known high
+      # advisories from the end-of-life ESLint 8 chain (audit finding P6);
+      # those ship to nobody, so they must not block the pipeline.
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
