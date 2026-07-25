@@ -488,6 +488,7 @@ to launch — they are not blockers for any batch.
 | [H14](#h14--decide-whether-demostats-should-exist) | Decide `/demo/stats`' fate | S4 | Before Batch 2 |
 | [H15](#h15--verify-a-resend-sender-domain) | Verify a Resend sender | notifications | Before launch |
 | [H17](#h17--approve-the-admin-authentication-batch-s1-s5-s9) | **Approve the admin auth batch** | **Batch 3 (S1, High)** | **Now** |
+| [H18](#h18--approve-corrected-cookie-policy-copy-f7) | **Approve corrected cookie-policy copy** | F7 | **Now** |
 | [H16](#h16--review-and-merge-each-pr) | Review each merged PR | oversight | Ongoing |
 
 ---
@@ -937,6 +938,67 @@ Two related items are held for the same reason, both session handling:
 - **P7's revocation** — a `token_version` claim compared against an env var, so
   a single admin session can be killed without rotating `ADMIN_SESSION_SECRET`
   and invalidating every session at once.
+
+---
+
+<a id="h18--approve-corrected-cookie-policy-copy-f7"></a>
+### H18 — Approve corrected `/legal/cookies` copy · F7 · **compliance copy, so yours to decide**
+
+The banner is removed. `app/legal/cookies/page.tsx` is **regulatory copy**, which
+is on the standing stop-and-ask list, so I have not touched a word of it — but
+you should know what it currently says, because most of it was already untrue
+before this change.
+
+The site sets **exactly one cookie**, verified by grepping every write in the
+codebase: `marsa_admin`, in `app/api/admin/login/route.ts` and
+`.../logout/route.ts`. It is strictly necessary and is only ever issued to an
+authenticated operator.
+
+Against that, the page currently claims:
+
+| Claim on the page | Reality |
+|---|---|
+| "Preferences — remember settings such as your selected currency or language" | No such cookie exists |
+| "Analytics — help us understand aggregate usage… Set only with your consent" | No analytics cookie exists |
+| "Marketing — measure the effectiveness of campaigns" | No marketing cookie exists |
+| "the *Cookie settings* link in the footer" | **No such link exists** — this was already false before today |
+| "our cookie banner lets you accept or reject non-essential cookies" | True until this change; false now |
+| "We only set non-essential cookies after you have given consent" | Vacuously true — there are none |
+
+Four of those six were wrong before I touched anything. That is worth knowing
+independently of the banner decision.
+
+**Suggested replacement** for the "Categories of cookies we use" and "Managing
+your preferences" sections — offered as a starting point for you or your
+counsel, not as approved wording:
+
+> **Cookies we use**
+> Marsa sets a single cookie, `marsa_admin`. It is strictly necessary: it keeps
+> an authenticated administrator signed in to the internal dashboard, and it is
+> never issued to ordinary visitors. We set no preference, analytics or
+> marketing cookies, and we use no third-party trackers or tag managers.
+>
+> **Managing your preferences**
+> Because the only cookie we set is strictly necessary, there is nothing to
+> consent to and no preference banner to configure. You can block or clear
+> cookies through your browser settings at any time; doing so will only affect
+> administrator sign-in.
+>
+> **Analytics**
+> The interactive demo records anonymous, cookieless usage events using a random
+> identifier that lasts for a single visit and is never linked to you. We honour
+> the browser's Do Not Track signal.
+
+**What to do:** either paste an approved version into
+`app/legal/cookies/page.tsx` yourself, or reply with the wording you want and I
+will apply it verbatim.
+
+**One dependency:** `lib/consent.ts` and the consent check in `DemoFlow` are
+still in place. With the banner gone nothing writes that value, so they are
+currently inert. I have deliberately left them rather than deleting a mechanism
+while the document that promises visitors a control is still under review. Tell
+me which way the copy lands and I will either wire a preferences control to them
+or remove them.
 
 ---
 
