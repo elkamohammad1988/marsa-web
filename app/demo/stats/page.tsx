@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
 import { isAdminRequest, safeEqual } from "@/lib/admin-auth";
 import { getAnalyticsStore } from "@/lib/analytics";
+import { rateLimitShared, clientKey } from "@/lib/rate-limit";
+import { STATS_RATE_LIMIT } from "@/lib/api-rate-limit";
 import { FunnelView } from "@/components/admin/FunnelView";
 
 export const dynamic = "force-dynamic";
@@ -23,8 +26,20 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
  * Without either it 404s (indistinguishable from a missing page), and the
  * token compare is constant-time. If DEMO_STATS_TOKEN is unset, only admins
  * can view it.
+ *
+ * The compare being constant-time stopped timing analysis but not volume:
+ * there was no limit on how many tokens a caller could try (audit S4). The
+ * limiter below runs before any credential is examined, and exhausting it
+ * produces the same 404 as a wrong token, so it reveals nothing new about
+ * whether the page or the token exists.
  */
 export default async function DemoStatsPage({ searchParams }: { searchParams: SearchParams }) {
+  const attempts = await rateLimitShared(
+    clientKey(await headers(), "demo-stats"),
+    STATS_RATE_LIMIT,
+  );
+  if (!attempts.ok) notFound();
+
   const params = await searchParams;
   const provided = (Array.isArray(params.token) ? params.token[0] : params.token) ?? "";
   const expected = process.env.DEMO_STATS_TOKEN ?? "";

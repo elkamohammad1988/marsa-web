@@ -212,9 +212,16 @@ export class FileSubmissionStore implements SubmissionStore {
   async health(): Promise<{ ok: boolean; detail?: string }> {
     try {
       await fs.mkdir(DATA_DIR, { recursive: true });
-      return { ok: true, detail: `writing to ${DATA_DIR}` };
+      return { ok: true, detail: "file store writable" };
     } catch (err) {
-      return { ok: false, detail: err instanceof Error ? err.message : "data dir not writable" };
+      // The real reason embeds the absolute DATA_DIR path, which describes the
+      // server's filesystem layout to anyone who can reach /api/health. Log it
+      // where an operator can read it; return a fixed string (audit S2).
+      console.error(
+        "[storage] file store health check failed.",
+        err instanceof Error ? err.message : err,
+      );
+      return { ok: false, detail: "file store not writable" };
     }
   }
 }
@@ -311,9 +318,17 @@ export class PostgresSubmissionStore implements SubmissionStore {
   async health(): Promise<{ ok: boolean; detail?: string }> {
     try {
       await countRows(this.cfg, TABLE);
-      return { ok: true, detail: "postgres reachable" };
+      return { ok: true, detail: "database reachable" };
     } catch (err) {
-      return { ok: false, detail: err instanceof Error ? err.message : "database unreachable" };
+      // A PostgrestError message carries the HTTP status, the table name and up
+      // to 300 characters of the upstream response body — which for Postgres
+      // errors includes column names, constraint names and hints. That is free
+      // schema reconnaissance, so it is logged and never returned (audit S2).
+      console.error(
+        "[storage] database health check failed.",
+        err instanceof Error ? err.message : err,
+      );
+      return { ok: false, detail: "database unreachable" };
     }
   }
 }
