@@ -1,12 +1,44 @@
 /**
  * Central site configuration. Everything that might differ between
- * environments (URLs, contact addresses, social handles) is read from
- * environment variables with sensible production defaults, so the code
- * never hard-codes deployment-specific values.
+ * environments (URLs, contact addresses, social handles) is read from the
+ * environment. Where a value would otherwise have to be invented — a domain,
+ * a mailbox, a social profile — the default is *absent*, not a guess, and each
+ * consumer renders nothing instead.
  */
 
 function cleanUrl(url: string): string {
   return url.replace(/\/+$/, "");
+}
+
+/**
+ * The canonical origin, resolved in order of how much it can be trusted.
+ *
+ * This used to fall back to `https://www.marsa.money` — a domain nobody owns —
+ * which meant an unconfigured build emitted canonical tags, a sitemap, robots
+ * directives, OG tags and JSON-LD all pointing at somebody else's future
+ * property. A wrong canonical is the one metadata error that asks search
+ * engines to attribute this site's content to another origin.
+ *
+ * 1. `NEXT_PUBLIC_SITE_URL` — set this in production. It is the only value that
+ *    is stable across deploys, so it is the only one a canonical should use.
+ * 2. Vercel's per-deployment host, so preview deploys describe themselves
+ *    rather than localhost. `NEXT_PUBLIC_VERCEL_URL` is the browser-visible
+ *    half of the same pair; `VERCEL_URL` is server-only. Neither is stable —
+ *    each deployment gets its own — which is why they rank below the explicit
+ *    value rather than replacing it.
+ * 3. `http://localhost:3000` — the dev server, and the only honest answer when
+ *    nothing else is configured.
+ */
+export function resolveSiteUrl(
+  env: Record<string, string | undefined> = process.env,
+): string {
+  const configured = env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configured) return cleanUrl(configured);
+
+  const vercelHost = (env.NEXT_PUBLIC_VERCEL_URL ?? env.VERCEL_URL)?.trim();
+  if (vercelHost) return cleanUrl(`https://${vercelHost}`);
+
+  return "http://localhost:3000";
 }
 
 export const siteConfig = {
@@ -15,7 +47,7 @@ export const siteConfig = {
   /** Short brand line — a marsa is the harbour a ship comes home to. */
   tagline: "Where your money lands.",
   /** Canonical origin, used for metadata, sitemap, robots, and JSON-LD. */
-  url: cleanUrl(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.marsa.money"),
+  url: resolveSiteUrl(),
   description:
     "Multi-currency IBAN accounts, SEPA transfers, and interbank FX for people and businesses moving money between Europe and the rest of the world.",
   /**
