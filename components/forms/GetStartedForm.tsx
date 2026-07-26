@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { TextField, SelectField, CheckboxField, Honeypot } from "./fields";
-import { useFormSubmit } from "./useSubmit";
+import { useDemoSubmit } from "./useDemoSubmit";
+import { DemoSubmissionNotice } from "./DemoSubmissionNotice";
 import { validateLead, type AccountType } from "@/lib/validation";
 import { countries } from "@/lib/countries";
 import { cn } from "@/lib/utils";
@@ -22,42 +23,42 @@ export function GetStartedForm({ defaultType = "personal", defaultPlan }: Props)
   const [country, setCountry] = useState("");
   const [consent, setConsent] = useState(false);
   const [hp, setHp] = useState("");
-  const { state, errors, message, submit, setErrors } = useFormSubmit("/api/leads");
+  const { state, errors, submit, setErrors } = useDemoSubmit(validateLead);
 
-  async function onSubmit(e: React.FormEvent) {
+  function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const payload = { name, email, accountType, company, country, consent, plan: defaultPlan };
-    const result = validateLead(payload);
-    if (!result.success) {
-      setErrors(result.errors);
-      return;
-    }
-    await submit({ ...payload, hp });
+    // The honeypot is still read, so a bot filling it is silently ignored
+    // exactly as the server would — the rule is demonstrated, not simulated.
+    if (hp.trim() !== "") return;
+    submit({ name, email, accountType, company, country, consent, plan: defaultPlan });
   }
 
-  if (state === "success") {
+  if (state === "accepted") {
     return (
-      <div className="rounded-card-lg border border-line bg-card p-8 text-center shadow-card">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/15 text-success">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M4 12l5 5L20 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-        <h2 className="mt-5 text-2xl font-bold text-ink">Application received</h2>
-        <p className="mx-auto mt-3 max-w-md text-sm text-ink-muted">
-          Thanks, {name.split(" ")[0] || "there"}. Our onboarding team will email{" "}
-          <span className="font-medium text-ink">{email}</span> within one business day with your
-          next steps and identity-verification link.
-        </p>
-        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-          <Button href="/pricing" variant="outline" size="md">
-            Review plans
-          </Button>
-          <Button href="/tools/currency-converter" variant="primary" size="md">
-            Try the converter
-          </Button>
-        </div>
-      </div>
+      <DemoSubmissionNotice
+        title="That would have opened an application"
+        endpoint="POST /api/leads"
+        steps={[
+          {
+            label: "Re-validate on the server",
+            detail: "The same rules that just ran in your browser, as the source of truth.",
+          },
+          {
+            label: "Rate-limit and screen for bots",
+            detail: "A shared, cross-instance window plus a honeypot field.",
+          },
+          {
+            label: "Store durably, then notify",
+            detail: "Written to Postgres before anyone is emailed — never the other way round.",
+          },
+          {
+            label: "Begin identity verification",
+            detail: "A KYC provider would take it from here, in the real product.",
+          },
+        ]}
+        primary={{ label: "Try the interactive demo", href: "/demo" }}
+        secondary={{ label: "Review plans", href: "/pricing" }}
+      />
     );
   }
 
@@ -165,21 +166,10 @@ export function GetStartedForm({ defaultType = "personal", defaultPlan }: Props)
 
       <Honeypot value={hp} onChange={setHp} />
 
-      <Button
-        type="submit"
-        variant="primary"
-        size="lg"
-        className="mt-6 w-full"
-        disabled={state === "submitting"}
-      >
-        {state === "submitting" ? "Submitting…" : "Create my account"}
+      <Button type="submit" variant="primary" size="lg" className="mt-6 w-full">
+        Create my account
       </Button>
 
-      {message && state === "error" && (
-        <p className="mt-3 text-sm font-medium text-danger" role="alert">
-          {message}
-        </p>
-      )}
       <p className="mt-4 text-center text-xs text-ink-subtle">
         Opening an account is free and takes about 5 minutes. No credit check.
       </p>
