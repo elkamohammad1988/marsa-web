@@ -804,3 +804,74 @@ breadcrumb reading Home → EU Business Account and "Business" correctly absent;
 `BreadcrumbList`, not two. Sitemap: 32 entries, 6 with `lastmod` — 32 not
 33 because the careers page was deleted in #26.
 tsc exit 0 · lint clean · 645 tests / 34 files (from 587/33) · build 55 routes.
+
+---
+
+## Batch G — the demo, as an interaction · **MERGED**
+
+**Not an `AUDIT.md` finding.** The audit called the demo's accessibility
+"thoughtfully done", and the pieces it named are real. Working through the flow
+as a *reader* rather than as a diff turned up four defects and three gaps.
+
+### Defects
+
+**1. Landing on `/demo` moved focus into the middle of the page.** Focus goes
+to the step heading on every step change, which is right — except the effect
+also ran on mount, so a keyboard visitor arrived past the skip link and the
+entire navbar with no indication they had been moved. It now skips the first
+render.
+
+**2. The whole step panel was an `aria-live` region, *and* focus moved into
+it.** Every transition announced the heading, the body copy and every control —
+then the focus move announced the heading again. Worse, the KYC progress and
+the rate loader are their own live regions nested inside it. There is now one
+`sr-only` live region carrying a sentence about what actually changed
+("Received $4,820.00. USD balance is now $4,820.00."), which is what a live
+region is for. A live region should say what changed; what changes here is a
+balance.
+
+**3. The progress rail said nothing on a phone.** The step labels were
+`hidden sm:block` — `display: none` below 640px, so on a phone a screen-reader
+user got eight unnamed bars and an `aria-current` pointing at one of them. Now
+`sr-only sm:not-sr-only`: visually identical, always in the accessibility tree.
+
+**4. Disabled Continue buttons never said why.** Every gate in this flow is one
+action away from opening, which is exactly what makes naming the blocker worth
+doing: "Receive the $4,820.00 payout to continue" is an instruction, while a
+greyed-out button is a dead end. The convert step now distinguishes *"you have
+not converted yet"* from *"the live rate has not loaded"* — two different
+situations that look identical from a disabled control, one the reader's move
+and one the network's.
+
+### The rules became testable
+
+Those gates were a seven-branch ternary embedded in JSX, checkable only by
+clicking. `advanceFrom(step, progress)` and `previousStep(step)` are pure
+functions in `lib/demo.ts` now, with ten cases covering every gate, the blocker
+text, and the invariant that advancing and going back are inverses at every
+step.
+
+### Motion
+
+Step changes were instant, and new activity rows appeared with no motion at
+all — the two moments in the flow where something is meant to feel like it
+happened. Two keyframes, both short on purpose: `step-in` (320ms, 8px) is a
+settle rather than an entrance, because the panel is what the reader is already
+looking at, and `fade-up`'s 700ms/18px would make every click feel like a page
+load. `row-in` (420ms) arrives from above, where the row comes from.
+
+A balance tile now highlights briefly when its number moves. The count-up
+animation already existed; what it could not say was *which* balance changed.
+The highlight is a colour transition rather than motion, so it still reads
+under `prefers-reduced-motion`, where the counter falls back to setting the
+value directly.
+
+**Also:** a **Back** control. A walkthrough with no way to re-read the previous
+step, only "Restart", punishes curiosity — and the state is cumulative, so
+stepping back and forward is consistent rather than destructive.
+
+**Evidence, against the generated HTML:** the demo panel is down from three
+live regions to two targeted ones, all eight rail labels are present in the
+markup at every viewport, the Back control and the blocker hint are correctly
+absent on the welcome step. tsc exit 0 · lint clean · 571 tests / 30 files ·
+build 49 pages, `/demo` at 7.18 kB.

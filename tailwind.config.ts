@@ -195,6 +195,21 @@ const config: Config = {
           "0%, 100%": { boxShadow: "0 0 0 0 rgba(238,79,165,0.0)", opacity: "0.92" },
           "50%": { boxShadow: "0 0 12px 1px rgba(238,79,165,0.55)", opacity: "1" },
         },
+        /**
+         * Demo step change. Short and small on purpose: the panel is what the
+         * reader is already looking at, so this is a settle, not an entrance.
+         * `fade-up`'s 700ms and 18px would make every click feel like a page
+         * load.
+         */
+        "step-in": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        /** A new activity row arriving at the top of the list, from above. */
+        "row-in": {
+          "0%": { opacity: "0", transform: "translateY(-6px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
@@ -208,6 +223,8 @@ const config: Config = {
         "aurora-b": "aurora-b 28s ease-in-out infinite",
         "dash-flow": "dash-flow 3.2s linear infinite",
         shimmer: "shimmer 2.4s linear infinite",
+        "step-in": "step-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "row-in": "row-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both",
       },
     },
   },
