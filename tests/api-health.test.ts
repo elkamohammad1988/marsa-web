@@ -3,6 +3,7 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { setReporter, type CapturedEvent } from "@/lib/observability";
+import { GET } from "@/app/api/health/route";
 
 /**
  * /api/health is unauthenticated, so what it says is what any stranger can
@@ -15,10 +16,11 @@ import { setReporter, type CapturedEvent } from "@/lib/observability";
  * response body carries nothing but booleans.
  */
 
+// Imports are hoisted, so this runs after the route module is evaluated.
+// That is fine: lib/jsonl resolves DATA_DIR per call rather than into a
+// module-level const (B6), and the route builds its store inside the handler.
 const TMP_DIR = path.join(os.tmpdir(), `marsa-health-${process.pid}-${Date.now()}`);
 process.env.DATA_DIR = TMP_DIR;
-
-const { GET } = await import("@/app/api/health/route");
 
 type HealthBody = {
   status: string;
@@ -105,7 +107,6 @@ describe("GET /api/health — failure disclosure", () => {
         throw new Error("ECONNREFUSED 203.0.113.9:443");
       }),
     );
-    vi.spyOn(console, "error").mockImplementation(() => {});
 
     const res = await GET();
     const body = (await res.json()) as HealthBody;
@@ -122,7 +123,6 @@ describe("GET /api/health — failure disclosure", () => {
         throw new Error("ECONNREFUSED 203.0.113.9:443");
       }),
     );
-    vi.spyOn(console, "error").mockImplementation(() => {});
 
     const raw = await (await GET()).text();
 

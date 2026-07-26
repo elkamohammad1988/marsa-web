@@ -155,19 +155,23 @@ function downsample<T>(items: T[], max: number): T[] {
   return out;
 }
 
+const FX_TIMEOUT_MS = 8000;
+
+/**
+ * `AbortSignal.timeout` covers the whole exchange, including the body read the
+ * callers do after this resolves (audit B9). The previous `AbortController`
+ * was cleared in a `finally` that ran as soon as the headers arrived, so a
+ * stalled body had no ceiling — on the code path that `/api/health` calls
+ * synchronously, which is how a slow FX provider could hold a health probe
+ * open long past the timeout it appeared to have.
+ */
 async function fxFetch(path: string): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-  try {
-    return await fetch(`${FX_BASE}${path}`, {
-      signal: controller.signal,
-      headers: { accept: "application/json" },
-      // Cache upstream responses for an hour (ECB updates at most daily).
-      next: { revalidate: 3600 },
-    });
-  } finally {
-    clearTimeout(timeout);
-  }
+  return fetch(`${FX_BASE}${path}`, {
+    signal: AbortSignal.timeout(FX_TIMEOUT_MS),
+    headers: { accept: "application/json" },
+    // Cache upstream responses for an hour (ECB updates at most daily).
+    next: { revalidate: 3600 },
+  });
 }
 
 export class FxError extends Error {

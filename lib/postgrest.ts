@@ -40,18 +40,27 @@ export class PostgrestError extends Error {
   }
 }
 
+/**
+ * `AbortSignal.timeout`, not a hand-rolled `AbortController` cleared in
+ * `finally` (audit B9).
+ *
+ * `finally` runs when `fetch()` resolves — that is, when the *headers* arrive.
+ * Every caller here then reads the body outside that scope (`res.json()`,
+ * `res.text()`), so a response that stalled mid-body hung with no ceiling at
+ * all: the timeout had already been cleared. `AbortSignal.timeout` stays armed
+ * for the whole exchange, body included, which is the property the 8-second
+ * budget was supposed to express.
+ */
 async function request(
   cfg: PostgrestConfig,
   path: string,
   init: RequestInit & { headers?: Record<string, string> } = {},
 ): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
     const res = await fetch(`${cfg.endpoint}${path}`, {
       ...init,
       cache: "no-store",
-      signal: controller.signal,
+      signal: AbortSignal.timeout(TIMEOUT_MS),
       headers: {
         apikey: cfg.key,
         Authorization: `Bearer ${cfg.key}`,
@@ -69,10 +78,17 @@ async function request(
     return res;
   } catch (err) {
     if (err instanceof PostgrestError) throw err;
-    const reason = err instanceof Error ? err.message : String(err);
+    // A timeout arrives as a DOMException named TimeoutError rather than
+    // AbortError, and its default message ("The operation was aborted due to
+    // timeout") does not say how long was allowed — which is the first thing
+    // anyone reading the log wants to know.
+    const reason =
+      err instanceof Error && err.name === "TimeoutError"
+        ? `no response within ${TIMEOUT_MS}ms`
+        : err instanceof Error
+          ? err.message
+          : String(err);
     throw new PostgrestError(`PostgREST request failed: ${reason}`);
-  } finally {
-    clearTimeout(timeout);
   }
 }
 

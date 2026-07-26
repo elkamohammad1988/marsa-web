@@ -2,18 +2,16 @@ import { describe, it, expect, vi, afterEach, beforeAll, afterAll } from "vitest
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-// Type-only: erased at compile time, so it cannot trigger module evaluation
-// before DATA_DIR is set below.
 import type { StoredSubmission } from "@/lib/storage";
 import { setReporter, type CapturedEvent } from "@/lib/observability";
 
-// DATA_DIR is read when lib/storage is first imported, so it has to be set
-// before the dynamic import below — hence top-level await rather than a plain
-// static import.
+// DATA_DIR used to be read into a module-level const when lib/storage was
+// first imported, so it had to be set before a dynamic import. lib/jsonl now
+// resolves it per call (B6), so a plain static import is enough.
 const TMP_DIR = path.join(os.tmpdir(), `marsa-storage-${process.pid}-${Date.now()}`);
 process.env.DATA_DIR = TMP_DIR;
 
-const {
+import {
   createStore,
   FileSubmissionStore,
   PostgresSubmissionStore,
@@ -21,7 +19,7 @@ const {
   StorageWriteError,
   searchText,
   newId,
-} = await import("@/lib/storage");
+} from "@/lib/storage";
 
 const lead: StoredSubmission = {
   id: "abc123",
