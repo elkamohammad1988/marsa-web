@@ -315,11 +315,185 @@ text. tsc exit 0 · lint clean · 316 tests / 21 files · build 49 pages.
 
 ---
 
-## Status at this checkpoint
+## Checkpoint — 2026-07-25, nine PRs in
 
-**Merged:** 9 PRs. **Findings closed:** B1, P5 (units), S2, S6, S8, S10, S7,
-S3, F2, F3, F8, B8, F5, F4, F6 — plus S4 in part. Test suite 94 → **316**.
+**Findings closed:** B1, P5 (units), S2, S6, S8, S10, S7, S3, F2, F3, F8, B8,
+F5, F4, F6 — plus S4 in part. Test suite 94 → **316**.
 
 **Stopped on:** Batch 3 (S1, S5, S9) is entirely admin authentication, which is
 on the standing stop-and-ask list, and several later items are gated on
 decisions recorded in [HUMAN ACTIONS](./PROJECT-PLAN.md#human-actions).
+
+---
+
+## Batch 3 — Admin authentication boundary · **MERGED**
+
+**Findings closed:** S1 (High), S5, S9 · **PR:** [#11](https://github.com/elkamohammad1988/marsa-web/pull/11) · approved under H17
+
+**S1.** Admin login used the in-memory limiter while all three public form
+endpoints used the shared one. Its buckets live in a module-level `Map`, so
+every concurrent instance enforced its own window — and concurrency is
+attacker-controllable, making the effective ceiling 5/min × instances.
+
+The audit asked for exponential backoff. `check_rate_limit` is a fixed-window
+counter, so rather than add a schema change for a growing timer, backoff is
+expressed as **overlapping tiers checked on every attempt**: 5 per 15 min,
+10 per hour, 20 per day, plus 50 per 15 min across *all* callers. The ceiling
+tightens the longer an attack runs — the same shape as backoff, built from the
+atomic primitive that already existed. The 429 reports the longest failing
+tier's reset, not the first that tripped.
+
+`ADMIN_PASSWORD` minimum 8 → 16.
+
+**S5.** `middleware.ts` on `/admin`, `/admin/:path*`, `/api/admin/:path*`. All
+four existing `isAdminRequest()` call sites were correct, so this fixed no live
+vulnerability — it changed the shape of the possible mistake. In-route checks
+stay as defence in depth. `lib/admin-session.ts` was split out because
+middleware runs on Edge and cannot import `next/headers`.
+
+The lockout risk was the one that mattered: `/admin/login`, `/api/admin/login`
+and `/api/admin/logout` are explicitly exempt, with a test pinning it.
+
+**S9.** `Sec-Fetch-Site` where present, `Origin` as fallback. A client sending
+neither is allowed through — rejecting on absence breaks curl and probes
+without stopping an attacker, who controls neither header from a page.
+
+**Evidence, against a running production server:** `/admin`, `/admin/funnel`
+and `/admin/some-future-page` all 307 → `/admin/login`; `/admin/login` 200;
+`/api/admin/export` 401; `/` unaffected. tsc exit 0 · lint clean · 337 tests /
+22 files · build 49 pages + middleware.
+
+---
+
+## Batch 2b — `/demo/stats` deleted rather than mitigated · **MERGED**
+
+**Finding closed:** S4 (Medium) · **PR:** [#12](https://github.com/elkamohammad1988/marsa-web/pull/12) · decided under H14
+
+Batch 2 shipped the attempt limit; the token still travelled in the query
+string, so it landed in host access logs, CDN logs, browser history and the
+`Referer` of every outbound link on the page. Fixing that properly meant an
+httpOnly cookie exchange: more session-handling code, another secret to
+distribute and rotate.
+
+`/admin/funnel` already showed the same report behind real authentication, and
+after #11 behind middleware as well. Deleting removed the class of problem
+instead of mitigating it — no token to leak, no token to rotate, no shared link
+sitting in an inbox. `DEMO_STATS_TOKEN`, the robots disallow and
+`STATS_RATE_LIMIT` went with it.
+
+**Evidence:** tsc exit 0 · lint clean · 337 tests / 22 files · build 49 pages.
+Test count unchanged: the deleted page had no tests, and the limiter coverage
+went with its only caller.
+
+**Worth knowing:** the first typecheck failed against stale `.next/types` still
+referencing the deleted route. Re-running after a build is clean.
+
+---
+
+## Batch 16a — the cookie banner removed · **MERGED**
+
+**Finding closed:** F7 (Medium) in code · **PR:** [#13](https://github.com/elkamohammad1988/marsa-web/pull/13) · decided under H10
+
+The site sets exactly one cookie — `marsa_admin` — strictly necessary and only
+ever issued to an authenticated operator. Every first visit nonetheless
+rendered a viewport-anchored overlay claiming consent-gated tracking that does
+not happen, storing its decision in localStorage rather than a cookie.
+
+**Found while doing it:** four of the five claims on
+`app/legal/cookies/page.tsx` were already untrue *before* this change,
+including a "Cookie settings" link in the footer that has never existed. That
+page is regulatory copy and on the standing stop-and-ask list, so not a word of
+it was touched; the full list and suggested wording are
+[H18](./PROJECT-PLAN.md#h18--approve-corrected-cookie-policy-copy-f7).
+
+`lib/consent.ts` and the `DemoFlow` consent check were deliberately left in
+place. Deleting a mechanism while the document promising visitors a control is
+still under review is the wrong order.
+
+**Evidence:** tsc exit 0 · lint clean · 337 tests / 22 files · build 49 pages.
+
+---
+
+## Batches 8 + 9 — migration history, aggregation in Postgres · **MERGED**
+
+**Findings closed:** P4 (High), B7, B3, B4 · **PR:** [#14](https://github.com/elkamohammad1988/marsa-web/pull/14)
+
+**P4.** `db/schema.sql` → `db/migrations/001_initial_schema.sql`, plus 002 and
+003. The rules are enforced by `tests/migrations.test.ts`, not by convention:
+numbered consecutively from 001 with no gaps or duplicates (a gap means a
+deletion, a duplicate means two people picked the same number and one silently
+never runs), every statement idempotent, every file recording itself in
+`schema_migrations` with `on conflict do nothing`, RLS on every table with zero
+policies anywhere, and `search_path` pinned on every `security definer`
+function.
+
+`npm run db:migrate` reports applied vs pending and **does not pretend to
+execute SQL** — Supabase exposes no arbitrary-SQL transport over PostgREST, so
+it prints the pending files to paste into the SQL editor. A runner that
+silently does nothing is worse than no runner.
+
+**B7.** The purge filtered on `window_start` while the primary key is
+`(key, window_start)` — a predicate on the second column alone cannot use it.
+Sequential scan taking row locks, on 1% of form submissions, while a visitor
+waited. 002 adds the index, extracts a schedulable `purge_rate_limit_hits()`,
+and drops the inline probability to 0.1%. **Deliberate departure:** the audit
+preferred moving the purge out entirely, but keeping a small inline one means
+table growth does not depend on someone remembering to schedule a job.
+
+**B3.** The funnel pulled up to 20,000 rows per page view and counted them in
+Node. The correctness bug was worse than the cost: past 20,000 events it kept
+the most *recent* rows, dropping early sessions' `start` events while retaining
+their later steps, so `starts` undercounted and `completionRate` could exceed
+100% — silently. `demo_funnel()` counts distinct sessions per step in Postgres,
+exact at any volume. A test asserts the rate can no longer exceed 100%.
+
+**B4.** `submission_stats()` returns all four numbers from one table scan via
+`count(*) filter (…)`, replacing four HEAD counts. A test asserts exactly one
+`fetch`.
+
+**The detail that made this safe to merge with nothing applied:** both call
+sites fall back to the old implementation when the function is absent, logging
+which migration to run. The code is correct against a database that has had 003
+applied and against one that has not.
+
+**Evidence:** tsc exit 0 · lint clean · 367 tests / 24 files · build 49 pages ·
+`npm run db:migrate -- --dry` → 0 applied, 3 pending.
+
+---
+
+## Batch A — documentation truth & admin setup copy · **MERGED**
+
+**Not an `AUDIT.md` finding.** Found by re-reading the repository end to end on
+2026-07-26, after the fourteenth PR.
+
+**The real bug.** `app/admin/login/page.tsx` told the operator to set
+`ADMIN_PASSWORD` to "8+ characters". Batch 3 raised `MIN_PASSWORD_LENGTH` to
+16 and this string was missed. An operator following the only on-screen
+guidance would have set a password `getAdminConfig()` then rejects — and the
+rejection is a `console.error` on the server plus an admin area that silently
+stays shut, with the login page still displaying the instruction that caused
+it. Both minimums are now interpolated from the constants, and
+`tests/admin-config-copy.test.ts` fails if a literal length is ever typed into
+that page again, whatever number is chosen.
+
+**The documentation.** `README.md` claimed "94 passing tests" against an actual
+367, and listed "CI pipeline" as an unbuilt follow-up eleven PRs after
+`.github/workflows/ci.yml` started gating every push. For a repository whose
+whole argument is that its claims are checkable, a headline number that is four
+times off is the most expensive kind of error. The count is now stated once, in
+a table explicitly framed as a dated measurement, and a CI badge carries the
+continuously-true claim instead of prose.
+
+Also corrected: the `PROJECT-PLAN.md` batch board and `PROGRESS.md` both
+stopped at PR #9 while #11–#14 were merged, so the plan showed the admin auth
+batch as blocked and the migrations as unwritten. H4 folded into H3 (they were
+written assuming 001 was already applied; it is not). H10, H14 and H17 marked
+resolved with the decision that closed each.
+
+Two things the README now says that it did not: the JSONL file store is a
+development convenience and never a production path (the documentation half of
+**B5**), and the imagery under `public/images/` is unreplaced placeholders with
+six unique files behind seventeen names (**F1**, open). A reviewer finding that
+themselves draws a worse conclusion than one told up front.
+
+**Evidence:** tsc exit 0 · lint clean · 370 tests / 25 files · build 49 pages.

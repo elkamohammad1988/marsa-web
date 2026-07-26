@@ -1,14 +1,18 @@
 # Marsa
 
+[![CI](https://github.com/elkamohammad1988/marsa-web/actions/workflows/ci.yml/badge.svg)](https://github.com/elkamohammad1988/marsa-web/actions/workflows/ci.yml)
+
 **One account for every currency you get paid in.** Marsa is a multi-currency
 account concept for cross-border businesses and freelancers — get paid by
 marketplaces and clients abroad, hold 30+ currencies, convert at the interbank
 rate, and pay out over SEPA, without a second bank in the middle.
 
 This repository is the **marketing site + lead-capture backend + an interactive
-product demo**, built to a production bar (Lighthouse 100s, 0 axe violations,
-94 passing tests). It is deliberately honest about what is real software versus
-a labelled sandbox — see [What's real vs simulated](#whats-real-vs-simulated).
+product demo**, built to a production bar: Lighthouse 100s, 0 axe violations,
+and a typecheck → lint → unit-test → build gate that runs on every push and
+every pull request. It is deliberately honest about what is real software
+versus a labelled sandbox — see
+[What's real vs simulated](#whats-real-vs-simulated).
 
 ![Marsa home — black rose theme](portfolio-screenshots/br-home.png)
 
@@ -81,6 +85,14 @@ Design principle throughout: **provider selection by environment**. With zero
 config the app runs on file storage and logs; set `SUPABASE_URL` etc. and the
 same interfaces switch to Postgres. See `.env.example`.
 
+**The JSONL file store is a development convenience, never a production
+path.** It exists so `npm run dev` needs no credentials. It reads and sorts the
+whole dataset per request, it is invisible to any other instance, and a
+serverless filesystem is read-only or ephemeral — so `createStore()` refuses to
+build it when `NODE_ENV=production` and names the variables that are missing
+instead. Losing a lead silently is the failure mode that rule exists to make
+impossible.
+
 ## Run / test / verify
 
 ```bash
@@ -90,13 +102,16 @@ npm run dev            # http://localhost:3000
 # Production
 npm run build && npm start
 
-# Verification gate (all must be clean)
-npm test               # Vitest — 94 tests
-npx tsc --noEmit       # types — zero errors, zero `any`
-npx next lint          # ESLint — zero warnings
-npx next build         # production build
-npm audit --omit=dev   # 0 vulnerabilities
+# Verification gate — `npm run verify` runs the first four in order
+npm run typecheck      # tsc — zero errors, zero `any`
+npm run lint           # ESLint — zero warnings
+npm test               # Vitest
+npm run build          # production build
+npm audit --omit=dev   # 0 vulnerabilities in the shipped tree
 ```
+
+The same five steps are the CI job (`.github/workflows/ci.yml`), so the badge
+above is the live answer to "does this gate pass", not a claim in prose.
 
 Optional production wiring (all in `.env.example`): `SUPABASE_URL` +
 `SUPABASE_SERVICE_ROLE_KEY` (run `npm run db:migrate` once), `RESEND_API_KEY` +
@@ -106,7 +121,9 @@ loudly in production rather than degrading in silence.
 
 ## Verified quality
 
-Measured on the production build (see [CASE-STUDY.md](CASE-STUDY.md) for method):
+A point-in-time measurement on the production build, last taken **2026-07-26**
+(see [CASE-STUDY.md](CASE-STUDY.md) for method). The CI badge above is the
+continuously-true version of the bottom two rows.
 
 | Check | Result |
 |---|---|
@@ -114,8 +131,13 @@ Measured on the production build (see [CASE-STUDY.md](CASE-STUDY.md) for method)
 | Lighthouse `/demo` (desktop) | **100 · 100 · 100 · 100** |
 | axe-core (WCAG 2.0/2.1 A+AA) | **29 routes, 0 violations** — automated crawl of each route in its default state; does not cover states reached only by interaction, including form validation errors after a failed submit |
 | Responsive (375 / 768 / 1440) | No horizontal overflow on any route |
-| Unit tests | **94 / 94 passing** |
-| Types / lint / audit | tsc clean · lint clean · 0 vulnerabilities · zero `any` |
+| Unit tests | **367 / 367 passing**, 24 files |
+| Types / lint / audit | tsc clean · lint clean · 0 vulnerabilities in the production tree · zero `any` |
+
+The dev dependency tree carries known high advisories from the end-of-life
+ESLint 8 chain. They ship to nobody — `npm audit --omit=dev` is 0 — so CI
+audits the production tree and the migration to ESLint 9 is tracked in
+[`PROJECT-PLAN.md`](PROJECT-PLAN.md).
 
 ### Contrast (verified)
 
@@ -129,7 +151,12 @@ normal, ≥ 3:1 large/non-text):
 | `#EE4FA5` on `#0C080B` | 5.97:1 | links, eyebrows, focus rings |
 | `#FFFFFF` on `#CC1F86` | 5.11:1 | button labels |
 | `#7FBF8A` on `#140A10` | 9.0:1 | success / payout amounts |
+| `#E88A8A` on `#140A10` | 7.80:1 | form errors, invalid-IBAN panel |
 | `#CC1F86` on `#0C080B` | 3.89:1 | large key numbers only (≥3 large) |
+
+`tests/contrast.test.ts` recomputes these from `styles/globals.css` on every
+run rather than trusting the table, and asserts that the `red-600` these error
+states used to use *would* have failed.
 
 ## What's real vs simulated
 
@@ -153,6 +180,13 @@ wording is env-gated: the site only asserts an authorisation when a real
 register reference is configured (`lib/legal.ts`), otherwise it describes the
 licensed-partner model.
 
+**Imagery:** the photographs under `public/images/` are unreplaced design
+placeholders — six unique files serving seventeen names — so several `alt`
+strings describe a product shot that is really a stock photo. That is a known
+open finding (F1 in [`AUDIT.md`](AUDIT.md)), blocked on sourcing licensed
+assets rather than on code, and it is listed here rather than quietly left for
+a reader to notice.
+
 ## Roadmap
 
 **Phase B — the actual regulated product (deferred, not built here):**
@@ -162,9 +196,11 @@ double-entry immutable ledger, money movement through a licensed BaaS partner
 not stubbed — half-built auth/ledger would be worse than none. The demo remains a
 labelled sandbox until that exists.
 
-Smaller follow-ups: error tracking (Sentry) + product analytics, CI pipeline,
-component/e2e tests in CI, i18n (Arabic/French for the MENA wedge), image
-optimisation to AVIF/WebP.
+Smaller follow-ups, tracked in [`PROJECT-PLAN.md`](PROJECT-PLAN.md): error
+tracking (Sentry) + product analytics, Playwright smoke tests in CI, data
+retention and erasure tooling, ESLint 9, i18n (Arabic/French for the MENA
+wedge), and real product photography to replace the current placeholder
+imagery.
 
 ## Screenshots
 
