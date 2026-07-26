@@ -255,7 +255,8 @@ since `.dark` is an exact mirror of `:root`.
 **Deliberately not done:** `globals.css` still carries the `.dark` block and
 `layout.tsx` still runs the pre-paint theme script, both now provably dead.
 Not an `AUDIT.md` finding, and the theme script is load-bearing in Batch 5's
-CSP reasoning. Recorded for the re-audit.
+CSP reasoning. Recorded for the re-audit. → **removed in [Batch B](#batch-b--the-dead-theme-system-removed--merged)**,
+which also establishes that the CSP conclusion never depended on that script.
 
 **Evidence:** tsc exit 0 · lint clean · 282 tests / 19 files · build 49 pages.
 
@@ -497,3 +498,53 @@ six unique files behind seventeen names (**F1**, open). A reviewer finding that
 themselves draws a worse conclusion than one told up front.
 
 **Evidence:** tsc exit 0 · lint clean · 370 tests / 25 files · build 49 pages.
+
+---
+
+## Batch B — the dead theme system removed · **MERGED**
+
+**Closes the remainder of F8**, which Batch 6 recorded as deliberately deferred.
+Not otherwise an `AUDIT.md` finding.
+
+`styles/globals.css` carried a `.dark` block declaring all 30 custom properties
+**to the same values as `:root`**, and `app/layout.tsx` ran a pre-paint inline
+script whose only job was to add that class. A closed loop: it could not change
+a rendered colour. `ThemeToggle` — the only thing that would ever have written
+the `theme` key the script read — was deleted in Batch 6; the loop outlived it.
+
+It survived because it looked load-bearing. Batch 5's CSP reasoning is written
+around hashing "the inline theme script", and F2/F8 were partly *caused* by it:
+two error messages kept a failing `red-600` inside `dark:` variants that could
+never match.
+
+**What it actually cost, measured rather than assumed.** The `.dark` block was
+967 source bytes and **6 bytes of shipped CSS** — cssnano saw two identical
+declaration blocks and merged the selectors into `.dark,:root{…}`. Claiming a
+kilobyte of dead CSS would have been wrong. The real cost was the other half:
+**230 bytes of blocking inline script in the `<head>` of all 31 prerendered
+documents**, executed before first paint on every navigation, to add a class
+with no effect.
+
+Also removed: `IconSun` and `IconMoon` (orphaned when `ThemeToggle` went),
+`IconCheck` and `IconArrowRight` (never had a caller), `suppressHydrationWarning`
+on `<html>` — which existed only because the script mutated the class list
+before React hydrated, and which would otherwise hide real mismatches — and the
+duplicate `themeColor` entry naming `#0c080b` under both `prefers-color-scheme`
+media queries.
+
+**Kept deliberately:** `darkMode: "class"` in the Tailwind config, with the
+reason written down. Under the default `"media"` strategy a stray `dark:`
+variant would activate for every visitor whose OS prefers dark — most of them —
+silently applying a value nobody designed against. `"class"` makes such a
+variant inert, which is the belt to `tests/contrast.test.ts`'s brace.
+
+`tests/dead-code.test.ts` guards all three shapes this repository has actually
+grown: a token declared twice (a second palette, real or mirrored),
+`dangerouslySetInnerHTML` or `suppressHydrationWarning` in the document shell,
+and any icon exported without a caller — the last parameterised, so a new icon
+that nothing imports fails by name.
+
+**Evidence:** tsc exit 0 · lint clean · 395 tests / 26 files · build 49 pages.
+Against the generated output: zero `localStorage.getItem('theme')` in any HTML,
+no `.dark` rule in the CSS, `color-scheme: dark` still present, `<html>` clean.
+94 source lines deleted, 16 added.

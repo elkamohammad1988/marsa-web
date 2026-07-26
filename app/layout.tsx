@@ -42,18 +42,16 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * One colour, unconditionally. The site is dark-only, so browser UI should not
+ * be told to expect anything else — the previous two-entry array named the same
+ * `#0c080b` under both `prefers-color-scheme` media queries.
+ */
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0c080b" },
-    { media: "(prefers-color-scheme: dark)", color: "#0c080b" },
-  ],
+  themeColor: "#0c080b",
   width: "device-width",
   initialScale: 1,
 };
-
-// Runs before first paint so the saved (or system) theme is applied with no
-// flash of the wrong colours. Kept dependency-free and inlined in <head>.
-const themeScript = `(function(){try{var t=localStorage.getItem('theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(t!=='light'&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
 export default function RootLayout({
   children,
@@ -61,10 +59,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen bg-canvas antialiased">
         {/* Atmosphere: a fixed, subtle magenta glow behind all content. */}
         <div aria-hidden className="atmosphere-layer" />

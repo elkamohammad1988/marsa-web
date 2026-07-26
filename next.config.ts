@@ -40,13 +40,14 @@ const nextConfig: NextConfig = {
              * from the browser — so 'self' costs nothing.
              *
              * `script-src` keeps 'unsafe-inline', deliberately. The audit
-             * proposed `script-src 'self' 'sha256-<theme-script>'`, but the
-             * theme script is not the only inline script on the page: the App
-             * Router streams its RSC payload as inline
-             * `self.__next_f.push([...])` blocks — 47 of them on the homepage
-             * alone — whose contents differ per page and per build and so
-             * cannot be hashed. A hash-only policy would block every one and
-             * leave the site rendered but dead.
+             * proposed `script-src 'self' 'sha256-<theme-script>'`. That
+             * theme script has since been deleted as dead code, but the
+             * conclusion does not change and is worth restating, because it is
+             * the reason a hash cannot work here at all: the App Router streams
+             * its RSC payload as inline `self.__next_f.push([...])` blocks — 47
+             * of them on the homepage alone — whose contents differ per page and
+             * per build and so cannot be hashed. A hash-only policy would block
+             * every one and leave the site rendered but dead.
              *
              * The only way to a strict script-src here is a per-request nonce
              * set in middleware, which opts all 49 statically generated pages
