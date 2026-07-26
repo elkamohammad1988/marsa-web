@@ -145,6 +145,7 @@ evidence that motivated it.
 |---|---|---|---|
 | A | Documentation truth & admin setup copy | `README.md` claimed 94 tests against 367 and listed CI as unbuilt; `/admin/login` told the operator to set an 8-character password the app rejects | **DONE** |
 | B | The dead theme system removed | A `.dark` block mirroring `:root` value for value, a pre-paint script whose only job was to add that class, and four orphaned icons — closes the half of **F8** Batch 6 deferred | **DONE** |
+| C | Navigation: ARIA, focus, link hygiene | Closes **F10**; also a dropdown no tap could open, `aria-controls` naming nothing, white focus halos from an unnamed ring offset, and two footer shortcuts to one page | **DONE** |
 
 ---
 
@@ -411,17 +412,21 @@ F5 strictly precedes F4: the dates are unparseable display strings until F5.
 
 ---
 
-### Batch 15 — Markup honesty & artifact weight · F10, F9
+### Batch 15 — Markup honesty & artifact weight · F10, F9 · **F10 DONE**
 
-**Branch:** `fix/navbar-aria-and-unused-assets`
+**F10 shipped as Batch C**, which grew past the audit's description — see
+[`PROGRESS.md`](./PROGRESS.md#batch-c--navigation-aria-honesty-focus-and-link-hygiene--merged).
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| Drop `role="menu"` / `role="menuitem"` from the navbar dropdown. The ARIA menu pattern commits to arrow keys, Home/End, type-ahead and focus movement; none is implemented, so screen-reader users are told "menu, 6 items" and find the arrow keys do nothing. A button with `aria-expanded` plus a plain `<ul>` of links describes what the component actually does, and tab navigation already works | F10 | Low | `TODO` |
+| Drop `role="menu"` / `role="menuitem"` from the navbar dropdown. The ARIA menu pattern commits to arrow keys, Home/End, type-ahead and focus movement; none is implemented, so screen-reader users are told "menu, 6 items" and find the arrow keys do nothing. A button with `aria-expanded` plus a plain `<ul>` of links describes what the component actually does, and tab navigation already works | F10 | Low | **DONE** |
 | Delete `hero-blog-2/3/4/5.png` and `hero-blog-list.png` — referenced nowhere, ~630 KB of artifact weight | F9 | Low | `TODO` |
 
 F9 must land **after** F1's replacements are chosen, in case a hero-blog file is
-reused as a distinct blog cover rather than deleted.
+reused as a distinct blog cover rather than deleted. It is the one deletion in
+this programme that is not trivially reversible from the working tree, so it
+waits for [H9](#h9--source-real-product-imagery-f1) rather than being done on
+the grounds that git remembers.
 
 ---
 
