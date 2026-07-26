@@ -12,11 +12,18 @@ const socials = [
   { label: "Marsa on LinkedIn", href: siteConfig.social.linkedin, Icon: IconLinkedIn },
 ];
 
+/**
+ * Four shortcuts, four destinations. This list previously read
+ * "Tariffs · Help · Support · FAQ" with *Help* and *FAQ* both pointing at
+ * `/faq`, and *Tariffs* labelling the page every other surface on the site
+ * calls Pricing — two links to one page and one page under two names, on every
+ * page of the site.
+ */
 const fastLinks = [
-  { label: "Tariffs", href: "/pricing" },
-  { label: "Help", href: "/faq" },
-  { label: "Support", href: "/contact?topic=support" },
+  { label: "Pricing", href: "/pricing" },
   { label: "FAQ", href: "/faq" },
+  { label: "Support", href: "/contact?topic=support" },
+  { label: "Try the demo", href: "/demo" },
 ];
 
 export function Footer() {

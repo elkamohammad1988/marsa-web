@@ -548,3 +548,67 @@ that nothing imports fails by name.
 Against the generated output: zero `localStorage.getItem('theme')` in any HTML,
 no `.dark` rule in the CSS, `color-scheme: dark` still present, `<html>` clean.
 94 source lines deleted, 16 added.
+
+---
+
+## Batch C — navigation: ARIA honesty, focus, and link hygiene · **MERGED**
+
+**Finding closed:** F10 (Low) · plus four defects found while fixing it
+
+**F10.** The dropdowns declared `role="menu"` with `role="menuitem"` children.
+Those roles are a contract — arrow keys between items, Home/End to the ends,
+type-ahead, focus moving into the menu on open. None was implemented, so a
+screen-reader user was told "menu, 6 items" and then found the arrow keys did
+nothing. `aria-haspopup` went with them; it makes the same promise.
+
+What the component actually is, is a **disclosure**: a button with
+`aria-expanded` revealing a list of links, which Tab already walks correctly.
+That is now what the markup says. Escape closes and returns focus to the
+trigger — the one keyboard affordance a disclosure does owe, and the one that
+was missing.
+
+**Found while fixing it, none in the audit:**
+
+**1. A tap could not open a dropdown.** The panel opened on `mouseEnter` and
+the trigger *toggled* on click. On a touch device a tap synthesises mouseenter
+before click, so the panel opened and immediately closed. The desktop nav is
+reachable from 1024px up, which includes tablets in landscape. Now
+`onPointerEnter`/`onPointerLeave` guarded on `pointerType === "mouse"`, so
+hover-to-open is a mouse affordance and touch gets a clean toggle.
+
+**2. `aria-controls` had nothing to point at.** The panel was
+`{open && <div/>}`, so when collapsed the id named no element. Same defect the
+accordion had in #9, same fix: always render, collapse with the `hidden`
+attribute.
+
+**3. White halos on focus.** Four controls carried `focus-visible:ring-offset-2`
+with no offset colour. Tailwind's default `--tw-ring-offset-color` is
+**white**, so keyboard focus painted a white ring around a control on a
+near-black navbar. Three more — the desktop "Log In" link, the mobile toggle,
+every mobile link — had no focus style at all and fell back to the UA outline.
+All seven now share one `FOCUS_RING` constant.
+
+**4. `<details open>` with no `onToggle`.** Added while making the mobile
+section containing the current page open by default. React resets a controlled
+`open` on the next render, which would have collapsed the section under the
+reader's finger. Made genuinely controlled instead.
+
+Also: `aria-current="page"` on the active link in both navs, `aria-label="Main"`
+on the `<nav>`, an accurate "Open menu"/"Close menu" label on the mobile toggle
+in place of the state-free "Toggle menu", and decorative chevrons marked
+`aria-hidden`.
+
+**Footer.** The four "Fast links" were *Tariffs · Help · Support · FAQ* — with
+Help and FAQ both pointing at `/faq`, and Tariffs labelling the page every
+other surface calls Pricing. Two links to one page and one page under two
+names, on every page of the site. Now four shortcuts to four destinations.
+
+**Evidence, against the generated HTML** (`.next/server/app/pricing.html`):
+0 `role="menu"`, 0 `role="menuitem"`, 0 `aria-haspopup`; 9 `aria-expanded` and
+**9 `aria-controls`, all nine resolving to an element that exists**; 5 panels
+rendered-and-hidden, still carrying their links; 2 `aria-current="page"`.
+tsc exit 0 · lint clean · 403 tests / 27 files · build 49 pages.
+
+`tests/navigation.test.ts` strips comments before scanning, because these files
+now *explain* the roles they no longer use and a naive grep would count the
+explanation as the offence.
