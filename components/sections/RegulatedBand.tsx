@@ -4,35 +4,44 @@ import { Heading } from "@/components/ui/Heading";
 import { FeatureIcon } from "@/components/ui/FeatureIcon";
 import { IconShield, IconBank, IconLock } from "@/components/icons";
 
+/**
+ * The regulatory model, stated as a model.
+ *
+ * This band renders on nine pages and used to read "Regulated And
+ * Safeguarded — Marsa is built on regulated financial infrastructure, under EU
+ * and UK supervision". There is no institution, no supervision and no
+ * infrastructure. Describing the architecture a real product would need is
+ * both true and more interesting than asserting compliance nobody holds.
+ */
 export function RegulatedBand() {
   const items = [
     {
       icon: <IconShield />,
       title: "Licensed Rails",
       description:
-        "Accounts and payments run on licensed partner institutions supervised in the EU and UK.",
+        "A product like this does not hold a banking licence. It runs on partner institutions that do, in each market it serves.",
     },
     {
       icon: <IconBank />,
       title: "Segregated Accounts",
       description:
-        "Your balance sits in safeguarding accounts at partner banks — never mixed with ours.",
+        "Customer balances sit in safeguarding accounts at those partners, never mixed with the operator's own funds.",
     },
     {
       icon: <IconLock />,
       title: "Screened Every Time",
       description:
-        "KYC, sanctions and transaction monitoring run on every onboarding and every payment.",
+        "KYC, sanctions and transaction monitoring on every onboarding and every payment — the part that decides whether a product is shippable.",
     },
   ];
   return (
     <Section tone="white" size="md">
       <Container>
         <div className="mx-auto max-w-3xl text-center">
-          <Heading level="h2">Regulated And Safeguarded</Heading>
+          <Heading level="h2">The Model Behind It</Heading>
           <p className="mt-3 text-ink-muted">
-            Marsa is built on regulated financial infrastructure, under EU and UK supervision, so
-            your money stays protected end to end.
+            Marsa is a concept, so it holds no authorisation of its own. This is the regulatory
+            structure the product it describes would be built on.
           </p>
         </div>
         <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">

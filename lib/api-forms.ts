@@ -15,7 +15,9 @@ import type { ValidationResult } from "@/lib/validation";
  */
 const STORAGE_ERROR_MESSAGE =
   `We could not save your details just now, so nothing has been recorded. ` +
-  `Please try again in a moment — or email ${siteConfig.email.support} and we will pick it up from there.`;
+  (siteConfig.email.support
+    ? `Please try again in a moment — or email ${siteConfig.email.support} and we will pick it up from there.`
+    : `Please try again in a moment.`);
 
 /**
  * Shared handler for the form-submission endpoints. Applies rate limiting, a

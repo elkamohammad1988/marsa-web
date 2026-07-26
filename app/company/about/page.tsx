@@ -17,7 +17,7 @@ export const metadata: Metadata = buildMetadata({
 
 const values = [
   { icon: <IconGlobe />, title: "Borderless by default", text: "Money should move as freely as the people and businesses who use it." },
-  { icon: <IconShield />, title: "Trust is earned", text: "We operate under strict regulation and safeguard every customer's funds." },
+  { icon: <IconShield />, title: "Trust is earned", text: "A money product earns trust by being explicit about what it is — including when it is a concept." },
   { icon: <IconLightning />, title: "Speed with substance", text: "Fast onboarding and instant payments, backed by real compliance." },
   { icon: <IconUsers />, title: "Customer-obsessed", text: "Every decision starts with the person on the other side of the screen." },
 ];

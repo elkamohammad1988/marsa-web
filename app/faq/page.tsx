@@ -64,7 +64,7 @@ const feesSecurity = [
   {
     question: "Is my money safe?",
     answer:
-      "Marsa runs on regulated partner institutions. Customer funds are safeguarded in segregated accounts at those partners, separate from Marsa's own funds, so they stay protected even in the unlikely event of our insolvency.",
+      "Marsa is a concept build — it holds no money and has no customers. In the product it describes, funds would be safeguarded in segregated accounts at regulated partner institutions, separate from the operator's own funds.",
   },
   {
     question: "How is my account protected?",

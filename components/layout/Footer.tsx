@@ -6,11 +6,16 @@ import { regulatoryDisclosure } from "@/lib/legal";
 import { NewsletterForm } from "@/components/forms/NewsletterForm";
 import { IconLinkedIn, IconYouTube, IconX } from "@/components/icons";
 
+/**
+ * Only profiles that are configured. These defaulted to `x.com/marsamoney`
+ * and friends — accounts nobody owns, linked from every page and asserted in
+ * `Organization.sameAs`.
+ */
 const socials = [
   { label: "Marsa on X", href: siteConfig.social.x, Icon: IconX },
   { label: "Marsa on YouTube", href: siteConfig.social.youtube, Icon: IconYouTube },
   { label: "Marsa on LinkedIn", href: siteConfig.social.linkedin, Icon: IconLinkedIn },
-];
+].filter((s) => s.href);
 
 /**
  * Four shortcuts, four destinations. This list previously read

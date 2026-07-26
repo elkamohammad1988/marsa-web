@@ -72,7 +72,9 @@ export default function TermsPage() {
         {
           heading: "Contact",
           paragraphs: [
-            `Questions about these terms can be sent to ${siteConfig.email.support}.`,
+            siteConfig.email.support
+              ? `Questions about these terms can be sent to ${siteConfig.email.support}.`
+              : "These terms are an illustration of what a real product would need to publish. There is no service to contract with and no operator to contact.",
           ],
         },
       ]}

@@ -13,6 +13,12 @@ export const metadata: Metadata = buildMetadata({
   path: "/contact",
 });
 
+/** Only addresses that are actually configured. */
+const mailboxes = [
+  { label: "Sales", address: siteConfig.email.sales },
+  { label: "Support", address: siteConfig.email.support },
+].filter((m) => m.address);
+
 const highlights = [
   { icon: <IconClock />, title: "Fast replies", text: "We answer every enquiry within one business day." },
   { icon: <IconGlobe />, title: "Global support", text: "Assistance across EU, UK and 180+ countries." },
@@ -54,17 +60,25 @@ export default async function ContactPage({
               ))}
             </ul>
 
-            <div className="mt-8 rounded-card border border-line bg-card p-5 text-sm">
-              <div className="font-semibold text-ink">Prefer email?</div>
-              <div className="mt-2 flex flex-col gap-1 text-ink-muted">
-                <a href={`mailto:${siteConfig.email.sales}`} className="hover:text-brand-strong">
-                  Sales — {siteConfig.email.sales}
-                </a>
-                <a href={`mailto:${siteConfig.email.support}`} className="hover:text-brand-strong">
-                  Support — {siteConfig.email.support}
-                </a>
+            {/* Rendered only when a real address is configured. This block
+                used to offer sales@ and support@marsa.money — a domain nobody
+                owns, so both were invitations to write into a void. */}
+            {mailboxes.length > 0 && (
+              <div className="mt-8 rounded-card border border-line bg-card p-5 text-sm">
+                <div className="font-semibold text-ink">Prefer email?</div>
+                <div className="mt-2 flex flex-col gap-1 text-ink-muted">
+                  {mailboxes.map(({ label, address }) => (
+                    <a
+                      key={label}
+                      href={`mailto:${address}`}
+                      className="rounded-sm hover:text-brand-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+                    >
+                      {label} — {address}
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <ContactForm defaultTopic={defaultTopic} />

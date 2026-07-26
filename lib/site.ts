@@ -24,16 +24,30 @@ export const siteConfig = {
    * fall back to the on-site onboarding flow so the link is never dead.
    */
   appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "/get-started",
+  /**
+   * Contact addresses, configured or absent — never invented.
+   *
+   * These defaulted to `support@`, `sales@` and `press@marsa.money`, rendered
+   * as live `mailto:` links on the contact page and emitted in
+   * `Organization.contactPoint`. That domain is not owned, so every one of
+   * them was an invitation to write to a mailbox that does not exist. Set the
+   * environment variables to publish a real address; leave them unset and the
+   * site stops offering one.
+   */
   email: {
-    support: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@marsa.money",
-    sales: process.env.NEXT_PUBLIC_SALES_EMAIL ?? "sales@marsa.money",
-    press: process.env.NEXT_PUBLIC_PRESS_EMAIL ?? "press@marsa.money",
+    support: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "",
+    sales: process.env.NEXT_PUBLIC_SALES_EMAIL ?? "",
+    press: process.env.NEXT_PUBLIC_PRESS_EMAIL ?? "",
   },
+  /**
+   * Same rule. These defaulted to `x.com/marsamoney` and friends and were
+   * emitted in `Organization.sameAs`, which is a machine-readable claim to own
+   * those profiles.
+   */
   social: {
-    x: process.env.NEXT_PUBLIC_SOCIAL_X ?? "https://x.com/marsamoney",
-    youtube: process.env.NEXT_PUBLIC_SOCIAL_YOUTUBE ?? "https://www.youtube.com/@marsamoney",
-    linkedin:
-      process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN ?? "https://www.linkedin.com/company/marsamoney",
+    x: process.env.NEXT_PUBLIC_SOCIAL_X ?? "",
+    youtube: process.env.NEXT_PUBLIC_SOCIAL_YOUTUBE ?? "",
+    linkedin: process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN ?? "",
   },
   /**
    * Regulatory reference shown in the footer / legal pages.
