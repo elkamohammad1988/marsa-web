@@ -8,6 +8,23 @@ export function organizationSchema() {
     siteConfig.social.linkedin,
   ].filter(Boolean);
 
+  /**
+   * One entry per address that is actually configured — and nothing at all when
+   * none is.
+   *
+   * This block is what a knowledge panel reads, so an organisation claiming a
+   * support channel it does not staff is worse than one claiming none. The
+   * earlier version listed customer-support and sales unconditionally, which
+   * against the current defaults would have published two `ContactPoint` nodes
+   * whose `email` was the empty string.
+   */
+  const contactPoint = [
+    { contactType: "customer support", email: siteConfig.email.support },
+    { contactType: "sales", email: siteConfig.email.sales },
+  ]
+    .filter((c) => c.email)
+    .map((c) => ({ "@type": "ContactPoint", ...c, availableLanguage: ["English"] }));
+
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -15,10 +32,12 @@ export function organizationSchema() {
     legalName: siteConfig.legalName,
     url: siteConfig.url,
     logo: absoluteUrl("/icon.svg"),
+    description: siteConfig.description,
     // Emitted only when configured. `sameAs` is a machine-readable claim to
     // own a profile, and `email` an invitation to write to a mailbox — both
     // previously defaulted to a domain nobody holds.
     ...(siteConfig.email.support ? { email: siteConfig.email.support } : {}),
+    ...(contactPoint.length ? { contactPoint } : {}),
     ...(sameAs.length ? { sameAs } : {}),
   };
 }
@@ -45,15 +64,29 @@ export function faqSchema(items: { question: string; answer: string }[]) {
   };
 }
 
-export function breadcrumbSchema(items: { name: string; path: string }[]) {
+/**
+ * A `BreadcrumbList` for a trail that may include labels which are not pages.
+ *
+ * The site's visual breadcrumbs contain grouping labels — "Business",
+ * "Legal" — that no route serves. Schema.org requires `item` on every entry
+ * except the last, so emitting those as list elements produces a breadcrumb
+ * claiming URLs that do not exist. They are dropped from the structured data
+ * and left in the visual trail, where they are doing a different job.
+ *
+ * The final entry keeps its name with no `item`, which is the documented way
+ * to say "and this is the page you are on".
+ */
+export function breadcrumbSchema(items: { name: string; path?: string }[]) {
+  const listed = items.filter((item, i) => item.path || i === items.length - 1);
+
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: items.map((item, i) => ({
+    itemListElement: listed.map((item, i) => ({
       "@type": "ListItem",
       position: i + 1,
       name: item.name,
-      item: absoluteUrl(item.path),
+      ...(item.path ? { item: absoluteUrl(item.path) } : {}),
     })),
   };
 }
@@ -68,6 +101,14 @@ export function blogPostingSchema(post: BlogPost) {
     // markup, which a crawler fetching an image URL cannot render.
     image: absoluteUrl(postSocialImage(post.slug)),
     datePublished: post.date,
+    /**
+     * Equal to `datePublished` because nothing here has been revised since it
+     * was written. Google treats a missing `dateModified` as unknown and a
+     * *fabricated* one as a freshness signal, so the honest value is the
+     * publication date rather than the build time — which would tell every
+     * crawl that all six posts were rewritten this morning.
+     */
+    dateModified: post.date,
     articleSection: post.category,
     url: absoluteUrl(`/blog/${post.slug}`),
     author: { "@type": "Organization", name: siteConfig.name },

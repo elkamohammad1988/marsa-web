@@ -30,6 +30,7 @@ export async function generateMetadata({
     path: `/blog/${post.slug}`,
     image: postSocialImage(post.slug),
     type: "article",
+    publishedTime: post.date,
   });
 }
 
