@@ -12,7 +12,7 @@ production `npm audit` on every push to `main` and every pull request.
 Everything else in the audit — **S1–S10, B1–B10, F1–F10, P3–P9** — is tracked
 below. 37 findings, 19 batches.
 
-Last updated: 2026-07-25. **9 PRs merged, 16 findings closed.** See [`PROGRESS.md`](./PROGRESS.md).
+Last updated: 2026-07-26. **14 PRs merged, 25 findings closed.** See [`PROGRESS.md`](./PROGRESS.md).
 
 ---
 
@@ -119,22 +119,31 @@ Batch 16 and cannot start until assets exist.
 | 0 | Submissions are never silently lost | B1 | **DONE** ([#1](https://github.com/elkamohammad1988/marsa-web/pull/1)) |
 | 1 | Test the security boundary | P5a | **DONE** ([#3](https://github.com/elkamohammad1988/marsa-web/pull/3)) |
 | 2 | Public endpoint exposure & abuse limits | S2, S6, S4* | **DONE** ([#4](https://github.com/elkamohammad1988/marsa-web/pull/4)) |
-| 3 | Admin authentication boundary | S1, S5, S9 | **BLOCKED-ON-ME** ([H17](#h17--approve-the-admin-authentication-batch-s1-s5-s9)) |
+| 3 | Admin authentication boundary | S1, S5, S9 | **DONE** ([#11](https://github.com/elkamohammad1988/marsa-web/pull/11)) |
 | 4 | Small security & privacy corrections | S8, S10, S7 | **DONE** ([#5](https://github.com/elkamohammad1988/marsa-web/pull/5)) |
 | 5 | Content-Security-Policy | S3 | **DONE** ([#6](https://github.com/elkamohammad1988/marsa-web/pull/6)) |
 | 6 | Accessible error states | F2, F3, F8 | **DONE** ([#7](https://github.com/elkamohammad1988/marsa-web/pull/7)) |
 | 7 | Fail loudly on misconfiguration | B8 | **DONE** ([#8](https://github.com/elkamohammad1988/marsa-web/pull/8)) |
-| 8 | Migration infrastructure | P4 | `TODO` |
-| 9 | Database correctness & round trips | B7, B3, B4 | `TODO` (code only; applying = [H4](#h4--apply-pending-database-migrations-p4-b3-b4-b7)) |
+| 8 | Migration infrastructure | P4 | **DONE** ([#14](https://github.com/elkamohammad1988/marsa-web/pull/14)) |
+| 9 | Database correctness & round trips | B7, B3, B4 | **DONE** ([#14](https://github.com/elkamohammad1988/marsa-web/pull/14)) — applying = [H3](#h3--apply-the-database-migrations--not-yet-done) |
 | 10 | Observability | B2, P3 | `TODO` |
 | 11 | Retention & erasure | B10, P9 | `TODO` (period = [H12](#h12--decide-data-retention-periods-b10)) |
 | 12 | Storage internals | B6, B5, B9 | `TODO` |
 | 13 | End-to-end smoke tests | P5b | `TODO` |
 | 14 | Blog dates, ordering & structured data | F5, F4, F6 | **DONE** ([#9](https://github.com/elkamohammad1988/marsa-web/pull/9)) |
-| 15 | Markup honesty & artifact weight | F10, F9 | `TODO` |
-| 16 | Imagery & cookie banner | F1, F7 | **BLOCKED-ON-ME** |
+| 15 | Markup honesty & artifact weight | F10, F9 | `TODO` (F9 gated on [H9](#h9--source-real-product-imagery-f1)) |
+| 16 | Imagery & cookie banner | F1, F7 | F7 **DONE** ([#13](https://github.com/elkamohammad1988/marsa-web/pull/13)); F1 **BLOCKED-ON-ME** ([H9](#h9--source-real-product-imagery-f1)) |
 | 17 | ESLint 9 migration | P6 | `TODO` |
 | 18 | Operational documentation | P7, P8 | `TODO` |
+
+**Outside the original backlog.** The audit is one dated snapshot, not a
+permanent ceiling. Work found by re-reading the repository afterwards is
+tracked the same way and recorded in [`PROGRESS.md`](./PROGRESS.md) with the
+evidence that motivated it.
+
+| # | Batch | Scope | Status |
+|---|---|---|---|
+| A | Documentation truth & admin setup copy | `README.md` claimed 94 tests against 367 and listed CI as unbuilt; `/admin/login` told the operator to set an 8-character password the app rejects | **DONE** |
 
 ---
 
@@ -198,16 +207,16 @@ ever see the sanitised response. H6 is written to account for that.
 
 ---
 
-### Batch 3 — Admin authentication boundary · S1, S5, S9
+### Batch 3 — Admin authentication boundary · S1, S5, S9 · **DONE**
 
-**Branch:** `security/admin-auth-boundary`
+**PR:** [#11](https://github.com/elkamohammad1988/marsa-web/pull/11) · merged as `42a4a2a` · approved under H17
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| Admin login moves from in-memory `rateLimit` to `rateLimitShared` (5 per 15 min), plus a persisted failure counter with exponential backoff keyed on IP *and* a global counter. `rateLimitShared` already degrades to in-memory on RPC failure, so the "must work when the DB is broken" property the current comment defends is preserved | S1 | High | `TODO` |
-| Minimum admin password length 8 → 16 | S1 | High | `TODO` |
-| `middleware.ts` with `matcher: ['/admin/:path*', '/api/admin/:path*']` verifying the session cookie signature — converts deny-by-omission into deny-by-default. In-route `isAdminRequest()` checks stay as defence in depth | S5 | Medium | `TODO` |
-| Reject `POST /api/admin/logout` when `Sec-Fetch-Site` is `cross-site`, or when `Origin` mismatches the request host | S9 | Low | `TODO` |
+| Admin login moves from in-memory `rateLimit` to `rateLimitShared` (5 per 15 min), plus a persisted failure counter with exponential backoff keyed on IP *and* a global counter. `rateLimitShared` already degrades to in-memory on RPC failure, so the "must work when the DB is broken" property the current comment defends is preserved | S1 | High | `DONE` |
+| Minimum admin password length 8 → 16 | S1 | High | `DONE` |
+| `middleware.ts` with `matcher: ['/admin/:path*', '/api/admin/:path*']` verifying the session cookie signature — converts deny-by-omission into deny-by-default. In-route `isAdminRequest()` checks stay as defence in depth | S5 | Medium | `DONE` |
+| Reject `POST /api/admin/logout` when `Sec-Fetch-Site` is `cross-site`, or when `Origin` mismatches the request host | S9 | Low | `DONE` |
 
 **Note:** raising the password floor to 16 will lock the admin area out if the
 configured `ADMIN_PASSWORD` is shorter. [H8](#h8--deploy-time-environment-variables-b1-b8-p7)
@@ -283,15 +292,19 @@ submission; this stops the deploy reaching production in that state at all.
 
 ---
 
-### Batch 8 — Migration infrastructure · P4
+### Batch 8 — Migration infrastructure · P4 · **DONE**
 
-**Branch:** `chore/db-migrations`
+**PR:** [#14](https://github.com/elkamohammad1988/marsa-web/pull/14) · merged as `e5fd2e3`
+
+The apply procedure lives in [`db/README.md`](./db/README.md) rather than a new
+`docs/` directory: it is a page about the migration files, and it belongs next
+to them.
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| `db/migrations/NNN_description.sql` plus a `schema_migrations` table recording what has been applied where; `db/schema.sql` becomes `001_initial_schema.sql` | P4 | High | `TODO` |
-| A documented apply procedure, and a runner script that is safe to re-run | P4 | High | `TODO` |
-| Document the backup and restore procedure in `docs/` | P4 | High | `TODO` |
+| `db/migrations/NNN_description.sql` plus a `schema_migrations` table recording what has been applied where; `db/schema.sql` becomes `001_initial_schema.sql` | P4 | High | `DONE` |
+| A documented apply procedure, and a runner script that is safe to re-run | P4 | High | `DONE` |
+| Document the backup and restore procedure in `docs/` | P4 | High | `DONE` |
 
 Backups themselves are dashboard work — [H5](#h5--enable-point-in-time-recovery-and-test-one-restore-p4).
 The audit's point stands and is worth repeating in the plan: *an untested backup
@@ -299,19 +312,22 @@ is a hypothesis*.
 
 ---
 
-### Batch 9 — Database correctness & round trips · B7, B3, B4
+### Batch 9 — Database correctness & round trips · B7, B3, B4 · **DONE**
 
-**Branch:** `fix/database-aggregation` · **Depends on Batch 8**
+**PR:** [#14](https://github.com/elkamohammad1988/marsa-web/pull/14) · merged as `e5fd2e3`, together with Batch 8
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| `create index rate_limit_hits_window_idx on public.rate_limit_hits (window_start)` — the purge predicate cannot use the `(key, window_start)` primary key, so it is a sequential scan taking row locks, on 1% of form submissions, while a user waits | B7 | Medium | `TODO` |
-| Move the purge out of the request path (`pg_cron`, or a scheduled route) | B7 | Medium | `TODO` |
-| Funnel aggregation moves into Postgres — `select step, count(distinct session_id) … group by step` behind an RPC. Today it pulls up to 20,000 rows per page view and truncates *silently*; past 20,000 events it keeps the most recent rows, drops early sessions' `start` events while keeping their later steps, and `completionRate` can exceed 100% | B3 | Medium | `TODO` |
-| Single `submission_stats()` function replacing five HTTP round trips per admin render | B4 | Medium | `TODO` |
+| `create index rate_limit_hits_window_idx on public.rate_limit_hits (window_start)` — the purge predicate cannot use the `(key, window_start)` primary key, so it is a sequential scan taking row locks, on 1% of form submissions, while a user waits | B7 | Medium | `DONE` |
+| Move the purge out of the request path (`pg_cron`, or a scheduled route) | B7 | Medium | `DONE` |
+| Funnel aggregation moves into Postgres — `select step, count(distinct session_id) … group by step` behind an RPC. Today it pulls up to 20,000 rows per page view and truncates *silently*; past 20,000 events it keeps the most recent rows, drops early sessions' `start` events while keeping their later steps, and `completionRate` can exceed 100% | B3 | Medium | `DONE` |
+| Single `submission_stats()` function replacing five HTTP round trips per admin render | B4 | Medium | `DONE` |
 
-Each ships as a numbered migration. Applying them to the live database is
-[H4](#h4--apply-pending-database-migrations-p4-b3-b4-b7).
+Each shipped as a numbered migration. **Both call sites fall back to the old
+implementation when the function is absent**, so merging this could not break
+the admin dashboard while the migrations were still pending — which they still
+are. Applying them to the live database is
+[H3](#h3--apply-the-database-migrations--not-yet-done).
 
 ---
 
@@ -408,21 +424,26 @@ reused as a distinct blog cover rather than deleted.
 
 ---
 
-### Batch 16 — Imagery & cookie banner · F1, F7 · **BLOCKED-ON-ME**
+### Batch 16 — Imagery & cookie banner · F1, F7 · **F7 DONE · F1 BLOCKED-ON-ME**
 
-**Branch:** `fix/real-imagery`
+**Branch:** `fix/real-imagery` (F1) · F7 shipped in [#13](https://github.com/elkamohammad1988/marsa-web/pull/13)
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
 | Replace `coin-blue`, `coin-gold`, `card-phone`, `phone-apps`, `phone-home`, `cards-stack` with real product imagery — 17 files currently have 6 unique hashes | F1 | High | **BLOCKED-ON-ME** ([H9](#h9--source-real-product-imagery-f1)) |
 | Give each blog post a distinct cover — `blog-2.png` and `blog-4.png` are the same bytes | F1 | High | **BLOCKED-ON-ME** ([H9](#h9--source-real-product-imagery-f1)) |
 | Correct every `alt` to describe what is actually rendered — `card-phone.png` is served as `alt="Marsa Mastercard and mobile app"` and is a blog photograph. This is a WCAG 1.1.1 failure: a screen-reader user is told something untrue | F1 | High | `TODO` (unblocks with the assets) |
-| Cookie banner: wire consent to the telemetry and reword the copy accurately, or remove it and state the position on `/legal/cookies` | F7 | Medium | **BLOCKED-ON-ME** ([H10](#h10--decide-the-cookie-banners-fate-f7)) |
+| Cookie banner: removed, because the one cookie the site sets is strictly necessary and exempt | F7 | Medium | **DONE** ([#13](https://github.com/elkamohammad1988/marsa-web/pull/13)) |
 
-Both halves need human judgement that cannot be substituted: whether an image
-looks right, and what the site should claim about tracking. Procurement should
-start now ([H9](#h9--source-real-product-imagery-f1)) and run in parallel with
-Batches 1–15.
+F1 needs judgement that cannot be substituted — whether an image looks right —
+so procurement ([H9](#h9--source-real-product-imagery-f1)) is now the single
+open **High** in the whole backlog. Until it lands, `README.md` states the
+placeholder situation plainly rather than leaving a reviewer to find it.
+
+`lib/consent.ts` and the `DemoFlow` consent check survive the banner's removal
+on purpose: nothing writes that value today, but deleting the mechanism while
+[H18](#h18--approve-corrected-cookie-policy-copy-f7)'s copy is still under
+review would be the wrong order.
 
 ---
 
@@ -474,20 +495,20 @@ to launch — they are not blockers for any batch.
 |---|---|---|---|
 | ~~H1~~ | ~~Authenticate the GitHub CLI~~ | — | **RESOLVED** |
 | [H2](#h2--rotate-the-supabase-secret-key) | Rotate the Supabase secret key | security hygiene | Now |
-| [H3](#h3--apply-the-database-migrations--not-yet-done) | **Apply the database migrations** (verified: 0 of 3 applied) | Batches 2, 3, 9 | **Now** |
-| [H4](#h4--apply-pending-database-migrations-p4-b3-b4-b7) | Apply pending migrations | Batch 9 | When Batch 9 lands |
+| [H3](#h3--apply-the-database-migrations--not-yet-done) | **Apply the database migrations** (verified: 0 of 3 applied) | storage, shared rate limiting, funnel & admin aggregation | **Now** |
+| ~~H4~~ | ~~Apply pending migrations once Batch 9 lands~~ — folded into H3, which now covers all three files | — | **RESOLVED** |
 | [H5](#h5--enable-point-in-time-recovery-and-test-one-restore-p4) | Enable PITR and test one restore | P4 | Before launch |
 | [H6](#h6--point-an-uptime-monitor-at-apihealth-p3) | Uptime monitor on `/api/health` | P3 | **deploy-time** |
 | [H7](#h7--create-an-error-tracking-project-and-supply-the-dsn-b2) | Error-tracking DSN | B2 | Before Batch 10 |
 | [H8](#h8--deploy-time-environment-variables-b1-b8-p7) | Deploy-time environment variables | B1, B8, P7 | **deploy-time** |
-| [H9](#h9--source-real-product-imagery-f1) | Source real product imagery | F1, F9 | Start now, runs parallel |
-| [H10](#h10--decide-the-cookie-banners-fate-f7) | Decide the cookie banner's fate | F7 | Before Batch 16 |
+| [H9](#h9--source-real-product-imagery-f1) | **Source real product imagery** | F1, F9 | **The one open High** |
+| ~~H10~~ | ~~Decide the cookie banner's fate~~ — you chose **A**, removed in [#13](https://github.com/elkamohammad1988/marsa-web/pull/13) | F7 | **RESOLVED** |
 | [H11](#h11--enable-branch-protection-on-main) | Branch protection on `main` | process | Now |
 | [H12](#h12--decide-data-retention-periods-b10) | Decide data retention periods | B10 | Before Batch 11 |
 | [H13](#h13--deploy-time-connect-the-host-to-the-repository) | Connect the host to the repository | deploy provenance | **deploy-time** |
-| [H14](#h14--decide-whether-demostats-should-exist) | Decide `/demo/stats`' fate | S4 | Before Batch 2 |
+| ~~H14~~ | ~~Decide `/demo/stats`' fate~~ — you chose **B**, deleted in [#12](https://github.com/elkamohammad1988/marsa-web/pull/12) | S4 | **RESOLVED** |
 | [H15](#h15--verify-a-resend-sender-domain) | Verify a Resend sender | notifications | Before launch |
-| [H17](#h17--approve-the-admin-authentication-batch-s1-s5-s9) | **Approve the admin auth batch** | **Batch 3 (S1, High)** | **Now** |
+| ~~H17~~ | ~~Approve the admin auth batch~~ — approved, shipped in [#11](https://github.com/elkamohammad1988/marsa-web/pull/11) | Batch 3 | **RESOLVED** |
 | [H18](#h18--approve-corrected-cookie-policy-copy-f7) | **Approve corrected cookie-policy copy** | F7 | **Now** |
 | [H16](#h16--review-and-merge-each-pr) | Review each merged PR | oversight | Ongoing |
 
@@ -587,19 +608,14 @@ request — see the last section of `db/README.md`.
 ---
 
 <a id="h4--apply-pending-database-migrations-p4-b3-b4-b7"></a>
-### H4 — Apply pending database migrations · P4, B3, B4, B7
+### ~~H4 — Apply pending database migrations~~ · **RESOLVED into H3**
 
-Batches 8 and 9 add numbered migrations under `db/migrations/`. Once merged:
-
-1. `git pull` on `main`.
-2. `ls db/migrations/` — note the numbered files.
-3. **supabase.com/dashboard** → your project → **SQL Editor** → **+ New query**.
-4. Run `select * from schema_migrations order by version;` to see what is applied.
-5. For each migration file **not** in that result, in ascending numeric order:
-   paste its full contents, click **Run**, confirm success before moving to the next.
-6. Re-run the query from step 4 and confirm every file is now listed.
-
-Do not skip or reorder. Each migration assumes its predecessors have run.
+Written when Batches 8 and 9 were still unbuilt, on the assumption their
+migrations would arrive after 001 had already been applied. Both shipped in
+[#14](https://github.com/elkamohammad1988/marsa-web/pull/14) while **zero**
+migrations had been applied, so there is one job, not two:
+[H3](#h3--apply-the-database-migrations--not-yet-done) now covers all three
+files in order. Follow that; ignore this.
 
 ---
 
