@@ -12,39 +12,34 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "Compliance & Regulation",
   description:
-    "How Marsa is regulated and how we safeguard your funds. Details on our EMI authorisation, AML/KYC obligations, safeguarding, and how to make a complaint.",
+    "The regulatory model this concept assumes: how an e-money institution is authorised, how safeguarding differs from deposit protection, and what onboarding would involve.",
   path: "/company/compliance",
 });
 
 const sections = [
   {
-    heading: "Regulatory authorisation",
+    heading: "Regulatory standing",
     body: [regulatoryDisclosure()],
   },
   {
-    heading: "Safeguarding of funds",
+    heading: "How safeguarding would work",
     body: [
-      "100% of customer funds are safeguarded. Money you hold with Marsa is kept in segregated safeguarding accounts at regulated partner institutions, separate from Marsa's own operating funds, in line with applicable safeguarding requirements.",
-      "Electronic money is not a bank deposit. It is not covered by the Financial Services Compensation Scheme or equivalent deposit-guarantee schemes. Instead, safeguarding is designed to ensure that, in the unlikely event of our insolvency, customer funds are protected and can be returned.",
+      "An e-money institution does not lend customer funds. It holds them in segregated safeguarding accounts at partner banks, separate from its own operating money, so that the balance is protected if the institution itself fails. That is the model this concept assumes.",
+      "Electronic money is not a bank deposit and is not covered by a deposit-guarantee scheme. Safeguarding is a different mechanism with a different failure mode, and any product making this comparison should say so plainly rather than imply equivalence.",
     ],
   },
   {
-    heading: "Anti-money-laundering & KYC",
+    heading: "How onboarding would work",
     body: [
-      "We are committed to preventing financial crime. Before opening an account we verify your identity (Know Your Customer) and, for businesses, your ownership structure. We monitor transactions for suspicious activity and comply with applicable anti-money-laundering (AML), counter-terrorist-financing, and sanctions obligations.",
-      "These checks are a legal requirement and help keep every customer safe. We may request additional information at any time to meet our obligations.",
+      "Before an account could be opened, a real operator would verify identity (Know Your Customer) and, for a business, its ownership structure — then monitor transactions against anti-money-laundering, counter-terrorist-financing and sanctions obligations.",
+      "The interactive demo walks through a simulated version of that check so the shape of the flow is visible. It verifies nothing and screens nobody.",
     ],
   },
   {
     heading: "Data protection",
     body: [
-      "We handle personal data in accordance with the EU and UK GDPR. Our Privacy Policy explains what we collect, why, and the rights you have over your data.",
-    ],
-  },
-  {
-    heading: "Making a complaint",
-    body: [
-      `We aim to get things right first time, but if something goes wrong we want to know. Contact us at ${siteConfig.email.support} and we'll acknowledge your complaint and work to resolve it promptly. If you're not satisfied with our final response, you may be entitled to refer your complaint to the relevant financial ombudsman service.`,
+      "This build collects no personal data. The forms validate what you type using the same rules the API would, then discard it — nothing is transmitted and nothing is stored. The demo records anonymous, cookieless step counts and honours Do Not Track.",
+      "A real product would handle personal data under the EU and UK GDPR; the Privacy Policy on this site is written as an illustration of what that document would need to cover.",
     ],
   },
 ];
@@ -64,8 +59,10 @@ export default function Page() {
               Compliance &amp; Regulation
             </Heading>
             <p className="mt-5 text-base text-white/75 md:text-lg">
-              Trust underpins everything we do. Here&apos;s how Marsa is regulated, how we safeguard
-              your money, and how to reach us if you have a concern.
+              Marsa is a concept build, not an authorised institution. This page describes the
+              regulatory model such a product would have to operate under — because getting that
+              model right is most of the work, and a design that ignores it is a design that could
+              never ship.
             </p>
           </div>
         </Container>

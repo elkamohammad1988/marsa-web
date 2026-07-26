@@ -2,6 +2,12 @@ import { absoluteUrl, siteConfig } from "@/lib/site";
 import type { BlogPost } from "@/lib/blog";
 
 export function organizationSchema() {
+  const sameAs = [
+    siteConfig.social.x,
+    siteConfig.social.youtube,
+    siteConfig.social.linkedin,
+  ].filter(Boolean);
+
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -9,8 +15,11 @@ export function organizationSchema() {
     legalName: siteConfig.legalName,
     url: siteConfig.url,
     logo: absoluteUrl("/icon.svg"),
-    email: siteConfig.email.support,
-    sameAs: [siteConfig.social.x, siteConfig.social.youtube, siteConfig.social.linkedin],
+    // Emitted only when configured. `sameAs` is a machine-readable claim to
+    // own a profile, and `email` an invitation to write to a mailbox — both
+    // previously defaulted to a domain nobody holds.
+    ...(siteConfig.email.support ? { email: siteConfig.email.support } : {}),
+    ...(sameAs.length ? { sameAs } : {}),
   };
 }
 

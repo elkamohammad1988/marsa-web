@@ -25,8 +25,12 @@ export function getNotifierConfig(
 ): NotifierConfig | null {
   const apiKey = env.RESEND_API_KEY;
   const from = env.RESEND_FROM;
-  if (!apiKey || !from) return null;
-  return { apiKey, from, to: env.RESEND_TO ?? siteConfig.email.support };
+  // `to` used to fall back to a hard-coded support address. With that default
+  // removed, an unset RESEND_TO leaves nobody to send to — which is a
+  // misconfiguration, not a reason to post mail into the void.
+  const to = env.RESEND_TO ?? siteConfig.email.support;
+  if (!apiKey || !from || !to) return null;
+  return { apiKey, from, to };
 }
 
 /** Render a submission as a plain-text notification email (subject + body). */

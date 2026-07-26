@@ -35,9 +35,21 @@ describe("getNotifierConfig", () => {
     expect(getNotifierConfig({ RESEND_FROM: "a@b.com" })).toBeNull();
   });
 
-  it("defaults the recipient to the support address", () => {
-    const cfg = getNotifierConfig({ RESEND_API_KEY: "re_x", RESEND_FROM: "a@b.com" });
-    expect(cfg).toEqual({ apiKey: "re_x", from: "a@b.com", to: "support@marsa.money" });
+  it("uses the configured recipient", () => {
+    const cfg = getNotifierConfig({
+      RESEND_API_KEY: "re_x",
+      RESEND_FROM: "a@b.com",
+      RESEND_TO: "team@example.com",
+    });
+    expect(cfg).toEqual({ apiKey: "re_x", from: "a@b.com", to: "team@example.com" });
+  });
+
+  it("is unconfigured when there is no recipient", () => {
+    // `to` used to fall back to a hard-coded support@marsa.money — a mailbox on
+    // a domain nobody owns. With that default gone, an unset RESEND_TO is a
+    // misconfiguration, and the honest response is "notifications are off"
+    // rather than posting mail at an address that cannot receive it.
+    expect(getNotifierConfig({ RESEND_API_KEY: "re_x", RESEND_FROM: "a@b.com" })).toBeNull();
   });
 });
 

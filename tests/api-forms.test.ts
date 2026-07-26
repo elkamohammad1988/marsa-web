@@ -3,6 +3,7 @@ import { promises as fs } from "node:fs";
 // Type-only: erased at compile time, so it cannot trigger module evaluation
 // before DATA_DIR is set below.
 import type { SubmissionStore } from "@/lib/storage";
+import { siteConfig } from "@/lib/site";
 
 /**
  * The submission pipeline, asserted at the boundary the visitor actually
@@ -280,8 +281,16 @@ describe("submission where the database write throws", () => {
 
     expect(json.error).toMatch(/nothing has been recorded/i);
     expect(json.error).toMatch(/try again/i);
-    // An alternative contact route, taken from siteConfig.
-    expect(json.error).toMatch(/@/);
+
+    // The message used to promise an alternative contact route unconditionally.
+    // The support address now defaults to empty rather than to a mailbox on a
+    // domain nobody owns, so the offer is made only when there is somewhere for
+    // it to go — and never rendered as "email  and we will".
+    if (siteConfig.email.support) {
+      expect(json.error).toContain(siteConfig.email.support);
+    } else {
+      expect(json.error).not.toMatch(/email\s|@/);
+    }
   });
 
   it("leaks no database internals, paths or stack traces to the browser", async () => {
