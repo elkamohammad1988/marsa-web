@@ -1,15 +1,28 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Colours are driven by CSS custom properties (see styles/globals.css) so the
- * whole palette can flip between light and dark themes from a single `.dark`
- * class on <html>. Tokens are stored as space-separated RGB channels
- * (`--ink: 10 20 38`) so Tailwind's `<alpha-value>` opacity modifiers
- * (`bg-ink/5`, `ring-brand-blue/30`, `from-ink/70`) keep working.
+ * Colours are driven by CSS custom properties (see styles/globals.css), stored
+ * as space-separated RGB channels (`--ink: 246 234 241`) so Tailwind's
+ * `<alpha-value>` opacity modifiers (`bg-ink/5`, `ring-brand-blue/30`,
+ * `from-ink/70`) keep working.
+ *
+ * The site has exactly one palette. It is *not* a light theme with a dark
+ * override — there is no second set of values anywhere, and nothing adds a
+ * `.dark` class to <html>.
  */
 const withAlpha = (varName: string) => `rgb(var(${varName}) / <alpha-value>)`;
 
 const config: Config = {
+  /**
+   * Kept as "class", deliberately, even though nothing sets the class.
+   *
+   * It is what makes a stray `dark:` variant inert rather than live: under the
+   * default "media" strategy such a variant would activate for every visitor
+   * whose OS prefers dark — i.e. most of them — silently applying a value
+   * nobody designed against, on a palette that is already dark.
+   * `tests/contrast.test.ts` forbids `dark:` outright; this is the belt to that
+   * brace.
+   */
   darkMode: "class",
   content: [
     "./app/**/*.{ts,tsx}",

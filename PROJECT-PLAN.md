@@ -144,6 +144,7 @@ evidence that motivated it.
 | # | Batch | Scope | Status |
 |---|---|---|---|
 | A | Documentation truth & admin setup copy | `README.md` claimed 94 tests against 367 and listed CI as unbuilt; `/admin/login` told the operator to set an 8-character password the app rejects | **DONE** |
+| B | The dead theme system removed | A `.dark` block mirroring `:root` value for value, a pre-paint script whose only job was to add that class, and four orphaned icons — closes the half of **F8** Batch 6 deferred | **DONE** |
 
 ---
 

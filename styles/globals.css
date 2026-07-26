@@ -6,8 +6,15 @@
  * Marsa design tokens — "Black Rose": metallic magenta on near-black.
  *
  * Values are space-separated RGB channels so Tailwind's `<alpha-value>` opacity
- * modifiers keep working (see tailwind.config.ts). The site is dark-only;
- * `.dark` mirrors `:root` so the pre-paint theme script can never desync it.
+ * modifiers keep working (see tailwind.config.ts).
+ *
+ * There is ONE theme. `:root` below is the whole palette, and `color-scheme:
+ * dark` tells the browser to render form controls and scrollbars to match.
+ * There used to be a `.dark` block here that mirrored `:root` value for value,
+ * plus a pre-paint script that added the class — a closed loop that could only
+ * ever set colours to what they already were. Both are gone; if a light theme
+ * is ever wanted it should be written as a real second palette, not
+ * reconstructed from the shape of the dead one.
  *
  * Magenta roles:
  *   • `--brand` (#CC1F86) is the fill — CTAs, progress rail, logo tile, large
@@ -61,54 +68,6 @@
     --line-dark: 71 25 58; /* #47193A — emphasis */
 
     /* Chart (full colour strings — consumed via var() in RateChart) */
-    --chart-line: #ee4fa5;
-    --chart-grid: #2e1024;
-    --chart-axis: #a97f97;
-    --chart-tooltip-bg: #140a10;
-    --chart-tooltip-border: #2e1024;
-    --chart-tooltip-fg: #f6eaf1;
-
-    color-scheme: dark;
-  }
-
-  /**
-   * The site is dark-only ("black rose"). `.dark` mirrors `:root` exactly so
-   * that if the pre-paint theme script adds the class (e.g. the OS prefers
-   * dark) nothing changes — there is no light theme to fall out of sync.
-   */
-  .dark {
-    --canvas: 12 8 11;
-    --card: 20 10 16;
-    --surface-cream: 20 10 16;
-    --surface-cream-2: 26 12 20;
-    --surface-tint: 33 16 32;
-    --surface-tint-2: 26 12 22;
-    --surface-navy: 10 7 10;
-    --surface-navy-2: 20 10 16;
-
-    --brand: 204 31 134;
-    --brand-deep: 184 26 120;
-    --brand-soft: 122 18 80;
-    --brand-strong: 238 79 165;
-    --accent: 238 79 165;
-    --accent-soft: 122 18 80;
-
-    --success: 127 191 138;
-    --success-strong: 127 191 138;
-    --warning: 224 184 74;
-    --danger: 232 138 138;
-
-    --cta-from: 206 42 140;
-    --cta-to: 165 21 106;
-    --on-brand: 255 255 255;
-
-    --ink: 246 234 241;
-    --ink-muted: 169 127 151;
-    --ink-subtle: 174 130 150;
-
-    --line: 46 16 36;
-    --line-dark: 71 25 58;
-
     --chart-line: #ee4fa5;
     --chart-grid: #2e1024;
     --chart-axis: #a97f97;
