@@ -4,35 +4,38 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Honeypot } from "./fields";
-import { useFormSubmit } from "./useSubmit";
+import { useDemoSubmit } from "./useDemoSubmit";
 import { validateSubscribe } from "@/lib/validation";
 
 export function NewsletterForm() {
   const [email, setEmail] = useState("");
   const [hp, setHp] = useState("");
-  const { state, errors, message, submit, setErrors } = useFormSubmit("/api/subscribe");
+  const { state, errors, submit, setErrors } = useDemoSubmit(validateSubscribe);
 
-  async function onSubmit(e: React.FormEvent) {
+  function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const result = validateSubscribe({ email });
-    if (!result.success) {
-      setErrors(result.errors);
-      return;
-    }
-    const ok = await submit({ email, hp });
-    if (ok) setEmail("");
+    if (hp.trim() !== "") return;
+    submit({ email });
   }
 
-  if (state === "success") {
+  /**
+   * The footer has no room for the full notice panel, so this says the same
+   * thing in one line. "You're subscribed" would have been a lie in the one
+   * component that renders on every page of the site.
+   */
+  if (state === "accepted") {
     return (
       <div
-        className="flex w-full items-center gap-2 text-sm font-medium text-white md:max-w-2xl"
+        className="flex w-full items-start gap-2.5 text-sm text-white md:max-w-2xl"
         role="status"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="mt-0.5 flex-none">
           <path d="M4 12l5 5L20 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        Thanks — you&apos;re subscribed. Watch your inbox for the next Marsa update.
+        <span>
+          <span className="font-medium">Checked, and discarded.</span> There is no mailing list —
+          this is a concept build, so nothing was stored and no address was captured.
+        </span>
       </div>
     );
   }
@@ -62,19 +65,15 @@ export function NewsletterForm() {
           aria-invalid={errors.email ? true : undefined}
           aria-describedby={errors.email ? "newsletter-error" : undefined}
           className="border-transparent"
-          disabled={state === "submitting"}
         />
       </div>
       <Honeypot value={hp} onChange={setHp} />
-      <Button type="submit" variant="white" size="md" disabled={state === "submitting"}>
-        {state === "submitting" ? "Subscribing…" : "Subscribe"}
+      <Button type="submit" variant="white" size="md">
+        Subscribe
       </Button>
-      <p aria-live="polite" className="sr-only">
-        {state === "submitting" ? "Submitting" : ""}
-      </p>
-      {(errors.email || message) && (
+      {errors.email && (
         <p id="newsletter-error" className="text-sm font-medium text-white sm:basis-full" role="alert">
-          {errors.email ?? message}
+          {errors.email}
         </p>
       )}
     </form>
