@@ -12,6 +12,8 @@
  * signature over that expiry, verified with a constant-time compare.
  */
 
+import { captureException } from "@/lib/observability";
+
 export const ADMIN_COOKIE = "marsa_admin";
 const SESSION_TTL_SECONDS = 8 * 60 * 60;
 
@@ -35,9 +37,15 @@ export function getAdminConfig(
   const secret = env.ADMIN_SESSION_SECRET;
   if (!password || !secret) return null;
   if (password.length < MIN_PASSWORD_LENGTH || secret.length < MIN_SECRET_LENGTH) {
-    console.error(
-      `[admin] ADMIN_PASSWORD must be at least ${MIN_PASSWORD_LENGTH} characters and ` +
-        `ADMIN_SESSION_SECRET at least ${MIN_SECRET_LENGTH}; admin is disabled.`,
+    // Reported rather than logged, because this is the failure that looks like
+    // nothing: the admin area simply stays shut, the login page still renders,
+    // and the only trace is one line in a stream nobody is reading.
+    captureException(
+      new Error(
+        `ADMIN_PASSWORD must be at least ${MIN_PASSWORD_LENGTH} characters and ` +
+          `ADMIN_SESSION_SECRET at least ${MIN_SECRET_LENGTH}; admin is disabled.`,
+      ),
+      { event: "admin.config.rejected" },
     );
     return null;
   }

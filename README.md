@@ -36,6 +36,12 @@ versus a labelled sandbox — see
   HMAC-authenticated admin dashboard with CSV export.
 - **First-party analytics** — anonymous demo funnel, no cookies, no third-party
   trackers, Do-Not-Track respected.
+- **Failures are reported, not swallowed** — every degradation the system
+  chooses to absorb (a write that failed, an insert that fell back, an email
+  that never sent, a rate limiter running without its database) emits a
+  structured event through `lib/observability.ts`, with personal data redacted
+  before it can leave the process. A provider adapter plugs in through
+  `setReporter`; the default writes one line of JSON to stderr.
 
 ## Stack
 
@@ -75,6 +81,7 @@ lib/
   analytics.ts             Demo funnel store + computeFunnel()
   notify.ts                Resend notifier (side-effect, never blocks intake)
   rate-limit.ts            In-memory + shared (Postgres RPC) limiter
+  observability.ts         captureException seam: structured events, redacted
   admin-auth.ts            HMAC-signed session cookies, constant-time compare
   csv.ts                   RFC-4180 + formula-injection-safe CSV
   legal.ts / site.ts       Env-gated regulatory copy, site config

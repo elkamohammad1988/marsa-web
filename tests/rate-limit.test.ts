@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { rateLimit, rateLimitShared, clientKey } from "@/lib/rate-limit";
+import { setReporter, type CapturedEvent } from "@/lib/observability";
 
 /**
  * `lib/rate-limit.ts` is the only thing standing between the public form
@@ -189,7 +190,8 @@ describe("rateLimitShared — cross-instance limiter", () => {
   it("degrades to the in-memory result when the database is unreachable", async () => {
     vi.stubEnv("SUPABASE_URL", PG_ENV.SUPABASE_URL);
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", PG_ENV.SUPABASE_SERVICE_ROLE_KEY);
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const captured: CapturedEvent[] = [];
+    const restore = setReporter((event) => captured.push(event));
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => {
@@ -197,11 +199,21 @@ describe("rateLimitShared — cross-instance limiter", () => {
       }),
     );
 
-    const result = await rateLimitShared(uniqueKey(), { limit: 5, windowMs: 60_000 });
+    let result;
+    try {
+      result = await rateLimitShared(uniqueKey(), { limit: 5, windowMs: 60_000 });
+    } finally {
+      setReporter(restore);
+    }
 
     // A broken database must not lock every real user out.
     expect(result.ok).toBe(true);
-    expect(warn).toHaveBeenCalled();
+
+    // But it must not do so silently: the limit is now per-instance, which is
+    // the exact weakness S1 was about, arriving without anyone being told.
+    const degraded = captured.find((e) => e.event === "rateLimit.degraded");
+    expect(degraded, "the degradation was not reported").toBeDefined();
+    expect(degraded!.severity).toBe("warning");
   });
 
   it("still enforces the local window while the database is down", async () => {

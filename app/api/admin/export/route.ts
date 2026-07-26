@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/admin-auth";
 import { getStore, isSubmissionKind } from "@/lib/storage";
 import { submissionsToCsv } from "@/lib/csv";
+import { captureException } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (err) {
-    console.error("[admin] export failed", err);
+    captureException(err, { event: "admin.export", kind: kind ?? "all" });
     return NextResponse.json({ error: "Could not build the export." }, { status: 502 });
   }
 }

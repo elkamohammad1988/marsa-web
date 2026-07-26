@@ -8,6 +8,7 @@ import {
   selectRows,
   type PostgrestConfig,
 } from "@/lib/postgrest";
+import { captureException } from "@/lib/observability";
 
 /**
  * First-party funnel analytics for the /demo flow.
@@ -136,8 +137,13 @@ class FileDemoAnalyticsStore implements DemoAnalyticsStore {
       await fs.mkdir(DATA_DIR, { recursive: true });
       await fs.appendFile(FILE, `${JSON.stringify(event)}\n`, "utf8");
     } catch (err) {
-      // Telemetry must never break the demo — log and move on.
-      console.warn("[analytics] could not persist demo event:", err instanceof Error ? err.message : err);
+      // Telemetry must never break the demo — report and move on.
+      captureException(err, {
+        event: "analytics.record",
+        severity: "warning",
+        provider: this.provider,
+        step: event.step,
+      });
     }
   }
 
@@ -182,7 +188,13 @@ class PostgresDemoAnalyticsStore implements DemoAnalyticsStore {
         created_at: event.at,
       });
     } catch (err) {
-      console.warn("[analytics] db insert failed; using fallback:", err instanceof Error ? err.message : err);
+      captureException(err, {
+        event: "analytics.record.degraded",
+        severity: "warning",
+        provider: this.provider,
+        fallback: this.fallback.provider,
+        step: event.step,
+      });
       await this.fallback.record(event);
     }
   }
@@ -213,11 +225,12 @@ class PostgresDemoAnalyticsStore implements DemoAnalyticsStore {
         return buildFunnelReport(FUNNEL_STEPS.map((s) => bySt.get(s) ?? 0));
       }
     } catch (err) {
-      console.warn(
-        "[analytics] demo_funnel() unavailable; falling back to the row scan. " +
-          "Apply db/migrations/003_aggregate_functions.sql.",
-        err instanceof Error ? err.message : err,
-      );
+      captureException(err, {
+        event: "analytics.funnel.degraded",
+        severity: "warning",
+        remedy: "apply db/migrations/003_aggregate_functions.sql",
+        fallback: `row scan, truncated at ${MAX_FETCH}`,
+      });
     }
 
     const { rows } = await selectRows<EventRow>(

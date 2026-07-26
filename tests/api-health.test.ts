@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach, beforeAll, afterAll } from "vitest
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { setReporter, type CapturedEvent } from "@/lib/observability";
 
 /**
  * /api/health is unauthenticated, so what it says is what any stranger can
@@ -139,19 +140,27 @@ describe("GET /api/health — failure disclosure", () => {
     expect(raw.toLowerCase()).not.toContain(os.tmpdir().toLowerCase());
   });
 
-  it("logs the real reason server-side so an operator can still diagnose it", async () => {
+  it("reports the real reason server-side so an operator can still diagnose it", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => {
         throw new Error("ECONNREFUSED 203.0.113.9:443");
       }),
     );
-    const error = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    await GET();
+    // Asserted at the observability seam rather than at `console.error`: the
+    // point of S2 is that the reason is *removed from the response, not
+    // discarded*, and the seam is where "not discarded" now means something.
+    const captured: CapturedEvent[] = [];
+    const restore = setReporter((event) => captured.push(event));
+    try {
+      await GET();
+    } finally {
+      setReporter(restore);
+    }
 
-    // Removed from the response, not discarded.
-    const logged = error.mock.calls.flat().map(String).join(" ");
-    expect(logged).toContain("ECONNREFUSED");
+    const fx = captured.find((e) => e.event === "health.fx");
+    expect(fx, "no health.fx event was captured").toBeDefined();
+    expect(fx!.message).toContain("ECONNREFUSED");
   });
 });

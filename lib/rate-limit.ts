@@ -1,4 +1,5 @@
 import { getPostgrestConfig, rpc } from "@/lib/postgrest";
+import { captureException } from "@/lib/observability";
 
 /**
  * Fixed-window rate limiting, in two tiers.
@@ -61,10 +62,16 @@ export async function rateLimitShared(
     if (typeof remaining !== "number") return local;
     return { ok: remaining >= 0, remaining: Math.max(0, remaining), resetAt: local.resetAt };
   } catch (err) {
-    console.warn(
-      "[rate-limit] shared limiter unavailable; falling back to the in-memory window.",
-      err instanceof Error ? err.message : err,
-    );
+    // Degraded, not broken: the in-memory window still applies, but it is
+    // per-instance, so the effective ceiling is now limit × instances. That is
+    // the right runtime behaviour and the wrong thing to be unaware of — it is
+    // exactly the weakness S1 was about, arriving silently.
+    captureException(err, {
+      event: "rateLimit.degraded",
+      severity: "warning",
+      scope: key.split(":")[0],
+      fallback: "in-memory window, per instance",
+    });
     return local;
   }
 }

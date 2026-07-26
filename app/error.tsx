@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
+import { captureException } from "@/lib/observability";
 
 export default function Error({
   error,
@@ -12,8 +13,10 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Surface the error to logs/monitoring. Swap console for your provider.
-    console.error("Application error:", error);
+    // `digest` is the hash Next.js puts in the server log for this same error,
+    // and it is already shown to the visitor below — capturing it is what
+    // joins the two together.
+    captureException(error, { event: "app.render", digest: error.digest });
   }, [error]);
 
   return (

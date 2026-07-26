@@ -1,4 +1,5 @@
 import { siteConfig } from "@/lib/site";
+import { captureException } from "@/lib/observability";
 import type { StoredSubmission, SubmissionKind } from "@/lib/storage";
 
 /**
@@ -83,10 +84,17 @@ export async function notifySubmission(
     if (!res.ok) throw new Error(`Resend responded ${res.status}`);
     return { sent: true };
   } catch (err) {
-    console.warn(
-      `[notify] could not email ${submission.kind} ${submission.id}; it is stored and can be retrieved from /admin.`,
-      err instanceof Error ? err.message : err,
-    );
+    // Warning, not error: the submission is already durably stored, so nothing
+    // is lost. What is lost is the *notification* — nobody is told a lead
+    // arrived — and with no alert on this, "we stopped getting emails" is
+    // noticed weeks later by absence.
+    captureException(err, {
+      event: "notify.send",
+      severity: "warning",
+      kind: submission.kind,
+      submissionId: submission.id,
+      recoverable: "the record is stored and retrievable from /admin",
+    });
     return { sent: false };
   } finally {
     clearTimeout(timeout);

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { rateLimitShared, clientKey } from "@/lib/rate-limit";
 import { getStore, newId, type SubmissionKind } from "@/lib/storage";
 import { notifySubmission } from "@/lib/notify";
+import { captureException, newReference } from "@/lib/observability";
 import { siteConfig } from "@/lib/site";
 import type { ValidationResult } from "@/lib/validation";
 
@@ -10,12 +11,22 @@ import type { ValidationResult } from "@/lib/validation";
  *
  * Deliberately says nothing about *why*: the underlying error can contain the
  * PostgREST response body (table and constraint names, upstream error text) or
- * a server filesystem path. Those go to the server log; the browser gets this
- * string and an action to take.
+ * a server filesystem path. Those go to the captured event; the browser gets
+ * this string, an action to take, and a reference.
+ *
+ * The reference is the correlation id B2 asked for, placed where it does the
+ * most good. A middleware-generated id would tag every request including the
+ * 99.9% that succeed; this one is minted only when a submission fails, shown
+ * to the person it failed for, and written into the captured event — so
+ * "it said reference K3F9QW2A" resolves to exactly one log line.
  */
-const STORAGE_ERROR_MESSAGE =
-  `We could not save your details just now, so nothing has been recorded. ` +
-  `Please try again in a moment — or email ${siteConfig.email.support} and we will pick it up from there.`;
+function storageErrorMessage(reference: string): string {
+  return (
+    `We could not save your details just now, so nothing has been recorded. ` +
+    `Please try again in a moment — or email ${siteConfig.email.support}, ` +
+    `quoting reference ${reference}, and we will pick it up from there.`
+  );
+}
 
 /**
  * Shared handler for the form-submission endpoints. Applies rate limiting, a
@@ -86,11 +97,17 @@ export async function handleFormPost<T extends Record<string, unknown>>(
   try {
     await getStore().save(submission);
   } catch (err) {
-    console.error(
-      `[api-forms] refusing to confirm ${opts.kind} submission ${submission.id}: storage failed.`,
-      err instanceof Error ? `${err.name}: ${err.message}` : err,
+    const reference = newReference();
+    captureException(err, {
+      event: "form.submission.rejected",
+      reference,
+      kind: opts.kind,
+      submissionId: submission.id,
+    });
+    return NextResponse.json(
+      { error: storageErrorMessage(reference), reference },
+      { status: 503 },
     );
-    return NextResponse.json({ error: STORAGE_ERROR_MESSAGE }, { status: 503 });
   }
 
   // Store first, notify second: the visitor's result never depends on email.

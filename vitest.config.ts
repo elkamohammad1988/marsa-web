@@ -12,5 +12,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    // Silences the observability reporter so a passing run is quiet; see the
+    // file for why that is not the same as hiding failures.
+    setupFiles: ["tests/setup.ts"],
   },
 });
