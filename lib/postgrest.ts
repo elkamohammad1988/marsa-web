@@ -17,6 +17,21 @@ export type PostgrestConfig = {
   endpoint: string;
   /** Service role key — server-side only, never expose to the browser. */
   key: string;
+  /**
+   * A signed-in user's access token, sent as the bearer credential instead of
+   * `key` while `key` stays the `apikey` header.
+   *
+   * This is what makes Row Level Security apply. `key` is the service-role
+   * key, which bypasses RLS — correct for the submissions pipeline, where
+   * every row belongs to the operator and there is no user to act as. It is
+   * exactly wrong for a customer's profile: with it, whether one customer can
+   * read another's row would depend on a filter in a route handler rather than
+   * on a policy in the database.
+   *
+   * When a token is set, `key` is the *anon* key (see `lib/auth-config.ts`),
+   * so a request that somehow loses its token has no privilege to fall back on.
+   */
+  token?: string;
 };
 
 const TIMEOUT_MS = 8000;
@@ -63,7 +78,7 @@ async function request(
       signal: AbortSignal.timeout(TIMEOUT_MS),
       headers: {
         apikey: cfg.key,
-        Authorization: `Bearer ${cfg.key}`,
+        Authorization: `Bearer ${cfg.token ?? cfg.key}`,
         "content-type": "application/json",
         ...init.headers,
       },
@@ -105,6 +120,29 @@ export async function insertRow<T>(
   });
   const rows = (await res.json()) as T[];
   return rows[0];
+}
+
+/**
+ * Patch the rows a filter selects. Returns the first stored row, or null.
+ *
+ * Null is a real answer rather than an error: under Row Level Security a row
+ * the caller may not touch simply is not there to update, and PostgREST
+ * reports that as an empty result with a 200. Callers must not read null as
+ * "it worked".
+ */
+export async function updateRow<T>(
+  cfg: PostgrestConfig,
+  table: string,
+  query: string,
+  patch: Record<string, unknown>,
+): Promise<T | null> {
+  const res = await request(cfg, `/${table}?${query}`, {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+    headers: { Prefer: "return=representation" },
+  });
+  const rows = (await res.json()) as T[];
+  return rows[0] ?? null;
 }
 
 /** `Content-Range: 0-24/1337` → 1337 */

@@ -51,11 +51,16 @@ export const siteConfig = {
   description:
     "Multi-currency IBAN accounts, SEPA transfers, and interbank FX for people and businesses moving money between Europe and the rest of the world.",
   /**
-   * Where an authenticated "Log in" should send users. In production this is
-   * the banking app on a separate origin. Until that origin is provided we
-   * fall back to the on-site onboarding flow so the link is never dead.
+   * Where "Log in" sends people. In production this would be the banking app
+   * on a separate origin; until that origin is provided the fallback is the
+   * sign-in page on this one.
+   *
+   * It used to fall back to `/get-started` — the marketing lead form — because
+   * there was nothing to sign in to. There is now, and a link labelled "Log In"
+   * that leads to a registration-of-interest form was the small kind of untrue
+   * this project keeps finding.
    */
-  appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "/get-started",
+  appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "/login",
   /**
    * Contact addresses, configured or absent — never invented.
    *

@@ -1,4 +1,5 @@
 import { isEmail } from "@/lib/validation";
+import { MIN_AUTH_SECRET_LENGTH } from "@/lib/auth-config";
 
 /**
  * Environment validation.
@@ -94,6 +95,47 @@ export function validateEnvironment(env: Env = process.env): EnvIssue[] {
       "NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY",
       "must not exist — a NEXT_PUBLIC_ prefix ships the value to the browser, " +
         "and this key bypasses row-level security",
+    );
+  }
+
+  /* ------------------------------------------------------ customer accounts */
+
+  // The *rules* for the signing secret live in `lib/auth-config.ts`, next to
+  // the code that enforces them, and the length is imported rather than
+  // retyped. What belongs here is the same thing this module already does for
+  // the database and email pairs: catch a half-configured set, which is the
+  // shape that boots, serves traffic, looks healthy, and quietly has no
+  // working sign-in.
+  const anonKey = read(env, "SUPABASE_ANON_KEY");
+  const authSecret = read(env, "AUTH_SESSION_SECRET");
+
+  if (anonKey && !supabaseUrl) {
+    add("SUPABASE_URL", "is required whenever SUPABASE_ANON_KEY is set");
+  }
+  if (anonKey && !authSecret) {
+    add(
+      "AUTH_SESSION_SECRET",
+      "is required whenever SUPABASE_ANON_KEY is set, or the account area stays closed",
+    );
+  }
+  if (authSecret && !anonKey) {
+    add(
+      "SUPABASE_ANON_KEY",
+      "is required whenever AUTH_SESSION_SECRET is set, or the account area stays closed",
+    );
+  }
+  if (authSecret && authSecret.length < MIN_AUTH_SECRET_LENGTH) {
+    add(
+      "AUTH_SESSION_SECRET",
+      `must be at least ${MIN_AUTH_SECRET_LENGTH} characters — it is the one value ` +
+        "that would let anybody forge a session for any account",
+    );
+  }
+  if (env.NEXT_PUBLIC_AUTH_SESSION_SECRET) {
+    add(
+      "NEXT_PUBLIC_AUTH_SESSION_SECRET",
+      "must not exist — a NEXT_PUBLIC_ prefix ships the value to the browser, " +
+        "and this key signs every session cookie",
     );
   }
 

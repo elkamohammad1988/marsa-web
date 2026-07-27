@@ -4,29 +4,45 @@
  * Split out from `lib/admin-auth.ts` so `middleware.ts` can verify a session
  * without importing `next/headers`, which is unavailable in middleware
  * (audit S5). Everything here is a pure function over its arguments and runs
- * unchanged on the Node and Edge runtimes — `crypto.subtle` exists on both.
+ * unchanged on the Node and Edge runtimes.
  *
- * The admin area is a single shared password (there is one operator, and a
- * user table would be security theatre without one). What matters is that the
- * session cookie cannot be forged: it carries an expiry plus an HMAC-SHA256
- * signature over that expiry, verified with a constant-time compare.
+ * The admin area is a single shared password (there is one operator, and it
+ * guards a different thing from the customer accounts in `lib/auth.ts` — form
+ * submissions, not a person's own data). What matters is that the session
+ * cookie cannot be forged: it carries an expiry plus an HMAC-SHA256 signature
+ * over that expiry, verified with a constant-time compare.
+ *
+ * The signing, comparison and cookie policy now live in `lib/signed-cookie.ts`
+ * because user sessions need the same three things. This module is what is
+ * specific to the operator: one password, an 8-hour session, and a
+ * configuration that refuses to run weakly.
  */
 
 import { captureException } from "@/lib/observability";
+import {
+  hmacHex,
+  MIN_SECRET_LENGTH,
+  safeEqual,
+  signPayload,
+  verifyPayload,
+} from "@/lib/signed-cookie";
+
+export { safeEqual, MIN_SECRET_LENGTH };
+/** The admin cookie's policy is the shared one; see `lib/signed-cookie.ts`. */
+export { cookieOptions as sessionCookieOptions } from "@/lib/signed-cookie";
 
 export const ADMIN_COOKIE = "marsa_admin";
 const SESSION_TTL_SECONDS = 8 * 60 * 60;
 
 /**
- * Minimum credential lengths.
+ * Minimum password length.
  *
- * The password floor was 8 (audit S1). One shared password with no lockout and
- * no second factor guards the name, email, country and company of every person
+ * The floor was 8 (audit S1). One shared password with no lockout and no
+ * second factor guards the name, email, country and company of every person
  * who ever filled in a form, so an 8-character search space was the weakest
  * link in the system by a wide margin.
  */
 export const MIN_PASSWORD_LENGTH = 16;
-export const MIN_SECRET_LENGTH = 16;
 
 export type AdminConfig = { password: string; secret: string };
 
@@ -52,45 +68,13 @@ export function getAdminConfig(
   return { password, secret };
 }
 
-const encoder = new TextEncoder();
-
-function toHex(buffer: ArrayBuffer): string {
-  return Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-async function sign(value: string, secret: string): Promise<string> {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  return toHex(await crypto.subtle.sign("HMAC", key, encoder.encode(value)));
-}
-
-/** Length-independent constant-time comparison. */
-export function safeEqual(a: string, b: string): boolean {
-  const aBytes = encoder.encode(a);
-  const bBytes = encoder.encode(b);
-  let diff = aBytes.length ^ bBytes.length;
-  const len = Math.max(aBytes.length, bBytes.length);
-  for (let i = 0; i < len; i++) {
-    diff |= (aBytes[i] ?? 0) ^ (bBytes[i] ?? 0);
-  }
-  return diff === 0;
-}
-
 /** Build a signed session token valid for the next 8 hours. */
 export async function createSessionToken(
   secret: string,
   now = Date.now(),
 ): Promise<{ token: string; maxAge: number }> {
   const expiresAt = Math.floor(now / 1000) + SESSION_TTL_SECONDS;
-  const signature = await sign(String(expiresAt), secret);
-  return { token: `${expiresAt}.${signature}`, maxAge: SESSION_TTL_SECONDS };
+  return { token: await signPayload(String(expiresAt), secret), maxAge: SESSION_TTL_SECONDS };
 }
 
 export async function verifySessionToken(
@@ -98,14 +82,10 @@ export async function verifySessionToken(
   secret: string,
   now = Date.now(),
 ): Promise<boolean> {
-  if (!token) return false;
-  const [expiresAt, signature] = token.split(".");
-  if (!expiresAt || !signature) return false;
+  const payload = await verifyPayload(token, secret);
+  if (payload === null) return false;
 
-  const expected = await sign(expiresAt, secret);
-  if (!safeEqual(signature, expected)) return false;
-
-  const expiry = Number(expiresAt);
+  const expiry = Number(payload);
   return Number.isFinite(expiry) && expiry * 1000 > now;
 }
 
@@ -117,18 +97,8 @@ export async function checkPassword(
   if (typeof candidate !== "string" || candidate.length === 0) return false;
   // Hash both sides first so the compare is over fixed-length digests.
   const [a, b] = await Promise.all([
-    sign(candidate, config.secret),
-    sign(config.password, config.secret),
+    hmacHex(candidate, config.secret),
+    hmacHex(config.password, config.secret),
   ]);
   return safeEqual(a, b);
-}
-
-export function sessionCookieOptions(maxAge: number) {
-  return {
-    httpOnly: true,
-    sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge,
-  };
 }

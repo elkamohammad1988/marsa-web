@@ -27,12 +27,13 @@ const REAL = [
   "Live European Central Bank rates, cached hourly — every number in the converter and the demo",
   "IBAN validation to ISO 13616 / MOD-97, fully offline",
   "A complete form-intake pipeline, admin dashboard and analytics funnel, unit-tested",
+  "Sign-up, email confirmation, sign-in, password reset and roles, on Supabase Auth — creating an account stores your email address and, if you give one, your name",
 ];
 
 const NOT_REAL = [
   "No company, no licence, no regulator, no partner institutions",
-  "No accounts, no balances, no money — the demo is a labelled sandbox",
-  "The forms validate your input and then discard it. Nothing is stored or sent",
+  "No balances, no money, no payments — the demo is a labelled sandbox",
+  "The marketing forms still validate your input and then discard it — nothing there is stored or sent",
 ];
 
 export function ConceptBadge() {
@@ -77,7 +78,8 @@ export function ConceptBadge() {
 
         <p className="mt-2 text-xs leading-relaxed text-ink-muted">
           A portfolio piece exploring what a cross-border money product could look like. It is not
-          a financial service, and nothing here can be signed up to.
+          a financial service and holds no money. You can create a real account — it is an email
+          address and a password, and it opens a profile page, nothing more.
         </p>
 
         <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">

@@ -65,21 +65,58 @@ type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
   error?: string;
   hint?: string;
+  /**
+   * A control rendered inside the field, at the trailing edge — the password
+   * reveal toggle is the only one so far.
+   *
+   * It lives here rather than in a bespoke password field so that the label,
+   * hint, error and `aria-describedby` wiring stay in one place. A second copy
+   * of that markup is a second place for an accessible name to go missing.
+   */
+  trailing?: ReactNode;
 };
 
-export function TextField({ label, error, hint, className, id, required, ...props }: TextFieldProps) {
+export function TextField({
+  label,
+  error,
+  hint,
+  className,
+  id,
+  required,
+  trailing,
+  ...props
+}: TextFieldProps) {
   const autoId = useId();
   const fieldId = id ?? autoId;
+
+  const input = (
+    <input
+      id={fieldId}
+      className={cn(
+        control,
+        "h-11",
+        borderClass(!!error),
+        // Room for the control, so a long value never slides under it.
+        trailing ? "pr-20" : undefined,
+        className,
+      )}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={error ? `${fieldId}-error` : hint ? `${fieldId}-hint` : undefined}
+      required={required}
+      {...props}
+    />
+  );
+
   return (
     <FieldShell id={fieldId} label={label} required={required} hint={hint} error={error}>
-      <input
-        id={fieldId}
-        className={cn(control, "h-11", borderClass(!!error), className)}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${fieldId}-error` : hint ? `${fieldId}-hint` : undefined}
-        required={required}
-        {...props}
-      />
+      {trailing ? (
+        <div className="relative">
+          {input}
+          <div className="absolute inset-y-0 right-1.5 flex items-center">{trailing}</div>
+        </div>
+      ) : (
+        input
+      )}
     </FieldShell>
   );
 }

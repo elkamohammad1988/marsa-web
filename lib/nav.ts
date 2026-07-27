@@ -110,12 +110,20 @@ export const footerColumns: Array<{ title: string; links: NavLink[] }> = [
  * "Regulated Partners · Segregated Accounts · Safeguarded Funds" — a list of
  * credentials, asserted sitewide, that nobody holds. They now describe what
  * the build actually is.
+ *
+ * "No data collected" was one of them until accounts existed. It was true of
+ * the marketing forms and is not true of a sign-up, and a privacy claim that
+ * is true of most of a site is a false one — so it is replaced by a statement
+ * about the stack rather than reworded into something narrower that a reader
+ * would still take sitewide. The precise disclosure of what an account stores
+ * lives in `ConceptBadge`, which is also on every page and has room to say it
+ * exactly.
  */
 export const footerBadges = [
   "Concept build",
   "Live ECB rates",
   "ISO 13616 IBAN validation",
-  "No data collected",
+  "Supabase Auth + row-level security",
   "Next.js 15 · React 19",
   "Open source",
 ];

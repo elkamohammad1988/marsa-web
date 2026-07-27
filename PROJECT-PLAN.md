@@ -577,6 +577,61 @@ instance:
 
 ---
 
+## Milestone 1 — customer authentication · 2026-07-27
+
+The first work in this repository that is not remediation. `AUDIT.md` is
+closed and the honesty programme is down to its last blocked item, so this
+adds a capability rather than correcting one.
+
+**What it is.** Registration, email confirmation, sign-in, sign-out, password
+recovery, session persistence with silent token renewal, a profile per account,
+and a role model — Supabase Auth over its REST API, no SDK, an HMAC-signed
+`httpOnly` session cookie, and authorisation enforced by Row Level Security in
+Postgres. Architecture and setup in [`AUTHENTICATION.md`](AUTHENTICATION.md).
+
+**The four decisions worth recording here:**
+
+1. **No `@supabase/ssr`.** Its cookies are meant to be read by a browser
+   client, so they cannot be `httpOnly`. Nothing here authenticates from the
+   browser, so the session is `httpOnly` and an XSS bug cannot read it. It also
+   keeps the four-dependency claim in the README true and avoids a second
+   PostgREST client beside `lib/postgrest.ts`.
+2. **Our own signed envelope** around Supabase's tokens, so middleware can
+   authenticate on the Edge runtime without a network call and without holding
+   Supabase's JWT signing secret. It reuses the primitive the admin session has
+   run on since audit S5, which is now shared in `lib/signed-cookie.ts`.
+3. **The database decides.** `lib/profiles.ts` never uses the service-role key.
+   The administrator's directory is written as "select every profile" with no
+   role filter and returns one row to everybody else. A wrong role in a cookie
+   opens a page and reads nothing.
+4. **Two authentication systems, not one.** `/admin` stays a single operator
+   password over form submissions. Merging them would mean that password could
+   read customer rows.
+
+**The one existing assertion that changed.** `tests/migrations.test.ts`
+asserted *"never creates a row level security policy"* — correct while every
+row belonged to the operator. A profile has an owner, so 004 adds policies, and
+the property that test defended is now stated more precisely and more strictly:
+no policy grants anything to `anon` or `public`, every policy is scoped to
+`authenticated`, every policy is constrained by `auth.uid()` or `is_admin()`,
+and only reads and updates are granted at all. One assertion out, four in.
+Nothing else in the existing suite was touched.
+
+**The honesty consequence.** Accounts store real email addresses, so three
+sitewide claims stopped being true and were narrowed rather than deleted:
+`ConceptBadge` now says the *marketing forms* discard input and states exactly
+what an account stores; the footer's "No data collected" chip is gone, because
+a privacy claim that holds for most of a site is a false one; and the README's
+"nothing here can be signed up to" is replaced by what is now the case. The
+marketing forms themselves are untouched and
+`tests/forms-collect-nothing.test.ts` passes unchanged.
+
+**Inert until [H21](#h21--switch-customer-accounts-on).** Nothing was applied
+to the live Supabase project — migration 004 is written and tested but not run,
+per the standing rule that changes inside Supabase are yours to make.
+
+---
+
 <a id="human-actions"></a>
 ## HUMAN ACTIONS
 
@@ -608,6 +663,7 @@ to launch — they are not blockers for any batch.
 | [H15](#h15--verify-a-resend-sender-domain) | Verify a Resend sender | notifications | Before launch |
 | ~~H17~~ | ~~Approve the admin auth batch~~ — approved, shipped in [#11](https://github.com/elkamohammad1988/marsa-web/pull/11) | Batch 3 | **RESOLVED** |
 | [H18](#h18--approve-corrected-cookie-policy-copy-f7) | **Approve corrected cookie-policy copy** | F7 | **Now** |
+| [H21](#h21--switch-customer-accounts-on) | **Switch customer accounts on** — two dashboard settings and three environment variables | the whole `/account` area | **Now** |
 | [H16](#h16--review-and-merge-each-pr) | Review each merged PR | oversight | Ongoing |
 
 ---
@@ -658,9 +714,11 @@ Verify: `npm run dev`, then open `http://localhost:3000/api/health` — the
 ### H3 — Apply the database migrations · **not yet done**
 
 Verified 2026-07-25 by running `npm run db:migrate -- --dry` against your
-project: **0 migrations applied, 3 pending.** The schema has never been applied,
-so the `submissions` table does not exist yet and the shared rate limiter has no
-`check_rate_limit()` to call.
+project: **0 migrations applied, 3 pending.** A fourth,
+`004_auth_profiles.sql`, arrived with the authentication milestone on
+2026-07-27 and is pending too, so there are now **four**. The schema has never
+been applied, so the `submissions` table does not exist yet, the shared rate
+limiter has no `check_rate_limit()` to call, and no account can have a profile.
 
 Nothing is broken by that today — the app refuses to start in production without
 a durable store, and local development uses the file store. But no submission
@@ -670,9 +728,10 @@ can be stored in Postgres until this is done.
 2. Left sidebar → **SQL Editor** (the `>_` icon) → **+ New query**.
 3. Open `db/migrations/001_initial_schema.sql`, copy all of it, paste, click
    **Run** (or Ctrl+Enter). Confirm *Success. No rows returned*.
-4. Repeat for `002_rate_limit_window_index.sql`, then
-   `003_aggregate_functions.sql`. **In that order** — each assumes its
-   predecessors have run.
+4. Repeat for `002_rate_limit_window_index.sql`,
+   `003_aggregate_functions.sql`, then `004_auth_profiles.sql`. **In that
+   order** — each assumes its predecessors have run, and 004 writes to the
+   ledger 001 creates.
 
 Every file is idempotent and records itself in `schema_migrations`, so a
 re-run is a no-op and the ledger stays correct however you apply them.
@@ -683,8 +742,12 @@ re-run is a no-op and the ledger stays correct however you apply them.
 npm run db:migrate -- --dry
 ```
 
-Expect *"3 migration(s) already applied. Nothing to do."* Then confirm the
-security model is intact, expecting `locked_down = true` on every row:
+Expect *"4 migration(s) already applied. Nothing to do."* Then confirm the
+security model is intact, expecting `locked_down = true` on every row. Note
+that `profiles` is deliberately **not** in this list: it is the one table with
+RLS policies, because a profile has an owner and a submission does not.
+`db/README.md` carries the query for that one and for the column privileges
+that make `role` unwritable from a browser session.
 
 ```sql
 select c.relname as table_name,
@@ -1009,6 +1072,97 @@ before choosing A, that is the reasonable route.
 ---
 
 <a id="h11--enable-branch-protection-on-main"></a>
+<a id="h21--switch-customer-accounts-on"></a>
+### H21 — Switch customer accounts on · **blocks the whole `/account` area**
+
+The authentication milestone is built, tested and merged. It is also, by
+design, **completely inert** until you do the four things below — none of which
+can be done from code, and all of which touch your live Supabase project.
+
+Until then every auth page renders a panel naming exactly what is missing, the
+account area stays closed, and nothing at all is stored. That is a supported
+state, not a broken one.
+
+**1. Apply migration 004.** Covered by [H3](#h3--apply-the-database-migrations--not-yet-done)
+— it is the fourth file in that list. Nothing below works without it.
+
+**2. Add three environment variables** to `.env.local` (and to the host at
+deploy time — see [H8](#h8--deploy-time-environment-variables-b1-b8-p7)):
+
+```sh
+SUPABASE_ANON_KEY=<Project Settings → API → anon / public key>
+AUTH_SESSION_SECRET=<openssl rand -hex 32>
+# SUPABASE_URL is already set.
+```
+
+The **anon** key, not the service-role one you already have. That is the
+security model rather than a detail: the anon key carries no privilege, the
+signed-in user's own token supplies the identity, and Row Level Security is
+what decides whose profile row they can read. `lib/auth-config.ts` never reads
+the service-role key at all.
+
+`AUTH_SESSION_SECRET` signs the session cookie. It is the one value that would
+let anybody forge a session for any account, so it must never appear in a
+tracked file and must never carry a `NEXT_PUBLIC_` prefix — `lib/env.ts`
+refuses to start if it does. Rotating it signs everybody out, which is also how
+you would respond if it leaked.
+
+**3. Allow the redirect destination.** *Authentication → URL Configuration →
+Redirect URLs*, add both:
+
+```
+http://localhost:3000/auth/confirm
+https://<your production origin>/auth/confirm
+```
+
+Without these Supabase refuses the destination the app sends and every link in
+its emails lands on the site root.
+
+**4. Rewrite two email templates.** *Authentication → Email Templates*. In
+**Confirm signup**, replace the `{{ .ConfirmationURL }}` link with:
+
+```
+{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup
+```
+
+and in **Reset password**:
+
+```
+{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password
+```
+
+This is the one step with a real architectural reason behind it rather than a
+configuration one. `{{ .ConfirmationURL }}` sends the reader to GoTrue's own
+`/verify`, which bounces them back with the tokens in the URL **fragment** —
+and a fragment is never sent to a server. Completing the flow would then need
+client JavaScript to read `location.hash` and post the credential back, putting
+it in the page, in browser history, and in any `Referer` that page later sends.
+`{{ .TokenHash }}` moves the whole exchange to the server.
+
+**Verify.** Register at `/register`, follow the link, land on `/account` signed
+in. Then check the policies are what they should be — every row must show
+`{authenticated}`, never `{anon}` or `{public}`:
+
+```sql
+select policyname, roles, cmd from pg_policies
+where schemaname = 'public' and tablename = 'profiles' order by policyname;
+```
+
+**To make yourself an administrator** (there is deliberately no UI for this —
+`authenticated` holds no update privilege on the column):
+
+```sql
+update public.profiles set role = 'admin' where email = 'you@example.com';
+```
+
+Then `/account/admin` appears in the account navigation. Sign out and in again,
+or wait up to an hour: the role is re-read on every token renewal.
+
+The full version of all of this, with the reasoning, is in
+[`AUTHENTICATION.md`](AUTHENTICATION.md).
+
+---
+
 ### H11 — Enable branch protection on `main`
 
 Do this after the first PR merges green, so you know the required check name is

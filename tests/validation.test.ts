@@ -4,8 +4,15 @@ import {
   validateSubscribe,
   validateLead,
   validateContact,
+  validateRegistration,
+  validateSignIn,
+  validateEmailOnly,
+  validateNewPassword,
+  validateProfile,
   ACCOUNT_TYPES,
   CONTACT_TOPICS,
+  MAX_PASSWORD_BYTES,
+  MIN_ACCOUNT_PASSWORD_LENGTH,
 } from "@/lib/validation";
 
 /**
@@ -305,5 +312,164 @@ describe("validateContact", () => {
     expect(result.success).toBe(false);
     if (!result.success)
       expect(Object.keys(result.errors).sort()).toEqual(["email", "message", "name"]);
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* Account credentials                                                 */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The same rules run in the browser for instant feedback and on the server as
+ * the source of truth, so a person is never shown a rule that is not the one
+ * that will be applied.
+ */
+
+describe("validateRegistration", () => {
+  const valid = { email: "person@example.com", password: "a-long-enough-passphrase" };
+
+  it("accepts an address and a long enough password", () => {
+    const result = validateRegistration(valid);
+    expect(result.success).toBe(true);
+  });
+
+  it("lower-cases the address, so one person is one account", () => {
+    // Supabase treats addresses case-insensitively. Without this, the rate
+    // limiter's per-account bucket would key `A@b.co` and `a@b.co` separately
+    // and halve the protection on the account being attacked.
+    const result = validateRegistration({ ...valid, email: "  Person@Example.COM " });
+    if (result.success) expect(result.data.email).toBe("person@example.com");
+  });
+
+  it("requires a password long enough to be worth hashing", () => {
+    const result = validateRegistration({
+      ...valid,
+      password: "a".repeat(MIN_ACCOUNT_PASSWORD_LENGTH - 1),
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.errors.password).toContain(String(MIN_ACCOUNT_PASSWORD_LENGTH));
+  });
+
+  it("accepts a password of exactly the minimum length", () => {
+    expect(
+      validateRegistration({ ...valid, password: "b".repeat(MIN_ACCOUNT_PASSWORD_LENGTH) }).success,
+    ).toBe(true);
+  });
+
+  it("refuses a password past bcrypt's 72-byte ceiling rather than truncating it", () => {
+    // bcrypt ignores everything past 72 bytes, so a 200-character passphrase
+    // is exactly as strong as its first 72 — and two passphrases sharing that
+    // prefix both sign in. Accepting it would be a security property quietly
+    // weaker than the length bar implies.
+    const result = validateRegistration({ ...valid, password: "x".repeat(MAX_PASSWORD_BYTES + 1) });
+    expect(result.success).toBe(false);
+  });
+
+  it("counts bytes, not characters, against that ceiling", () => {
+    // 40 emoji are 40 characters and 160 bytes.
+    const result = validateRegistration({ ...valid, password: "🔐".repeat(40) });
+    expect(result.success).toBe(false);
+  });
+
+  it("refuses a password that is the address itself", () => {
+    const result = validateRegistration({
+      email: "a-long-address@example.com",
+      password: "A-Long-Address@example.com",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.errors.password).toContain("email address");
+  });
+
+  it("never trims a password", () => {
+    // Spaces are legitimate password characters. Trimming means a password
+    // accepted at registration is rejected at sign-in.
+    const padded = "  a-long-enough-passphrase  ";
+    const result = validateRegistration({ ...valid, password: padded });
+    if (result.success) expect(result.data.password).toBe(padded);
+  });
+
+  it("treats the name as optional but bounded", () => {
+    expect(validateRegistration(valid).success).toBe(true);
+    expect(validateRegistration({ ...valid, fullName: "x" }).success).toBe(false);
+    expect(validateRegistration({ ...valid, fullName: "y".repeat(101) }).success).toBe(false);
+  });
+
+  it("reports every failing field at once", () => {
+    const result = validateRegistration({ email: "nope", password: "short", fullName: "x" });
+    expect(result.success).toBe(false);
+    if (!result.success)
+      expect(Object.keys(result.errors).sort()).toEqual(["email", "fullName", "password"]);
+  });
+});
+
+describe("validateSignIn", () => {
+  it("checks presence and shape, not the password rules", () => {
+    // Applying the rules here would lock out anybody whose existing password
+    // predates a raised bar, at the one screen where they can do nothing about
+    // it — and would say that the address is a real account.
+    const result = validateSignIn({ email: "person@example.com", password: "old" });
+    expect(result.success).toBe(true);
+  });
+
+  it("still requires both fields", () => {
+    const result = validateSignIn({});
+    expect(result.success).toBe(false);
+    if (!result.success) expect(Object.keys(result.errors).sort()).toEqual(["email", "password"]);
+  });
+
+  it("rejects an address that is not one", () => {
+    expect(validateSignIn({ email: "nope", password: "something" }).success).toBe(false);
+  });
+});
+
+describe("validateEmailOnly", () => {
+  it("accepts a valid address and normalises it", () => {
+    const result = validateEmailOnly({ email: " Person@Example.com " });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.email).toBe("person@example.com");
+  });
+
+  it("rejects a missing or malformed address", () => {
+    expect(validateEmailOnly({}).success).toBe(false);
+    expect(validateEmailOnly({ email: "nope" }).success).toBe(false);
+  });
+});
+
+describe("validateNewPassword", () => {
+  it("applies the same length rules as registration", () => {
+    expect(validateNewPassword({ password: "a-long-enough-passphrase" }).success).toBe(true);
+    expect(validateNewPassword({ password: "short" }).success).toBe(false);
+  });
+
+  it("compares against an address the caller supplies from the session", () => {
+    // The form never asks for an address; the session has one, so the rule is
+    // still enforceable.
+    const password = "person-long@example.com";
+    expect(validateNewPassword({ password }).success).toBe(true);
+    expect(validateNewPassword({ password }, "person-long@example.com").success).toBe(false);
+  });
+});
+
+describe("validateProfile", () => {
+  it("accepts a name and clears it when empty", () => {
+    const named = validateProfile({ fullName: "Jordan Rivera" });
+    if (named.success) expect(named.data.fullName).toBe("Jordan Rivera");
+
+    const cleared = validateProfile({ fullName: "   " });
+    expect(cleared.success).toBe(true);
+    if (cleared.success) expect(cleared.data.fullName).toBeNull();
+  });
+
+  it("bounds the name at both ends", () => {
+    expect(validateProfile({ fullName: "x" }).success).toBe(false);
+    expect(validateProfile({ fullName: "y".repeat(101) }).success).toBe(false);
+  });
+
+  it("silently drops anything else it is given", () => {
+    // The escalation this closes: a role in the request body reaching the
+    // database. It cannot, because the validated payload has no field for it.
+    const result = validateProfile({ fullName: "Jordan", role: "admin", email: "new@x.co" });
+    expect(result.success).toBe(true);
+    if (result.success) expect(Object.keys(result.data)).toEqual(["fullName"]);
   });
 });

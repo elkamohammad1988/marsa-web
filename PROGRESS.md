@@ -1047,3 +1047,121 @@ Every Critical and every High in `AUDIT.md` is closed. What remains from the
 original backlog is Batch 11 (retention), Batch 13 (end-to-end smoke tests),
 Batch 17 (ESLint 9) and Batch 18 (operational documentation) — none of them
 risk-driven.
+
+## Milestone 1 — customer authentication · 2026-07-27
+
+Branch `feat/auth-foundation`. The first non-remediation work in this
+repository: `AUDIT.md` is closed and the honesty programme is down to its last
+blocked item, so this adds a capability rather than correcting one.
+
+### What shipped
+
+Registration, email confirmation, sign-in, sign-out, password recovery,
+session persistence with silent token renewal, one profile per account, and a
+two-role authorisation model — Supabase Auth over its REST API with no SDK, an
+HMAC-signed `httpOnly` session cookie, and authorisation enforced by Row Level
+Security in Postgres.
+
+Architecture, setup and the security matrix are in `AUTHENTICATION.md`. What
+follows is only what a reader of this file would not find there.
+
+### Four decisions
+
+**No `@supabase/ssr`.** Its cookies exist to be read by a browser client, so
+they cannot be `httpOnly`. Nothing in this application authenticates from the
+browser — every call is a route handler or a server component — so the session
+is `httpOnly` and no Supabase token exists in browser JavaScript at all. It
+also keeps the README's four-dependency claim true and avoids a second
+PostgREST client sitting beside `lib/postgrest.ts` with different timeout,
+error and escaping behaviour. The cost is nine endpoints of code we own against
+an API we do not control; `tests/gotrue.test.ts` exercises every one.
+
+**A signed envelope around Supabase's tokens.** Middleware has to answer
+"signed in, as what role" before every protected page, on Edge, without a
+network call. The alternatives were putting Supabase's JWT signing secret in
+the environment — a secret whose disclosure forges any user — or fetching a
+JWKS and implementing ES256. An HMAC over our own payload is one
+`crypto.subtle` call and reuses what the admin session has run on since audit
+S5, now shared in `lib/signed-cookie.ts`. What it gives up is stated in the
+module: a revoked session still verifies for up to one access-token lifetime,
+which is the same window a verified Supabase JWT would have given.
+
+**The database decides who reads what.** `lib/profiles.ts` never touches the
+service-role key. `listProfiles` is written as "select every profile" with no
+role filter and returns the directory to an administrator and exactly one row
+to everybody else, because migration 004's policies say so. The practical test:
+if a role in a session cookie were ever wrong, `/account/admin` would open and
+show one row.
+
+**Two authentication systems, not one.** `/admin` stays a single shared
+operator password over form submissions. Merging it into the role model would
+mean that one password could read customer rows.
+
+### Two bugs the tests found in my own code
+
+`noticeFor()` used `code in AUTH_NOTICES`, and `in` walks the prototype chain —
+so `/login?error=toString` resolved to `Object.prototype.toString` and handed a
+*function* to the page as its notice. `Object.hasOwn` now.
+
+The renewed session cookie was initially written only onto the response. The
+page rendering that same request still read the old cookie — and after a long
+absence that access token is already expired, so the first page someone sees on
+coming back would fail to load any data, once, for no visible reason.
+`NextResponse.next({ request })` forwards it.
+
+### The existing test that changed, and why exactly one did
+
+`tests/migrations.test.ts` asserted *"never creates a row level security
+policy"*. That was right while every row belonged to the operator: a form
+submission has no owner but the business, so RLS-on-zero-policies plus the
+service-role key is a complete model.
+
+A profile has an owner. Keeping zero policies would leave one customer's row
+separated from another's only by a filter in a route handler, and a filter is
+something a future handler can forget. So 004 adds policies, and the property
+that assertion was defending is restated more strictly: no policy grants
+anything to `anon` or `public`, every policy is scoped to `authenticated`,
+every policy is constrained by `auth.uid()` or `is_admin()`, only `select` and
+`update` are granted at all, and every policy is dropped before it is created
+so the directory stays re-runnable. One assertion out, five in.
+
+That is the only pre-existing assertion that moved. Verified rather than
+asserted: `main`'s copies of the two modified test files were checked out and
+run against the new schema, and exactly one test failed — that one.
+
+### The honesty consequence
+
+Accounts store real email addresses, which made three sitewide claims false.
+The maintainer chose to narrow them to the marketing forms rather than hedge
+the account area, so:
+
+- `ConceptBadge` says the *marketing forms* discard input, and states plainly
+  that creating an account stores an email address and, if given, a name.
+- The footer chip "No data collected" is gone. It was replaced rather than
+  reworded because a privacy claim that holds for most of a site is a false
+  one, and the badge row has no space to say it precisely; `ConceptBadge` does.
+- The README's "nothing here can be signed up to" is now what is the case, and
+  its Roadmap no longer lists customer authentication as deferred.
+
+The marketing forms themselves were not touched.
+`tests/forms-collect-nothing.test.ts` passes unchanged.
+
+Two stale claims found on the way and corrected: the README said 367 tests in
+24 files (it was 691 in 34 before this work, 909 in 40 after), and it described
+placeholder photographs under `public/images/` — a directory that no longer
+exists, because the artwork batch replaced them with drawings in markup.
+
+### Verification
+
+`npm run typecheck` · `npm run lint` · `npm test` · `npm run build` — all
+clean. 913 tests across 40 files, up from 691 across 34. All 49 statically
+generated pages stay static: the account area is dynamic, the marketing site is
+not.
+
+### Left for a human
+
+`H21` in `PROJECT-PLAN.md`. Nothing was applied to the live Supabase project.
+Migration 004 is written and tested but not run, and the two dashboard settings
+it needs — the redirect allow-list and the email templates — cannot be set from
+code. Until all four steps are done the account area is completely inert and
+every auth page says what is missing.

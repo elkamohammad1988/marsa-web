@@ -6,10 +6,11 @@ import {
   getAdminConfig,
   sessionCookieOptions,
 } from "@/lib/admin-auth";
-import { clientKey, rateLimitShared } from "@/lib/rate-limit";
+import { clientKey } from "@/lib/rate-limit";
 import {
   ADMIN_LOGIN_TIERS,
   ADMIN_LOGIN_GLOBAL,
+  checkTiers,
   retryAfterSeconds,
 } from "@/lib/api-rate-limit";
 
@@ -36,26 +37,17 @@ export async function POST(request: Request) {
 
   // Every tier on every attempt, plus a global ceiling for attempts spread
   // across many addresses. Checked together so the response can name the
-  // longest wait rather than the first one that tripped.
-  const verdicts = await Promise.all([
-    ...ADMIN_LOGIN_TIERS.map((tier) =>
-      rateLimitShared(`${tier.scope}${ip}`, { limit: tier.limit, windowMs: tier.windowMs }),
-    ),
-    rateLimitShared(ADMIN_LOGIN_GLOBAL.key, {
-      limit: ADMIN_LOGIN_GLOBAL.limit,
-      windowMs: ADMIN_LOGIN_GLOBAL.windowMs,
-    }),
-  ]);
-
-  const blocked = verdicts.filter((v) => !v.ok);
-  if (blocked.length) {
-    const resetAt = Math.max(...blocked.map((v) => v.resetAt));
+  // longest wait rather than the first one that tripped. The loop that does it
+  // moved to `checkTiers` when the customer sign-in route needed the same
+  // shape; the tiers themselves are still this route's own.
+  const limit = await checkTiers(ip, ADMIN_LOGIN_TIERS, ADMIN_LOGIN_GLOBAL);
+  if (!limit.ok) {
     return NextResponse.json(
       { error: "Too many attempts. Try again later." },
       {
         status: 429,
         headers: {
-          "retry-after": String(retryAfterSeconds(resetAt)),
+          "retry-after": String(retryAfterSeconds(limit.resetAt)),
           "cache-control": "no-store",
         },
       },

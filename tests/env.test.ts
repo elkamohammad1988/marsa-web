@@ -166,3 +166,55 @@ describe("assertEnvironment", () => {
     expect(() => assertEnvironment({ NODE_ENV: "production" })).not.toThrow();
   });
 });
+
+describe("customer account configuration", () => {
+  const VALID_SECRET = "0".repeat(64);
+
+  it("accepts a complete set", () => {
+    expect(
+      validateEnvironment({
+        SUPABASE_URL: "https://project.supabase.co",
+        SUPABASE_SERVICE_ROLE_KEY: "service-key",
+        SUPABASE_ANON_KEY: "anon-key",
+        AUTH_SESSION_SECRET: VALID_SECRET,
+      }),
+    ).toEqual([]);
+  });
+
+  it("reports a half-configured set rather than letting sign-in silently fail", () => {
+    // The shape this module exists for: it boots, serves traffic, looks
+    // healthy, and has no working sign-in.
+    const missingSecret = validateEnvironment({
+      SUPABASE_URL: "https://project.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "service-key",
+      SUPABASE_ANON_KEY: "anon-key",
+    });
+    expect(missingSecret.map((i) => i.variable)).toContain("AUTH_SESSION_SECRET");
+
+    const missingKey = validateEnvironment({ AUTH_SESSION_SECRET: VALID_SECRET });
+    expect(missingKey.map((i) => i.variable)).toContain("SUPABASE_ANON_KEY");
+  });
+
+  it("rejects a signing secret short enough to be guessed", () => {
+    const issues = validateEnvironment({
+      SUPABASE_URL: "https://project.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "service-key",
+      SUPABASE_ANON_KEY: "anon-key",
+      AUTH_SESSION_SECRET: "too-short",
+    });
+    expect(issues.find((i) => i.variable === "AUTH_SESSION_SECRET")).toBeTruthy();
+  });
+
+  it("refuses to let the signing secret be shipped to the browser", () => {
+    // A NEXT_PUBLIC_ prefix on this one value would let anybody forge a
+    // session for any account.
+    const issues = validateEnvironment({ NEXT_PUBLIC_AUTH_SESSION_SECRET: VALID_SECRET });
+    expect(issues.map((i) => i.variable)).toContain("NEXT_PUBLIC_AUTH_SESSION_SECRET");
+  });
+
+  it("leaves an unconfigured environment alone", () => {
+    // The site runs with an empty environment by design; accounts being off is
+    // a supported state, not a misconfiguration.
+    expect(validateEnvironment({})).toEqual([]);
+  });
+});

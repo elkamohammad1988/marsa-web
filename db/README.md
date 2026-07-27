@@ -11,6 +11,7 @@ PostgreSQL 14+ behind PostgREST. Supabase works out of the box.
 | `001_initial_schema.sql` | `submissions`, `demo_events`, `rate_limit_hits`, their indexes, RLS, `check_rate_limit()`, and the `schema_migrations` ledger |
 | `002_rate_limit_window_index.sql` | Index on `rate_limit_hits(window_start)`; splits the purge into `purge_rate_limit_hits()` and takes it off the hot path (audit B7) |
 | `003_aggregate_functions.sql` | `demo_funnel()` and `submission_stats()` — aggregation in Postgres rather than in Node over rows pulled across HTTP (audit B3, B4) |
+| `004_auth_profiles.sql` | `profiles` keyed to `auth.users`, the sign-up / email-sync / `updated_at` triggers, `is_admin()`, the first RLS **policies** in this schema, and the privileges that make `role` unwritable from a browser session |
 
 Before this existed there was one apply-once file with no record of what had
 been applied where (audit P4). Every `create table if not exists` is safe to
@@ -48,9 +49,12 @@ select version, applied_at from public.schema_migrations order by version;
 
 ## Verifying the security model
 
-RLS is enabled with **no policies** on every table, so the anon key can read
-nothing. The app reaches the database only from server code using the
-service-role key, which bypasses RLS.
+Two models now, and the difference is who owns a row.
+
+**Operator-owned tables** — `submissions`, `demo_events`, `rate_limit_hits`,
+`schema_migrations`. RLS is enabled with **no policies**, so the anon key can
+read nothing. The app reaches them only from server code using the service-role
+key, which bypasses RLS.
 
 ```sql
 select
@@ -68,6 +72,37 @@ order by c.relname;
 ```
 
 Every row must report `locked_down = true`.
+
+**User-owned rows** — `profiles`. A profile has an owner, so "no policies"
+would leave one customer's row separated from another's only by a filter in a
+route handler, and a filter is something a future handler can forget. Policies
+mean the database refuses: a signed-in user's token yields their row and
+nothing else, whatever query the application sends.
+
+The property the older rule protected is kept and stated more precisely: **no
+policy grants anything to `anon` or `public`.**
+
+```sql
+select policyname, roles, cmd, qual
+from pg_policies
+where schemaname = 'public' and tablename = 'profiles'
+order by policyname;
+```
+
+Every row must show `roles = {authenticated}` and a `qual` mentioning
+`auth.uid()` or `is_admin()`.
+
+`role` must also be unwritable from a browser session. This should return no
+row for `authenticated`:
+
+```sql
+select grantee, privilege_type
+from information_schema.column_privileges
+where table_schema = 'public' and table_name = 'profiles' and column_name = 'role';
+```
+
+`tests/migrations.test.ts` asserts all of the above against the SQL itself, so
+a migration that weakened it would fail the build rather than the audit.
 
 ## Scheduled maintenance
 

@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { rateLimitShared } from "@/lib/rate-limit";
+import { hmacHex } from "@/lib/signed-cookie";
 
 /**
  * Shared pieces for rate-limiting public GET endpoints.
@@ -48,6 +50,124 @@ export const ADMIN_LOGIN_GLOBAL = {
   limit: 50,
   windowMs: 15 * 60_000,
 } as const;
+
+/* ------------------------------------------------- customer authentication */
+
+export type RateLimitTier = { scope: string; limit: number; windowMs: number };
+
+export type GlobalCeiling = { key: string; limit: number; windowMs: number };
+
+/**
+ * Sign-in attempts from one address, in the same escalating shape as the admin
+ * tiers above: a burst trips the short window, a grinder trips a longer one.
+ *
+ * Looser than the admin's 5-per-15-minutes because the population is
+ * different. There is one operator, who knows their password; there are many
+ * customers, and a person who has forgotten which of two passwords they used
+ * should not be locked out for a quarter of an hour on the third try.
+ */
+export const AUTH_SIGN_IN_TIERS: readonly RateLimitTier[] = [
+  { scope: "auth-signin", limit: 10, windowMs: 15 * 60_000 },
+  { scope: "auth-signin-hour", limit: 30, windowMs: 60 * 60_000 },
+  { scope: "auth-signin-day", limit: 60, windowMs: 24 * 60 * 60_000 },
+];
+
+/**
+ * Sign-in attempts against one *account*, whatever address they come from.
+ *
+ * The per-IP tiers above are the wrong instrument for the attack that matters
+ * most here: someone working through a password list against one known email,
+ * from a rotating pool of addresses, trips none of them. This tier is what
+ * that attack hits, and a real person mistyping their own password does not.
+ */
+export const AUTH_SIGN_IN_ACCOUNT_TIERS: readonly RateLimitTier[] = [
+  { scope: "auth-signin-account", limit: 10, windowMs: 15 * 60_000 },
+  { scope: "auth-signin-account-hour", limit: 25, windowMs: 60 * 60_000 },
+];
+
+/** Registration. Tight: a real person does this once. */
+export const AUTH_SIGN_UP_TIERS: readonly RateLimitTier[] = [
+  { scope: "auth-signup", limit: 5, windowMs: 60 * 60_000 },
+  { scope: "auth-signup-day", limit: 10, windowMs: 24 * 60 * 60_000 },
+];
+
+/**
+ * Password recovery and confirmation re-sends.
+ *
+ * These are the two endpoints that cause mail to be delivered to an address
+ * the caller chose, so the thing being rationed is not compute but somebody
+ * else's inbox — and the sender reputation of the domain doing the sending.
+ */
+export const AUTH_EMAIL_TIERS: readonly RateLimitTier[] = [
+  { scope: "auth-email", limit: 5, windowMs: 60 * 60_000 },
+];
+
+/** The same, per target address, so one mailbox cannot be flooded from many IPs. */
+export const AUTH_EMAIL_ACCOUNT_TIERS: readonly RateLimitTier[] = [
+  { scope: "auth-email-account", limit: 3, windowMs: 60 * 60_000 },
+];
+
+/**
+ * Ceilings across all callers, so an attempt spread thinly over many addresses
+ * still trips something. Sized well above plausible legitimate volume for a
+ * site of this size — reaching either from real traffic would be a good
+ * problem, and raising a number here is a one-line change.
+ */
+export const AUTH_SIGN_IN_GLOBAL: GlobalCeiling = {
+  key: "auth-signin:global",
+  limit: 200,
+  windowMs: 15 * 60_000,
+};
+
+export const AUTH_EMAIL_GLOBAL: GlobalCeiling = {
+  key: "auth-email:global",
+  limit: 50,
+  windowMs: 60 * 60_000,
+};
+
+/**
+ * A rate-limit bucket for an email address that does not contain the address.
+ *
+ * The shared limiter writes its key into `rate_limit_hits.key` in Postgres.
+ * Bucketing per account is worth having; storing a column of customer email
+ * addresses in a rate-limiting table to get it is not — that table has no
+ * retention policy, no access policy of its own, and no reason to hold
+ * personal data. An HMAC under the session secret gives a stable bucket per
+ * address that cannot be read back into one.
+ */
+export async function accountBucket(email: string, secret: string): Promise<string> {
+  return (await hmacHex(email.trim().toLowerCase(), secret)).slice(0, 32);
+}
+
+/**
+ * Check every tier at once, plus an optional global ceiling.
+ *
+ * All of them, on every attempt, rather than stopping at the first — so the
+ * response can name the longest wait instead of the first one that tripped,
+ * and so the effective ceiling tightens the longer an attack runs.
+ *
+ * Written once here because the admin login route had it inline and the four
+ * authentication routes would each have grown their own copy.
+ */
+export async function checkTiers(
+  suffix: string,
+  tiers: readonly RateLimitTier[],
+  global: GlobalCeiling | null = null,
+): Promise<{ ok: boolean; resetAt: number }> {
+  const verdicts = await Promise.all([
+    ...tiers.map((tier) =>
+      rateLimitShared(`${tier.scope}${suffix}`, { limit: tier.limit, windowMs: tier.windowMs }),
+    ),
+    ...(global
+      ? [rateLimitShared(global.key, { limit: global.limit, windowMs: global.windowMs })]
+      : []),
+  ]);
+
+  const blocked = verdicts.filter((v) => !v.ok);
+  return blocked.length
+    ? { ok: false, resetAt: Math.max(...blocked.map((v) => v.resetAt)) }
+    : { ok: true, resetAt: 0 };
+}
 
 /** Seconds until the window resets, floored at 1 so the header is never "0". */
 export function retryAfterSeconds(resetAt: number): number {
