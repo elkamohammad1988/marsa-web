@@ -204,18 +204,42 @@ describe("blogPostingSchema", () => {
 });
 
 describe("organizationSchema", () => {
-  it("publishes only contact channels the site actually shows", () => {
+  /**
+   * These two assertions used to read `contactPoint.map(...)` and
+   * `sameAs` directly, because both were emitted unconditionally against
+   * defaults that invented a support address and three social profiles at a
+   * domain nobody owns. Those defaults are now empty (#24), so the keys are
+   * *absent* rather than present-and-blank — a `ContactPoint` whose `email` is
+   * `""` is a worse claim than no contact point at all, and `sameAs` is a
+   * machine-readable assertion of ownership.
+   *
+   * The invariant is therefore about shape, not about a particular
+   * configuration: whatever is emitted must be real, and nothing may be
+   * emitted empty. That holds both here and on a deployment that has the
+   * environment variables set.
+   */
+  it("emits no empty contact channel", () => {
     const schema = organizationSchema();
-    const emails = schema.contactPoint.map((c) => c.email);
+    expect("contactPoint" in schema).toBe(Boolean(schema.contactPoint?.length));
 
-    expect(schema.contactPoint.map((c) => c.contactType)).toEqual(["customer support", "sales"]);
-    for (const email of emails) expect(email).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    for (const c of schema.contactPoint ?? []) {
+      expect(c.email).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+      expect(["customer support", "sales"]).toContain(c.contactType);
+    }
   });
 
   it("links only to profiles configured as absolute URLs", () => {
-    for (const profile of organizationSchema().sameAs) {
+    const schema = organizationSchema();
+    expect("sameAs" in schema).toBe(Boolean(schema.sameAs?.length));
+
+    for (const profile of schema.sameAs ?? []) {
       expect(profile).toMatch(/^https:\/\//);
     }
+  });
+
+  it("claims no email address unless one is configured", () => {
+    const schema = organizationSchema();
+    if ("email" in schema) expect(schema.email).toMatch(/@/);
   });
 });
 

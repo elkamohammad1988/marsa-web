@@ -801,5 +801,6 @@ they think they are.
 carries `Organization`, `WebSite`, `BreadcrumbList` and `FAQPage`, with the
 breadcrumb reading Home → EU Business Account and "Business" correctly absent;
 `/legal/privacy` the same shape; the blog post carries **exactly one**
-`BreadcrumbList`, not two. Sitemap: 33 entries, 6 with `lastmod`.
-tsc exit 0 · lint clean · 561 tests / 30 files (from 503/29) · build 49 pages.
+`BreadcrumbList`, not two. Sitemap: 32 entries, 6 with `lastmod` — 32 not
+33 because the careers page was deleted in #26.
+tsc exit 0 · lint clean · 645 tests / 34 files (from 587/33) · build 55 routes.
