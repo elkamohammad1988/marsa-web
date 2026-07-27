@@ -873,5 +873,5 @@ stepping back and forward is consistent rather than destructive.
 **Evidence, against the generated HTML:** the demo panel is down from three
 live regions to two targeted ones, all eight rail labels are present in the
 markup at every viewport, the Back control and the blocker hint are correctly
-absent on the welcome step. tsc exit 0 · lint clean · 571 tests / 30 files ·
-build 49 pages, `/demo` at 7.18 kB.
+absent on the welcome step. tsc exit 0 · lint clean · 655 tests / 34 files ·
+build 55 routes.
