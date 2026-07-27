@@ -739,5 +739,5 @@ directly: one asserting the budget is 8000ms and reaches the message, and one
 asserting the signal is **still armed while the body is being read**, which is
 the case the old implementation left unbounded.
 
-**Evidence:** tsc exit 0 · lint clean · 503 tests / 29 files (from 488/28) ·
-build 49 pages.
+**Evidence:** tsc exit 0 · lint clean · 587 tests / 33 files (from 572/32) ·
+build 54 routes.
