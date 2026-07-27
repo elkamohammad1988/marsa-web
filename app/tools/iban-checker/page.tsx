@@ -89,8 +89,7 @@ export default function Page() {
         description="Open a free Marsa account and receive a multi-currency IBAN in minutes."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
       />
     </>
   );

@@ -1,18 +1,18 @@
-import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { Heading } from "@/components/ui/Heading";
 import { Badge } from "@/components/ui/Badge";
 import { CheckBullet } from "@/components/ui/CheckBullet";
 import { Button } from "@/components/ui/Button";
+import { BrandArt, type ArtName } from "@/components/art/BrandArt";
 
 type CardShowcaseProps = {
   eyebrow?: string;
   title: string;
   description?: string;
   bullets: string[];
-  imageSrc: string;
-  imageAlt: string;
+  /** Each illustration carries its own description — see `BrandArt`. */
+  art: ArtName;
   cta?: { label: string; href: string };
   reverse?: boolean;
 };
@@ -22,8 +22,7 @@ export function CardShowcase({
   title,
   description,
   bullets,
-  imageSrc,
-  imageAlt,
+  art,
   cta,
   reverse,
 }: CardShowcaseProps) {
@@ -36,13 +35,7 @@ export function CardShowcase({
           }`}
         >
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-card-lg bg-surface-blue-tint">
-            <Image
-              src={imageSrc}
-              alt={imageAlt}
-              fill
-              sizes="(min-width:1024px) 48vw, 100vw"
-              className="object-cover"
-            />
+            <BrandArt name={art} />
           </div>
           <div>
             {eyebrow && <Badge tone="blue">{eyebrow}</Badge>}

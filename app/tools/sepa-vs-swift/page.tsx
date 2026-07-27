@@ -125,8 +125,7 @@ export default function Page() {
         description="Open a Marsa account for free SEPA transfers and low-cost SWIFT payments worldwide."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
       />
     </>
   );

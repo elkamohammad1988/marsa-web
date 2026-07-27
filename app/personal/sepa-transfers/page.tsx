@@ -31,8 +31,7 @@ export default function Page() {
         description="European SEPA Payments For Modern Lifestyles. Send Money Across All 36 SEPA Countries For Free."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/cards-stack.png"
-        imageAlt="Marsa cards"
+        art="card-stack"
         tone="cream"
       />
 
@@ -95,9 +94,9 @@ export default function Page() {
       />
 
       <CardShowcase
-        eyebrow="Mastercard"
-        title="Spend Anywhere With Marsa Mastercard"
-        description="Pair your SEPA account with a Marsa Mastercard for real-time spend control everywhere."
+        eyebrow="The Card"
+        title="Spend Anywhere With The Marsa Card"
+        description="Pair your SEPA account with a Marsa card for real-time spend control everywhere."
         bullets={[
           "Real-time payment notifications",
           "Apple & Google Pay support",
@@ -106,8 +105,7 @@ export default function Page() {
           "Auto-categorised spending",
           "Tap to send to a friend",
         ]}
-        imageSrc="/images/cards-stack.png"
-        imageAlt="Marsa Mastercard"
+        art="card-stack"
         reverse
       />
 
@@ -149,8 +147,7 @@ export default function Page() {
         description="Open a free Marsa personal account and start sending SEPA payments today."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
       />
     </>
   );

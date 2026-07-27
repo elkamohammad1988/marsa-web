@@ -35,8 +35,7 @@ export default function Page() {
         ]}
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/card-phone.png"
-        imageAlt="Marsa business account for agencies and freelancers"
+        art="card-and-phone"
         tone="navy"
       />
 
@@ -139,8 +138,7 @@ export default function Page() {
         title="Invoice The World, Keep More Of It"
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa business account coin"
+        art="coin"
       />
     </>
   );

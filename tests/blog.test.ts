@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { posts, readingTimeMinutes, type BlogPost } from "@/lib/blog";
+import { posts, readingTimeMinutes, postSocialImage, type BlogPost } from "@/lib/blog";
 
 const make = (words: number): BlogPost => ({
   slug: "x",
@@ -7,7 +7,7 @@ const make = (words: number): BlogPost => ({
   excerpt: "",
   date: "",
   category: "",
-  cover: "",
+  cover: "corridor",
   body: [{ paragraphs: [Array(words).fill("word").join(" ")] }],
 });
 
@@ -25,6 +25,25 @@ describe("blog data integrity", () => {
   it("has unique slugs", () => {
     const slugs = posts.map((p) => p.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
+  });
+
+  it("gives every post its own cover", () => {
+    // The six `cover` paths this replaced resolved to five distinct images:
+    // posts 2 and 4 were byte-identical, so the blog index showed the same
+    // picture twice and neither told a reader anything about either article.
+    const covers = posts.map((p) => p.cover);
+    expect(new Set(covers).size).toBe(covers.length);
+  });
+
+  it("addresses each post's share card under its own slug", () => {
+    // OpenGraph, Twitter and `BlogPosting.image` all read this one function;
+    // if it stopped varying by slug, every post would share a card and the
+    // duplication would be back in the place crawlers actually look.
+    const images = posts.map((p) => postSocialImage(p.slug));
+    expect(new Set(images).size).toBe(images.length);
+    for (const post of posts) {
+      expect(postSocialImage(post.slug)).toBe(`/blog/${post.slug}/opengraph-image`);
+    }
   });
 });
 

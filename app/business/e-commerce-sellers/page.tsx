@@ -30,8 +30,7 @@ export default function Page() {
         description="Optimised Receiving From Amazon, Shopify, Stripe, And All Major Marketplaces. Settle Inside SEPA."
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/phone-apps.png"
-        imageAlt="Marsa for e-commerce"
+        art="phone-accounts"
         tone="navy"
       />
 
@@ -131,8 +130,7 @@ export default function Page() {
         title="Open Your EU E-Commerce Business Account"
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/coin-gold.png"
-        imageAlt="Marsa business coin"
+        art="coin-warm"
       />
     </>
   );

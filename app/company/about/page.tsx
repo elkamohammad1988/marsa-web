@@ -116,8 +116,7 @@ export default function Page() {
         description="Open an account in minutes, or explore a career on our team."
         primaryCta={{ label: "Open An Account", href: "/get-started" }}
         secondaryCta={{ label: "See Open Roles", href: "/company/careers" }}
-        imageSrc="/images/coin-gold.png"
-        imageAlt="Marsa coin"
+        art="coin-warm"
       />
     </>
   );

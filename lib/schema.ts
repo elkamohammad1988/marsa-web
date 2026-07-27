@@ -1,5 +1,5 @@
 import { absoluteUrl, siteConfig } from "@/lib/site";
-import type { BlogPost } from "@/lib/blog";
+import { postSocialImage, type BlogPost } from "@/lib/blog";
 
 export function organizationSchema() {
   const sameAs = [
@@ -64,7 +64,9 @@ export function blogPostingSchema(post: BlogPost) {
     "@type": "BlogPosting",
     headline: post.title,
     description: post.excerpt,
-    image: absoluteUrl(post.cover),
+    // The generated share card, not the on-page cover. The cover is drawn in
+    // markup, which a crawler fetching an image URL cannot render.
+    image: absoluteUrl(postSocialImage(post.slug)),
     datePublished: post.date,
     articleSection: post.category,
     url: absoluteUrl(`/blog/${post.slug}`),

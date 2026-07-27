@@ -1,3 +1,5 @@
+import type { BlogMotif } from "@/components/art/captions";
+
 export type BlogPost = {
   slug: string;
   title: string;
@@ -13,7 +15,16 @@ export type BlogPost = {
    */
   date: string;
   category: string;
-  cover: string;
+  /**
+   * Which cover is drawn, not which file is loaded.
+   *
+   * This was a path into `public/images/`, and the six paths behind it resolved
+   * to five distinct photographs — posts 2 and 4 were byte-identical, and every
+   * one of them was also being used elsewhere as a product shot. A union type
+   * means a seventh post cannot ship until someone has decided what its cover
+   * actually shows.
+   */
+  cover: BlogMotif;
   body: { heading?: string; paragraphs: string[] }[];
 };
 
@@ -26,7 +37,7 @@ const allPosts: BlogPost[] = [
       "Why European clients hesitate to pay non-EU accounts, and how a local IBAN removes the friction, delays, and lost margin.",
     date: "2025-03-30",
     category: "Business",
-    cover: "/images/blog-1.png",
+    cover: "corridor",
     body: [
       {
         paragraphs: [
@@ -63,7 +74,7 @@ const allPosts: BlogPost[] = [
       "How to cut foreign-exchange costs on every international payment — practical strategies and tools for 2026.",
     date: "2026-02-20",
     category: "Business",
-    cover: "/images/blog-2.png",
+    cover: "spread",
     body: [
       {
         paragraphs: [
@@ -109,7 +120,7 @@ const allPosts: BlogPost[] = [
       "The hidden cost of FX spreads and the simple rule that will save your business thousands.",
     date: "2026-01-16",
     category: "Treasury",
-    cover: "/images/blog-3.png",
+    cover: "rate-line",
     body: [
       {
         paragraphs: [
@@ -151,7 +162,7 @@ const allPosts: BlogPost[] = [
       "Freelancers in 100+ countries are switching to multi-currency IBANs. Here's what changed in 2026.",
     date: "2026-04-12",
     category: "Freelance",
-    cover: "/images/blog-4.png",
+    cover: "currencies",
     body: [
       {
         paragraphs: [
@@ -193,7 +204,7 @@ const allPosts: BlogPost[] = [
       "Marketplaces tightened payout rules in 2026. A European IBAN is no longer optional for cross-border sellers.",
     date: "2026-03-30",
     category: "E-commerce",
-    cover: "/images/blog-5.png",
+    cover: "payout",
     body: [
       {
         paragraphs: [
@@ -234,7 +245,7 @@ const allPosts: BlogPost[] = [
       "A practical five-step playbook to consolidate accounts, hold currencies, hedge FX, and accelerate growth in 2026.",
     date: "2026-03-30",
     category: "Treasury",
-    cover: "/images/blog-6.png",
+    cover: "ledger",
     body: [
       {
         paragraphs: [
@@ -311,6 +322,19 @@ export function formatPostDate(date: string): string {
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(`${date}T00:00:00Z`));
+}
+
+/**
+ * The bitmap a crawler gets for a post: OpenGraph, Twitter, and
+ * `BlogPosting.image`.
+ *
+ * On-page covers are drawn in markup (`components/art/BlogCover.tsx`), which a
+ * social scraper cannot render — so the share card is generated separately at
+ * build time by `app/blog/[slug]/opengraph-image.tsx` and addressed here. One
+ * function, so the route and the three metadata consumers cannot drift apart.
+ */
+export function postSocialImage(slug: string): string {
+  return `/blog/${slug}/opengraph-image`;
 }
 
 /** Estimated reading time in minutes, derived from the post body (~200 wpm). */

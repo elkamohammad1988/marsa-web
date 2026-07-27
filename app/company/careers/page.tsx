@@ -107,8 +107,7 @@ export default function Page() {
         title="Ready To Make An Impact?"
         description="Tell us about yourself and the role you're interested in."
         primaryCta={{ label: "Get In Touch", href: "/contact?topic=general" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
       />
     </>
   );

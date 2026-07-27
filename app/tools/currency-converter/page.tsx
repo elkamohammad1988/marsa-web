@@ -142,8 +142,7 @@ export default function Page() {
         description="Up To 2% FX Fees, Free SEPA Transfers, And Support In 180+ Countries."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
       />
     </>
   );

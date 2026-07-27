@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
 import { Button } from "@/components/ui/Button";
 import { BlogCard } from "@/components/sections/BlogCard";
+import { BlogCover } from "@/components/art/BlogCover";
 import { CTACard } from "@/components/sections/CTACard";
 import { JsonLd } from "@/components/JsonLd";
-import { posts, readingTimeMinutes, formatPostDate } from "@/lib/blog";
+import { posts, readingTimeMinutes, formatPostDate, postSocialImage } from "@/lib/blog";
 import { buildMetadata } from "@/lib/seo";
 import { blogPostingSchema, breadcrumbSchema } from "@/lib/schema";
 
@@ -28,7 +28,7 @@ export async function generateMetadata({
     title: post.title,
     description: post.excerpt,
     path: `/blog/${post.slug}`,
-    image: post.cover,
+    image: postSocialImage(post.slug),
     type: "article",
   });
 }
@@ -81,14 +81,7 @@ export default async function BlogPostPage({
       <section className="bg-canvas py-10 md:py-12">
         <Container>
           <div className="relative aspect-[16/8] w-full overflow-hidden rounded-card-lg">
-            <Image
-              src={post.cover}
-              alt={post.title}
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover"
-            />
+            <BlogCover motif={post.cover} category={post.category} />
           </div>
         </Container>
       </section>
@@ -136,8 +129,7 @@ export default async function BlogPostPage({
         description="Up To 2% FX Fees, Free SEPA Transfers, And Support In 180+ Countries."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
       />
     </>
   );

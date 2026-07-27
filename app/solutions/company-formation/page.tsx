@@ -36,8 +36,7 @@ export default function Page() {
         ]}
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/phone-home.png"
-        imageAlt="Marsa company formation and business account"
+        art="phone-home"
         tone="navy"
       />
 
@@ -114,8 +113,7 @@ export default function Page() {
           "A dedicated onboarding specialist",
           "SEPA and SWIFT from a single dashboard",
         ]}
-        imageSrc="/images/cards-stack.png"
-        imageAlt="Marsa business cards for a newly formed company"
+        art="card-stack"
         cta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
       />
 
@@ -157,8 +155,7 @@ export default function Page() {
         title="Start Your EU Company With Marsa"
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/coin-gold.png"
-        imageAlt="Marsa business coin"
+        art="coin-warm"
       />
     </>
   );
