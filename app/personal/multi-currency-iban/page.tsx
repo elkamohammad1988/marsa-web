@@ -31,8 +31,7 @@ export default function Page() {
         description="European Multi-Currency Account For Modern Lifestyles. Hold, Convert, And Spend In 15+ Currencies From A Single IBAN."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/phone-home.png"
-        imageAlt="Marsa Mastercard and phone"
+        art="phone-home"
         tone="cream"
       />
 
@@ -99,8 +98,8 @@ export default function Page() {
       />
 
       <CardShowcase
-        eyebrow="Mastercard"
-        title="Marsa Mastercard Card"
+        eyebrow="The Card"
+        title="The Marsa Card"
         description="Premium spending in 180+ countries with no hidden FX fees and instant transaction alerts."
         bullets={[
           "Free withdrawals up to €200/month",
@@ -110,8 +109,7 @@ export default function Page() {
           "Lock or freeze instantly",
           "Disposable virtual cards",
         ]}
-        imageSrc="/images/card-phone.png"
-        imageAlt="Marsa Mastercard"
+        art="card-and-phone"
       />
 
       <Testimonial
@@ -152,8 +150,7 @@ export default function Page() {
         description="Open a free Marsa personal account and start receiving SEPA payments in minutes."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
       />
     </>
   );

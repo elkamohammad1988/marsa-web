@@ -49,8 +49,7 @@ export default function DemoPage() {
         description="Same loop, real money. Free plan available, online application, no branch visit."
         primaryCta={{ label: "Open An Account", href: "/get-started" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
       />
     </>
   );

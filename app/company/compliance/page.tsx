@@ -95,8 +95,7 @@ export default function Page() {
         description="Have a regulatory or safeguarding question? We're happy to help."
         primaryCta={{ label: "Contact Compliance", href: "/contact?topic=compliance" }}
         secondaryCta={{ label: "Read Our Privacy Policy", href: "/legal/privacy" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
       />
     </>
   );

@@ -1,8 +1,8 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
 import { Button } from "@/components/ui/Button";
+import { BrandArt, type ArtName } from "@/components/art/BrandArt";
 import { BreadcrumbEyebrow } from "./BreadcrumbEyebrow";
 import { cn } from "@/lib/utils";
 
@@ -23,9 +23,14 @@ type HeroProps = {
   secondaryCta?: { label: string; href: string };
   /** Small reassurance line under the buttons (pricing, commitment, timing). */
   footnote?: string;
-  imageSrc?: string;
-  imageAlt?: string;
-  /** Custom visual, used instead of `imageSrc` when provided. */
+  /**
+   * Which illustration fills the visual slot. Each one carries its own
+   * description (see `components/art/BrandArt.tsx`) — there is deliberately no
+   * per-page alt string, because that pairing is exactly what drifted: pages
+   * described photographs they were not showing.
+   */
+  art?: ArtName;
+  /** Custom visual, used instead of `art` when provided. */
   visual?: ReactNode;
   /** Optional headline figures rendered below the fold line. */
   stats?: HeroStat[];
@@ -43,8 +48,7 @@ export function Hero({
   primaryCta,
   secondaryCta,
   footnote,
-  imageSrc,
-  imageAlt,
+  art,
   visual,
   stats,
   tone = "cream",
@@ -60,7 +64,7 @@ export function Hero({
           ? "bg-surface-cream text-ink"
           : "bg-canvas text-ink";
 
-  const hasVisual = Boolean(visual || imageSrc);
+  const hasVisual = Boolean(visual || art);
 
   return (
     <section
@@ -184,7 +188,7 @@ export function Hero({
           {visual ? (
             <div className="animate-scale-in [animation-delay:120ms]">{visual}</div>
           ) : (
-            imageSrc && (
+            art && (
               <div className="relative animate-scale-in [animation-delay:120ms]">
                 <div
                   aria-hidden
@@ -198,14 +202,7 @@ export function Hero({
                       : "border border-line bg-surface-blue-tint",
                   )}
                 >
-                  <Image
-                    src={imageSrc}
-                    alt={imageAlt ?? ""}
-                    fill
-                    priority
-                    sizes="(min-width:1024px) 45vw, 100vw"
-                    className="object-cover"
-                  />
+                  <BrandArt name={art} />
                 </div>
 
                 {/* Truthful live-data badge (the tools use real ECB rates). */}

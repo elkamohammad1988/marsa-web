@@ -28,8 +28,7 @@ export default function Page() {
         description="Personal And Business Accounts With A Multi-Currency IBAN. In Minutes, From Any Country."
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/coin-gold.png"
-        imageAlt="Marsa business coin"
+        art="coin-warm"
         tone="navy"
       />
 
@@ -107,8 +106,7 @@ export default function Page() {
         title="Manage Your Business Finance Globally"
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/card-phone.png"
-        imageAlt="Marsa Business app"
+        art="card-and-phone"
       />
     </>
   );

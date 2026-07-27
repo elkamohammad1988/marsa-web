@@ -104,9 +104,9 @@ export default function HomePage() {
       />
 
       <CardShowcase
-        eyebrow="Marsa Mastercard"
+        eyebrow="The Marsa Card"
         title="Spend Anywhere, Without The Hidden Fees"
-        description="Pair your account with a Marsa Mastercard for real-time control and interbank rates everywhere you go."
+        description="Pair your account with a Marsa card for real-time control and interbank rates everywhere you go."
         bullets={[
           "Apple Pay & Google Pay",
           "Real-time spend notifications",
@@ -115,8 +115,7 @@ export default function HomePage() {
           "Virtual & disposable cards",
           "Auto-categorised spending",
         ]}
-        imageSrc="/images/card-phone.png"
-        imageAlt="Marsa Mastercard and mobile app"
+        art="card-and-phone"
       />
 
       <ComparisonTable
@@ -167,8 +166,7 @@ export default function HomePage() {
         description="Low FX fees, free SEPA transfers, and support across 180+ countries."
         primaryCta={{ label: "Open An Account", href: "/get-started" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
         footnote="Physical cards available for Europe and UK customers only. All other features — IBAN, SEPA, SWIFT, FX conversion — are available worldwide."
       />
     </>

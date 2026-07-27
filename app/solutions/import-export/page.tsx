@@ -35,8 +35,7 @@ export default function Page() {
         ]}
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/phone-apps.png"
-        imageAlt="Marsa multi-currency account for importers and exporters"
+        art="phone-accounts"
         tone="navy"
       />
 
@@ -139,8 +138,7 @@ export default function Page() {
         title="Trade Globally On One Account"
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/coin-gold.png"
-        imageAlt="Marsa multi-currency coin"
+        art="coin-warm"
       />
     </>
   );

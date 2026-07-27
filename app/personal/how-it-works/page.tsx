@@ -28,8 +28,7 @@ export default function Page() {
         description="Personal And Business Accounts With A Multi-Currency IBAN. In Minutes, From Any Country, 100% Online."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/phone-apps.png"
-        imageAlt="Marsa mobile app"
+        art="phone-accounts"
         tone="white"
       />
 
@@ -95,7 +94,7 @@ export default function Page() {
           {
             question: "Can I get a physical card?",
             answer:
-              "Yes — physical Marsa Mastercard cards are shipped within 5-7 business days to all EU/UK addresses.",
+              "Yes — physical Marsa cards are shipped within 5-7 business days to all EU/UK addresses.",
           },
           {
             question: "Is there a minimum deposit?",
@@ -109,8 +108,7 @@ export default function Page() {
         title="Simplify Your Finance Wherever Life Takes You"
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/cards-stack.png"
-        imageAlt="Marsa cards"
+        art="card-stack"
       />
     </>
   );

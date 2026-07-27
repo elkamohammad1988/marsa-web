@@ -1,16 +1,22 @@
-import Image from "next/image";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { CheckBullet } from "@/components/ui/CheckBullet";
+import { BrandArt, type ArtName } from "@/components/art/BrandArt";
 import type { Plan } from "@/lib/pricing";
 
-const planImageMap: Record<string, string> = {
-  classic: "/images/card-phone.png",
-  plus: "/images/cards-stack.png",
-  premium: "/images/coin-blue.png",
-  "biz-starter": "/images/cards-stack.png",
-  "biz-growth": "/images/card-phone.png",
-  "biz-enterprise": "/images/coin-gold.png",
+/**
+ * One illustration per plan. The old map pointed six plans at three PNGs, two
+ * of which were the same photograph — so "Classic" and "Business Growth"
+ * rendered an identical picture labelled `alt="Classic card render"` and
+ * `alt="Business Growth card render"`.
+ */
+const planArt: Record<string, ArtName> = {
+  classic: "card-and-phone",
+  plus: "card-stack",
+  premium: "coin",
+  "biz-starter": "phone-accounts",
+  "biz-growth": "phone-home",
+  "biz-enterprise": "coin-warm",
 };
 
 export function PricingPlanCard({ plan }: { plan: Plan }) {
@@ -45,14 +51,8 @@ export function PricingPlanCard({ plan }: { plan: Plan }) {
         </div>
       </div>
 
-      <div className="relative mx-auto aspect-[5/4] w-full max-w-md">
-        <Image
-          src={planImageMap[plan.id] ?? "/images/card-phone.png"}
-          alt={`${plan.name} card render`}
-          fill
-          sizes="(min-width:1024px) 35vw, 90vw"
-          className="object-contain"
-        />
+      <div className="relative mx-auto aspect-[5/4] w-full max-w-md overflow-hidden rounded-card">
+        <BrandArt name={planArt[plan.id] ?? "card-and-phone"} />
       </div>
     </article>
   );

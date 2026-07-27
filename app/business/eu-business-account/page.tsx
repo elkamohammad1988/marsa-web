@@ -31,8 +31,7 @@ export default function Page() {
         description="European Business IBAN For Modern Operations. No Branch Visits. Funds Settle Inside SEPA In Seconds."
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/phone-home.png"
-        imageAlt="Marsa business app"
+        art="phone-home"
         tone="navy"
       />
 
@@ -99,8 +98,8 @@ export default function Page() {
       />
 
       <CardShowcase
-        eyebrow="Mastercard Business"
-        title="Marsa Business Mastercard"
+        eyebrow="Business Card"
+        title="The Marsa Business Card"
         description="Issue physical and virtual cards to your team with spend rules and real-time visibility."
         bullets={[
           "Unlimited virtual cards",
@@ -110,8 +109,7 @@ export default function Page() {
           "Accounting integrations",
           "Apple & Google Pay",
         ]}
-        imageSrc="/images/cards-stack.png"
-        imageAlt="Marsa Business Mastercard"
+        art="card-stack"
       />
 
       <Testimonial
@@ -152,8 +150,7 @@ export default function Page() {
         title="Manage Your Business Finance Globally With Marsa"
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/coin-gold.png"
-        imageAlt="Marsa business coin"
+        art="coin-warm"
       />
     </>
   );
