@@ -105,3 +105,76 @@ export const DEMO_SCRIPT = {
   convertUsd: 3000,
   sendEur: 1150,
 } as const;
+
+/** Everything the flow needs to decide whether the reader may move on. */
+export type DemoProgress = {
+  kycComplete: boolean;
+  usd: number;
+  eur: number;
+  hasSentSepa: boolean;
+  rateReady: boolean;
+};
+
+export type DemoAdvance = {
+  next: DemoStepId;
+  /** Null when the step may be left; otherwise the action that would unblock it. */
+  blockedBy: string | null;
+};
+
+/**
+ * Where "Continue" goes from `step`, and what is standing in the way.
+ *
+ * Pulled out of the component and made pure for two reasons. It is the flow's
+ * actual rule set, and it was previously a seven-branch ternary embedded in
+ * JSX where it could only be checked by clicking. And every gate here is one
+ * action away from opening, which is what makes naming the blocker worth
+ * doing: a disabled button with no explanation is a dead end, while "Receive
+ * the $4,820.00 payout to continue" is an instruction.
+ */
+export function advanceFrom(step: DemoStepId, progress: DemoProgress): DemoAdvance | null {
+  switch (step) {
+    case "welcome":
+      return { next: "profile", blockedBy: null };
+    case "profile":
+      return { next: "identity", blockedBy: null };
+    case "identity":
+      return {
+        next: "account",
+        blockedBy: progress.kycComplete ? null : "Waiting for the identity check to finish.",
+      };
+    case "account":
+      return { next: "receive", blockedBy: null };
+    case "receive":
+      return {
+        next: "convert",
+        blockedBy:
+          progress.usd > 0
+            ? null
+            : `Receive the ${money(DEMO_SCRIPT.payoutUsd, "USD")} payout to continue.`,
+      };
+    case "convert":
+      return {
+        next: "send",
+        blockedBy:
+          progress.eur > 0
+            ? null
+            : progress.rateReady
+              ? "Convert to euros to continue."
+              : "Waiting for the live exchange rate.",
+      };
+    case "send":
+      return {
+        next: "done",
+        blockedBy: progress.hasSentSepa ? null : "Send the SEPA transfer to continue.",
+      };
+    case "done":
+      // The end of the flow: the controls become calls to action, not a step.
+      return null;
+  }
+}
+
+/** The step before `step`, or null at the start of the flow. */
+export function previousStep(step: DemoStepId): DemoStepId | null {
+  const i = stepIndex(step);
+  return i > 0 ? DEMO_STEPS[i - 1].id : null;
+}

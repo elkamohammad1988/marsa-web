@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { MarsaMark } from "@/components/icons/Logo";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,9 @@ import {
   DEMO_STEPS,
   formatIbanBlocks,
   generateSampleIban,
+  advanceFrom,
   money,
+  previousStep,
   stepIndex,
   type AccountType,
   type Balances,
@@ -90,6 +92,38 @@ export function DemoFlow() {
   const [rateState, setRateState] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const blockedHintId = useId();
+  /**
+   * Focus moves to the step heading on every step change *except the first*.
+   * Doing it on mount pulled focus into the middle of the page on arrival, so
+   * a keyboard visitor landed past the skip link and the whole navbar with no
+   * idea they had been moved.
+   */
+  const hasNavigated = useRef(false);
+
+  /**
+   * One sentence describing what just happened, for screen readers.
+   *
+   * This replaces an `aria-live="polite"` wrapped around the entire step panel
+   * — which announced the heading, the body copy and every control on each
+   * transition, *and* fought the focus move for the same content. A live
+   * region should say what changed, and what changes here is a balance.
+   */
+  const [announcement, setAnnouncement] = useState("");
+
+  /** Currency tiles to highlight briefly after a balance moves. */
+  const [flash, setFlash] = useState<ReadonlySet<keyof Balances>>(() => new Set());
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const highlight = useCallback((...codes: (keyof Balances)[]) => {
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    setFlash(new Set(codes));
+    flashTimer.current = setTimeout(() => setFlash(new Set()), 1200);
+  }, []);
+
+  useEffect(() => () => {
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+  }, []);
 
   // First-party funnel telemetry: a random per-visit id, no cookies, no PII.
   const [sessionId] = useState(() =>
@@ -100,6 +134,7 @@ export function DemoFlow() {
   const sentRef = useRef<Set<string>>(new Set());
 
   const idx = stepIndex(step);
+  const previous = previousStep(step);
 
   const animUsd = useAnimatedNumber(balances.USD);
   const animEur = useAnimatedNumber(balances.EUR);
@@ -110,8 +145,13 @@ export function DemoFlow() {
     setActivity((prev) => [{ ...a, id: activityId.current }, ...prev]);
   }, []);
 
-  // Move focus to the step heading so keyboard/screen-reader users follow along.
+  // Move focus to the step heading so keyboard/screen-reader users follow
+  // along — but not on arrival, when nobody asked to be moved anywhere.
   useEffect(() => {
+    if (!hasNavigated.current) {
+      hasNavigated.current = true;
+      return;
+    }
     headingRef.current?.focus();
   }, [step]);
 
@@ -176,10 +216,12 @@ export function DemoFlow() {
     setRateDate(null);
     setRateState("idle");
     setKyc(0);
+    setAnnouncement("");
     setStep("welcome");
   }
 
   function receivePayout() {
+    const next = balances.USD + DEMO_SCRIPT.payoutUsd;
     setBalances((b) => ({ ...b, USD: b.USD + DEMO_SCRIPT.payoutUsd }));
     pushActivity({
       kind: "in",
@@ -187,6 +229,10 @@ export function DemoFlow() {
       meta: "Received · just now",
       amount: `+${money(DEMO_SCRIPT.payoutUsd, "USD")}`,
     });
+    highlight("USD");
+    setAnnouncement(
+      `Received ${money(DEMO_SCRIPT.payoutUsd, "USD")}. USD balance is now ${money(next, "USD")}.`,
+    );
   }
 
   function convert() {
@@ -199,9 +245,15 @@ export function DemoFlow() {
       meta: `Interbank rate ${rate.toFixed(4)}`,
       amount: money(eur, "EUR"),
     });
+    highlight("USD", "EUR");
+    setAnnouncement(
+      `Converted ${money(DEMO_SCRIPT.convertUsd, "USD")} at ${rate.toFixed(4)}. ` +
+        `EUR balance is now ${money(balances.EUR + eur, "EUR")}.`,
+    );
   }
 
   function sendSepa() {
+    const next = balances.EUR - DEMO_SCRIPT.sendEur;
     setBalances((b) => ({ ...b, EUR: b.EUR - DEMO_SCRIPT.sendEur }));
     pushActivity({
       kind: "out",
@@ -209,7 +261,19 @@ export function DemoFlow() {
       meta: "Sent · just now",
       amount: `−${money(DEMO_SCRIPT.sendEur, "EUR")}`,
     });
+    highlight("EUR");
+    setAnnouncement(
+      `Sent ${money(DEMO_SCRIPT.sendEur, "EUR")} over SEPA. EUR balance is now ${money(next, "EUR")}.`,
+    );
   }
+
+  const advance = advanceFrom(step, {
+    kycComplete: kyc >= 100,
+    usd: balances.USD,
+    eur: balances.EUR,
+    hasSentSepa: activity.some((a) => a.kind === "out"),
+    rateReady: rateState === "ready",
+  });
 
   const accountLive = idx >= stepIndex("account");
   const rateAsOf =
@@ -250,10 +314,16 @@ export function DemoFlow() {
                 )}
                 aria-hidden
               />
+              {/*
+                `sr-only sm:not-sr-only`, not `hidden sm:block`: below 640px
+                the labels were `display: none`, so the progress rail told a
+                screen-reader user on a phone nothing at all — eight unnamed
+                bars and an `aria-current` pointing at one of them.
+              */}
               <span
                 aria-current={active ? "step" : undefined}
                 className={cn(
-                  "hidden text-[11px] font-medium sm:block",
+                  "sr-only text-[11px] font-medium transition-colors sm:not-sr-only",
                   active ? "text-brand-strong" : "text-ink-subtle",
                 )}
               >
@@ -307,7 +377,19 @@ export function DemoFlow() {
               {(["EUR", "USD", "GBP"] as const).map((ccy) => {
                 const val = ccy === "USD" ? animUsd : ccy === "EUR" ? animEur : animGbp;
                 return (
-                  <div key={ccy} className="rounded-xl border border-line/70 bg-canvas/50 px-3 py-2.5">
+                  <div
+                    key={ccy}
+                    className={cn(
+                      // The number already counts up; this says *which* number
+                      // moved, which a counting animation on its own does not.
+                      // A colour change rather than motion, so it still reads
+                      // under `prefers-reduced-motion`.
+                      "rounded-xl border bg-canvas/50 px-3 py-2.5 transition-colors duration-500",
+                      flash.has(ccy)
+                        ? "border-brand-strong/50 bg-brand-blue/[0.07]"
+                        : "border-line/70",
+                    )}
+                  >
                     <p className="text-[11px] font-semibold tracking-wide text-ink-subtle">{ccy}</p>
                     <p className="mt-0.5 text-sm font-semibold tabular-nums text-ink">
                       {money(val, ccy)}
@@ -327,7 +409,9 @@ export function DemoFlow() {
             ) : (
               <ul className="mt-2 divide-y divide-line/70">
                 {activity.map((a) => (
-                  <li key={a.id} className="flex items-center gap-3 py-3">
+                  // Keyed, so only a newly prepended row plays the animation —
+                  // the rows already on screen keep their DOM node and stay put.
+                  <li key={a.id} className="flex animate-row-in items-center gap-3 py-3">
                     <span
                       className={cn(
                         "grid h-8 w-8 shrink-0 place-items-center rounded-full",
@@ -369,7 +453,19 @@ export function DemoFlow() {
 
         {/* Step content */}
         <div className="gradient-ring rounded-card-lg border border-line bg-card p-6 shadow-e2 sm:p-8">
-          <div aria-live="polite" className="min-h-[320px]">
+          {/*
+            One targeted live region, announcing what actually changed. The
+            panel below used to be wrapped in `aria-live="polite"`, so every
+            transition read out the heading, the body copy and each control —
+            while the focus move was announcing the same heading again.
+          */}
+          <p aria-live="polite" className="sr-only">
+            {announcement}
+          </p>
+
+          {/* `key` restarts the entrance on each step; 320px reserves the
+              height so the controls below do not jump between steps. */}
+          <div key={step} className="min-h-[320px] animate-step-in">
             <h2
               ref={headingRef}
               tabIndex={-1}
@@ -577,63 +673,55 @@ export function DemoFlow() {
           </div>
 
           {/* Controls */}
-          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-5">
-            {step === "welcome" && (
-              <Button type="button" onClick={() => go("profile")}>
-                Start the demo
-              </Button>
-            )}
-            {step === "profile" && (
-              <Button type="button" onClick={() => go("identity")}>
-                Continue
-              </Button>
-            )}
-            {step === "identity" && (
-              <Button type="button" onClick={() => go("account")} disabled={kyc < 100}>
-                Continue
-              </Button>
-            )}
-            {step === "account" && (
-              <Button type="button" onClick={() => go("receive")}>
-                Continue
-              </Button>
-            )}
-            {step === "receive" && (
-              <Button type="button" onClick={() => go("convert")} disabled={balances.USD === 0}>
-                Continue
-              </Button>
-            )}
-            {step === "convert" && (
-              <Button type="button" onClick={() => go("send")} disabled={balances.EUR === 0}>
-                Continue
-              </Button>
-            )}
-            {step === "send" && (
-              <Button
-                type="button"
-                onClick={() => go("done")}
-                disabled={!activity.some((a) => a.kind === "out")}
-              >
-                Continue
-              </Button>
-            )}
-            {step === "done" && (
-              <>
-                <Button href="/get-started">Open a real account</Button>
-                <Button href="/pricing" variant="outline">
-                  See pricing
+          <div className="mt-6 border-t border-line pt-5">
+            <div className="flex flex-wrap items-center gap-3">
+              {previous && (
+                <Button type="button" variant="outline" onClick={() => go(previous)}>
+                  ← Back
                 </Button>
-              </>
-            )}
+              )}
 
-            {step !== "welcome" && (
-              <button
-                type="button"
-                onClick={reset}
-                className="ml-auto text-sm font-medium text-ink-muted underline-offset-4 hover:text-ink hover:underline"
-              >
-                Restart
-              </button>
+              {advance && (
+                <Button
+                  type="button"
+                  onClick={() => go(advance.next)}
+                  disabled={Boolean(advance.blockedBy)}
+                  aria-describedby={advance.blockedBy ? blockedHintId : undefined}
+                >
+                  {step === "welcome" ? "Start the demo" : "Continue"}
+                </Button>
+              )}
+
+              {step === "done" && (
+                <>
+                  <Button href="/get-started">Open a real account</Button>
+                  <Button href="/pricing" variant="outline">
+                    See pricing
+                  </Button>
+                </>
+              )}
+
+              {step !== "welcome" && (
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="ml-auto rounded-sm text-sm font-medium text-ink-muted underline-offset-4 transition-colors hover:text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+                >
+                  Restart
+                </button>
+              )}
+            </div>
+
+            {/*
+              A disabled button with no explanation is a dead end: the reader
+              can see there is a next step and not why they cannot take it.
+              Every gate in this flow is one action away from opening, so the
+              hint names that action.
+            */}
+            {advance?.blockedBy && (
+              <p id={blockedHintId} className="mt-3 text-xs text-ink-subtle">
+                {advance.blockedBy}
+              </p>
             )}
           </div>
         </div>
