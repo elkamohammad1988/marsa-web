@@ -32,19 +32,28 @@ const staticRoutes: { path: string; priority: number; changeFrequency: MetadataR
   { path: "/legal/cookies", priority: 0.3, changeFrequency: "yearly" },
 ];
 
+/**
+ * `lastModified` is stated only where it is known.
+ *
+ * Every entry — marketing pages and blog posts alike — used to carry
+ * `new Date()`, so each crawl was told the entire site had changed that
+ * morning. A `lastmod` that is always today is not a strong freshness signal;
+ * it is a signal a crawler learns to ignore, and it takes the *accurate* dates
+ * down with it. The blog posts have real publication dates and now say so;
+ * the marketing routes have no change history to report, so they report none.
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
-
   const staticEntries: MetadataRoute.Sitemap = staticRoutes.map((r) => ({
     url: absoluteUrl(r.path),
-    lastModified: now,
     changeFrequency: r.changeFrequency,
     priority: r.priority,
   }));
 
   const blogEntries: MetadataRoute.Sitemap = posts.map((p) => ({
     url: absoluteUrl(`/blog/${p.slug}`),
-    lastModified: now,
+    // Parsed at UTC midnight, matching how the date is rendered and how
+    // `datePublished` is emitted, so the three cannot disagree by a day.
+    lastModified: new Date(`${p.date}T00:00:00Z`),
     changeFrequency: "monthly",
     priority: 0.6,
   }));

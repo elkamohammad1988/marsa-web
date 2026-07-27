@@ -102,6 +102,19 @@ export function hasRegulatorDetails(): boolean {
   return Boolean(siteConfig.regulator.authority && siteConfig.regulator.reference);
 }
 
+/**
+ * The `@handle` for Twitter card attribution, read off the configured profile
+ * URL so there is one place to change the account rather than two.
+ *
+ * Returns null for anything that is not a recognisable profile path, because a
+ * card attributing a page to `@undefined` is worse than one attributing it to
+ * nobody.
+ */
+export function socialHandle(url: string = siteConfig.social.x): string | null {
+  const match = url.match(/^https?:\/\/(?:www\.)?(?:x|twitter)\.com\/([A-Za-z0-9_]{1,15})\/?$/);
+  return match ? `@${match[1]}` : null;
+}
+
 /** Build an absolute URL for a given path (for canonicals, OG, sitemap). */
 export function absoluteUrl(path = "/"): string {
   const suffix = path.startsWith("/") ? path : `/${path}`;

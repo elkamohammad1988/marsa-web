@@ -741,3 +741,66 @@ the case the old implementation left unbounded.
 
 **Evidence:** tsc exit 0 · lint clean · 587 tests / 33 files (from 572/32) ·
 build 54 routes.
+
+---
+
+## Batch F — structured data and the honesty of a sitemap · **MERGED**
+
+**Not an `AUDIT.md` finding.** The audit called the SEO implementation
+"meticulous" and it largely is — canonical on every indexable route, a complete
+sitemap, FAQ and breadcrumb schema. Re-reading it turned up three claims that
+were being made and not kept.
+
+**1. Eighteen pages rendered a breadcrumb and one emitted `BreadcrumbList`.**
+Ten via `Hero`, five directly, three via `LegalDoc` — and only `/blog/[slug]`,
+which does not use the component, had the structured data. The fix is not to
+hand-write the schema on the other seventeen: `BreadcrumbEyebrow` now derives
+it from the same array it renders, so the two cannot drift apart because there
+is only one of them.
+
+That surfaced a real modelling question. The trails contain grouping labels —
+"Business", "Legal" — that no route serves, and Schema.org requires `item` on
+every entry except the last. Listing them would claim URLs that 404. They are
+dropped from the structured data and kept in the visual trail, where they are
+doing a different job; positions renumber consecutively.
+
+The markup changed too: a flat run of `<span>`s became a real `<ol>`, and the
+final entry carries `aria-current="page"`. A breadcrumb that is not a list
+reads to a screen reader as a sentence of disconnected words rather than a
+position in a hierarchy.
+
+**2. The sitemap said the entire site changed this morning, every morning.**
+Every entry carried `new Date()`, including the six blog posts that have real
+publication dates. A `lastmod` that is always today is not a strong freshness
+signal — it is one a crawler learns to discount, and it takes the *accurate*
+dates down with it. Blog entries now carry their publication date, parsed at
+UTC midnight so the sitemap, the rendered date and `datePublished` cannot
+disagree by a day. The marketing routes have no change history to report, so
+they report none.
+
+A test asserts the sitemap lists nothing `robots.txt` disallows. A sitemap is a
+request to crawl; listing a forbidden path asks for two contradictory things.
+
+**3. `dateModified` was absent** from `BlogPosting`. Set equal to
+`datePublished`, because nothing has been revised — the tempting alternative,
+build time, would tell every crawl that all six posts were rewritten this
+morning, which is the same lie as (2) in a different field.
+
+**Also:** `article:published_time` on blog posts and nowhere else; `Organization`
+gains `contactPoint` for the two addresses the site actually publishes;
+Twitter `site`/`creator` derived from the configured profile URL by
+`socialHandle()`, which returns null rather than emit `@undefined`; and a web
+app manifest at `/manifest.webmanifest`.
+
+The manifest sets `display: "browser"` deliberately. A standalone window hides
+the address bar, and hiding the address bar on something that presents as a
+bank removes the one piece of chrome a visitor can use to check they are where
+they think they are.
+
+**Evidence, against the generated HTML:** `/business/eu-business-account` now
+carries `Organization`, `WebSite`, `BreadcrumbList` and `FAQPage`, with the
+breadcrumb reading Home → EU Business Account and "Business" correctly absent;
+`/legal/privacy` the same shape; the blog post carries **exactly one**
+`BreadcrumbList`, not two. Sitemap: 32 entries, 6 with `lastmod` — 32 not
+33 because the careers page was deleted in #26.
+tsc exit 0 · lint clean · 645 tests / 34 files (from 587/33) · build 55 routes.
