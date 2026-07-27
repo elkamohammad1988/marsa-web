@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from "vitest";
 import { promises as fs } from "node:fs";
-// Type-only: erased at compile time, so it cannot trigger module evaluation
-// before DATA_DIR is set below.
+import os from "node:os";
+import path from "node:path";
 import type { SubmissionStore } from "@/lib/storage";
 import { siteConfig } from "@/lib/site";
 
@@ -16,16 +16,13 @@ import { siteConfig } from "@/lib/site";
  * message that is safe to render and tells the visitor what to do next.
  */
 
-import os from "node:os";
-import path from "node:path";
-
 const TMP_DIR = path.join(os.tmpdir(), `marsa-api-forms-${process.pid}-${Date.now()}`);
 process.env.DATA_DIR = TMP_DIR;
 
-const { handleFormPost } = await import("@/lib/api-forms");
-const storage = await import("@/lib/storage");
-const notify = await import("@/lib/notify");
-const validation = await import("@/lib/validation");
+import { handleFormPost } from "@/lib/api-forms";
+import * as storage from "@/lib/storage";
+import * as notify from "@/lib/notify";
+import * as validation from "@/lib/validation";
 
 type Json = {
   ok?: boolean;

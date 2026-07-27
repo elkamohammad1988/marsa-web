@@ -1,6 +1,5 @@
 import { promises as fs } from "node:fs";
 import { randomUUID } from "node:crypto";
-import path from "node:path";
 import {
   countRows,
   escapeLike,
@@ -11,6 +10,7 @@ import {
   type PostgrestConfig,
 } from "@/lib/postgrest";
 import { captureException } from "@/lib/observability";
+import { DEFAULT_TAIL_BYTES, JsonlStore, dataDir } from "@/lib/jsonl";
 
 /**
  * Submission storage.
@@ -117,7 +117,6 @@ export interface SubmissionStore {
   health(): Promise<{ ok: boolean; detail?: string }>;
 }
 
-const DATA_DIR = process.env.DATA_DIR ?? path.join(process.cwd(), ".data");
 const TABLE = "submissions";
 
 /** Flatten a submission's values into one searchable string. */
@@ -144,11 +143,16 @@ export class FileSubmissionStore implements SubmissionStore {
   readonly provider = "file";
   readonly durable = false;
 
+  private readonly files: Record<SubmissionKind, JsonlStore<StoredSubmission>> = {
+    lead: new JsonlStore("lead.jsonl"),
+    contact: new JsonlStore("contact.jsonl"),
+    subscribe: new JsonlStore("subscribe.jsonl"),
+  };
+
   async save(submission: StoredSubmission): Promise<void> {
     const line = `${JSON.stringify(submission)}\n`;
     try {
-      await fs.mkdir(DATA_DIR, { recursive: true });
-      await fs.appendFile(path.join(DATA_DIR, `${submission.kind}.jsonl`), line, "utf8");
+      await this.files[submission.kind].append(submission);
     } catch (err) {
       // A read-only or unwritable DATA_DIR means the record does not exist
       // anywhere. Log it so it is recoverable from the platform logs, then
@@ -158,7 +162,7 @@ export class FileSubmissionStore implements SubmissionStore {
         provider: this.provider,
         kind: submission.kind,
         submissionId: submission.id,
-        dataDir: DATA_DIR,
+        dataDir: dataDir(),
       });
       // The last-resort recovery record, and the reason `console.info` is
       // right here rather than a captured event: this is the submission
@@ -172,29 +176,37 @@ export class FileSubmissionStore implements SubmissionStore {
     }
   }
 
-  private async readKind(kind: SubmissionKind): Promise<StoredSubmission[]> {
-    try {
-      const raw = await fs.readFile(path.join(DATA_DIR, `${kind}.jsonl`), "utf8");
-      return raw
-        .split("\n")
-        .filter(Boolean)
-        .flatMap((line) => {
-          try {
-            return [JSON.parse(line) as StoredSubmission];
-          } catch {
-            return []; // skip a corrupted line rather than failing the page
-          }
-        });
-    } catch {
-      return [];
-    }
-  }
-
+  /**
+   * Newest first, from the bounded window each file exposes (audit B5).
+   *
+   * When a window did not reach the start of its file the shortfall is
+   * reported rather than absorbed: an admin page quietly showing "47 records"
+   * for a file holding 4,700 is the silent-truncation shape that made the demo
+   * funnel report over 100%, and it is not worth reintroducing to save a
+   * development-only read.
+   */
   private async readAll(kind?: SubmissionKind): Promise<StoredSubmission[]> {
     const kinds = kind ? [kind] : SUBMISSION_KINDS;
-    const batches = await Promise.all(kinds.map((k) => this.readKind(k)));
-    return batches
-      .flat()
+    const pages = await Promise.all(kinds.map((k) => this.files[k].read()));
+
+    const truncated = kinds.filter((_, i) => pages[i].truncated);
+    if (truncated.length) {
+      captureException(
+        new Error(
+          `The file store read only the most recent ${DEFAULT_TAIL_BYTES} bytes of ` +
+            `${truncated.join(", ")}; older records are not included in this result.`,
+        ),
+        {
+          event: "storage.file.truncated",
+          severity: "warning",
+          kinds: truncated.join(","),
+          remedy: "configure SUPABASE_URL — the file store is a development fallback",
+        },
+      );
+    }
+
+    return pages
+      .flatMap((page) => page.records)
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0));
   }
 
@@ -221,7 +233,7 @@ export class FileSubmissionStore implements SubmissionStore {
 
   async health(): Promise<{ ok: boolean; detail?: string }> {
     try {
-      await fs.mkdir(DATA_DIR, { recursive: true });
+      await fs.mkdir(dataDir(), { recursive: true });
       return { ok: true, detail: "file store writable" };
     } catch (err) {
       // The real reason embeds the absolute DATA_DIR path, which describes the
@@ -230,7 +242,7 @@ export class FileSubmissionStore implements SubmissionStore {
       captureException(err, {
         event: "storage.health",
         provider: this.provider,
-        dataDir: DATA_DIR,
+        dataDir: dataDir(),
       });
       return { ok: false, detail: "file store not writable" };
     }

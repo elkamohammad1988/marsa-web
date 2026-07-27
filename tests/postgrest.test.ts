@@ -276,25 +276,82 @@ describe("error handling", () => {
     expect((error as Error).message).toContain("ECONNREFUSED");
   });
 
-  it("aborts a request that never responds", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (_url: string, init: RequestInit) => {
-        // Stand in for a hung upstream: settle only when the caller aborts.
-        return await new Promise((_resolve, reject) => {
-          init.signal?.addEventListener("abort", () => reject(new Error("The operation was aborted")));
-        });
-      }),
-    );
-    vi.useFakeTimers();
+  /**
+   * Audit B9. The timeout used to be an `AbortController` cleared in a
+   * `finally`, and `finally` runs when `fetch()` resolves — that is, when the
+   * *headers* arrive. Every caller then reads the body outside that scope, so
+   * a response that stalled mid-body had no ceiling at all.
+   *
+   * These drive the timeout by controlling the signal rather than by advancing
+   * fake timers: `AbortSignal.timeout` is armed inside the runtime, not by a
+   * JavaScript `setTimeout` that vitest can move.
+   */
+  describe("the 8-second budget", () => {
+    /** Replaces the runtime timer with one the test can fire on demand. */
+    function controllableTimeout() {
+      const timer = new AbortController();
+      const spy = vi.spyOn(AbortSignal, "timeout").mockReturnValue(timer.signal);
+      const fire = () =>
+        timer.abort(new DOMException("The operation was aborted due to timeout", "TimeoutError"));
+      return { fire, spy };
+    }
 
-    const pending = selectRows(CFG, "submissions", "select=*").catch((e: Error) => e);
-    await vi.advanceTimersByTimeAsync(8_001);
-    const error = await pending;
+    /**
+     * Rejects the way undici does when a timeout signal fires — including when
+     * the signal aborted *before* this was called, which is the ordering in
+     * the body-read case: the timer fires while the response headers are still
+     * being handed to the caller.
+     */
+    function abortedBy(signal: AbortSignal | null | undefined): Promise<never> {
+      return new Promise((_resolve, reject) => {
+        const fail = () =>
+          reject(new DOMException("The operation was aborted due to timeout", "TimeoutError"));
+        if (signal?.aborted) fail();
+        else signal?.addEventListener("abort", fail);
+      });
+    }
 
-    vi.useRealTimers();
-    expect(error).toBeInstanceOf(PostgrestError);
-    expect(error).toMatchObject({ status: 502 });
+    it("gives up on a request that never responds, and says how long it waited", async () => {
+      const { fire, spy } = controllableTimeout();
+      vi.stubGlobal(
+        "fetch",
+        vi.fn((_url: string, init: RequestInit) => abortedBy(init.signal)),
+      );
+
+      const pending = selectRows(CFG, "submissions", "select=*").catch((e: Error) => e);
+      fire();
+      const error = await pending;
+
+      expect(spy).toHaveBeenCalledWith(8000);
+      expect(error).toBeInstanceOf(PostgrestError);
+      expect(error).toMatchObject({ status: 502 });
+      // The runtime's own message ("aborted due to timeout") never says what
+      // the budget was, which is the first thing a reader of the log wants.
+      expect((error as Error).message).toContain("8000ms");
+    });
+
+    it("is still armed while the response body is being read", async () => {
+      // The exact case the old implementation left unbounded: headers arrive
+      // promptly, the timer is cleared, and the body then never comes.
+      const { fire } = controllableTimeout();
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (_url: string, init: RequestInit) => ({
+          ok: true,
+          status: 200,
+          headers: new Headers({ "content-range": "0-0/1" }),
+          json: () => abortedBy(init.signal),
+          text: () => abortedBy(init.signal),
+        })),
+      );
+
+      const pending = selectRows(CFG, "submissions", "select=*").catch((e: Error) => e);
+      fire();
+      const error = await pending;
+
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).name).toBe("TimeoutError");
+    });
   });
 });
 

@@ -19,6 +19,8 @@ const EMAIL_SUBJECTS: Record<SubmissionKind, string> = {
   contact: "New contact enquiry",
 };
 
+const NOTIFY_TIMEOUT_MS = 8000;
+
 export type NotifierConfig = { apiKey: string; from: string; to: string };
 
 export function getNotifierConfig(
@@ -67,8 +69,6 @@ export async function notifySubmission(
   if (!config) return { sent: false };
 
   const { subject, text } = formatSubmissionEmail(submission);
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -83,7 +83,11 @@ export async function notifySubmission(
         text,
         reply_to: typeof submission.data.email === "string" ? submission.data.email : undefined,
       }),
-      signal: controller.signal,
+      // Armed for the whole exchange rather than cleared once headers arrive
+      // (audit B9). This one runs *after* the visitor's submission is already
+      // stored, so an unbounded hang here delays a response the visitor is
+      // waiting on for a side effect they do not depend on.
+      signal: AbortSignal.timeout(NOTIFY_TIMEOUT_MS),
     });
     if (!res.ok) throw new Error(`Resend responded ${res.status}`);
     return { sent: true };
@@ -100,7 +104,5 @@ export async function notifySubmission(
       recoverable: "the record is stored and retrievable from /admin",
     });
     return { sent: false };
-  } finally {
-    clearTimeout(timeout);
   }
 }

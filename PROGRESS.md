@@ -688,3 +688,56 @@ line, and 200 references do not collide.
 **Not done, deliberately:** no live-server probe. The behaviour is covered at
 unit level against real modules, and standing up a server to watch a log line
 would not have told me anything the tests do not.
+
+---
+
+## Batch E — storage internals · **MERGED**
+
+**Findings closed:** B6, B5, B9 (all Medium/Low) · **Batch 12**
+
+**B6.** `lib/analytics.ts` carried a near-verbatim copy of `lib/storage.ts`'s
+JSONL mechanics: the `DATA_DIR` resolution, the mkdir-then-append write, the
+split-filter-parse-skip-corrupt read loop. The duplication was stable, which is
+exactly why it was worth removing — every change to how records are written or
+recovered had to be made twice, and the second one gets forgotten.
+
+`lib/jsonl.ts` is now the one implementation. Each module holds only its schema
+and its aggregation.
+
+A second thing fell out of it: `DATA_DIR` was read into a module-level `const`
+at import time, which is why **two test files carried a comment explaining that
+they must set the variable before a dynamic import**. `dataDir()` resolves per
+call, so those files went back to plain static imports and the explanation went
+away with them.
+
+**B5.** Both file stores read every file completely into memory, `JSON.parse`d
+every line and sorted the whole array before slicing for pagination — on the
+*default* provider, on every request. Reads are now bounded to the trailing
+512 KiB.
+
+**The part that took the thought is the truncation, not the bound.** A store
+that quietly returns the newest 47 of 4,700 records is the same shape of bug as
+the funnel that could report over 100% — and that one shipped for months
+because nothing said it was happening. So `read()` returns `truncated`, and
+both stores report it through the seam Batch D had just built, naming the
+remedy. `tests/jsonl.test.ts` asserts the window never yields a half-record
+from its leading edge, and that a window smaller than one record is an empty
+result rather than a parse error.
+
+**B9.** The 8-second timeouts were `AbortController`s cleared in a `finally` —
+and `finally` runs when `fetch()` resolves, which is when the **headers**
+arrive. Every caller then read the body outside that scope, so a response that
+stalled mid-body had no ceiling at all. `AbortSignal.timeout` stays armed for
+the whole exchange. `lib/postgrest.ts` also now says *"no response within
+8000ms"* rather than relaying the runtime's "aborted due to timeout", which
+never mentions what the budget was.
+
+The existing abort test drove the timeout with vitest's fake timers, which
+cannot move `AbortSignal.timeout` — that timer lives inside the runtime, not in
+a JavaScript `setTimeout`. It is replaced by two tests that control the signal
+directly: one asserting the budget is 8000ms and reaches the message, and one
+asserting the signal is **still armed while the body is being read**, which is
+the case the old implementation left unbounded.
+
+**Evidence:** tsc exit 0 · lint clean · 587 tests / 33 files (from 572/32) ·
+build 54 routes.

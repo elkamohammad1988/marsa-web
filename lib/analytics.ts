@@ -1,5 +1,3 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import {
   countRows,
   getPostgrestConfig,
@@ -9,6 +7,7 @@ import {
   type PostgrestConfig,
 } from "@/lib/postgrest";
 import { captureException } from "@/lib/observability";
+import { JsonlStore } from "@/lib/jsonl";
 
 /**
  * First-party funnel analytics for the /demo flow.
@@ -118,8 +117,6 @@ export function buildFunnelReport(counts: number[]): FunnelReport {
 
 /* ------------------------------------------------------------------ store -- */
 
-const DATA_DIR = process.env.DATA_DIR ?? path.join(process.cwd(), ".data");
-const FILE = path.join(DATA_DIR, "demo-events.jsonl");
 const TABLE = "demo_events";
 const MAX_FETCH = 20_000;
 
@@ -132,10 +129,17 @@ export interface DemoAnalyticsStore {
 class FileDemoAnalyticsStore implements DemoAnalyticsStore {
   readonly provider = "file";
 
+  /**
+   * The JSONL mechanics used to be a near-verbatim copy of `lib/storage.ts` —
+   * the same DATA_DIR resolution, the same mkdir-then-append, the same
+   * skip-corrupt-lines read loop (audit B6). This module now holds only the
+   * demo's schema and its aggregation.
+   */
+  private readonly file = new JsonlStore<DemoEvent>("demo-events.jsonl");
+
   async record(event: DemoEvent): Promise<void> {
     try {
-      await fs.mkdir(DATA_DIR, { recursive: true });
-      await fs.appendFile(FILE, `${JSON.stringify(event)}\n`, "utf8");
+      await this.file.append(event);
     } catch (err) {
       // Telemetry must never break the demo — report and move on.
       captureException(err, {
@@ -147,26 +151,25 @@ class FileDemoAnalyticsStore implements DemoAnalyticsStore {
     }
   }
 
-  private async readAll(): Promise<DemoEvent[]> {
-    try {
-      const raw = await fs.readFile(FILE, "utf8");
-      return raw
-        .split("\n")
-        .filter(Boolean)
-        .flatMap((line) => {
-          try {
-            return [JSON.parse(line) as DemoEvent];
-          } catch {
-            return [];
-          }
-        });
-    } catch {
-      return [];
-    }
-  }
-
   async funnel(): Promise<FunnelReport> {
-    return computeFunnel(await this.readAll());
+    const { records, truncated } = await this.file.read();
+    if (truncated) {
+      // Same reasoning as the submission store: a funnel computed from the
+      // tail of the file undercounts `starts` more than `done`, which is
+      // exactly how the Postgres version used to report over 100%.
+      captureException(
+        new Error(
+          "The demo funnel was computed from the most recent events only; " +
+            "earlier sessions are missing from these counts.",
+        ),
+        {
+          event: "analytics.file.truncated",
+          severity: "warning",
+          remedy: "configure SUPABASE_URL — the file store is a development fallback",
+        },
+      );
+    }
+    return computeFunnel(records);
   }
 }
 
