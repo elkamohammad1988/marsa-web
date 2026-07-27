@@ -3,7 +3,6 @@ import { buildMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -28,8 +27,7 @@ export default function Page() {
         description="Personal And Business Accounts With A Multi-Currency IBAN. In Minutes, From Any Country."
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/coin-gold.png"
-        imageAlt="Marsa business coin"
+        art="coin-warm"
         tone="navy"
       />
 
@@ -69,12 +67,6 @@ export default function Page() {
         ]}
       />
 
-      <Testimonial
-        quote="Opened A Business Account Online In One Day — After Multiple EU Bank Rejections."
-        authorName="Marco P."
-        authorTitle="Founder, Verona"
-      />
-
       <RegulatedBand />
 
       <FAQ
@@ -107,8 +99,7 @@ export default function Page() {
         title="Manage Your Business Finance Globally"
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/card-phone.png"
-        imageAlt="Marsa Business app"
+        art="card-and-phone"
       />
     </>
   );

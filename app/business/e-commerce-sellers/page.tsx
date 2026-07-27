@@ -4,7 +4,6 @@ import { Hero } from "@/components/sections/Hero";
 import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -30,8 +29,7 @@ export default function Page() {
         description="Optimised Receiving From Amazon, Shopify, Stripe, And All Major Marketplaces. Settle Inside SEPA."
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/phone-apps.png"
-        imageAlt="Marsa for e-commerce"
+        art="phone-accounts"
         tone="navy"
       />
 
@@ -93,12 +91,6 @@ export default function Page() {
         ]}
       />
 
-      <Testimonial
-        quote="I got a Netherlands IBAN in one day and finally unblocked my Amazon DE payouts — without opening a local subsidiary."
-        authorName="Diana V."
-        authorTitle="Amazon FBA Seller, Madrid"
-      />
-
       <RegulatedBand />
 
       <FAQ
@@ -131,8 +123,7 @@ export default function Page() {
         title="Open Your EU E-Commerce Business Account"
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/coin-gold.png"
-        imageAlt="Marsa business coin"
+        art="coin-warm"
       />
     </>
   );

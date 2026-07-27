@@ -26,7 +26,6 @@ const staticRoutes: { path: string; priority: number; changeFrequency: MetadataR
   { path: "/faq", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.6, changeFrequency: "yearly" },
   { path: "/company/about", priority: 0.5, changeFrequency: "yearly" },
-  { path: "/company/careers", priority: 0.5, changeFrequency: "weekly" },
   { path: "/company/compliance", priority: 0.5, changeFrequency: "yearly" },
   { path: "/legal/privacy", priority: 0.3, changeFrequency: "yearly" },
   { path: "/legal/terms", priority: 0.3, changeFrequency: "yearly" },

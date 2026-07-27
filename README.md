@@ -30,10 +30,16 @@ versus a labelled sandbox — see
 - **Interactive demo** (`/demo`) — a clickable sandbox that walks the whole
   cross-border loop (open account → KYC → IBAN → receive → convert at the live
   rate → SEPA out) with correct arithmetic and a first-party analytics funnel.
-- **Real backend** — on-site forms (lead / contact / newsletter) with shared
-  validation, honeypot, rate limiting, durable storage (PostgreSQL or a file
-  fallback), optional email notification, a health endpoint, and an
-  HMAC-authenticated admin dashboard with CSV export.
+- **Real backend** — a form-intake pipeline with shared validation, honeypot,
+  cross-instance rate limiting, durable storage (PostgreSQL or a file
+  fallback), email notification, a health endpoint, and an HMAC-authenticated
+  admin dashboard with CSV export. **The public forms deliberately do not call
+  it.** This build has no operator, so collecting a real name and email address
+  behind "we'll email you within one business day" would be a false promise and
+  a live data-protection obligation. The forms validate through the same
+  `lib/validation.ts` the API uses, then discard the input and explain what a
+  real submission would have done. The pipeline itself stays fully unit-tested
+  in `tests/api-forms.test.ts`.
 - **First-party analytics** — anonymous demo funnel, no cookies, no third-party
   trackers, Do-Not-Track respected.
 - **Failures are reported, not swallowed** — every degradation the system

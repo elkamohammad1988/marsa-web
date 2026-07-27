@@ -1,8 +1,8 @@
-import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { Heading } from "@/components/ui/Heading";
 import { Button } from "@/components/ui/Button";
+import { BrandArt, type ArtName } from "@/components/art/BrandArt";
 
 type CTACardProps = {
   eyebrow?: string;
@@ -10,8 +10,8 @@ type CTACardProps = {
   description?: string;
   primaryCta: { label: string; href: string };
   secondaryCta?: { label: string; href: string };
-  imageSrc: string;
-  imageAlt: string;
+  /** Each illustration carries its own description — see `BrandArt`. */
+  art: ArtName;
   footnote?: string;
 };
 
@@ -21,8 +21,7 @@ export function CTACard({
   description,
   primaryCta,
   secondaryCta,
-  imageSrc,
-  imageAlt,
+  art,
   footnote,
 }: CTACardProps) {
   return (
@@ -68,13 +67,9 @@ export function CTACard({
                 aria-hidden
                 className="pointer-events-none absolute inset-6 rounded-full bg-radial-glow blur-2xl"
               />
-              <Image
-                src={imageSrc}
-                alt={imageAlt}
-                fill
-                sizes="(min-width:768px) 36vw, 90vw"
-                className="relative object-contain object-center"
-              />
+              {/* `bare`: this slot already sits inside the CTA's own dark panel,
+                  so the art must not paint a second backdrop over it. */}
+              <BrandArt name={art} surface="bare" className="relative" />
             </div>
           </div>
 

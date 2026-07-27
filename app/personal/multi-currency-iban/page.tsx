@@ -5,7 +5,6 @@ import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { CardShowcase } from "@/components/sections/CardShowcase";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -31,8 +30,7 @@ export default function Page() {
         description="European Multi-Currency Account For Modern Lifestyles. Hold, Convert, And Spend In 15+ Currencies From A Single IBAN."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/phone-home.png"
-        imageAlt="Marsa Mastercard and phone"
+        art="phone-home"
         tone="cream"
       />
 
@@ -99,8 +97,8 @@ export default function Page() {
       />
 
       <CardShowcase
-        eyebrow="Mastercard"
-        title="Marsa Mastercard Card"
+        eyebrow="The Card"
+        title="The Marsa Card"
         description="Premium spending in 180+ countries with no hidden FX fees and instant transaction alerts."
         bullets={[
           "Free withdrawals up to €200/month",
@@ -110,14 +108,7 @@ export default function Page() {
           "Lock or freeze instantly",
           "Disposable virtual cards",
         ]}
-        imageSrc="/images/card-phone.png"
-        imageAlt="Marsa Mastercard"
-      />
-
-      <Testimonial
-        quote="I opened a Netherlands IBAN in 14 minutes — without flying to Europe. Marsa replaced 3 different banking apps for me."
-        authorName="Sophia M."
-        authorTitle="Digital nomad, Lisbon"
+        art="card-and-phone"
       />
 
       <RegulatedBand />
@@ -152,8 +143,7 @@ export default function Page() {
         description="Open a free Marsa personal account and start receiving SEPA payments in minutes."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
       />
     </>
   );

@@ -19,13 +19,21 @@ import type { ValidationResult } from "@/lib/validation";
  * 99.9% that succeed; this one is minted only when a submission fails, shown
  * to the person it failed for, and written into the captured event — so
  * "it said reference K3F9QW2A" resolves to exactly one log line.
+ *
+ * The support address is conditional because it is allowed to be absent: it
+ * defaults to empty rather than to a mailbox at a domain nobody owns (#24). The
+ * reference is worth quoting either way — an operator reading the logs can find
+ * the event from it — so it survives into the branch that has nowhere to send
+ * the reader, rather than being dropped along with the address.
  */
 function storageErrorMessage(reference: string): string {
-  return (
-    `We could not save your details just now, so nothing has been recorded. ` +
-    `Please try again in a moment — or email ${siteConfig.email.support}, ` +
-    `quoting reference ${reference}, and we will pick it up from there.`
-  );
+  const opening = `We could not save your details just now, so nothing has been recorded. `;
+
+  return siteConfig.email.support
+    ? opening +
+        `Please try again in a moment — or email ${siteConfig.email.support}, ` +
+        `quoting reference ${reference}, and we will pick it up from there.`
+    : opening + `Please try again in a moment, quoting reference ${reference}.`;
 }
 
 /**

@@ -126,7 +126,7 @@ Batch 16 and cannot start until assets exist.
 | 7 | Fail loudly on misconfiguration | B8 | **DONE** ([#8](https://github.com/elkamohammad1988/marsa-web/pull/8)) |
 | 8 | Migration infrastructure | P4 | **DONE** ([#14](https://github.com/elkamohammad1988/marsa-web/pull/14)) |
 | 9 | Database correctness & round trips | B7, B3, B4 | **DONE** ([#14](https://github.com/elkamohammad1988/marsa-web/pull/14)) — applying = [H3](#h3--apply-the-database-migrations--not-yet-done) |
-| 10 | Observability | B2, P3 | **DONE** (code) — adapter = [H7](#h7--create-an-error-tracking-project-and-supply-the-dsn-b2), monitor = [H6](#h6--point-an-uptime-monitor-at-apihealth-p3) |
+| 10 | Observability | B2, P3 | `TODO` |
 | 11 | Retention & erasure | B10, P9 | `TODO` (period = [H12](#h12--decide-data-retention-periods-b10)) |
 | 12 | Storage internals | B6, B5, B9 | `TODO` |
 | 13 | End-to-end smoke tests | P5b | `TODO` |
@@ -146,7 +146,6 @@ evidence that motivated it.
 | A | Documentation truth & admin setup copy | `README.md` claimed 94 tests against 367 and listed CI as unbuilt; `/admin/login` told the operator to set an 8-character password the app rejects | **DONE** |
 | B | The dead theme system removed | A `.dark` block mirroring `:root` value for value, a pre-paint script whose only job was to add that class, and four orphaned icons — closes the half of **F8** Batch 6 deferred | **DONE** |
 | C | Navigation: ARIA, focus, link hygiene | Closes **F10**; also a dropdown no tap could open, `aria-controls` naming nothing, white focus halos from an unnamed ring offset, and two footer shortcuts to one page | **DONE** |
-| D | Observability seam | Batch 10's code half — see the batch entry above | **DONE** |
 
 ---
 
@@ -334,28 +333,20 @@ are. Applying them to the live database is
 
 ---
 
-### Batch 10 — Observability · B2, P3 · **code DONE**
+### Batch 10 — Observability · B2, P3
 
-**Branch:** `feat/observability-seam` · full write-up in [`PROGRESS.md`](./PROGRESS.md#batch-d--the-observability-seam--merged)
+**Branch:** `feat/observability`
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| A provider-agnostic `lib/observability.ts` seam with `captureException`, wired at the four sites the audit names — storage write failure, DB→file fallback, email never sent, rate limiter degraded — plus `app/error.tsx` | B2 | High | **DONE** — wired at nine, not four |
-| Request ID generated in middleware and attached to every captured event | B2 | High | **DONE, differently** — see below |
+| A provider-agnostic `lib/observability.ts` seam with `captureException`, wired at the four sites the audit names — storage write failure (`storage.ts:108`), DB→file fallback (`storage.ts:217`), email never sent (`notify.ts:86`), rate limiter degraded (`rate-limit.ts:64`) — plus `app/error.tsx` | B2 | High | `TODO` |
+| Request ID generated in middleware and attached to every captured event | B2 | High | `TODO` |
 | Sentry (or equivalent) adapter behind the seam, active only when a DSN is present | B2 | High | **BLOCKED-ON-ME** ([H7](#h7--create-an-error-tracking-project-and-supply-the-dsn-b2)) |
 | Uptime monitor on `/api/health` | P3 | High | **BLOCKED-ON-ME** ([H6](#h6--point-an-uptime-monitor-at-apihealth-p3)) |
 
-**Deviation on the correlation id, deliberate.** A middleware-generated request
-id tags every request including the 99.9% that succeed, and it requires
-widening the matcher — currently `/admin` only — so that every asset request
-runs Edge middleware. Instead a **reference** is minted only when a submission
-fails, shown to the visitor in the error message, returned in the response
-body, and written into the captured event. One failed request, one reference,
-one log line, and the person it failed for can quote it in an email.
-
-Only the adapter and the monitor wait on a human; with no DSN the seam reports
-structurally, which is already the difference between "invisible" and
-"greppable".
+The seam ships whether or not a DSN exists, so this batch is not fully blocked:
+with no DSN it logs structurally, which is still an improvement on ten
+unstructured `console.*` calls. Only the adapter and the monitor wait on the human.
 
 ---
 

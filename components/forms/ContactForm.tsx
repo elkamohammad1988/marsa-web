@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { TextField, SelectField, TextareaField, Honeypot } from "./fields";
-import { useFormSubmit } from "./useSubmit";
+import { useDemoSubmit } from "./useDemoSubmit";
+import { DemoSubmissionNotice } from "./DemoSubmissionNotice";
 import { validateContact, CONTACT_TOPICS, type ContactTopic } from "@/lib/validation";
 
 const TOPIC_LABELS: Record<ContactTopic, string> = {
@@ -21,33 +22,38 @@ export function ContactForm({ defaultTopic = "general" }: { defaultTopic?: Conta
   const [topic, setTopic] = useState<ContactTopic>(defaultTopic);
   const [messageText, setMessageText] = useState("");
   const [hp, setHp] = useState("");
-  const { state, errors, message, submit, setErrors } = useFormSubmit("/api/contact");
+  const { state, errors, submit } = useDemoSubmit(validateContact);
 
-  async function onSubmit(e: React.FormEvent) {
+  function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const payload = { name, email, company, topic, message: messageText };
-    const result = validateContact(payload);
-    if (!result.success) {
-      setErrors(result.errors);
-      return;
-    }
-    await submit({ ...payload, hp });
+    // Read the honeypot exactly as the server would: a bot that fills it gets
+    // a silent no-op rather than an error it can learn from.
+    if (hp.trim() !== "") return;
+    submit({ name, email, company, topic, message: messageText });
   }
 
-  if (state === "success") {
+  if (state === "accepted") {
     return (
-      <div className="rounded-card-lg border border-line bg-card p-8 text-center shadow-card">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/15 text-success">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M4 12l5 5L20 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-        <h2 className="mt-5 text-2xl font-bold text-ink">Message sent</h2>
-        <p className="mx-auto mt-3 max-w-md text-sm text-ink-muted">
-          Thanks for reaching out. Our team will reply to{" "}
-          <span className="font-medium text-ink">{email}</span> within one business day.
-        </p>
-      </div>
+      <DemoSubmissionNotice
+        title="That would have reached the team"
+        endpoint="POST /api/contact"
+        steps={[
+          {
+            label: "Re-validate on the server",
+            detail: "Topic against an allowlist, message capped at 4,000 characters.",
+          },
+          {
+            label: "Rate-limit and screen for bots",
+            detail: "Five per minute per caller, plus a hidden honeypot field.",
+          },
+          {
+            label: "Store, then email the team",
+            detail: "Persisted before anyone is notified, with your address as the reply-to.",
+          },
+        ]}
+        primary={{ label: "Try the interactive demo", href: "/demo" }}
+        secondary={{ label: "Read the FAQ", href: "/faq" }}
+      />
     );
   }
 
@@ -116,21 +122,9 @@ export function ContactForm({ defaultTopic = "general" }: { defaultTopic?: Conta
 
       <Honeypot value={hp} onChange={setHp} />
 
-      <Button
-        type="submit"
-        variant="primary"
-        size="lg"
-        className="mt-6 w-full sm:w-auto"
-        disabled={state === "submitting"}
-      >
-        {state === "submitting" ? "Sending…" : "Send message"}
+      <Button type="submit" variant="primary" size="lg" className="mt-6 w-full sm:w-auto">
+        Send message
       </Button>
-
-      {message && state === "error" && (
-        <p className="mt-3 text-sm font-medium text-danger" role="alert">
-          {message}
-        </p>
-      )}
     </form>
   );
 }

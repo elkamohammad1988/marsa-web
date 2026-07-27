@@ -90,7 +90,6 @@ export const footerColumns: Array<{ title: string; links: NavLink[] }> = [
     title: "Company",
     links: [
       { label: "About Us", href: "/company/about" },
-      { label: "Careers", href: "/company/careers" },
       { label: "Contact", href: "/contact" },
       { label: "Compliance", href: "/company/compliance" },
     ],
@@ -106,11 +105,17 @@ export const footerColumns: Array<{ title: string; links: NavLink[] }> = [
   },
 ];
 
+/**
+ * Shown as a row of chips in the footer, on every page. These used to read
+ * "Regulated Partners · Segregated Accounts · Safeguarded Funds" — a list of
+ * credentials, asserted sitewide, that nobody holds. They now describe what
+ * the build actually is.
+ */
 export const footerBadges = [
-  "Regulated Partners",
-  "Segregated Accounts",
-  "Netherlands",
-  "IBAN Opening",
-  "180+ Countries",
-  "Safeguarded Funds",
+  "Concept build",
+  "Live ECB rates",
+  "ISO 13616 IBAN validation",
+  "No data collected",
+  "Next.js 15 · React 19",
+  "Open source",
 ];

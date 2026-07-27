@@ -71,7 +71,9 @@ export default function PrivacyPage() {
         {
           heading: "Contact us",
           paragraphs: [
-            `To exercise your rights or ask about this policy, contact our Data Protection team at ${siteConfig.email.support}.`,
+            siteConfig.email.support
+              ? `To exercise your rights or ask about this policy, contact our Data Protection team at ${siteConfig.email.support}.`
+              : "This build collects no personal data, so there is nothing to exercise a right against. In a real product this section would name a Data Protection contact.",
           ],
         },
       ]}

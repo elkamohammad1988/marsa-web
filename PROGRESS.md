@@ -681,8 +681,7 @@ its migration. Each is a stronger assertion than the spy it replaces: it checks
 `tests/setup.ts` silences the reporter by default, because several suites drive
 failure paths deliberately and a passing run had begun printing a wall of JSON.
 
-**Evidence:** tsc exit 0 · lint clean · 488 tests / 28 files (from 403/27) ·
-build 49 pages. The seam's own contract is covered: it never throws when the
+**Evidence:** tsc exit 0 · lint clean · 572 tests / 32 files · build 54 routes. The seam's own contract is covered: it never throws when the
 reporter does, it redacts nested context, it writes one newline-free parseable
 line, and 200 references do not collide.
 

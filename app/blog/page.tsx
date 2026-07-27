@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { buildMetadata } from "@/lib/seo";
 import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
 import { Button } from "@/components/ui/Button";
 import { BlogCard } from "@/components/sections/BlogCard";
+import { BlogCover } from "@/components/art/BlogCover";
 import { Pagination } from "@/components/sections/Pagination";
 import { posts, featuredPost, formatPostDate } from "@/lib/blog";
 import { clampPage, pageCount, paginate } from "@/lib/pagination";
@@ -47,16 +47,15 @@ export default async function BlogListPage({
               href={`/blog/${featuredPost.slug}`}
               className="group mt-10 block overflow-hidden rounded-card-lg"
             >
-              <div className="relative aspect-[16/8] w-full">
-                <Image
-                  src={featuredPost.cover}
-                  alt={featuredPost.title}
-                  fill
-                  priority
-                  sizes="100vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+              <div className="relative aspect-[16/8] w-full overflow-hidden">
+                <BlogCover
+                  motif={featuredPost.cover}
+                  category={featuredPost.category}
+                  className="transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/30 to-transparent" />
+                {/* Scrim: the title sits on the art, so it needs its own
+                    contrast floor rather than borrowing the art's. */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-10">
                   <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                     <div className="max-w-3xl">

@@ -4,7 +4,6 @@ import { Hero } from "@/components/sections/Hero";
 import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -35,8 +34,7 @@ export default function Page() {
         ]}
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/card-phone.png"
-        imageAlt="Marsa business account for agencies and freelancers"
+        art="card-and-phone"
         tone="navy"
       />
 
@@ -101,12 +99,6 @@ export default function Page() {
         ]}
       />
 
-      <Testimonial
-        quote="My design studio bills clients in London and New York. Sending them local account details instead of an IBAN and SWIFT code got me paid twice as fast, and I stopped losing a chunk of every invoice to conversion fees."
-        authorName="Sofia Novak"
-        authorTitle="Creative Director, Studio Novak — Warsaw"
-      />
-
       <RegulatedBand />
 
       <FAQ
@@ -139,8 +131,7 @@ export default function Page() {
         title="Invoice The World, Keep More Of It"
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa business account coin"
+        art="coin"
       />
     </>
   );

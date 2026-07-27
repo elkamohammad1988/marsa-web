@@ -86,7 +86,7 @@ export const businessPlans: Plan[] = [
     features: [
       "EU IBAN",
       "Multi-Currency",
-      "Mastercard Business",
+      "Business card",
       "SEPA Transfers",
       "Team Members",
       "Accounting Exports",

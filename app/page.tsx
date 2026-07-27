@@ -11,7 +11,6 @@ import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
-import { TrustStrip } from "@/components/sections/TrustStrip";
 import { absoluteUrl, siteConfig } from "@/lib/site";
 import { IconGlobe, IconExchange, IconShield } from "@/components/icons";
 
@@ -62,8 +61,6 @@ export default function HomePage() {
 
       <RateTicker />
 
-      <TrustStrip />
-
       <FeatureBullets
         items={[
           {
@@ -82,7 +79,7 @@ export default function HomePage() {
             icon: <IconShield />,
             title: "Safeguarded By Design",
             description:
-              "Accounts run on licensed partner institutions, and your balance sits in segregated safeguarding accounts kept separate from ours.",
+              "The model a product like this needs: licensed partner institutions holding customer balances in segregated safeguarding accounts, separate from the operator's own funds.",
           },
         ]}
       />
@@ -107,9 +104,9 @@ export default function HomePage() {
       />
 
       <CardShowcase
-        eyebrow="Marsa Mastercard"
+        eyebrow="The Marsa Card"
         title="Spend Anywhere, Without The Hidden Fees"
-        description="Pair your account with a Marsa Mastercard for real-time control and interbank rates everywhere you go."
+        description="Pair your account with a Marsa card for real-time control and interbank rates everywhere you go."
         bullets={[
           "Apple Pay & Google Pay",
           "Real-time spend notifications",
@@ -118,8 +115,7 @@ export default function HomePage() {
           "Virtual & disposable cards",
           "Auto-categorised spending",
         ]}
-        imageSrc="/images/card-phone.png"
-        imageAlt="Marsa Mastercard and mobile app"
+        art="card-and-phone"
       />
 
       <ComparisonTable
@@ -154,7 +150,7 @@ export default function HomePage() {
           {
             question: "How safe is my money?",
             answer:
-              "Marsa runs on licensed partner institutions. Customer funds are safeguarded in segregated accounts at those partners, separate from Marsa's own funds, so they stay protected even in the unlikely event of our insolvency.",
+              "Marsa is a concept build and holds no funds. In the product it describes, customer money would sit in segregated safeguarding accounts at licensed partner institutions, separate from the operator's own funds.",
           },
           {
             question: "What does it cost to send money?",
@@ -170,8 +166,7 @@ export default function HomePage() {
         description="Low FX fees, free SEPA transfers, and support across 180+ countries."
         primaryCta={{ label: "Open An Account", href: "/get-started" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/coin-blue.png"
-        imageAlt="Marsa coin"
+        art="coin"
         footnote="Physical cards available for Europe and UK customers only. All other features — IBAN, SEPA, SWIFT, FX conversion — are available worldwide."
       />
     </>

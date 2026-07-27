@@ -3,7 +3,6 @@ import { buildMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -28,8 +27,7 @@ export default function Page() {
         description="Personal And Business Accounts With A Multi-Currency IBAN. In Minutes, From Any Country, 100% Online."
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/phone-apps.png"
-        imageAlt="Marsa mobile app"
+        art="phone-accounts"
         tone="white"
       />
 
@@ -72,12 +70,6 @@ export default function Page() {
         ]}
       />
 
-      <Testimonial
-        quote="Opened A Business Account Online In One Day — After Multiple EU Bank Rejections."
-        authorName="Marco P."
-        authorTitle="Founder, Verona"
-      />
-
       <RegulatedBand />
 
       <FAQ
@@ -95,7 +87,7 @@ export default function Page() {
           {
             question: "Can I get a physical card?",
             answer:
-              "Yes — physical Marsa Mastercard cards are shipped within 5-7 business days to all EU/UK addresses.",
+              "Yes — physical Marsa cards are shipped within 5-7 business days to all EU/UK addresses.",
           },
           {
             question: "Is there a minimum deposit?",
@@ -109,8 +101,7 @@ export default function Page() {
         title="Simplify Your Finance Wherever Life Takes You"
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        imageSrc="/images/cards-stack.png"
-        imageAlt="Marsa cards"
+        art="card-stack"
       />
     </>
   );

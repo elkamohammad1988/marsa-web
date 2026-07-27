@@ -5,7 +5,6 @@ import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { CardShowcase } from "@/components/sections/CardShowcase";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -31,8 +30,7 @@ export default function Page() {
         description="European Multi-Currency Business IBAN. Hold, Convert, And Pay In 15+ Currencies — All From A Single Account."
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/cards-stack.png"
-        imageAlt="Marsa Business cards"
+        art="card-stack"
         tone="navy"
       />
 
@@ -83,7 +81,7 @@ export default function Page() {
       />
 
       <CardShowcase
-        eyebrow="Business Mastercard"
+        eyebrow="Business Card"
         title="Issue Cards To Your Team Instantly"
         description="Spin up virtual cards in seconds, enforce spend rules, and reconcile in your accounting software."
         bullets={[
@@ -94,15 +92,8 @@ export default function Page() {
           "Multi-user permissions",
           "Receipt capture",
         ]}
-        imageSrc="/images/card-phone.png"
-        imageAlt="Marsa Business Mastercard"
+        art="card-and-phone"
         reverse
-      />
-
-      <Testimonial
-        quote="Opened A Netherlands IBAN In 14 Days — The First Time A Provider Took Our SaaS Company Seriously."
-        authorName="Naomi T."
-        authorTitle="CFO, Lisbon"
       />
 
       <RegulatedBand />
@@ -137,8 +128,7 @@ export default function Page() {
         title="Your Business, Limitless"
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/coin-gold.png"
-        imageAlt="Marsa business coin"
+        art="coin-warm"
       />
     </>
   );

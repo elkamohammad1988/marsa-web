@@ -5,7 +5,6 @@ import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { CardShowcase } from "@/components/sections/CardShowcase";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -36,8 +35,7 @@ export default function Page() {
         ]}
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/phone-home.png"
-        imageAlt="Marsa company formation and business account"
+        art="phone-home"
         tone="navy"
       />
 
@@ -114,15 +112,8 @@ export default function Page() {
           "A dedicated onboarding specialist",
           "SEPA and SWIFT from a single dashboard",
         ]}
-        imageSrc="/images/cards-stack.png"
-        imageAlt="Marsa business cards for a newly formed company"
+        art="card-stack"
         cta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-      />
-
-      <Testimonial
-        quote="We wanted to base our SaaS in the EU but dreaded the paperwork. Marsa incorporated the company and had our IBAN and team cards live in a single week — we invoiced our first customer before the ink was dry."
-        authorName="Lukas Meyer"
-        authorTitle="Co-Founder, Northbound SaaS — Berlin"
       />
 
       <RegulatedBand />
@@ -157,8 +148,7 @@ export default function Page() {
         title="Start Your EU Company With Marsa"
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
-        imageSrc="/images/coin-gold.png"
-        imageAlt="Marsa business coin"
+        art="coin-warm"
       />
     </>
   );
