@@ -5,7 +5,6 @@ import { Heading } from "@/components/ui/Heading";
 import { BreadcrumbEyebrow } from "@/components/sections/BreadcrumbEyebrow";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { CTACard } from "@/components/sections/CTACard";
-import { siteConfig } from "@/lib/site";
 import { regulatoryDisclosure } from "@/lib/legal";
 import { buildMetadata } from "@/lib/seo";
 
@@ -89,12 +88,15 @@ export default function Page() {
         </Container>
       </Section>
 
+      {/* There is no compliance team. This used to say "Talk To Our Compliance
+          Team — we're happy to help", pointing at a contact form that stores
+          nothing and reaches nobody. */}
       <CTACard
-        eyebrow="Questions?"
-        title="Talk To Our Compliance Team"
-        description="Have a regulatory or safeguarding question? We're happy to help."
-        primaryCta={{ label: "Contact Compliance", href: "/contact?topic=compliance" }}
-        secondaryCta={{ label: "Read Our Privacy Policy", href: "/legal/privacy" }}
+        eyebrow="Read Further"
+        title="The Documents This Model Would Need"
+        description="The privacy policy and terms on this site are written as illustrations of what a real operator would have to publish — not as agreements anybody has entered into."
+        primaryCta={{ label: "Read The Privacy Policy", href: "/legal/privacy" }}
+        secondaryCta={{ label: "Read The Terms", href: "/legal/terms" }}
         art="coin"
       />
     </>

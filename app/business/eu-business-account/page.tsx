@@ -5,7 +5,6 @@ import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { CardShowcase } from "@/components/sections/CardShowcase";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -110,12 +109,6 @@ export default function Page() {
           "Apple & Google Pay",
         ]}
         art="card-stack"
-      />
-
-      <Testimonial
-        quote="Opened A Business Account Online In One Day — After Multiple EU Bank Rejections."
-        authorName="Marco P."
-        authorTitle="Founder, Verona"
       />
 
       <RegulatedBand />

@@ -4,7 +4,6 @@ import { Hero } from "@/components/sections/Hero";
 import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -98,12 +97,6 @@ export default function Page() {
           { label: "Client Sub-Accounts", marsa: "Yes", traditional: "No" },
           { label: "Setup Time", marsa: "Under 48h", traditional: "1-3 weeks" },
         ]}
-      />
-
-      <Testimonial
-        quote="My design studio bills clients in London and New York. Sending them local account details instead of an IBAN and SWIFT code got me paid twice as fast, and I stopped losing a chunk of every invoice to conversion fees."
-        authorName="Sofia Novak"
-        authorTitle="Creative Director, Studio Novak — Warsaw"
       />
 
       <RegulatedBand />

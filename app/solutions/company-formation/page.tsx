@@ -5,7 +5,6 @@ import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { CardShowcase } from "@/components/sections/CardShowcase";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -115,12 +114,6 @@ export default function Page() {
         ]}
         art="card-stack"
         cta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-      />
-
-      <Testimonial
-        quote="We wanted to base our SaaS in the EU but dreaded the paperwork. Marsa incorporated the company and had our IBAN and team cards live in a single week — we invoiced our first customer before the ink was dry."
-        authorName="Lukas Meyer"
-        authorTitle="Co-Founder, Northbound SaaS — Berlin"
       />
 
       <RegulatedBand />

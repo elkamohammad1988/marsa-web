@@ -3,7 +3,6 @@ import { buildMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -66,12 +65,6 @@ export default function Page() {
           { label: "FX Markup", marsa: "0% (up to €10k)", traditional: "2-4%" },
           { label: "Support", marsa: "Dedicated", traditional: "Generic" },
         ]}
-      />
-
-      <Testimonial
-        quote="Opened A Business Account Online In One Day — After Multiple EU Bank Rejections."
-        authorName="Marco P."
-        authorTitle="Founder, Verona"
       />
 
       <RegulatedBand />

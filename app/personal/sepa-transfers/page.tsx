@@ -5,7 +5,6 @@ import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { CardShowcase } from "@/components/sections/CardShowcase";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -107,12 +106,6 @@ export default function Page() {
         ]}
         art="card-stack"
         reverse
-      />
-
-      <Testimonial
-        quote="I switched to Marsa and stopped paying my old bank for every transfer. Now my SEPA payments land in seconds — for free."
-        authorName="Antoine R."
-        authorTitle="Freelance designer, Paris"
       />
 
       <RegulatedBand />

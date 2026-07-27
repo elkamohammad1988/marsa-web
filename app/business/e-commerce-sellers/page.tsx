@@ -4,7 +4,6 @@ import { Hero } from "@/components/sections/Hero";
 import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -90,12 +89,6 @@ export default function Page() {
           { label: "Payout Speed", marsa: "Same day", traditional: "2-5 days" },
           { label: "Support", marsa: "Dedicated", traditional: "Generic" },
         ]}
-      />
-
-      <Testimonial
-        quote="I got a Netherlands IBAN in one day and finally unblocked my Amazon DE payouts — without opening a local subsidiary."
-        authorName="Diana V."
-        authorTitle="Amazon FBA Seller, Madrid"
       />
 
       <RegulatedBand />

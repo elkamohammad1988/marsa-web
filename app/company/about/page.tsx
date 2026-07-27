@@ -111,11 +111,11 @@ export default function Page() {
       </Section>
 
       <CTACard
-        eyebrow="Join Us"
-        title="Build The Future Of Money With Marsa"
-        description="Open an account in minutes, or explore a career on our team."
-        primaryCta={{ label: "Open An Account", href: "/get-started" }}
-        secondaryCta={{ label: "See Open Roles", href: "/company/careers" }}
+        eyebrow="See It Working"
+        title="The Parts That Actually Run"
+        description="Live ECB rates, offline IBAN validation, and a walkthrough of the onboarding flow — the software, without the company."
+        primaryCta={{ label: "Try The Demo", href: "/demo" }}
+        secondaryCta={{ label: "Check An IBAN", href: "/tools/iban-checker" }}
         art="coin-warm"
       />
     </>
