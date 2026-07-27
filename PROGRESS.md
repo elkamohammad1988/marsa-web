@@ -875,3 +875,175 @@ live regions to two targeted ones, all eight rail labels are present in the
 markup at every viewport, the Back control and the blocker hint are correctly
 absent on the welcome step. tsc exit 0 · lint clean · 655 tests / 34 files ·
 build 55 routes.
+
+---
+
+## The honesty programme — batches H1–H5 · 2026-07-26 → 2026-07-27
+
+**Not `AUDIT.md` findings.** The audit asked whether the code was correct. It
+did not ask whether the site was *true*, and that turned out to be the more
+expensive question. Recorded here as one arc, because the individual fixes only
+make sense together.
+
+The trigger has a date on it: this repository is **public**, the site is a
+working application, and its forms collected a name and an email address behind
+a success screen reading *"our onboarding team will email you within one
+business day with your next steps and identity-verification link."* There is no
+onboarding team. That is a false statement made to a real person on a public
+URL, and it created a live data-protection obligation for a project with no
+operator to discharge one.
+
+### H1 — the forms collect nothing · [#23](https://github.com/elkamohammad1988/marsa-web/pull/23) · **MERGED**
+
+The public forms now validate through the same `lib/validation.ts` the server
+uses — so a visitor sees the real rule set rather than a mock of it — and then
+**transmit nothing and store nothing**. `DemoSubmissionNotice` replaces the
+success screen: what actually happened, what the real pipeline would have done
+in order, and the endpoint that would have run.
+
+The intake pipeline stays in the repository and stays tested — shared
+validation, honeypot, cross-instance rate limiting, durable storage with an
+unambiguous write contract, email notification. It is deliberately not wired to
+the public form, and the panel says so. `useSubmit.ts` (87 lines) was deleted;
+`tests/forms-collect-nothing.test.ts` asserts the absence.
+
+The footer newsletter gets a one-line version of the same statement, because it
+renders on every page and a subscription confirmation would have been a lie in
+the one component nobody can avoid.
+
+### H2 — the build says what it is · [#24](https://github.com/elkamohammad1988/marsa-web/pull/24) · **MERGED**
+
+`ConceptBadge` on every route: a small on-brand disclosure that expands into
+what is real (live ECB rates, ISO 13616 IBAN validation, a tested intake
+pipeline) and what is not (no company, no licence, no accounts, no data
+collected). Chosen over a top banner, which costs a strip of every viewport, and
+over an interstitial, which puts a modal between a visitor and the work in the
+first ten seconds.
+
+**The line was drawn at statements with legal weight, not at product claims.** A
+concept describing free SEPA transfers is a claim about a hypothetical product.
+A page telling a reader they may refer a complaint to the financial ombudsman
+service is a false statement about a legal right. Removed outright: the FSCS
+reference, the ombudsman referral, the assertion that 100% of customer funds are
+safeguarded, `RegulatedBand`'s "under EU and UK supervision" (nine pages), and
+the footer badges asserting *"Regulated Partners · Segregated Accounts ·
+Safeguarded Funds"* sitewide. `TrustStrip` went too — it was the last holder of
+"Safeguarded Funds" on the homepage and it listed **Mastercard** among "networks
+and standards you already trust".
+
+Six configuration defaults stopped inventing an identity. `support@`, `sales@`
+and `press@marsa.money` were live `mailto:` links and `Organization.email`;
+`x.com/marsamoney` and friends were emitted in `Organization.sameAs`, which is a
+machine-readable claim to own those accounts. All six now default to empty, and
+every consumer renders only when configured — including `getNotifierConfig`,
+which had been treating a missing recipient as a reason to send to the empty
+string.
+
+Then the same domain in the place it did the most damage: `siteConfig.url` fell
+back to `https://www.marsa.money`, which is what every canonical tag, the
+sitemap, robots, every OG tag and the JSON-LD are built from. An unconfigured
+build was asking search engines to attribute this site's content to a domain
+nobody owns. Resolution is now `NEXT_PUBLIC_SITE_URL`, then Vercel's
+per-deployment host, then `http://localhost:3000`.
+
+`tests/site-identity.test.ts` guards the shape rather than the string: no file
+under `app`, `lib` or `components` may contain the unregistered domain, and no
+`NEXT_PUBLIC_*` fallback may be a URL or an email literal. Scoped to that prefix
+deliberately — a server-side default naming a third party the code genuinely
+calls (`FX_API_BASE`) is a dependency, not a claim about who we are.
+
+**Deliberately untouched:** `lib/legal.ts`. Its fallback string is the one
+remaining substantial false claim on the site, and its wording is
+[H19](./PROJECT-PLAN.md#h19--approve-the-regulatory-disclosure-wording).
+
+### H3 — the imagery · [#25](https://github.com/elkamohammad1988/marsa-web/pull/25) · **MERGED** · closes **F1**, absorbs **F9**
+
+Seventeen PNGs, six unique hashes, 2.05 MB, provenance unknown. The audit filed
+it as duplication; the duplication was the symptom. **The defect was that a
+picture and the sentence describing it were maintained in different files with
+nothing tying them together** — which is how `card-phone.png` came to render as
+`alt="Marsa Mastercard and mobile app"` while being, byte for byte, the cover
+photograph of blog post 6. No amount of care at the call site could have caught
+that, because the call site had no way to know what the file was.
+
+Replacing raster with raster would have fixed the symptom and left the defect,
+so the art is now **drawn in markup**, in the idiom of `AccountPreview`:
+tokenised HTML and inline SVG, following the palette, sharp at any density, a
+few hundred bytes instead of 2.05 MB. `components/art/captions.ts` declares six
+product slots and six blog motifs as unions with a caption per member, keyed off
+the same type — a slot cannot exist without a description, and a description
+cannot outlive the slot it describes. `BrandArt` renders `role="img"` with that
+caption, which also drops the decorative internals out of the accessibility tree
+entirely. The `imageSrc`/`imageAlt` prop pair is gone from all four consuming
+components, so there is no per-page alt string left to drift.
+
+The card is **scheme-neutral** — no network mark, real or invented — and says
+CONCEPT where a scheme logo would sit. Seven "Marsa Mastercard" strings left the
+copy across five pages and `lib/pricing.ts`.
+
+Markup cannot serve a crawler, so `app/blog/[slug]/opengraph-image.tsx`
+generates a real share card per post at build time; `postSocialImage` is the
+single place its path is written, so the route and its three metadata consumers
+cannot drift. The five `hero-blog-*` files nothing referenced went with the rest
+(**F9**).
+
+**Not verified:** nobody has seen the artwork rendered — browser tooling was
+unavailable in the session that wrote it. Structural verification only. See
+[H20](./PROJECT-PLAN.md#h20--look-at-the-new-artwork).
+
+### H4 — the people and the jobs · [#26](https://github.com/elkamohammad1988/marsa-web/pull/26) · **MERGED**
+
+Nine testimonials, each a quotation attributed to a named person with a job
+title and a city. **Three separate pages ran the same quote from the same
+invented "Marco P."**, which is the detail that gives it away: they were written
+to fill a section, and any reader who visits two pages sees it. A fabricated
+endorsement is a different order of thing from an optimistic product claim — a
+claim describes a hypothetical product, an endorsement asserts that a real
+person had a real experience.
+
+The careers page went with them: five open roles, five Apply buttons, and a
+benefits list (meaningful equity, private health cover, 26 days holiday) for a
+company that does not exist. There is no honest version of that page, so it was
+deleted rather than reworded — with its footer link and its sitemap entry.
+
+Two CTAs that promised a person were rewritten: *"Talk To Our Compliance Team"*
+pointed at a form that reaches nobody, and *"explore a career on our team"*
+pointed at the deleted page.
+
+**Kept deliberately: the rate ticker.** Its data is real — ECB reference rates,
+fetched hourly, labelled with the actual publication date, and the section
+renders nothing at all if the provider is unreachable. It was never in the same
+category as the rest of this.
+
+`tests/no-invented-people.test.ts` guards the prop shape rather than the
+strings, so a new quote fails on arrival whatever it says. It also asserts that
+**every path in the sitemap resolves to a page file** — the careers deletion had
+three consequences and only two of them are visible while clicking around.
+
+### H5 — `/company/about` · [#27](https://github.com/elkamohammad1988/marsa-web/pull/27) · **OPEN, awaiting the maintainer**
+
+The one PR in this arc deliberately not self-merged. The maintainer asked for a
+proposal on the thin company pages rather than a deletion, so it is written as
+code and left open.
+
+It turns a company profile for a company that does not exist — *"Marsa was
+founded on a simple belief"*, **180+ countries served** — into a page about the
+build, where **every number is computed from the module that implements it**:
+the currency table the converter reads, the ISO 13616 table the validator checks
+against, the sitemap function itself. No test count appears on it, because that
+number has no honest self-updating source — which is exactly the failure the
+README had when it advertised 94 passing tests against an actual 367.
+
+---
+
+## Baseline on `main` — 2026-07-27
+
+```
+25 PRs merged · 655 tests / 34 files · 55 routes
+tsc --noEmit exit 0 · next lint clean · npm audit --omit=dev clean
+```
+
+Every Critical and every High in `AUDIT.md` is closed. What remains from the
+original backlog is Batch 11 (retention), Batch 13 (end-to-end smoke tests),
+Batch 17 (ESLint 9) and Batch 18 (operational documentation) — none of them
+risk-driven.

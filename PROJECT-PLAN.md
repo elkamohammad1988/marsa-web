@@ -12,7 +12,20 @@ production `npm audit` on every push to `main` and every pull request.
 Everything else in the audit — **S1–S10, B1–B10, F1–F10, P3–P9** — is tracked
 below. 37 findings, 19 batches.
 
-Last updated: 2026-07-26. **14 PRs merged, 25 findings closed.** See [`PROGRESS.md`](./PROGRESS.md).
+Last updated: 2026-07-27. **25 PRs merged.** Baseline on `main`: 655 tests
+across 34 files, 55 routes, typecheck and lint clean. See
+[`PROGRESS.md`](./PROGRESS.md).
+
+**The audit is no longer the whole plan.** It was a snapshot of code quality,
+and it was right about the code. What it did not ask is whether the site's
+*claims* were true — and re-reading the repository against that question turned
+up a larger problem than anything in the original backlog: a public build that
+collected real personal data under a promise nobody could keep, asserted a
+regulatory model that did not exist, quoted nine people who had never said
+anything, advertised five jobs, and shipped seventeen photographs of unknown
+provenance under alt text describing something else. That work is tracked in
+[The honesty programme](#the-honesty-programme) below and is now the larger half
+of this document.
 
 ---
 
@@ -126,15 +139,19 @@ Batch 16 and cannot start until assets exist.
 | 7 | Fail loudly on misconfiguration | B8 | **DONE** ([#8](https://github.com/elkamohammad1988/marsa-web/pull/8)) |
 | 8 | Migration infrastructure | P4 | **DONE** ([#14](https://github.com/elkamohammad1988/marsa-web/pull/14)) |
 | 9 | Database correctness & round trips | B7, B3, B4 | **DONE** ([#14](https://github.com/elkamohammad1988/marsa-web/pull/14)) — applying = [H3](#h3--apply-the-database-migrations--not-yet-done) |
-| 10 | Observability | B2, P3 | `TODO` |
+| 10 | Observability | B2, P3 | **DONE** ([#18](https://github.com/elkamohammad1988/marsa-web/pull/18)) — adapter = [H7](#h7--create-an-error-tracking-project-and-supply-the-dsn-b2), monitor = [H6](#h6--point-an-uptime-monitor-at-apihealth-p3) |
 | 11 | Retention & erasure | B10, P9 | `TODO` (period = [H12](#h12--decide-data-retention-periods-b10)) |
-| 12 | Storage internals | B6, B5, B9 | `TODO` |
+| 12 | Storage internals | B6, B5, B9 | **DONE** ([#19](https://github.com/elkamohammad1988/marsa-web/pull/19)) |
 | 13 | End-to-end smoke tests | P5b | `TODO` |
 | 14 | Blog dates, ordering & structured data | F5, F4, F6 | **DONE** ([#9](https://github.com/elkamohammad1988/marsa-web/pull/9)) |
-| 15 | Markup honesty & artifact weight | F10, F9 | `TODO` (F9 gated on [H9](#h9--source-real-product-imagery-f1)) |
-| 16 | Imagery & cookie banner | F1, F7 | F7 **DONE** ([#13](https://github.com/elkamohammad1988/marsa-web/pull/13)); F1 **BLOCKED-ON-ME** ([H9](#h9--source-real-product-imagery-f1)) |
+| 15 | Markup honesty & artifact weight | F10, F9 | **DONE** — F10 ([#17](https://github.com/elkamohammad1988/marsa-web/pull/17)), F9 absorbed into F1 ([#25](https://github.com/elkamohammad1988/marsa-web/pull/25)) |
+| 16 | Imagery & cookie banner | F1, F7 | **DONE** — F7 ([#13](https://github.com/elkamohammad1988/marsa-web/pull/13)), F1 ([#25](https://github.com/elkamohammad1988/marsa-web/pull/25)) |
 | 17 | ESLint 9 migration | P6 | `TODO` |
 | 18 | Operational documentation | P7, P8 | `TODO` |
+
+**Two batches remain from the original backlog** — 11 (retention), 13 (e2e
+smoke tests) — plus 17 and 18, which are deadline- and documentation-driven
+rather than risk-driven. Every High and every Critical in `AUDIT.md` is closed.
 
 **Outside the original backlog.** The audit is one dated snapshot, not a
 permanent ceiling. Work found by re-reading the repository afterwards is
@@ -143,9 +160,15 @@ evidence that motivated it.
 
 | # | Batch | Scope | Status |
 |---|---|---|---|
-| A | Documentation truth & admin setup copy | `README.md` claimed 94 tests against 367 and listed CI as unbuilt; `/admin/login` told the operator to set an 8-character password the app rejects | **DONE** |
-| B | The dead theme system removed | A `.dark` block mirroring `:root` value for value, a pre-paint script whose only job was to add that class, and four orphaned icons — closes the half of **F8** Batch 6 deferred | **DONE** |
-| C | Navigation: ARIA, focus, link hygiene | Closes **F10**; also a dropdown no tap could open, `aria-controls` naming nothing, white focus halos from an unnamed ring offset, and two footer shortcuts to one page | **DONE** |
+| A | Documentation truth & admin setup copy | `README.md` claimed 94 tests against 367 and listed CI as unbuilt; `/admin/login` told the operator to set an 8-character password the app rejects | **DONE** ([#15](https://github.com/elkamohammad1988/marsa-web/pull/15)) |
+| B | The dead theme system removed | A `.dark` block mirroring `:root` value for value, a pre-paint script whose only job was to add that class, and four orphaned icons — closes the half of **F8** Batch 6 deferred | **DONE** ([#22](https://github.com/elkamohammad1988/marsa-web/pull/22)) |
+| C | Navigation: ARIA, focus, link hygiene | Closes **F10**; also a dropdown no tap could open, `aria-controls` naming nothing, white focus halos from an unnamed ring offset, and two footer shortcuts to one page | **DONE** ([#17](https://github.com/elkamohammad1988/marsa-web/pull/17)) |
+| F | Structured data & sitemap honesty | Eighteen pages rendered a breadcrumb and one emitted `BreadcrumbList`; the sitemap stamped every entry with build time, telling each crawl that all 32 pages had just changed | **DONE** ([#20](https://github.com/elkamohammad1988/marsa-web/pull/20)) |
+| G | The demo, as an interaction | Four defects and three gaps found by walking the flow as a reader rather than reading it as a diff | **DONE** ([#21](https://github.com/elkamohammad1988/marsa-web/pull/21)) |
+
+(Batches D and E in `PROGRESS.md` are the audit's Batch 10 and Batch 12; they
+were written up under letters before the boards were reconciled. The PR numbers
+are the reliable identifier — #18 and #19.)
 
 ---
 
@@ -485,6 +508,75 @@ writing once, at the end.
 
 ---
 
+<a id="the-honesty-programme"></a>
+## The honesty programme
+
+`AUDIT.md` asked whether the code was correct. It did not ask whether the site
+was **true**. Those turn out to be different questions, and the second one had
+worse answers.
+
+The trigger was a single observation with a date on it: this repository is
+**public**, the site is a working Next.js application, and its forms collected a
+name and an email address behind a success screen reading *"our onboarding team
+will email you within one business day with your next steps and
+identity-verification link."* There is no onboarding team. Nobody was going to
+email anybody. That is a false statement made to a real person on a public URL,
+and it created a live data-protection obligation for a project with no operator
+to discharge one.
+
+Pulling that thread found the rest.
+
+### What was fixed, in the order it shipped
+
+| # | PR | What it was |
+|---|---|---|
+| 1 | [#23](https://github.com/elkamohammad1988/marsa-web/pull/23) | **The forms.** Now validate through the same `lib/validation.ts` the server uses, then **transmit nothing and store nothing**. A designed panel says what happened and what the real pipeline would have done, and names the endpoint that would have run. The intake pipeline itself — rate limiting, honeypot, durable storage, notification — stays in the repository and stays tested; it is simply not wired to the public form. |
+| 2 | [#24](https://github.com/elkamohammad1988/marsa-web/pull/24) | **The credentials.** `ConceptBadge` on every route. The FSCS reference, the ombudsman referral and *"100% of customer funds are safeguarded"* removed outright. `support@`/`sales@`/`press@marsa.money` and three social profiles — all at a domain nobody owns, the addresses live `mailto:` links, the profiles emitted in `Organization.sameAs` — now default to empty, with every consumer rendering nothing rather than inventing one. The canonical origin stopped defaulting to that same domain. |
+| 3 | [#25](https://github.com/elkamohammad1988/marsa-web/pull/25) | **The imagery.** Seventeen PNGs, six unique hashes, 2.05 MB, provenance unknown, alt text describing other photographs. Replaced by drawings in markup, each carrying its own description. Scheme-neutral card, no network mark; the trademark removed from copy on five pages. Closes **F1** and absorbs **F9**. |
+| 4 | [#26](https://github.com/elkamohammad1988/marsa-web/pull/26) | **The people and the jobs.** Nine testimonials attributed to named individuals with job titles and cities — three pages ran the same quote from the same invented person. Five open roles with Apply buttons and a benefits package. Both gone. |
+| 5 | [#27](https://github.com/elkamohammad1988/marsa-web/pull/27) | **`/company/about`** — open, awaiting the maintainer. Proposes turning a company profile for a company that does not exist into a page about the build, with every statistic derived from the module that implements it. |
+
+### The rule that emerged
+
+**The line is drawn at statements with legal weight, not at product claims.**
+
+A concept describing free SEPA transfers is a product claim about a hypothetical
+product — normal, and the polish is the point of the exercise. A page telling a
+reader they may refer a complaint to the financial ombudsman service is a false
+statement about a legal right they do not have. An endorsement attributed to a
+named person asserts that a real human had a real experience. A `sameAs` entry
+is a machine-readable claim to own an account.
+
+Those are the ones that had to go. The product copy stayed.
+
+### The pattern in every fix
+
+Each of these was fixed by removing the *state that allowed it*, not the
+instance:
+
+- The forms cannot lie about a submission because they no longer make one.
+- No `NEXT_PUBLIC_*` fallback may be a URL or an email literal — asserted by
+  `tests/site-identity.test.ts`, which scans source rather than checking one
+  string.
+- An illustration cannot be mislabelled because the caption is keyed off the
+  same union the drawing is, and there is no per-page `alt` prop left to drift.
+- A testimonial cannot reappear, because `authorName` as a prop shape fails the
+  test whatever it says.
+- The sitemap cannot advertise a 404, because every path in it is asserted to
+  resolve to a page file.
+
+### Still open
+
+| Item | Status |
+|---|---|
+| `lib/legal.ts` — the `regulatoryDisclosure()` fallback still describes licensed partner institutions holding customer funds, in the present tense. Under the concept framing it is false. | **BLOCKED-ON-ME** ([H19](#h19--approve-the-regulatory-disclosure-wording)) |
+| `regulatorySummary()` — same file, same problem (*"Funds safeguarded at licensed partner institutions"*), and it currently has **no callers at all**. | **BLOCKED-ON-ME** ([H19](#h19--approve-the-regulatory-disclosure-wording)) |
+| The sentences that follow the disclosure in `Footer.tsx` and `/legal/terms` — *"Marsa provides multi-currency accounts, SEPA & SWIFT transfers, and FX services…"* — assert operation immediately after a disclosure that denies it. | **BLOCKED-ON-ME** ([H19](#h19--approve-the-regulatory-disclosure-wording)) |
+| `siteConfig.legalName` is `"Marsa Money Ltd."` — a suffix that asserts an incorporated entity. | **BLOCKED-ON-ME** ([H19](#h19--approve-the-regulatory-disclosure-wording)) |
+| Nobody has looked at the new artwork rendered in a browser. It builds, it carries the right labels, and it fits its slots by construction — but that is not the same as looking right. | **BLOCKED-ON-ME** ([H20](#h20--look-at-the-new-artwork)) |
+
+---
+
 <a id="human-actions"></a>
 ## HUMAN ACTIONS
 
@@ -751,14 +843,41 @@ Verify after deploying: `https://<your-domain>/api/health` returns 200 with
 ---
 
 <a id="h9--source-real-product-imagery-f1"></a>
-### H9 — Source real product imagery · F1
+### ~~H9 — Source real product imagery~~ · F1 · **RESOLVED 2026-07-27 — by not sourcing any**
 
-The only High that engineering cannot start. Eleven of seventeen images are
-byte-identical duplicates; the homepage "Mastercard and mobile app" shot is a
-blog photograph, and its `alt` text says otherwise — a WCAG 1.1.1 failure on top
-of the credibility problem.
+**Closed by [#25](https://github.com/elkamohammad1988/marsa-web/pull/25).** This
+action assumed the fix was procurement: commission or buy nine assets, drop them
+in `public/images/`, and I would correct the alt text around them. That framing
+was wrong in three ways, and the maintainer's decision to replace `cards-stack`
+too — *"I cannot vouch for its provenance"* — is what made the third one
+obvious.
 
-**What is needed — nine distinct assets:**
+1. **It would have fixed the symptom.** The duplication was not the defect. The
+   defect was that a picture and the sentence describing it were maintained in
+   different files with nothing tying them together, which is how
+   `card-phone.png` came to be rendered as *"Marsa Mastercard and mobile app"*
+   while being the cover photograph of blog post 6. New files, same structure,
+   same failure available.
+2. **The trademark.** The card shot carried a Mastercard mark on a product with
+   no issuer, no BIN and no scheme agreement — the same class of problem as the
+   licence claims being removed in the same programme.
+3. **Provenance is unanswerable for anything sourced.** A licence receipt for a
+   stock photo is a receipt, not a guarantee, and this repository is public.
+
+The illustrations are now drawn in markup from design tokens, in the idiom of
+`components/sections/AccountPreview.tsx`. Nothing is sourced, so nothing has to
+be vouched for; each drawing carries its own description, so alt text cannot
+drift; the card is scheme-neutral and says `CONCEPT` where a network mark would
+sit. 2.05 MB of PNG left the repository, along with the five `hero-blog-*` files
+nothing referenced (**F9**).
+
+**What is left of this action** is the one part that genuinely needs a human:
+looking at it. See [H20](#h20--look-at-the-new-artwork).
+
+<details>
+<summary>The original procurement brief, kept for the record</summary>
+
+**What was needed — nine distinct assets:**
 
 | Slot | Currently | Needs to be |
 |---|---|---|
@@ -785,6 +904,81 @@ of the credibility problem.
    `hero-blog-*` files (F9).
 6. **Judgement only you can make:** open each page after my PR and confirm the
    images actually look right in context. I cannot assess that.
+
+</details>
+
+---
+
+<a id="h19--approve-the-regulatory-disclosure-wording"></a>
+### H19 — Approve the regulatory disclosure wording · **blocks the last of the honesty programme**
+
+`lib/legal.ts` holds the one string on this site that is a legal statement
+rather than copy, and it is rendered in the footer of **every page**, on
+`/company/compliance`, and inside `/legal/terms`. It has not been touched in the
+honesty programme because the maintainer's approval for that file was explicitly
+scoped to this single string and no further.
+
+**What it currently says when no regulator is configured — which is always:**
+
+> Marsa Money Ltd. is not a bank. Accounts, IBANs, payments and currency
+> exchange **are provided** by licensed partner institutions, and customer funds
+> **are held** in safeguarded accounts at those partners, kept separate from
+> Marsa's own funds. Marsa **provides** the platform, onboarding and support
+> layer on top of that regulated infrastructure.
+
+Every verb is present tense and every clause describes an arrangement that does
+not exist. There are no partner institutions, no customer funds and no platform
+layer in operation. Written before the concept framing, this was a reasonable
+"we are not a bank" disclaimer; under the new framing it is the last substantial
+false claim on the site.
+
+**Three things travel with it, and are listed here rather than fixed quietly
+because they only make sense decided together:**
+
+1. `regulatorySummary()` in the same file returns *"Funds safeguarded at
+   licensed partner institutions"* — same problem. It also has **no callers**,
+   so the options are rewrite or delete.
+2. `Footer.tsx` and `/legal/terms` each append a sentence to the disclosure —
+   *"Marsa provides multi-currency accounts, SEPA & SWIFT transfers, and FX
+   services to individuals and businesses across the EU and beyond"* — which
+   asserts operation immediately after a paragraph denying it.
+3. `siteConfig.legalName` is `"Marsa Money Ltd."`. The `Ltd.` suffix asserts an
+   incorporated entity, and it is emitted in `Organization.legalName`.
+
+The proposed replacement wording is in the working notes for this batch and
+awaits a yes, a no, or an edit.
+
+---
+
+<a id="h20--look-at-the-new-artwork"></a>
+### H20 — Look at the new artwork · F1
+
+The illustrations shipped in
+[#25](https://github.com/elkamohammad1988/marsa-web/pull/25) are verified
+structurally — they build, they carry accurate labels, they fit their slots by
+construction, and the generated HTML contains zero `/images/` references. **They
+have not been seen rendered.** Browser tooling was unavailable in the session
+that wrote them.
+
+This is the one part of F1 that was always going to need a person, and it is the
+same judgement the original H9 asked for.
+
+```
+npm run dev
+```
+
+Then look at `/` (the card-and-phone showcase and the coin CTA), `/pricing` (all
+six plan illustrations, which is where the sizing is tightest), and `/blog` (six
+distinct covers, plus the featured slot where the title sits on the art). Check
+in particular that:
+
+- nothing is clipped in the 5:4 slots on `/pricing`
+- the type inside the phone screens scales sensibly at small sizes
+- the coin's ripple rings are not cropped by the container
+- the featured blog cover has enough contrast behind its overlaid title
+
+Anything that looks wrong is a fix, not a re-decision — say what looks off and I
+will adjust it.
 
 ---
 
@@ -1044,21 +1238,38 @@ or remove them.
 ---
 
 <a id="h16--review-and-merge-each-pr"></a>
-### H16 — Review and merge each PR
+### ~~H16 — Review and merge each PR~~ · **SUPERSEDED 2026-07-27 — autonomy mode**
 
-For every batch I will tell you what changed, exactly which files in the diff
-deserve your attention, and whether I consider it safe to merge. Then:
+This action described the original working method: I open a PR, you read it, you
+click merge. The maintainer has since moved the programme to **autonomous
+batches** — I self-merge once CI is green, and stop only for a fixed set of
+things.
 
-1. Open the PR URL I give you.
-2. Click the **Files changed** tab.
-3. Read the files I flagged. For frontend batches, run `npm run dev` and look at
-   the actual page — there is no preview deployment until a host is connected
-   ([H13](#h13--deploy-time-connect-the-host-to-the-repository)).
-4. Confirm the **Verify** check is green at the bottom of the **Conversation** tab.
-5. Click **Merge pull request** → **Confirm merge** → **Delete branch**.
+**The four categories that still stop me:**
 
-If anything looks wrong, comment on the PR and tell me — I would rather rework it
-than have you merge something you are not comfortable with.
+1. **Copy with legal weight** — anything in `lib/legal.ts`, regulatory or
+   compliance claims, the cookie policy. Proposed wording goes to you first;
+   see [H18](#h18--approve-corrected-cookie-policy-copy-f7) and
+   [H19](#h19--approve-the-regulatory-disclosure-wording).
+2. **Anything irreversible** — a force-push over someone else's work, a
+   destructive migration, deleting something git cannot return, anything that
+   leaves this repository.
+3. **CI red twice** on the same batch. Once is a fix; twice means I have
+   misunderstood something and should say so rather than keep pushing.
+4. **A decision that is yours by right** — what the product claims, whose name
+   goes on it, what a page is *for*. When a batch turns one of these up I build
+   the option and leave the PR open rather than merging it. [#27](https://github.com/elkamohammad1988/marsa-web/pull/27)
+   is the current example.
+
+**What has not changed:** every PR still carries its full reasoning, still names
+the files worth your attention, and is still there to be reverted. Autonomy
+changed who clicks the button, not what is written down.
+
+**Still worth your eyes, when you have them:** frontend batches. There is no
+preview deployment until a host is connected
+([H13](#h13--deploy-time-connect-the-host-to-the-repository)), so `npm run dev`
+is the only way anyone sees the rendered result — and in this batch, nobody has
+([H20](#h20--look-at-the-new-artwork)).
 
 ---
 

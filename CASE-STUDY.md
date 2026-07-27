@@ -53,6 +53,56 @@ homepage account panel is `aria-hidden` illustration; regulatory copy is
 env-gated so the site never claims an authorisation it doesn't hold. This is a
 product decision, not a disclaimer bolted on at the end.
 
+**Dark-first, and why that is a token decision rather than a colour one.**
+
+The site has exactly **one palette**. Not a dark theme with a light fallback,
+not a light theme inverted — one set of 30 CSS custom properties on `:root`,
+with `color-scheme: dark` so the browser renders form controls and scrollbars to
+match. Everything else follows from that.
+
+*Why one.* A second palette is not twice the design work, it is twice the
+**verification** work: every foreground/background pair has to clear AA in both,
+and the interesting failures are always in the theme nobody is looking at. This
+project chose depth over breadth — one palette, every pair measured, rather than
+two palettes and a hope.
+
+*The values are RGB channels, not colours.* `--brand: 204 31 134`, not
+`#CC1F86`. Tailwind wraps each in `rgb(var(--brand) / <alpha-value>)`, which is
+what makes `bg-brand-blue/[0.12]`, `ring-line/70` and `from-ink/5` work at all.
+Storing a hex would have cost every opacity modifier in the codebase — a
+constraint worth knowing before you pick the format, and expensive to discover
+afterwards.
+
+*Roles, not shades.* Each token names a **job**: `--canvas` is the page,
+`--card` is an elevated panel, `--line` is a hairline, `--ink-muted` is
+secondary text. Nothing is called `gray-700`. The rename is what makes the
+contrast test possible — `tests/contrast.test.ts` can assert "every real text
+token clears 4.5:1 on every surface token" because the tokens know which of the
+two they are.
+
+*What it cost to get wrong once.* An earlier version shipped a `.dark` block
+declaring all 30 properties **to the same values as `:root`**, plus a pre-paint
+inline script in the document head whose only job was to add that class. A
+closed loop: it could not change a rendered colour. It survived several batches
+because it *looked* load-bearing — the CSP work reasoned about hashing "the
+inline theme script", and two error messages kept a failing `red-600` inside
+`dark:` variants that could never match.
+
+Measured rather than assumed when it was removed: the `.dark` block was 967
+source bytes and **6 bytes of shipped CSS**, because cssnano saw two identical
+declaration blocks and merged the selectors. The real cost was the other half —
+**230 bytes of blocking inline script in the `<head>` of all 31 prerendered
+documents**, executed before first paint on every navigation, to add a class
+with no effect.
+
+`darkMode: "class"` stays in the Tailwind config deliberately, with the reason
+written down. Under the default `"media"` strategy a stray `dark:` variant would
+activate for every visitor whose OS prefers dark — most of them — silently
+applying a value nobody designed against, on a palette that is already dark.
+`"class"` makes such a variant inert. `tests/dead-code.test.ts` fails if any
+token is ever declared twice, which is the shape a second palette would take on
+its way back in.
+
 **The `#CC1F86` vs `#EE4FA5` contrast decision (the interesting one).**
 The brief specified vivid magenta `#CC1F86` for CTAs *and* accent-bright
 `#EE4FA5` for hover/links, plus a non-negotiable WCAG AA bar. These collide:
@@ -74,15 +124,25 @@ ratios rather than eyeballing.
 
 All measured on the production build — method reproducible from the repo.
 
-- **Lighthouse (desktop preset)** — `/` and `/demo` both:
+> **Dated measurements, not standing claims.** The Lighthouse, axe-core and
+> end-to-end figures below were taken on the build of **2026-05**, before the
+> post-audit remediation programme. The test count and route count are from
+> **2026-07-27**. They are marked because the honest version of a number is the
+> one that says when it was taken — an earlier draft of `README.md` advertised
+> "94 passing tests" against an actual 367, which is the most expensive kind of
+> error for a project whose argument is that its claims are checkable. The
+> current baseline is always in [`PROGRESS.md`](./PROGRESS.md).
+
+- **Lighthouse (desktop preset, 2026-05)** — `/` and `/demo` both:
   **Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100.**
   (Run via the Chrome I manage over CDP to avoid a chrome-launcher temp-cleanup
   crash on Windows.)
-- **axe-core (WCAG 2.0 + 2.1, A + AA)** — injected the local axe build over CDP
-  and ran on **29 routes: 0 violations.**
+- **axe-core (WCAG 2.0 + 2.1, A + AA, 2026-05)** — injected the local axe build
+  over CDP and ran on **29 routes: 0 violations.** The site now has 55 routes;
+  this has not been re-run since.
 - **Responsive** — no horizontal overflow at 375 / 768 / 1440 px on `/` or
   `/demo` (`scrollWidth === viewport`).
-- **Tests** — **94 / 94** Vitest, covering IBAN/MOD-97, FX, pagination, storage
+- **Tests** (2026-07-27) — **655 / 655** Vitest across 34 files, covering IBAN/MOD-97, FX, pagination, storage
   provider selection, admin auth (HMAC round-trip, tamper/expiry), CSV
   injection-safety, and the analytics funnel (unique-session counting,
   drop-off, completion, divide-by-zero).
@@ -102,15 +162,26 @@ ledger, BaaS money movement) — is intentionally **not** built. Stubbing
 security-critical flows would be dishonest and worse than absent. This repo is
 the credible front door and demand engine for that product, not the product.
 
+**It is also not a business, and the site now says so on every page.** The
+public forms validate what you type and then discard it — nothing is
+transmitted, nothing is stored, nobody is contacted. There is no company, no
+licence, no partner institution, no account. Everything that previously implied
+otherwise (a regulatory claim, nine testimonials, five job openings, three
+contact addresses at a domain nobody owns) was found by auditing the site
+against its own claims and removed. That programme is the more interesting half
+of this project's history, and it is recorded batch by batch in
+[`PROGRESS.md`](./PROGRESS.md).
+
 ---
 
 ## Catalog blurb
 
 > **Marsa** — a cross-border multi-currency account concept, delivered as a
 > production-grade marketing site + interactive live-FX demo + first-party
-> analytics backend. Dark "black rose" design system, Lighthouse 100s across
-> the board, 0 accessibility violations on 29 routes, 94 passing tests, and a
-> hard line between real software and clearly-labelled sandbox. Next.js 15 /
-> React 19 / TypeScript, zero runtime bloat.
+> analytics backend. Dark "black rose" design system built on one set of
+> role-named tokens, 655 passing tests, illustrations drawn from those tokens
+> rather than sourced, and a hard line between real software and a build that
+> tells you exactly what it is not. Next.js 15 / React 19 / TypeScript, zero
+> runtime bloat.
 
 **Tagline:** *One account for every currency you get paid in.*
