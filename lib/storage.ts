@@ -10,6 +10,7 @@ import {
   selectRows,
   type PostgrestConfig,
 } from "@/lib/postgrest";
+import { captureException } from "@/lib/observability";
 
 /**
  * Submission storage.
@@ -152,10 +153,17 @@ export class FileSubmissionStore implements SubmissionStore {
       // A read-only or unwritable DATA_DIR means the record does not exist
       // anywhere. Log it so it is recoverable from the platform logs, then
       // throw — the visitor must not be told this succeeded.
-      console.error(
-        `[storage] could not write ${submission.kind} submission ${submission.id} to ${DATA_DIR}.`,
-        err instanceof Error ? err.message : err,
-      );
+      captureException(err, {
+        event: "storage.write",
+        provider: this.provider,
+        kind: submission.kind,
+        submissionId: submission.id,
+        dataDir: DATA_DIR,
+      });
+      // The last-resort recovery record, and the reason `console.info` is
+      // right here rather than a captured event: this is the submission
+      // itself, personal data included, and it must stay in the platform's own
+      // logs rather than being forwarded to a third-party error service.
       console.info(`[submission:${submission.kind}]`, line.trim());
       throw new StorageWriteError(
         `file store could not write ${submission.kind} submission ${submission.id}`,
@@ -217,12 +225,13 @@ export class FileSubmissionStore implements SubmissionStore {
       return { ok: true, detail: "file store writable" };
     } catch (err) {
       // The real reason embeds the absolute DATA_DIR path, which describes the
-      // server's filesystem layout to anyone who can reach /api/health. Log it
-      // where an operator can read it; return a fixed string (audit S2).
-      console.error(
-        "[storage] file store health check failed.",
-        err instanceof Error ? err.message : err,
-      );
+      // server's filesystem layout to anyone who can reach /api/health. Report
+      // it where an operator can read it; return a fixed string (audit S2).
+      captureException(err, {
+        event: "storage.health",
+        provider: this.provider,
+        dataDir: DATA_DIR,
+      });
       return { ok: false, detail: "file store not writable" };
     }
   }
@@ -273,10 +282,14 @@ export class PostgresSubmissionStore implements SubmissionStore {
       //
       // The full error text can include the PostgREST response body, so it is
       // logged server-side only and never carried to the browser.
-      console.error(
-        `[storage] database insert failed for ${submission.kind} ${submission.id}.`,
-        err instanceof Error ? err.message : err,
-      );
+      captureException(err, {
+        event: "storage.write",
+        provider: this.provider,
+        kind: submission.kind,
+        submissionId: submission.id,
+      });
+      // See the file store's equivalent: this line is the submission, so it
+      // stays in the platform log and never reaches a reporter.
       console.info(`[submission:${submission.kind}]`, JSON.stringify(submission));
       throw new StorageWriteError(
         `database insert failed for ${submission.kind} submission ${submission.id}`,
@@ -333,11 +346,12 @@ export class PostgresSubmissionStore implements SubmissionStore {
         };
       }
     } catch (err) {
-      console.warn(
-        "[storage] submission_stats() unavailable; falling back to four counts. " +
-          "Apply db/migrations/003_aggregate_functions.sql.",
-        err instanceof Error ? err.message : err,
-      );
+      captureException(err, {
+        event: "storage.stats.degraded",
+        severity: "warning",
+        remedy: "apply db/migrations/003_aggregate_functions.sql",
+        fallback: "four HEAD counts",
+      });
     }
 
     const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
@@ -362,11 +376,8 @@ export class PostgresSubmissionStore implements SubmissionStore {
       // A PostgrestError message carries the HTTP status, the table name and up
       // to 300 characters of the upstream response body — which for Postgres
       // errors includes column names, constraint names and hints. That is free
-      // schema reconnaissance, so it is logged and never returned (audit S2).
-      console.error(
-        "[storage] database health check failed.",
-        err instanceof Error ? err.message : err,
-      );
+      // schema reconnaissance, so it is reported and never returned (audit S2).
+      captureException(err, { event: "storage.health", provider: this.provider });
       return { ok: false, detail: "database unreachable" };
     }
   }

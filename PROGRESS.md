@@ -612,3 +612,79 @@ tsc exit 0 · lint clean · 403 tests / 27 files · build 49 pages.
 `tests/navigation.test.ts` strips comments before scanning, because these files
 now *explain* the roles they no longer use and a naive grep would count the
 explanation as the offence.
+
+---
+
+## Batch D — the observability seam · **MERGED**
+
+**Finding closed:** B2 (High), except the provider adapter · **Batch 10**, code half
+
+Ten `console.*` calls were the entire story, and `app/error.tsx` said so:
+*"Surface the error to logs/monitoring. Swap console for your provider."* The
+failures that matter most are all deliberately swallowed, and correctly so — a
+storage write that failed, an insert that fell back, an email that never sent,
+a limiter running degraded. None should break the visitor's request. Each was
+also invisible unless a human happened to be reading raw platform logs at that
+moment, so the detection path for *"we have been silently losing leads for a
+week"* was a customer complaint.
+
+`lib/observability.ts` is built for three properties:
+
+**No dependency.** Four runtime dependencies is a deliberate constraint. The
+default reporter writes **one line of JSON to stderr**, which every log
+platform already parses, with `severity` at the top level so an alert rule can
+filter without one. `setReporter` is where a Sentry adapter plugs in — that is
+[H7](./PROJECT-PLAN.md#h7--create-an-error-tracking-project-and-supply-the-dsn-b2),
+and it is now the *only* part of B2 waiting on a human.
+
+**Isomorphic.** `app/error.tsx` is a client component, so nothing here may
+import `node:*`. That ruled out the `AsyncLocalStorage` request-context design
+this started as.
+
+**Nothing personal leaves the process.** `redact()` drops the value of any key
+whose name reads as personal or secret — recursively, and applied to every
+context on the way to a reporter, not at the call sites. The capture sites deal
+in submission ids and error bodies, and it would take one careless
+`captureException(err, { submission })` to start posting names and email
+addresses to a third-party service. A test asserts the whole path.
+
+**The correlation id, placed where it earns its keep.** B2 asks for a request
+id from middleware. That would tag every request including the 99.9% that
+succeed, and it means widening the matcher — currently `/admin` only — so every
+asset request runs Edge middleware. Instead a **reference** is minted only when
+a submission fails, shown to the visitor in the error message, returned in the
+response body, and written into the captured event. "It said reference
+K3F9QW2A" now resolves to exactly one log line. The alphabet excludes `0/O` and
+`1/I/L` so it survives being read aloud.
+
+**Wired at nine sites**, not the four the audit named: storage write (both
+providers), storage health (both), stats degradation, analytics record and its
+fallback, funnel degradation, limiter degradation, notification failure, admin
+export, health-check storage and FX probes, `app/error.tsx`, and the admin
+credential rejection — the last because Batch A had just shown what a silently
+disabled admin area costs.
+
+**Two console calls survive on purpose**, and `tests/observability.test.ts`
+names the exemption so it is a decision rather than an oversight:
+`lib/storage.ts` echoes the failed submission itself, which is the last-resort
+recovery record and contains personal data, so it must stay in the platform's
+own logs rather than being forwarded anywhere; and `lib/env.ts` prints a
+multi-line human-readable configuration report at startup, where in production
+the same condition throws instead.
+
+**Three existing tests were rewritten to assert at the seam** rather than on
+console spies — `storage.health` no longer leaking `secret_column` into the
+response, the limiter's degradation being reported, the stats fallback naming
+its migration. Each is a stronger assertion than the spy it replaces: it checks
+*the event*, not the routing.
+
+`tests/setup.ts` silences the reporter by default, because several suites drive
+failure paths deliberately and a passing run had begun printing a wall of JSON.
+
+**Evidence:** tsc exit 0 · lint clean · 572 tests / 32 files · build 54 routes. The seam's own contract is covered: it never throws when the
+reporter does, it redacts nested context, it writes one newline-free parseable
+line, and 200 references do not collide.
+
+**Not done, deliberately:** no live-server probe. The behaviour is covered at
+unit level against real modules, and standing up a server to watch a log line
+would not have told me anything the tests do not.

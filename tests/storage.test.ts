@@ -5,6 +5,7 @@ import path from "node:path";
 // Type-only: erased at compile time, so it cannot trigger module evaluation
 // before DATA_DIR is set below.
 import type { StoredSubmission } from "@/lib/storage";
+import { setReporter, type CapturedEvent } from "@/lib/observability";
 
 // DATA_DIR is read when lib/storage is first imported, so it has to be set
 // before the dynamic import below — hence top-level await rather than a plain
@@ -320,9 +321,15 @@ describe("PostgresSubmissionStore", () => {
         headers: new Headers(),
       })),
     );
-    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const captured: CapturedEvent[] = [];
+    const restore = setReporter((event) => captured.push(event));
 
-    const health = await new PostgresSubmissionStore(cfg).health();
+    let health;
+    try {
+      health = await new PostgresSubmissionStore(cfg).health();
+    } finally {
+      setReporter(restore);
+    }
 
     expect(health.ok).toBe(false);
     expect(health.detail).toBe("database unreachable");
@@ -331,6 +338,8 @@ describe("PostgresSubmissionStore", () => {
     expect(health.detail).not.toContain("42703");
 
     // Removed from the caller's view, not discarded.
-    expect(error.mock.calls.flat().map(String).join(" ")).toContain("secret_column");
+    const reported = captured.find((e) => e.event === "storage.health");
+    expect(reported, "no storage.health event was captured").toBeDefined();
+    expect(reported!.message).toContain("secret_column");
   });
 });

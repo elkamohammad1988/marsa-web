@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { PostgresSubmissionStore } from "@/lib/storage";
 import { createAnalyticsStore } from "@/lib/analytics";
+import { setReporter, type CapturedEvent } from "@/lib/observability";
 
 /**
  * Audit B3 and B4: aggregation moved out of Node and into Postgres.
@@ -77,7 +78,6 @@ describe("B4 — admin stats in one round trip", () => {
 
   it("still renders against a database without migration 003", async () => {
     // The admin dashboard must not break because a migration has not been run.
-    vi.spyOn(console, "warn").mockImplementation(() => {});
     stubRoutes({}, ["rpc/submission_stats"]);
 
     const stats = await new PostgresSubmissionStore(CFG).stats();
@@ -86,12 +86,20 @@ describe("B4 — admin stats in one round trip", () => {
   });
 
   it("names the migration to run when it falls back", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const captured: CapturedEvent[] = [];
+    const restore = setReporter((event) => captured.push(event));
     stubRoutes({}, ["rpc/submission_stats"]);
 
-    await new PostgresSubmissionStore(CFG).stats();
+    try {
+      await new PostgresSubmissionStore(CFG).stats();
+    } finally {
+      setReporter(restore);
+    }
 
-    expect(String(warn.mock.calls[0][0])).toContain("003_aggregate_functions.sql");
+    const degraded = captured.find((e) => e.event === "storage.stats.degraded");
+    expect(degraded, "no degradation event was captured").toBeDefined();
+    expect(degraded!.severity).toBe("warning");
+    expect(String(degraded!.context.remedy)).toContain("003_aggregate_functions.sql");
   });
 });
 
@@ -145,7 +153,6 @@ describe("B3 — funnel aggregation is exact at any volume", () => {
   });
 
   it("falls back to the row scan when demo_funnel() is absent", async () => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
     stubRoutes({ demo_events: () => [] }, ["rpc/demo_funnel"]);
 
     const report = await createAnalyticsStore(PG_ENV).funnel();

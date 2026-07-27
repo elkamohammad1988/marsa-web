@@ -4,6 +4,7 @@ import { getNotifierConfig } from "@/lib/notify";
 import { getAdminConfig } from "@/lib/admin-auth";
 import { getPostgrestConfig } from "@/lib/postgrest";
 import { getLatestRate } from "@/lib/fx";
+import { captureException } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,10 +37,7 @@ export async function GET() {
   try {
     store = getStore();
   } catch (err) {
-    console.error(
-      "[health] submission storage is not configured.",
-      err instanceof Error ? err.message : err,
-    );
+    captureException(err, { event: "health.storage.unconfigured" });
   }
 
   const [storage, fx] = await Promise.all([
@@ -47,11 +45,9 @@ export async function GET() {
     getLatestRate("EUR", "USD").then(
       () => ({ ok: true }),
       (err: unknown) => {
-        // FxError messages relay the upstream provider's HTTP status.
-        console.error(
-          "[health] fx provider check failed.",
-          err instanceof Error ? err.message : err,
-        );
+        // FxError messages relay the upstream provider's HTTP status, so the
+        // detail belongs in the captured event and not in the response.
+        captureException(err, { event: "health.fx", severity: "warning" });
         return { ok: false };
       },
     ),
