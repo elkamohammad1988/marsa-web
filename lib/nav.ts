@@ -87,9 +87,11 @@ export const footerColumns: Array<{ title: string; links: NavLink[] }> = [
     ],
   },
   {
-    title: "Company",
+    // Not "Company" — there isn't one. This column points at what the build is
+    // and how it is meant to be read.
+    title: "This Build",
     links: [
-      { label: "About Us", href: "/company/about" },
+      { label: "About This Build", href: "/company/about" },
       { label: "Contact", href: "/contact" },
       { label: "Compliance", href: "/company/compliance" },
     ],
