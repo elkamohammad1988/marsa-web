@@ -5,7 +5,6 @@ import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { CardShowcase } from "@/components/sections/CardShowcase";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -95,12 +94,6 @@ export default function Page() {
         ]}
         art="card-and-phone"
         reverse
-      />
-
-      <Testimonial
-        quote="Opened A Netherlands IBAN In 14 Days — The First Time A Provider Took Our SaaS Company Seriously."
-        authorName="Naomi T."
-        authorTitle="CFO, Lisbon"
       />
 
       <RegulatedBand />

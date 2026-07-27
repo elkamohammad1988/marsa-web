@@ -4,7 +4,6 @@ import { Hero } from "@/components/sections/Hero";
 import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -98,12 +97,6 @@ export default function Page() {
           { label: "Settlement Speed", marsa: "Same-day SEPA", traditional: "2-5 days" },
           { label: "Account Manager", marsa: "Dedicated", traditional: "Call centre" },
         ]}
-      />
-
-      <Testimonial
-        quote="We import ceramics from three countries and used to lose thousands each quarter to bank FX spreads. With Marsa we hold euros and dollars, pay our factories the same day, and finally know our landed cost before the container ships."
-        authorName="Marco Bianchi"
-        authorTitle="Founder, Terra Imports — Milan"
       />
 
       <RegulatedBand />

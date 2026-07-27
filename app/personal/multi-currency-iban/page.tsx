@@ -5,7 +5,6 @@ import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { CardShowcase } from "@/components/sections/CardShowcase";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -110,12 +109,6 @@ export default function Page() {
           "Disposable virtual cards",
         ]}
         art="card-and-phone"
-      />
-
-      <Testimonial
-        quote="I opened a Netherlands IBAN in 14 minutes — without flying to Europe. Marsa replaced 3 different banking apps for me."
-        authorName="Sophia M."
-        authorTitle="Digital nomad, Lisbon"
       />
 
       <RegulatedBand />

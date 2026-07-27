@@ -3,7 +3,6 @@ import { buildMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
-import { Testimonial } from "@/components/sections/Testimonial";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
@@ -69,12 +68,6 @@ export default function Page() {
           { label: "SWIFT Fees", marsa: "Low flat fee", traditional: "€20-40 per transfer" },
           { label: "Mobile App", marsa: "Award-winning", traditional: "Limited features" },
         ]}
-      />
-
-      <Testimonial
-        quote="Opened A Business Account Online In One Day — After Multiple EU Bank Rejections."
-        authorName="Marco P."
-        authorTitle="Founder, Verona"
       />
 
       <RegulatedBand />

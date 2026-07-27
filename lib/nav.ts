@@ -90,7 +90,6 @@ export const footerColumns: Array<{ title: string; links: NavLink[] }> = [
     title: "Company",
     links: [
       { label: "About Us", href: "/company/about" },
-      { label: "Careers", href: "/company/careers" },
       { label: "Contact", href: "/contact" },
       { label: "Compliance", href: "/company/compliance" },
     ],
