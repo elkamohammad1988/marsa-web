@@ -16,6 +16,13 @@ live European Central Bank rates, ISO 13616 IBAN validation, Supabase Auth over
 its REST API with Postgres row-level security, and 1,494 unit tests behind a
 CI gate that runs on every push.
 
+**Live demo: https://marsa-web.vercel.app** — deployed with no credentials in
+the production environment, so the marketing site, the `/demo` sandbox, live ECB
+rates and IBAN validation all work, while `/account` and `/admin` are shut
+rather than half-working. What is missing there is a database, not a feature;
+the code and its tests are in this repository. `/api/health` reports `degraded`
+for the same reason, which is the app refusing to pretend.
+
 **What to look at if you are evaluating the work:**
 [What this is](#what-this-is-and-what-it-is-not) ·
 [Architecture](#architecture) · [Verified quality](#verified-quality) ·

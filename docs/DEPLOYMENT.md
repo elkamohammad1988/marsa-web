@@ -1,10 +1,17 @@
 # Deployment
 
-A launch-day runbook. It assumes nothing is deployed yet, because nothing is:
-this project is deliberately not connected to a hosting provider, and no
-`vercel` command has ever been run against it. That is a decision, not an
-oversight — the repository has no `vercel.json`, no `.vercel` link that matters,
-and no host-specific code.
+A launch-day runbook, and the record of the one deploy that has happened.
+
+**Currently deployed: https://marsa-web.vercel.app**, from
+`feat/auth-foundation`, with **exactly one environment variable set**
+(`NEXT_PUBLIC_SITE_URL`). No Supabase credentials, no admin password, no session
+secrets. That is why `/account` and `/admin` redirect and `/api/health` reports
+`degraded` rather than `ok` — every check below that depends on a database is
+therefore **not yet satisfied**, and this document does not pretend otherwise.
+
+The rest of this runbook is what a *credentialled* deploy needs. The repository
+still has no `vercel.json` and no host-specific code; the deploy is a stock
+Next.js build.
 
 The prerequisites that need a human and cannot be done from code live in
 [`PROJECT-PLAN.md` → HUMAN ACTIONS](PROJECT-PLAN.md#human-actions), each written

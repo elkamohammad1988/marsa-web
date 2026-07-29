@@ -22,6 +22,34 @@ description says what Marsa is in its second sentence rather than in a footnote.
 
 ---
 
+## 0. Live demo
+
+**https://marsa-web.vercel.app**
+
+Deployed from `feat/auth-foundation` with **no credentials configured at all** —
+the production environment holds exactly one variable, `NEXT_PUBLIC_SITE_URL`.
+That is a deliberate choice, and it decides what a visitor can and cannot reach.
+
+**Live and working:** the whole marketing site, the `/demo` sandbox end to end,
+live ECB rates in the converter and the demo's conversion step, ISO 13616 IBAN
+validation, the 404 and error boundaries, the sitemap and structured data, and
+the concept-build disclosure on every page.
+
+**Deliberately closed:** `/account` and `/admin` both redirect — customer
+accounts need `SUPABASE_ANON_KEY` and `AUTH_SESSION_SECRET`, and the operator
+dashboard needs `ADMIN_PASSWORD`. None are set, so those areas are shut rather
+than half-working. `/api/health` reports `degraded` for the same reason: storage
+is unconfigured, and the app refuses the file-store fallback in production
+instead of pretending a lead was saved.
+
+**If a buyer asks why auth is not clickable:** the code, the row-level-security
+migration and 1,494 tests are all in the public repository and run from a clean
+clone. What is missing from the demo is a database, not a feature. Standing up a
+live account system for a concept nobody can sign up to would mean holding real
+email addresses for a product that does not exist.
+
+---
+
 ## 1. Category
 
 **Web, Mobile & Software Dev → Full Stack Development.**
@@ -282,7 +310,7 @@ discover it in week three.
 - [ ] Title under 80 characters and free of superlatives Upwork rejects
 - [ ] No claim of client work, delivery volume, or reviews anywhere in the copy
 - [ ] Repository link included and public, `npm run verify` green on `main`
-- [ ] **A live demo URL** — see [`DEPLOYMENT.md`](DEPLOYMENT.md). This is the
-      largest remaining gap in the listing: a reviewer can read the code, but
-      cannot click the product
+- [x] **A live demo URL** — https://marsa-web.vercel.app, deployed with zero
+      credentials in the production environment. See §0 for exactly what is
+      reachable and what is deliberately closed
 - [ ] Every number in the description re-measured within the last week
