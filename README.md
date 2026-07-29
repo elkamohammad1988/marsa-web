@@ -334,7 +334,7 @@ moved the cut somewhere else rather than removing it.
 |---|---|
 | **Live ECB rates** — the converter and its 30-day history, on real European Central Bank reference data ![live rates](portfolio-screenshots/02-live-rates.png) | **Get paid from abroad** — the demo at the point a payout lands in the USD balance ![account](portfolio-screenshots/03-feature-account.png) |
 | **Convert at the interbank rate** — the same live rate, applied ![convert](portfolio-screenshots/04-feature-convert.png) | **Demo funnel** — first-party, anonymous, behind the operator password ![analytics](portfolio-screenshots/05-analytics.png) |
-| **IBAN validation** — ISO 13616 / MOD-97, entirely offline ![iban](portfolio-screenshots/06-iban-validation.png) | **Pricing** ![pricing](portfolio-screenshots/08-pricing.png) |
+| **IBAN validation** — ISO 13616 / MOD-97, entirely offline ![iban](portfolio-screenshots/06-iban-validation.png) | **Plan comparison** — the concept product's own subscription tiers. Prices for a product nobody can buy, not a rate card for the work ![pricing](portfolio-screenshots/08-pricing.png) |
 
 Mobile, 390 px: ![mobile](portfolio-screenshots/07-mobile.png)
 

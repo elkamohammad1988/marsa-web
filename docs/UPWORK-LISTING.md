@@ -134,7 +134,14 @@ every word that could read as a financial service.
 
 ---
 
-## 5. Tiers
+## 5. Development packages
+
+These are the three tiers a buyer purchases: **development work, priced in
+dollars, delivered as source code.** They are not connected to — and must never
+be confused with — the euro subscription tiers on the concept product's own
+`/pricing` page, which is fiction inside a demo and appears in image 8. If a
+single line of this listing could be misread as a financial product's price
+list, it is that image, which is why its caption names what it is.
 
 | | **Starter** | **Professional** | **Premium** |
 |---|---|---|---|
@@ -192,7 +199,7 @@ is offering banking, and a reviewer is right to stop there.
 | 5 | `05-analytics.png` | Operator dashboard behind authentication — first-party funnel analytics, no third-party trackers |
 | 6 | `06-iban-validation.png` | Working business logic, unit-tested — ISO 13616 / MOD-97 validation, fully offline |
 | 7 | `07-mobile.png` | Built mobile-first — no horizontal overflow at any width, tap targets ≥ 24px |
-| 8 | `08-pricing.png` | Conversion surfaces built to the same bar as the rest of the application |
+| 8 | `08-pricing.png` | Pricing and plan-comparison screens built to the same bar as the rest of the app. These are the concept product's invented tiers, not my rates — my packages are the three above |
 
 **Thumbnail:** `01-hero.png`. It carries the wordmark, the headline, the product
 panel and the concept marker in one frame.
