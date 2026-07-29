@@ -3,7 +3,7 @@ import Link from "next/link";
 import { buildMetadata } from "@/lib/seo";
 import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
-import { Button } from "@/components/ui/Button";
+import { ButtonLabel } from "@/components/ui/Button";
 import { BlogCard } from "@/components/sections/BlogCard";
 import { BlogCover } from "@/components/art/BlogCover";
 import { Pagination } from "@/components/sections/Pagination";
@@ -32,7 +32,7 @@ export default async function BlogListPage({
 
   return (
     <>
-      <section className="bg-surface-cream pb-12 pt-10 md:pb-16 md:pt-14">
+      <section className="bg-surface-alt pb-12 pt-10 md:pb-16 md:pt-14">
         <Container>
           <Heading level="display" className="max-w-4xl">
             Blogs
@@ -64,9 +64,14 @@ export default async function BlogListPage({
                         {featuredPost.title}
                       </h2>
                     </div>
-                    <Button href={`/blog/${featuredPost.slug}`} variant="white" size="md">
+                    {/*
+                      A label, not a link. The whole card is already an anchor
+                      to this same post, and nesting a second one is invalid
+                      HTML that cost this page its hydration.
+                    */}
+                    <ButtonLabel variant="white" size="md">
                       Read More
-                    </Button>
+                    </ButtonLabel>
                   </div>
                 </div>
               </div>

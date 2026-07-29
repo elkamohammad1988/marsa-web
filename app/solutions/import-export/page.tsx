@@ -12,7 +12,7 @@ import { IconExchange, IconGlobe, IconShield } from "@/components/icons";
 export const metadata: Metadata = buildMetadata({
   title: "Multi-Currency Accounts For Import & Export Businesses",
   description:
-    "Pay overseas suppliers and collect from international buyers at interbank FX. Marsa gives import-export businesses multi-currency IBANs and fast global payments.",
+    "Pay overseas suppliers and collect from international buyers at interbank FX, with multi-currency IBANs built for import-export businesses.",
   path: "/solutions/import-export",
 });
 
@@ -35,7 +35,7 @@ export default function Page() {
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
         art="phone-accounts"
-        tone="navy"
+        tone="deep"
       />
 
       <FeatureBullets

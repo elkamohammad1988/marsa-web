@@ -228,7 +228,7 @@ describe("validateLead", () => {
     // caps the address at 254 characters and validateLead does not. Not a
     // security hole — the regex still rejects whitespace and requires a domain
     // — but the asymmetry is unintended. Recorded for the re-audit; not changed
-    // here because Batch 1 is tests only and no AUDIT.md finding covers it.
+    // here because Batch 1 is tests only and no docs/AUDIT.md finding covers it.
     const local = "a".repeat(300);
     expect(validateLead({ ...valid, email: `${local}@example.com` }).success).toBe(true);
   });

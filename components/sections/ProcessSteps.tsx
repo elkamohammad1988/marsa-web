@@ -17,7 +17,7 @@ type ProcessStepsProps = {
 
 export function ProcessSteps({ eyebrow, title, description, steps }: ProcessStepsProps) {
   return (
-    <Section tone="navy" size="lg" className="relative isolate overflow-hidden">
+    <Section tone="deep" size="lg" className="relative isolate overflow-hidden">
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-radial-glow" />
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-50" />
       <Container>
@@ -41,7 +41,7 @@ export function ProcessSteps({ eyebrow, title, description, steps }: ProcessStep
               key={s.number}
               className="group relative rounded-card-lg border border-white/10 bg-white/[0.04] p-6 backdrop-blur transition-colors hover:border-brand-soft/40"
             >
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-blue text-lg font-bold text-on-brand shadow-glow-sm">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-lg font-bold text-on-brand shadow-glow-sm">
                 {s.number}
               </span>
               <h3 className="mt-5 text-lg font-semibold text-white">{s.title}</h3>

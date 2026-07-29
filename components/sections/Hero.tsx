@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 export type HeroChip = { label: string; value?: string };
 export type HeroStat = { value: string; label: string };
 
-type HeroTone = "white" | "cream" | "navy" | "spotlight";
+type HeroTone = "canvas" | "alt" | "deep" | "spotlight";
 
 type HeroProps = {
   breadcrumb?: { label: string; href?: string }[];
@@ -51,18 +51,19 @@ export function Hero({
   art,
   visual,
   stats,
-  tone = "cream",
+  tone = "alt",
   className,
 }: HeroProps) {
-  const isDark = tone === "navy" || tone === "spotlight";
-  const toneClasses =
-    tone === "spotlight"
-      ? "bg-surface-navy text-white"
-      : tone === "navy"
-        ? "bg-surface-navy text-white"
-        : tone === "cream"
-          ? "bg-surface-cream text-ink"
-          : "bg-canvas text-ink";
+  // `spotlight` and `deep` paint the same surface — the difference between
+  // them is the mesh and glow layered on top further down, not the background.
+  // They used to be two arms of the same ternary returning the identical
+  // string, which read as a distinction that did not exist.
+  const isDark = tone === "deep" || tone === "spotlight";
+  const toneClasses = isDark
+    ? "bg-surface-deep text-white"
+    : tone === "alt"
+      ? "bg-surface-alt text-ink"
+      : "bg-canvas text-ink";
 
   const hasVisual = Boolean(visual || art);
 
@@ -199,7 +200,7 @@ export function Hero({
                     "relative aspect-[4/3] w-full overflow-hidden rounded-[28px] shadow-elevated",
                     isDark
                       ? "border border-white/10 bg-white/[0.03]"
-                      : "border border-line bg-surface-blue-tint",
+                      : "border border-line bg-surface-tint",
                   )}
                 >
                   <BrandArt name={art} />
@@ -209,7 +210,7 @@ export function Hero({
                 <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-full border border-line glass px-3.5 py-2 text-xs font-medium text-ink shadow-elevated md:left-6">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-glow-pulse rounded-full bg-brand-soft opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-blue" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
                   </span>
                   Live ECB rates
                 </div>
@@ -228,7 +229,7 @@ export function Hero({
             {stats.map((s) => (
               <div
                 key={s.label}
-                className={cn("px-5 py-6 text-center", isDark ? "bg-surface-navy" : "bg-canvas")}
+                className={cn("px-5 py-6 text-center", isDark ? "bg-surface-deep" : "bg-canvas")}
               >
                 <dt className="sr-only">{s.label}</dt>
                 <dd>

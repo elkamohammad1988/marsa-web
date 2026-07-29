@@ -2,19 +2,47 @@
 
 [![CI](https://github.com/elkamohammad1988/marsa-web/actions/workflows/ci.yml/badge.svg)](https://github.com/elkamohammad1988/marsa-web/actions/workflows/ci.yml)
 
-**One account for every currency you get paid in.** Marsa is a multi-currency
-account concept for cross-border businesses and freelancers — get paid by
-marketplaces and clients abroad, hold 30+ currencies, convert at the interbank
-rate, and pay out over SEPA, without a second bank in the middle.
+**A fintech-inspired full-stack web application, built as a portfolio piece.**
+Marsa is a complete Next.js 15 application — marketing site, authenticated
+customer accounts, a lead-capture backend, an operator dashboard, and an
+interactive product demo — built to a production bar and deliberately honest
+about which parts are real software and which are a labelled sandbox.
 
-This repository is the **marketing site + lead-capture backend + an interactive
-product demo**, built to a production bar: Lighthouse 100s, 0 axe violations,
-and a typecheck → lint → unit-test → build gate that runs on every push and
-every pull request. It is deliberately honest about what is real software
-versus a labelled sandbox — see
-[What's real vs simulated](#whats-real-vs-simulated).
+The product it depicts is a multi-currency account for cross-border businesses
+and freelancers. That product does not exist. **Marsa is not a bank, holds no
+money, and moves none** — there is no company, no licence and no regulator
+behind it, and every page of the site says so. What is real is the engineering:
+live European Central Bank rates, ISO 13616 IBAN validation, Supabase Auth over
+its REST API with Postgres row-level security, and 1,494 unit tests behind a
+CI gate that runs on every push.
 
-![Marsa home — black rose theme](portfolio-screenshots/br-home.png)
+**What to look at if you are evaluating the work:**
+[What this is](#what-this-is-and-what-it-is-not) ·
+[Architecture](#architecture) · [Verified quality](#verified-quality) ·
+[What's real vs simulated](#whats-real-vs-simulated) ·
+[`AUTHENTICATION.md`](AUTHENTICATION.md) ·
+[`CASE-STUDY.md`](CASE-STUDY.md)
+
+![The Marsa home page: a dark magenta-on-black landing page for a concept
+multi-currency account, carrying the "Concept build" disclosure the site shows
+on every page](portfolio-screenshots/01-hero.png)
+
+## What this is, and what it is not
+
+| | |
+|---|---|
+| **It is** | A production-grade Next.js 15 / React 19 / TypeScript application demonstrating fintech-style workflows end to end |
+| **It is not** | A bank, an e-money institution, a licensed payment service, a live product, or software any customer has ever used |
+| **Real money involved** | None, anywhere, at any point |
+| **Real customers** | None. No client work, no revenue, no users to report |
+| **Status** | Self-directed portfolio build, developed in the open on a public repository |
+
+The screenshots below carry a "Concept build — what's real?" marker in the
+corner because they do on the site: it is a fixed disclosure on every page that
+expands into a plain list of what is real software and what is not. Portfolio
+images are the one place a product is seen with no site around it, so the
+capture script now [refuses to write an image without
+it](tests/portfolio-honesty.test.ts).
 
 ---
 
@@ -172,23 +200,30 @@ naming exactly what is missing rather than a form that would fail.
 
 ## Verified quality
 
-A point-in-time measurement on the production build, last taken **2026-07-26**
+A point-in-time measurement on the production build, last taken **2026-07-28**
 (see [CASE-STUDY.md](CASE-STUDY.md) for method). The CI badge above is the
 continuously-true version of the bottom two rows.
 
 | Check | Result |
 |---|---|
-| Lighthouse `/` (desktop) | **Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100** |
-| Lighthouse `/demo` (desktop) | **100 · 100 · 100 · 100** |
-| axe-core (WCAG 2.0/2.1 A+AA) | **29 routes, 0 violations** — automated crawl of each route in its default state; does not cover states reached only by interaction, including form validation errors after a failed submit |
-| Responsive (375 / 768 / 1440) | No horizontal overflow on any route |
-| Unit tests | **913 / 913 passing**, 40 files (measured 2026-07-27; 691 in 34 files before the authentication milestone) |
+| Lighthouse `/` (desktop) | **Accessibility 100 · Best Practices 100 · SEO 100 · CLS 0**. Performance is **100 on an idle machine** but load-sensitive — three consecutive runs on the same build scored 87 / 95 / 100 as total blocking time moved 240 ms → 150 ms → 20 ms. The 100 is real and the 87 is real; treat a single number here as a measurement of the machine as much as of the page |
+| axe-core (WCAG 2.0 / 2.1 / 2.2, A + AA, plus best-practice) | **36 routes × 2 viewports = 72 page-loads, 0 violations.** The 2.2 tags are what found the last round: five link and control targets under the 24 × 24 minimum in `2.5.8`, none of which the A+AA-only run had flagged |
+| Console + page errors (72 page-loads) | **0** — nothing thrown, no hydration mismatch, no broken image, no duplicate `id`, no anchor nested in an anchor. The only aborted request is the converter cancelling its own in-flight history fetch on unmount, which is the `AbortController` working |
+| Responsive (390 / 1440) | No horizontal overflow on any route at either width |
+| Unit tests | **1494 / 1494 passing**, 45 files (1488 in 44 before this round) |
 | Types / lint / audit | tsc clean · lint clean · 0 vulnerabilities in the production tree · zero `any` |
+
+**What the axe number does not cover.** It is an automated crawl of each route
+in its default state. It does not open a menu, submit an invalid form, or visit
+a signed-in page, so the states reached only by interaction — validation errors
+in particular — are outside it. Automated rules also cover a minority of WCAG
+in principle: zero violations means no machine-detectable failure, not an
+audited-accessible site.
 
 The dev dependency tree carries known high advisories from the end-of-life
 ESLint 8 chain. They ship to nobody — `npm audit --omit=dev` is 0 — so CI
 audits the production tree and the migration to ESLint 9 is tracked in
-[`PROJECT-PLAN.md`](PROJECT-PLAN.md).
+[`docs/PROJECT-PLAN.md`](docs/PROJECT-PLAN.md).
 
 ### Contrast (verified)
 
@@ -231,15 +266,17 @@ Honesty matters more than looking finished.
   money**. The sandbox banner says so, and discloses the anonymous analytics.
 - The homepage account panel is a static illustration (`aria-hidden`).
 
-**Marketing claims:** testimonials and figures like "180+ countries" are
-positioning copy for a pre-launch concept, not audited metrics. Regulatory
-wording is env-gated: the site only asserts an authorisation when a real
-register reference is configured (`lib/legal.ts`), otherwise it describes the
-licensed-partner model.
+**Marketing claims:** there are no testimonials — the invented people this site
+used to quote were removed rather than rewritten, because a concept has no
+customers to quote. Figures like "180+ countries" are the product's design
+scope, not audited metrics, and `/company/about` labels its number band as
+such rather than as "countries served". Regulatory wording is env-gated: the
+site only asserts an authorisation when a real register reference is configured
+(`lib/legal.ts`), otherwise it describes the licensed-partner model.
 
 **Imagery:** there is none. `public/images/` held seventeen PNGs with six
 unique hashes and unknown provenance, and `alt` strings describing other
-photographs (F1 in [`AUDIT.md`](AUDIT.md)). They were replaced by drawings in
+photographs (F1 in [`AUDIT.md`](docs/AUDIT.md)). They were replaced by drawings in
 markup, each carrying its own description keyed off the same union the drawing
 is — so an illustration cannot be mislabelled, because there is no per-page
 `alt` prop left to drift. The directory no longer exists.
@@ -262,21 +299,60 @@ enrolment, OAuth providers, and email change. Each is a flow of its own rather
 than a switch, and the reasoning for each is recorded in
 [`AUTHENTICATION.md`](AUTHENTICATION.md#deliberately-not-built).
 
-Smaller follow-ups, tracked in [`PROJECT-PLAN.md`](PROJECT-PLAN.md): error
-tracking (Sentry) + product analytics, Playwright smoke tests in CI, data
-retention and erasure tooling, ESLint 9, i18n (Arabic/French for the MENA
-wedge), and real product photography to replace the current placeholder
-imagery.
+Smaller follow-ups, tracked in [`docs/PROJECT-PLAN.md`](docs/PROJECT-PLAN.md):
+error tracking (Sentry) + product analytics, Playwright smoke tests in CI, data
+retention and erasure tooling — including account deletion, which the privacy
+policy now states plainly does not exist — ESLint 9, and i18n (Arabic/French
+for the MENA wedge).
 
 ## Screenshots
 
-| Demo — convert (live ECB rate) | Demo — done |
-|---|---|
-| ![convert](portfolio-screenshots/br-demo-convert.png) | ![done](portfolio-screenshots/br-demo-done.png) |
+Eight, in the order the product makes sense in. All eight are regenerated by
+`npm run capture` against a production build, so they cannot quietly go stale
+the way the previous set did — 127 files whose every filename still carried the
+name this project had before it was renamed.
 
-Mobile (375 px): ![mobile demo](portfolio-screenshots/br-375-demo.png)
+**Every one carries the concept-build disclosure**, in the corner, because the
+site does. The capture script used to hide it — reasonable-sounding, since the
+same badge in eight frames is chrome, and wrong here: a portfolio image is the
+only place this product is seen with no site around it, no navigation and no
+badge to open. What that produced was a hero image showing a European IBAN, a
+€12,480.55 balance and an "Open An Account" button with every marker that this
+is a concept removed by the script itself. `requireDisclosure()` now throws
+rather than write an unmarked image, and `tests/portfolio-honesty.test.ts`
+fails if that rule is ever softened back.
+
+The capture script does not scroll to a hand-tuned offset. It searches for a
+scroll position that **bisects no line of text and leaves nothing meaningful
+under the floating navbar**, and reports the position it chose. The tuned-offset
+version is why an earlier set sliced a heading in half at the top edge of two
+images and ended a third on a word cut down the middle: an offset that clears
+one page's header lands in the middle of the next page's paragraph, so each fix
+moved the cut somewhere else rather than removing it.
+
+| | |
+|---|---|
+| **Live ECB rates** — the converter and its 30-day history, on real European Central Bank reference data ![live rates](portfolio-screenshots/02-live-rates.png) | **Get paid from abroad** — the demo at the point a payout lands in the USD balance ![account](portfolio-screenshots/03-feature-account.png) |
+| **Convert at the interbank rate** — the same live rate, applied ![convert](portfolio-screenshots/04-feature-convert.png) | **Demo funnel** — first-party, anonymous, behind the operator password ![analytics](portfolio-screenshots/05-analytics.png) |
+| **IBAN validation** — ISO 13616 / MOD-97, entirely offline ![iban](portfolio-screenshots/06-iban-validation.png) | **Pricing** ![pricing](portfolio-screenshots/08-pricing.png) |
+
+Mobile, 390 px: ![mobile](portfolio-screenshots/07-mobile.png)
+
+There is no dashboard screenshot of `/admin` itself. It is a real dashboard and
+it looks like one, but it renders live form submissions — on any machine that
+has used the contact form, that means a real name and a real email address in
+an image meant for a public listing. The funnel view above carries the same
+"there is an authenticated operator area" message and is anonymous by
+construction.
 
 ---
 
-Built as a portfolio piece. Not affiliated with any bank; not a financial
-product. See [What's real vs simulated](#whats-real-vs-simulated).
+**Marsa is a concept build.** It is not a bank, not an e-money institution, not
+a licensed payment service, and not affiliated with any financial institution.
+It holds no money and moves none, it has no customers, and no part of it is or
+has been in production use. See
+[What this is](#what-this-is-and-what-it-is-not) and
+[What's real vs simulated](#whats-real-vs-simulated).
+
+Licensed under the [MIT License](LICENSE). Deployment runbook:
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).

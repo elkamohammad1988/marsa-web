@@ -57,7 +57,6 @@ export function EmailOnlyForm({
         type="email"
         name="email"
         autoComplete="email"
-        autoFocus={!defaultEmail}
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}

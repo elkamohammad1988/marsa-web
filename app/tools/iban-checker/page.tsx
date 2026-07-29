@@ -24,7 +24,7 @@ const concepts = [
 export default function Page() {
   return (
     <>
-      <Section tone="cream" size="md">
+      <Section tone="alt" size="md">
         <Container>
           <div className="mx-auto max-w-2xl text-center">
             <Heading level="display">IBAN Checker</Heading>
@@ -39,7 +39,7 @@ export default function Page() {
         </Container>
       </Section>
 
-      <Section tone="white" size="md">
+      <Section tone="canvas" size="md">
         <Container>
           <Heading level="h2">How IBAN validation works</Heading>
           <p className="mt-4 max-w-3xl text-base text-ink-muted">

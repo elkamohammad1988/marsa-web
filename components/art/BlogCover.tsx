@@ -117,7 +117,7 @@ function Currencies() {
           className={cn(
             "rounded-lg border py-2 text-center text-[0.62em] font-semibold leading-none tracking-wide",
             i === 0
-              ? "border-brand-strong/60 bg-brand-blue/[0.18] text-brand-strong"
+              ? "border-brand-strong/60 bg-brand/[0.18] text-brand-strong"
               : "border-line-dark bg-card text-ink-muted",
           )}
         >
@@ -140,7 +140,7 @@ function Payout() {
           key={row.label}
           className={cn(
             "flex items-center justify-between rounded-xl border px-3 py-2.5",
-            i === 0 ? "border-brand-strong/50 bg-brand-blue/[0.14]" : "border-line-dark bg-card",
+            i === 0 ? "border-brand-strong/50 bg-brand/[0.14]" : "border-line-dark bg-card",
           )}
         >
           <span className="flex items-center gap-2">
@@ -239,7 +239,7 @@ export function BlogCover({
       // very different widths (a 3-up card, the featured slot, the article
       // hero) and the type inside it has to track the box, not the window.
       className={cn(
-        "relative flex h-full w-full flex-col justify-center overflow-hidden bg-surface-navy p-[6%] text-[clamp(8px,9cqh,22px)] [container-type:size]",
+        "relative flex h-full w-full flex-col justify-center overflow-hidden bg-surface-deep p-[6%] text-[clamp(8px,9cqh,22px)] [container-type:size]",
         className,
       )}
     >

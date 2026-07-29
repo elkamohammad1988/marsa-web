@@ -1,13 +1,13 @@
 import { cn } from "@/lib/utils";
 import type { HTMLAttributes } from "react";
 
-type Tone = "blue" | "navy" | "cream" | "white" | "ink";
+type Tone = "brand" | "deep" | "alt" | "card" | "ink";
 
 const tones: Record<Tone, string> = {
-  blue: "bg-brand-blue text-on-brand",
-  navy: "bg-surface-navy text-white",
-  cream: "bg-surface-cream text-ink",
-  white: "bg-card text-ink border border-line",
+  brand: "bg-brand text-on-brand",
+  deep: "bg-surface-deep text-white",
+  alt: "bg-surface-alt text-ink",
+  card: "bg-card text-ink border border-line",
   ink: "bg-ink text-canvas",
 };
 
@@ -15,7 +15,7 @@ type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
   tone?: Tone;
 };
 
-export function Badge({ tone = "blue", className, ...props }: BadgeProps) {
+export function Badge({ tone = "brand", className, ...props }: BadgeProps) {
   return (
     <span
       className={cn(

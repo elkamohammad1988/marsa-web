@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { ACCOUNT_HOME, safeRedirect } from "@/lib/auth-routes";
 import type { ValidationResult } from "@/lib/validation";
 
 type AuthFormState = "editing" | "submitting" | "done";
@@ -76,8 +77,22 @@ export function useAuthForm<T extends Record<string, unknown>>({
   const [formError, setFormError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState<T | null>(null);
 
+  /**
+   * Guards against a second submission while the first is in flight.
+   *
+   * The disabled button is not enough on its own. Pressing Enter twice in
+   * quick succession can fire the handler again before React has re-rendered
+   * with the new state, and for registration that means two accounts, two
+   * emails, and a person who does not know which one they own. A ref rather
+   * than the state value because a ref updates synchronously and does not
+   * need to be a dependency of this callback.
+   */
+  const inFlight = useRef(false);
+
   const submit = useCallback(
     (input: Record<string, unknown>) => {
+      if (inFlight.current) return;
+
       const result = validate(input);
       if (!result.success) {
         setErrors(result.errors);
@@ -87,6 +102,7 @@ export function useAuthForm<T extends Record<string, unknown>>({
 
       setErrors({});
       setFormError(null);
+      inFlight.current = true;
       setState("submitting");
 
       void (async () => {
@@ -99,15 +115,28 @@ export function useAuthForm<T extends Record<string, unknown>>({
           const body = (await res.json().catch(() => ({}))) as ApiResponse;
 
           if (!res.ok) {
-            if (body.errors) setErrors(body.errors);
-            setFormError(body.error ?? "That did not work. Please try again.");
+            // A whole-form message only when the server actually sent one.
+            // Adding a generic "that did not work" above field errors that
+            // already say what is wrong reads as a second, unrelated failure
+            // — and it is the field errors a person needs to act on.
+            if (body.errors) {
+              setErrors(body.errors);
+              setFormError(body.error ?? null);
+            } else {
+              setFormError(body.error ?? "That did not work. Please try again.");
+            }
             setState("editing");
             return;
           }
 
           setAccepted(result.data);
 
-          const destination = body.next ?? redirectTo;
+          // `next` is chosen by our own route handlers, so this is defence in
+          // depth rather than a live hole — but `router.replace` will follow
+          // an absolute URL off the site, and a redirect target is exactly the
+          // value that should never be trusted on the strength of where it
+          // came from.
+          const destination = body.next ? safeRedirect(body.next, ACCOUNT_HOME) : redirectTo;
           if (destination) {
             setState("done");
             router.replace(destination);
@@ -125,6 +154,8 @@ export function useAuthForm<T extends Record<string, unknown>>({
           // person takes is different: try again, rather than change something.
           setFormError("We could not reach the server. Check your connection and try again.");
           setState("editing");
+        } finally {
+          inFlight.current = false;
         }
       })();
     },

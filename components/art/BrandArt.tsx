@@ -56,7 +56,7 @@ function PaymentCard({
   return (
     <div
       className={cn(
-        "relative aspect-[1.586/1] overflow-hidden rounded-[6.5%] bg-surface-navy ring-1 ring-inset ring-white/[0.14]",
+        "relative aspect-[1.586/1] overflow-hidden rounded-[6.5%] bg-surface-deep ring-1 ring-inset ring-white/[0.14]",
         className,
       )}
     >
@@ -140,7 +140,7 @@ function Phone({
   return (
     <div
       className={cn(
-        "relative aspect-[9/18.5] overflow-hidden rounded-[13%/6.5%] bg-surface-navy p-[3.5%] shadow-e3 ring-1 ring-inset ring-white/[0.14]",
+        "relative aspect-[9/18.5] overflow-hidden rounded-[13%/6.5%] bg-surface-deep p-[3.5%] shadow-e3 ring-1 ring-inset ring-white/[0.14]",
         className,
       )}
     >
@@ -244,7 +244,7 @@ function AccountsScreen() {
             </div>
             <div className="mt-[6%] h-[3px] overflow-hidden rounded-full bg-line">
               <span
-                className="block h-full rounded-full bg-brand-blue"
+                className="block h-full rounded-full bg-brand"
                 style={{ width: `${b.share}%` }}
               />
             </div>
@@ -253,7 +253,7 @@ function AccountsScreen() {
       </ul>
 
       <div className="mt-auto flex items-center gap-[4%] rounded-[9%] border border-dashed border-line-dark px-[7%] py-[5%]">
-        <span className="grid aspect-square w-[12%] place-items-center rounded-full bg-brand-blue/[0.14] text-[0.6em] font-bold leading-none text-brand-strong">
+        <span className="grid aspect-square w-[12%] place-items-center rounded-full bg-brand/[0.14] text-[0.6em] font-bold leading-none text-brand-strong">
           +
         </span>
         <span className="text-[0.48em] leading-none text-ink-muted">Open another currency</span>
@@ -279,7 +279,7 @@ function Coin({ tone }: { tone: "brand" | "warm" }) {
       <span
         className={cn(
           "absolute inset-[20%] rounded-full opacity-40 blur-2xl",
-          tone === "warm" ? "bg-warning" : "bg-brand-blue",
+          tone === "warm" ? "bg-warning" : "bg-brand",
         )}
       />
 
@@ -388,7 +388,7 @@ export function BrandArt({ name, surface = "filled", className }: BrandArtProps)
       // 560px hero illustration and a 300px pricing thumbnail.
       className={cn(
         "relative grid h-full w-full place-items-center overflow-hidden p-[6%] [container-type:size]",
-        surface === "filled" && "bg-surface-navy",
+        surface === "filled" && "bg-surface-deep",
         className,
       )}
     >

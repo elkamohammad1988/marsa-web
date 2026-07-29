@@ -30,7 +30,7 @@ export default function Page() {
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
         art="phone-accounts"
-        tone="navy"
+        tone="deep"
       />
 
       <FeatureBullets

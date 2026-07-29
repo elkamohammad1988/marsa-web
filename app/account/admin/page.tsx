@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Heading } from "@/components/ui/Heading";
+import { ScrollRegion } from "@/components/ui/ScrollRegion";
 import { FormAlert } from "@/components/auth/FormAlert";
 import { requirePermission } from "@/lib/auth";
 import { getAuthConfig } from "@/lib/auth-config";
 import { ROLE_LABELS } from "@/lib/auth-roles";
 import { listProfiles, PROFILE_PAGE_SIZE, type Profile } from "@/lib/profiles";
+import { formatDay } from "@/lib/dates";
 import { captureException } from "@/lib/observability";
 
 export const dynamic = "force-dynamic";
@@ -13,17 +15,6 @@ export const metadata: Metadata = {
   title: "Accounts",
   robots: { index: false, follow: false, nocache: true },
 };
-
-function formatDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(date);
-}
 
 /**
  * Every account, for a role that may read them.
@@ -85,7 +76,7 @@ export default async function AccountDirectoryPage() {
         <section className="overflow-hidden rounded-card-lg border border-line bg-card shadow-card">
           {/* Horizontal scroll is confined to the table, so the page itself
               never scrolls sideways on a narrow screen. */}
-          <div className="overflow-x-auto">
+          <ScrollRegion label="Accounts table" className="rounded-none">
             <table className="w-full min-w-[36rem] text-left text-sm">
               <caption className="sr-only">
                 Accounts, newest first. {total} in total.
@@ -115,7 +106,7 @@ export default async function AccountDirectoryPage() {
                     <td className="px-5 py-3 text-ink-muted">{profile.fullName ?? "—"}</td>
                     <td className="px-5 py-3 text-ink-muted">{ROLE_LABELS[profile.role]}</td>
                     <td className="px-5 py-3 tabular-nums text-ink-muted">
-                      {formatDate(profile.createdAt)}
+                      {formatDay(profile.createdAt)}
                     </td>
                   </tr>
                 ))}
@@ -128,7 +119,7 @@ export default async function AccountDirectoryPage() {
                 )}
               </tbody>
             </table>
-          </div>
+          </ScrollRegion>
 
           {total > profiles.length && (
             <p className="border-t border-line px-5 py-3 text-xs text-ink-subtle">

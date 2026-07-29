@@ -75,7 +75,7 @@ export function FxCalculator() {
               id="calc-from"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="rounded-lg bg-surface-blue-tint-2 px-2 py-1.5 text-sm font-medium"
+              className="rounded-lg bg-surface-tint-2 px-2 py-1.5 text-sm font-medium"
             >
               {FX_CURRENCIES.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -124,7 +124,10 @@ export function FxCalculator() {
           step={0.1}
           value={bankMarkup}
           onChange={(e) => setBankMarkup(Number(e.target.value))}
-          className="mt-2 w-full accent-brand-blue"
+          // `h-6` so the thumb's hit area clears 24px: the default range input
+          // renders 16px tall, which is under WCAG 2.2 AA 2.5.8 and genuinely
+          // fiddly to drag on a phone.
+          className="mt-2 h-6 w-full accent-brand"
         />
         <p className="mt-1 text-xs text-ink-subtle">
           Most high-street banks add 2–4% on top of the mid-market rate.
@@ -138,7 +141,7 @@ export function FxCalculator() {
             <button
               type="button"
               onClick={load}
-              className="rounded-full bg-brand-blue px-4 py-1.5 text-xs font-medium text-on-brand hover:bg-brand-blue-deep"
+              className="rounded-full bg-brand px-4 py-1.5 text-xs font-medium text-on-brand hover:bg-brand-deep"
             >
               Try again
             </button>
@@ -146,7 +149,7 @@ export function FxCalculator() {
         ) : calc == null ? (
           <div className="space-y-3">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-12 w-full animate-pulse rounded-card bg-surface-blue-tint-2" />
+              <div key={i} className="h-12 w-full animate-pulse rounded-card bg-surface-tint-2" />
             ))}
           </div>
         ) : (
@@ -196,7 +199,7 @@ function Row({
     <div
       className={
         "flex items-center justify-between rounded-card px-4 py-3 " +
-        (highlight ? "border border-brand-blue/30 bg-brand-blue/5" : "bg-surface-blue-tint-2/40")
+        (highlight ? "border border-brand/30 bg-brand/5" : "bg-surface-tint-2/40")
       }
     >
       <div>

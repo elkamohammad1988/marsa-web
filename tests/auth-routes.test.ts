@@ -596,3 +596,187 @@ describe("POST /api/account/password", () => {
     expect(init.headers.Authorization).toBe("Bearer access-token");
   });
 });
+
+/* ------------------------------------------------- availability under load -- */
+
+/**
+ * No customer endpoint has a ceiling shared by every caller.
+ *
+ * One was written and removed. A global limit is only safe on a door with a
+ * single user — the admin login, where tripping it inconveniences the one
+ * operator. On a public endpoint it is a switch that any anonymous caller can
+ * throw to stop everybody else: `auth-signin:global` at 200 per 15 minutes
+ * meant roughly fourteen requests a minute would keep the whole customer base
+ * locked out indefinitely.
+ *
+ * These are the regression guards. They deliberately exceed the old ceilings.
+ */
+describe("no customer endpoint can be locked for everybody", () => {
+  async function login(body: unknown) {
+    const { POST } = await import("@/app/api/auth/login/route");
+    return POST(post("/api/auth/login", body));
+  }
+  async function forgot(body: unknown) {
+    const { POST } = await import("@/app/api/auth/forgot-password/route");
+    return POST(post("/api/auth/forgot-password", body));
+  }
+
+  /**
+   * An explicit timeout, not the 5s default.
+   *
+   * These three deliberately drive hundreds of sequential requests through the
+   * real route handlers and the real limiter — that is the whole point of the
+   * regression guard — and on a loaded machine the 240-request one crosses 5
+   * seconds and fails on the clock rather than on the behaviour. That is the
+   * worst kind of red: it says "availability under load is broken" when what
+   * broke was the runner, and a portfolio whose argument is "the CI badge is
+   * the live answer" cannot afford a test that goes red when the runner is
+   * busy. Raising the global timeout instead would have hidden a genuinely
+   * hung test somewhere else.
+   */
+  it("still signs in a fresh account after a long burst against others", async () => {
+    stubUpstream(goTrueFails(400, { msg: "Invalid login credentials" }));
+
+    // Well past the 200-in-15-minutes ceiling that used to exist, spread over
+    // distinct addresses and distinct accounts so no per-IP or per-account
+    // tier is involved.
+    for (let attempt = 0; attempt < 240; attempt++) {
+      await login({ email: `burst${attempt}@example.com`, password: "a-long-enough-passphrase" });
+    }
+
+    stubUpstream();
+    const bystander = await login({
+      email: "bystander@example.com",
+      password: "a-long-enough-passphrase",
+    });
+
+    expect(bystander.status).toBe(200);
+    expect(bystander.cookies.get(SESSION_COOKIE)?.value).toBeTruthy();
+  }, 30_000);
+
+  it("still sends recovery mail to a fresh address after a long burst", async () => {
+    stubUpstream(goTrueOk(null));
+
+    // Past the old 50-per-hour ceiling, which registration shared with
+    // recovery — so one burst here used to block both, for everybody.
+    for (let attempt = 0; attempt < 80; attempt++) {
+      await forgot({ email: `flood${attempt}@example.com` });
+    }
+
+    const bystander = await forgot({ email: "bystander-recovery@example.com" });
+    expect(bystander.status).toBe(200);
+  }, 20_000);
+
+  it("still registers a fresh address after a long burst", async () => {
+    stubUpstream(goTrueOk({ id: "new-user", identities: [{ id: "i" }] }));
+
+    for (let attempt = 0; attempt < 80; attempt++) {
+      const { POST } = await import("@/app/api/auth/register/route");
+      await POST(
+        post("/api/auth/register", {
+          email: `signup${attempt}@example.com`,
+          password: "a-long-enough-passphrase",
+        }),
+      );
+    }
+
+    const { POST } = await import("@/app/api/auth/register/route");
+    const bystander = await POST(
+      post("/api/auth/register", {
+        email: "bystander-signup@example.com",
+        password: "a-long-enough-passphrase",
+      }),
+    );
+    expect(bystander.status).toBe(200);
+  }, 20_000);
+});
+
+/* ------------------------------------------- upstream failures are mapped -- */
+
+describe("a GoTrue failure is reported as the thing that actually failed", () => {
+  async function register(body: unknown) {
+    const { POST } = await import("@/app/api/auth/register/route");
+    return POST(post("/api/auth/register", body));
+  }
+
+  const VALID = { email: "person@example.com", password: "a-long-enough-passphrase" };
+
+  it("names the password only when GoTrue says the password", async () => {
+    stubUpstream(goTrueFails(422, { error_code: "weak_password", msg: "too weak" }));
+    const response = await register(VALID);
+    expect(response.status).toBe(422);
+    expect((await response.json()).errors.password).toBeTruthy();
+  });
+
+  it("names the address when GoTrue rejects the address", async () => {
+    stubUpstream(goTrueFails(400, { error_code: "email_address_invalid", msg: "bad address" }));
+    const response = await register(VALID);
+    expect(response.status).toBe(422);
+    expect((await response.json()).errors.email).toBeTruthy();
+  });
+
+  it("does not blame the password for an unrelated 422", async () => {
+    // Branching on the status rather than the code meant an operator who had
+    // switched sign-ups off in the dashboard sent every visitor a confident,
+    // permanent instruction to choose a stronger password. GoTrue answers 422
+    // for at least three unrelated conditions.
+    stubUpstream(goTrueFails(422, { error_code: "signup_disabled", msg: "Signups not allowed" }));
+    const response = await register(VALID);
+
+    const body = await response.json();
+    expect(body.errors?.password).toBeUndefined();
+    expect(response.status).toBe(503);
+    expect(body.reference).toMatch(/^[2-9A-HJ-NP-Z]{8}$/);
+    // And no upstream text, which is written for a log and not for a visitor.
+    expect(body.error).not.toContain("Signups not allowed");
+  });
+
+  it("passes an upstream rate limit through as a rate limit", async () => {
+    stubUpstream(goTrueFails(429, { msg: "over_email_send_rate_limit" }));
+    const response = await register(VALID);
+    expect(response.status).toBe(429);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
+});
+
+/* ------------------------------------------------------ confirm, throttled -- */
+
+describe("GET /auth/confirm is not a free amplifier", () => {
+  async function confirm(query: string) {
+    const { GET } = await import("@/app/auth/confirm/route");
+    return GET(
+      new Request(`${ORIGIN}/auth/confirm${query}`, {
+        headers: { "x-forwarded-for": "198.51.100.9" },
+      }),
+    );
+  }
+
+  function target(response: Response): string {
+    const url = new URL(response.headers.get("location")!);
+    return `${url.pathname}${url.search}`;
+  }
+
+  it("stops answering after a sustained burst from one address", async () => {
+    // Unauthenticated, and every hit costs one upstream call — so without a
+    // limit this turns one request into one request against Supabase, from
+    // anybody who finds the URL.
+    stubUpstream(goTrueFails(403, { msg: "Token has expired or is invalid" }));
+
+    const outcomes: string[] = [];
+    for (let attempt = 0; attempt < 40; attempt++) {
+      outcomes.push(target(await confirm("?token_hash=whatever&type=signup")));
+    }
+
+    expect(outcomes).toContain("/login?error=too-many-attempts");
+    // And it says so honestly rather than claiming the link was invalid.
+    expect(outcomes.filter((o) => o.includes("too-many-attempts")).length).toBeGreaterThan(0);
+  });
+
+  it("never caches a bounce", async () => {
+    // A cached "that link is invalid" served to the next person holding a good
+    // one is a bug nobody can reproduce.
+    stubUpstream(goTrueOk(SESSION_BODY));
+    const response = await confirm("?type=signup");
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
+});

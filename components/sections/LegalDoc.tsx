@@ -18,7 +18,7 @@ type LegalDocProps = {
 export function LegalDoc({ title, updated, intro, sections, crumb }: LegalDocProps) {
   return (
     <>
-      <section className="bg-surface-cream pb-8 pt-10 md:pt-14">
+      <section className="bg-surface-alt pb-8 pt-10 md:pt-14">
         <Container>
           <BreadcrumbEyebrow
             items={[{ label: "Home", href: "/" }, { label: "Legal" }, { label: crumb }]}

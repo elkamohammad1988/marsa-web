@@ -1,5 +1,21 @@
 import type { NextConfig } from "next";
 
+/**
+ * React Fast Refresh compiles modules with `eval`, so a `script-src` without
+ * `'unsafe-eval'` blocks it — and this policy was being served in development
+ * as well as production.
+ *
+ * The cost was not just hot reload. With `eval` blocked, React's development
+ * build cannot run, which means the descriptive hydration diagnostics never
+ * appear: `npm run dev` looked healthy while the production build was throwing
+ * a hydration mismatch on `/blog` that only the minified error code named.
+ * A development-only relaxation is what makes that class of bug visible again.
+ *
+ * Gated on `development` specifically rather than "not production", so the
+ * test environment sees the same policy the browser will.
+ */
+const DEV_ONLY_SCRIPT_SRC = process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
+
 const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
@@ -53,18 +69,20 @@ const nextConfig: NextConfig = {
              * set in middleware, which opts all 49 statically generated pages
              * into dynamic rendering. That is a real trade and it is the
              * maintainer's call, not one to make silently inside a security
-             * batch. Recorded in PROJECT-PLAN.md.
+             * batch. Recorded in docs/PROJECT-PLAN.md.
              *
              * Note the footgun this avoids: a hash or nonce in script-src makes
              * browsers *ignore* 'unsafe-inline'. Adding the theme-script hash
              * "for completeness" would therefore break the site, not harden it.
              *
-             * 'unsafe-eval' is absent, so eval and new Function stay blocked.
+             * 'unsafe-eval' is absent in production and in test, so eval and
+             * new Function stay blocked everywhere a visitor can reach. It is
+             * added only under `next dev` — see DEV_ONLY_SCRIPT_SRC above.
              */
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
+              `script-src 'self' 'unsafe-inline'${DEV_ONLY_SCRIPT_SRC}`,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data:",
               "font-src 'self'",

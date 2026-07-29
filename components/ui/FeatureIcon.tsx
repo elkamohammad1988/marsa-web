@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils";
 
-type Tone = "blue" | "cream" | "navy" | "white";
+type Tone = "brand" | "alt" | "deep" | "card";
 
 const tones: Record<Tone, string> = {
-  blue: "bg-brand-blue/10 text-brand-strong",
-  cream: "bg-surface-cream text-ink",
-  navy: "bg-surface-navy text-white",
-  white: "bg-card text-brand-strong border border-line",
+  brand: "bg-brand/10 text-brand-strong",
+  alt: "bg-surface-alt text-ink",
+  deep: "bg-surface-deep text-white",
+  card: "bg-card text-brand-strong border border-line",
 };
 
 type FeatureIconProps = {
@@ -18,7 +18,7 @@ type FeatureIconProps = {
 
 export function FeatureIcon({
   children,
-  tone = "blue",
+  tone = "brand",
   size = "md",
   className,
 }: FeatureIconProps) {

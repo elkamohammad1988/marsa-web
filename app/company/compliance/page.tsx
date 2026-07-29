@@ -11,7 +11,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "Compliance & Regulation",
   description:
-    "The regulatory model this concept assumes: how an e-money institution is authorised, how safeguarding differs from deposit protection, and what onboarding would involve.",
+    "The regulatory model this concept assumes: how an e-money institution is authorised, and how safeguarding differs from deposit protection.",
   path: "/company/compliance",
 });
 
@@ -37,7 +37,12 @@ const sections = [
   {
     heading: "Data protection",
     body: [
-      "This build collects no personal data. The forms validate what you type using the same rules the API would, then discard it — nothing is transmitted and nothing is stored. The demo records anonymous, cookieless step counts and honours Do Not Track.",
+      // Was "This build collects no personal data." True until customer
+      // accounts shipped; false the moment registration began writing an email
+      // address to Postgres. A data-protection claim on the compliance page is
+      // the last place a stale sentence is harmless, so it now names exactly
+      // what is stored and where.
+      "The marketing forms validate what you type using the same rules the API would, then discard it. Creating an account is the one place this build stores personal data: an email address and, if given, a name. The demo records anonymous, cookieless step counts and honours Do Not Track.",
       "A real product would handle personal data under the EU and UK GDPR; the Privacy Policy on this site is written as an illustration of what that document would need to cover.",
     ],
   },
@@ -46,7 +51,7 @@ const sections = [
 export default function Page() {
   return (
     <>
-      <Section tone="navy" size="md">
+      <Section tone="deep" size="md">
         <Container>
           <BreadcrumbEyebrow
             items={[{ label: "Home", href: "/" }, { label: "Company" }, { label: "Compliance" }]}
@@ -69,7 +74,7 @@ export default function Page() {
 
       <RegulatedBand />
 
-      <Section tone="white" size="md">
+      <Section tone="canvas" size="md">
         <Container>
           <article className="mx-auto max-w-3xl">
             {sections.map((s, i) => (

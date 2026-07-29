@@ -33,7 +33,7 @@ const fastLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-surface-blue-tint-2 pt-12 md:pt-16">
+    <footer className="bg-surface-tint-2 pt-12 md:pt-16">
       <Container>
         <div className="flex justify-center pb-6 md:pb-8">
           <Link
@@ -65,7 +65,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="relative isolate mt-10 flex flex-col items-stretch gap-4 overflow-hidden rounded-card-lg bg-surface-navy px-6 py-6 text-white shadow-elevated ring-1 ring-white/10 md:flex-row md:items-center md:justify-between md:px-8">
+        <div className="relative isolate mt-10 flex flex-col items-stretch gap-4 overflow-hidden rounded-card-lg bg-surface-deep px-6 py-6 text-white shadow-elevated ring-1 ring-white/10 md:flex-row md:items-center md:justify-between md:px-8">
           <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-mesh-deep opacity-80" />
           <NewsletterForm />
 

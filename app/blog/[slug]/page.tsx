@@ -25,7 +25,7 @@ export async function generateMetadata({
   const post = posts.find((p) => p.slug === slug);
   if (!post) return {};
   return buildMetadata({
-    title: post.title,
+    title: post.seoTitle ?? post.title,
     description: post.excerpt,
     path: `/blog/${post.slug}`,
     image: postSocialImage(post.slug),
@@ -59,10 +59,13 @@ export default async function BlogPostPage({
           ]),
         ]}
       />
-      <section className="bg-surface-cream pb-10 pt-10 md:pt-14">
+      <section className="bg-surface-alt pb-10 pt-10 md:pt-14">
         <Container>
           <div className="text-xs font-medium text-ink-muted">
-            <Link href="/blog" className="hover:text-brand-strong">
+            <Link
+              href="/blog"
+              className="inline-flex min-h-[24px] items-center hover:text-brand-strong"
+            >
               ← Back To Articles
             </Link>
           </div>

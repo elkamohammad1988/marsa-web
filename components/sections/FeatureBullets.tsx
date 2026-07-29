@@ -10,10 +10,10 @@ export type FeatureBullet = {
 
 type FeatureBulletsProps = {
   items: FeatureBullet[];
-  tone?: "white" | "cream" | "blue-tint";
+  tone?: "canvas" | "alt" | "tint";
 };
 
-export function FeatureBullets({ items, tone = "white" }: FeatureBulletsProps) {
+export function FeatureBullets({ items, tone = "canvas" }: FeatureBulletsProps) {
   return (
     <Section tone={tone} size="md">
       <Container>
@@ -26,7 +26,7 @@ export function FeatureBullets({ items, tone = "white" }: FeatureBulletsProps) {
               key={it.title}
               className="card-hover gradient-ring rounded-card border border-line bg-card p-6 shadow-e1"
             >
-              <FeatureIcon tone="blue">{it.icon}</FeatureIcon>
+              <FeatureIcon tone="brand">{it.icon}</FeatureIcon>
               <h3 className="mt-4 text-lg font-semibold text-ink">{it.title}</h3>
               <p className="mt-2 text-sm text-ink-muted">{it.description}</p>
             </div>

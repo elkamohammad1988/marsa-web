@@ -13,7 +13,7 @@ import { IconLightning, IconShield, IconCoin } from "@/components/icons";
 export const metadata: Metadata = buildMetadata({
   title: "Free SEPA Transfer Personal Account",
   description:
-    "Send free, instant SEPA transfers with a Marsa personal account. Money moves across all 36 SEPA countries in under 10 seconds — no fees, no EU residency required.",
+    "Send free, instant SEPA transfers with a Marsa personal account — across all 36 SEPA countries in under 10 seconds, no EU residency required.",
   path: "/personal/sepa-transfers",
 });
 
@@ -31,7 +31,7 @@ export default function Page() {
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="card-stack"
-        tone="cream"
+        tone="alt"
       />
 
       <FeatureBullets

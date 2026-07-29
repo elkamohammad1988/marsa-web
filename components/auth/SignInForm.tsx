@@ -43,7 +43,6 @@ export function SignInForm({ next, notice }: { next?: string; notice?: string })
         type="email"
         name="email"
         autoComplete="email"
-        autoFocus
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
+import { ScrollRegion } from "@/components/ui/ScrollRegion";
 import { Heading } from "@/components/ui/Heading";
 import { BreadcrumbEyebrow } from "@/components/sections/BreadcrumbEyebrow";
 import { FAQ } from "@/components/sections/FAQ";
@@ -28,7 +29,7 @@ const rows: Row[] = [
 export default function Page() {
   return (
     <>
-      <Section tone="cream" size="md">
+      <Section tone="alt" size="md">
         <Container>
           <BreadcrumbEyebrow
             items={[{ label: "Home", href: "/" }, { label: "Tools" }, { label: "SEPA vs SWIFT" }]}
@@ -45,11 +46,11 @@ export default function Page() {
         </Container>
       </Section>
 
-      <Section tone="white" size="md">
+      <Section tone="canvas" size="md">
         <Container>
-          <div className="overflow-x-auto">
+          <ScrollRegion label="SEPA and SWIFT compared">
             <div className="min-w-[640px] overflow-hidden rounded-card-lg border border-line">
-              <div className="grid grid-cols-3 bg-surface-navy text-sm font-semibold text-white">
+              <div className="grid grid-cols-3 bg-surface-deep text-sm font-semibold text-white">
                 <div className="px-5 py-4">Feature</div>
                 <div className="px-5 py-4 text-center">SEPA</div>
                 <div className="px-5 py-4 text-center">SWIFT</div>
@@ -57,7 +58,7 @@ export default function Page() {
               {rows.map((r, i) => (
                 <div
                   key={r.feature}
-                  className={`grid grid-cols-3 text-sm ${i % 2 === 0 ? "bg-card" : "bg-surface-blue-tint-2"}`}
+                  className={`grid grid-cols-3 text-sm ${i % 2 === 0 ? "bg-card" : "bg-surface-tint-2"}`}
                 >
                   <div className="px-5 py-4 font-medium text-ink">{r.feature}</div>
                   <div className="px-5 py-4 text-center text-ink">{r.sepa}</div>
@@ -65,15 +66,15 @@ export default function Page() {
                 </div>
               ))}
             </div>
-          </div>
+          </ScrollRegion>
         </Container>
       </Section>
 
-      <Section tone="white" size="md">
+      <Section tone="canvas" size="md">
         <Container>
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
             <div>
-              <Heading level="h3">What is SEPA?</Heading>
+              <Heading level="h2">What is SEPA?</Heading>
               <p className="mt-4 text-base text-ink-muted">
                 The Single Euro Payments Area (SEPA) lets you send euro payments across 36 European
                 countries as easily as a domestic transfer. Standard SEPA settles within a business
@@ -82,7 +83,7 @@ export default function Page() {
               </p>
             </div>
             <div>
-              <Heading level="h3">What is SWIFT?</Heading>
+              <Heading level="h2">What is SWIFT?</Heading>
               <p className="mt-4 text-base text-ink-muted">
                 SWIFT is a global messaging network that connects banks in more than 200 countries
                 and supports any currency. Because a payment may hop through several correspondent

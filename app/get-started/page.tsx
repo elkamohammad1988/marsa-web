@@ -39,7 +39,7 @@ export default async function GetStartedPage({
   const selectedPlan = plan && planName.has(plan) ? planName.get(plan) : undefined;
 
   return (
-    <section className="bg-surface-cream py-12 md:py-16">
+    <section className="bg-surface-alt py-12 md:py-16">
       <Container>
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start lg:gap-16">
           <div className="lg:pt-4">
@@ -58,7 +58,7 @@ export default async function GetStartedPage({
             )}
             <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {benefits.map((b) => (
-                <CheckBullet key={b} tone="blue">
+                <CheckBullet key={b} tone="brand">
                   {b}
                 </CheckBullet>
               ))}

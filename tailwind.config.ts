@@ -3,7 +3,7 @@ import type { Config } from "tailwindcss";
 /**
  * Colours are driven by CSS custom properties (see styles/globals.css), stored
  * as space-separated RGB channels (`--ink: 246 234 241`) so Tailwind's
- * `<alpha-value>` opacity modifiers (`bg-ink/5`, `ring-brand-blue/30`,
+ * `<alpha-value>` opacity modifiers (`bg-ink/5`, `ring-brand/30`,
  * `from-ink/70`) keep working.
  *
  * The site has exactly one palette. It is *not* a light theme with a dark
@@ -52,12 +52,19 @@ const config: Config = {
         canvas: withAlpha("--canvas"),
         card: withAlpha("--card"),
         brand: {
-          // Legacy `blue*` names kept for zero-churn; values are Rose Quartz.
-          // `blue`/`blue-deep`/`blue-soft` are PALE — use as fills/tints only.
-          // `strong` is the accessible, theme-flipping rose for text/links/rings.
-          blue: withAlpha("--brand"),
-          "blue-deep": withAlpha("--brand-deep"),
-          "blue-soft": withAlpha("--brand-soft"),
+          // Named for the job, not the hue. These were `blue`, `blue-deep` and
+          // `blue-soft` — kept "for zero-churn" through the rebrand, so the
+          // whole codebase asked for `bg-brand-blue` and got magenta. A token
+          // whose name contradicts its value is worse than a churny rename:
+          // it makes every colour decision in the codebase unreadable.
+          //
+          // DEFAULT is the fill (CTAs, progress rail, logo tile, large key
+          // numbers) and carries `on-brand` white at 5.1:1. `deep` is the
+          // hover fill, darker so white stays ≥6:1. `strong` is the accessible
+          // magenta for text, links and focus rings on the dark background.
+          DEFAULT: withAlpha("--brand"),
+          deep: withAlpha("--brand-deep"),
+          soft: withAlpha("--brand-soft"),
           strong: withAlpha("--brand-strong"),
         },
         accent: {
@@ -68,13 +75,16 @@ const config: Config = {
         "on-brand": withAlpha("--on-brand"),
         warning: withAlpha("--warning"),
         danger: withAlpha("--danger"),
+        // Surfaces by elevation and role, not by the colour they used to be.
+        // `deep` was `navy` and `alt` was `cream` — both near-black now, on a
+        // site with no navy and no cream anywhere in it.
         surface: {
-          navy: withAlpha("--surface-navy"),
-          "navy-2": withAlpha("--surface-navy-2"),
-          cream: withAlpha("--surface-cream"),
-          "cream-2": withAlpha("--surface-cream-2"),
-          "blue-tint": withAlpha("--surface-tint"),
-          "blue-tint-2": withAlpha("--surface-tint-2"),
+          deep: withAlpha("--surface-deep"), // deepest band: hero, spotlight
+          "deep-2": withAlpha("--surface-deep-2"),
+          alt: withAlpha("--surface-alt"), // the alternating section surface
+          "alt-2": withAlpha("--surface-alt-2"),
+          tint: withAlpha("--surface-tint"), // inputs, inner panels
+          "tint-2": withAlpha("--surface-tint-2"),
         },
         ink: {
           DEFAULT: withAlpha("--ink"),

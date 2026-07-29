@@ -94,3 +94,111 @@ describe("every exported icon has a caller", () => {
     expect(new RegExp(`\\b${name}\\b`).test(consumers)).toBe(true);
   });
 });
+
+/**
+ * 4. **A colour utility naming a token the palette does not define.**
+ *
+ * The rebrand left `brand.blue`, `brand["blue-deep"]` and `brand["blue-soft"]`
+ * in the Tailwind config "for zero-churn" — but seven places in the source had
+ * already been written as `bg-brand-soft/25`, `text-brand-soft` and
+ * `hover:border-brand-soft/40`. There was no `brand.soft` key, so Tailwind
+ * emitted nothing for any of them: the hero and corridor aurora glows, the
+ * CTA glow, two status dots and the corridor eyebrow were all rendering with
+ * no colour, and had been since the rename.
+ *
+ * Nothing caught it. Tailwind does not warn on an unknown utility, `tsc` and
+ * ESLint never see class strings, and the elements were decorative enough that
+ * their absence read as a design choice. The only visible symptom was a
+ * slightly flatter page than the one that had been designed.
+ *
+ * So: every colour utility in the source must name a colour the config
+ * actually defines. Parsed from `tailwind.config.ts` rather than hard-coded,
+ * so adding a token to the palette is all it takes to use it.
+ */
+describe("every colour utility resolves to a defined token", () => {
+  const config = readFileSync(path.join(ROOT, "tailwind.config.ts"), "utf8");
+
+  /** Colour names Tailwind will accept, derived from the config's `colors`. */
+  const defined = (() => {
+    const names = new Set<string>();
+    // Bounded to the `colors` block. Reading to the end of the file also
+    // swept up `keyframes` and `animation` names — `fade-in`, `aurora-a`,
+    // `shimmer` — which would then have counted as palette roots and made
+    // `shadow-glow-sm` look like a colour utility.
+    const start = config.indexOf("colors: {");
+    const end = config.indexOf("\n      letterSpacing:", start);
+    const colours = config.slice(start, end === -1 ? undefined : end);
+    let group: string | null = null;
+    for (const line of colours.split("\n")) {
+      const nested = line.match(/^\s{8}"?([a-z-]+)"?:\s*\{/);
+      if (nested) {
+        group = nested[1];
+        names.add(group);
+        continue;
+      }
+      if (/^\s{8}\}/.test(line)) {
+        group = null;
+        continue;
+      }
+      // Digits belong in a key name: `alt-2`, `tint-2` and `deep-2` are all
+      // real tokens, and a `[A-Za-z-]` class silently skipped every one.
+      const leaf = line.match(/^\s{8,10}"?([A-Za-z0-9-]+)"?:\s*withAlpha/);
+      if (!leaf) continue;
+      const key = leaf[1];
+      if (group) names.add(key === "DEFAULT" ? group : `${group}-${key}`);
+      else names.add(key);
+    }
+
+    // `backgroundImage` keys are reachable through `bg-`, so `bg-brand-gradient`
+    // is a real utility even though `brand-gradient` is not a colour.
+    const images = config.slice(config.indexOf("backgroundImage: {"));
+    for (const line of images.split("\n")) {
+      if (/^\s{6}\}/.test(line)) break;
+      const key = line.match(/^\s{8}"?([A-Za-z0-9-]+)"?:/);
+      if (key) names.add(key[1]);
+    }
+    return names;
+  })();
+
+  /** The palette roots — utilities on any other colour are Tailwind's own. */
+  const roots = [...defined].map((n) => n.split("-")[0]);
+
+  const PROPERTIES =
+    "bg|text|border|ring|ring-offset|from|to|via|fill|stroke|decoration|outline|caret|accent|divide|placeholder";
+
+  const pattern = new RegExp(`\\b(?:${PROPERTIES})-([a-z][a-z0-9-]*)`, "g");
+
+  it("parses a palette out of the config", () => {
+    expect(defined.has("brand")).toBe(true);
+    expect(defined.has("brand-soft")).toBe(true);
+    expect(defined.has("surface-deep")).toBe(true);
+    expect(defined.has("fade-in")).toBe(false);
+    expect(defined.size).toBeGreaterThan(15);
+  });
+
+  it("actually detects an undefined token", () => {
+    // The first version of this shipped with `\b` inside a template literal —
+    // a backspace character, not a word boundary — so the pattern matched
+    // nothing and every file passed. A guard that cannot fail is worse than
+    // no guard, because it also reports success.
+    const found = [...'className="bg-brand-bogus"'.matchAll(pattern)].map((m) => m[1]);
+    expect(found).toEqual(["brand-bogus"]);
+    expect(defined.has("brand-bogus")).toBe(false);
+    expect(roots.includes("brand")).toBe(true);
+  });
+
+  const files = [...sourceFiles("app"), ...sourceFiles("components")];
+
+  it.each(files)("%s", (file) => {
+    const source = readFileSync(path.join(ROOT, file), "utf8");
+    const used = new Set<string>();
+    for (const match of source.matchAll(pattern)) {
+      const name = match[1];
+      // Only judge names inside this palette; `bg-white`, `text-xs`,
+      // `border-2` and friends belong to Tailwind's own scales.
+      if (roots.includes(name.split("-")[0])) used.add(name);
+    }
+    const unresolved = [...used].filter((name) => !defined.has(name));
+    expect(unresolved).toEqual([]);
+  });
+});

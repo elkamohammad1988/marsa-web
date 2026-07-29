@@ -11,7 +11,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { IconGlobe, IconExchange, IconShield } from "@/components/icons";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Multi-Currency IBAN Account For Expats And Non-Residents",
+  title: "Multi-Currency IBAN For Expats And Non-Residents",
   description:
     "A multi-currency IBAN account for expats and non-residents. Open a European IBAN online and hold, convert, and spend in 15+ currencies at real interbank rates.",
   path: "/personal/multi-currency-iban",
@@ -31,7 +31,7 @@ export default function Page() {
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="phone-home"
-        tone="cream"
+        tone="alt"
       />
 
       <FeatureBullets

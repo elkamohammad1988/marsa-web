@@ -60,7 +60,7 @@ export function DemoSubmissionNotice({
           <ol className="mt-4 space-y-3">
             {steps.map((step, i) => (
               <li key={step.label} className="flex gap-3">
-                <span className="mt-0.5 grid h-5 w-5 flex-none place-items-center rounded-full bg-brand-blue/[0.12] text-[10px] font-semibold tabular-nums text-brand-strong">
+                <span className="mt-0.5 grid h-5 w-5 flex-none place-items-center rounded-full bg-brand/[0.12] text-[10px] font-semibold tabular-nums text-brand-strong">
                   {i + 1}
                 </span>
                 <span className="min-w-0">

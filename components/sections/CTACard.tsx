@@ -25,9 +25,9 @@ export function CTACard({
   footnote,
 }: CTACardProps) {
   return (
-    <Section tone="white" size="sm">
+    <Section tone="canvas" size="sm">
       <Container>
-        <div className="relative isolate overflow-hidden rounded-card-lg bg-surface-navy text-white shadow-elevated">
+        <div className="relative isolate overflow-hidden rounded-card-lg bg-surface-deep text-white shadow-elevated">
           {/* Ambient green glow + grid */}
           <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-radial-glow" />
           <div

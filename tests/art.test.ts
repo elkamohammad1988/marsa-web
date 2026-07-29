@@ -93,6 +93,29 @@ describe("the placeholder imagery is gone for good", () => {
     const offenders = source.filter((f) => /\bimageAlt\b|\bimageSrc\b/.test(read(f)));
     expect(offenders).toEqual([]);
   });
+
+  it("leaves no image slot standing empty", () => {
+    // Deleting `public/images/` emptied the slots that held the photographs,
+    // and one was never refilled: the converter page kept an `aspect-[4/3]`
+    // tinted box whose entire content was the words "Live FX Insights",
+    // centred in `text-ink-muted`. On screen that is indistinguishable from an
+    // asset that failed to load, and it sat on the page most likely to be
+    // linked as evidence of the FX work.
+    //
+    // The shape to forbid is the slot without a drawing in it, so this looks
+    // for the slot markup and requires a component inside.
+    const SLOT = /aspect-\[4\/3\][^>]*bg-surface-tint[^>]*>([\s\S]{0,400}?)<\/div>/g;
+    const offenders: string[] = [];
+
+    for (const file of source) {
+      for (const match of read(file).matchAll(SLOT)) {
+        const inner = match[1];
+        // A drawing is a capitalised JSX component: BrandArt, BlogCover, …
+        if (!/<[A-Z]/.test(inner)) offenders.push(`${file}: ${inner.trim().slice(0, 60)}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
 });
 
 describe("the card carries no payment-scheme mark", () => {

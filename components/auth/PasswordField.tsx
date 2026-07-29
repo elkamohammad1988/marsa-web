@@ -13,7 +13,6 @@ type PasswordFieldProps = {
   hint?: string;
   /** `current-password` when signing in, `new-password` when setting one. */
   autoComplete: "current-password" | "new-password";
-  autoFocus?: boolean;
 };
 
 /**
@@ -30,6 +29,11 @@ type PasswordFieldProps = {
  * than only the label. It is `type="button"` because a bare `<button>` inside
  * a form submits it, which here would mean revealing the password by
  * submitting the sign-in form.
+ *
+ * No field in any auth form takes focus on load. `autofocus` moves the reading
+ * position past the heading and the paragraph under it — and on `/register`
+ * that paragraph is the disclosure that a real account is about to be created,
+ * which is the last thing worth skipping to save one keystroke.
  */
 export function PasswordField({
   label,
@@ -39,7 +43,6 @@ export function PasswordField({
   error,
   hint,
   autoComplete,
-  autoFocus,
 }: PasswordFieldProps) {
   const [revealed, setRevealed] = useState(false);
 
@@ -49,7 +52,6 @@ export function PasswordField({
       name={name}
       type={revealed ? "text" : "password"}
       autoComplete={autoComplete}
-      autoFocus={autoFocus}
       required
       value={value}
       onChange={(e) => onChange(e.target.value)}

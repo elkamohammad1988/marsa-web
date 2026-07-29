@@ -58,7 +58,11 @@ export function BreadcrumbEyebrow({
                 {item.href ? (
                   <Link
                     href={item.href}
-                    className="rounded-sm underline-offset-4 hover:text-brand-strong hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+                    // `min-h-[24px]` and centring, not extra margin: at 11px
+                    // uppercase the link box was 17px tall, under the 24×24
+                    // WCAG 2.2 AA 2.5.8 minimum. A breadcrumb is a standalone
+                    // navigation control, so it gets no inline-text exception.
+                    className="inline-flex min-h-[24px] items-center rounded-sm underline-offset-4 hover:text-brand-strong hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
                   >
                     {item.label}
                   </Link>

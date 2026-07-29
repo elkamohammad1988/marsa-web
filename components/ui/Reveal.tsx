@@ -15,10 +15,24 @@ type RevealProps = {
 /**
  * Fades content up the first time it scrolls into view.
  *
- * Deliberately conservative: if IntersectionObserver is unavailable the
- * content is shown immediately, and `prefers-reduced-motion` short-circuits
- * the animation in CSS (see `.reveal` in globals.css). Content is never
- * allowed to stay hidden because an effect did not run.
+ * **This component can only ever make content appear sooner, never keep it
+ * hidden.** Three separate things guarantee that, because a decorative
+ * animation must not be able to cost a reader the page:
+ *
+ *   1. `.reveal` in globals.css is *visible* by default. The hidden start is
+ *      scoped to `@media (scripting: enabled)`, so with JavaScript off the
+ *      content is simply painted.
+ *   2. A CSS-only fallback animation reveals the element after four seconds,
+ *      so a bundle that is slow or never arrives costs a delay rather than the
+ *      content.
+ *   3. If `IntersectionObserver` is missing, this shows the element at once.
+ *
+ * The observer watches the viewport exactly — no negative root margin, and a
+ * threshold of zero. A negative bottom margin shrinks the observation area, so
+ * anything sitting in that strip on a page already scrolled to its end never
+ * intersects and never reveals: the previous `-12%` bottom margin could strand
+ * the last element on a short page permanently. Revealing a fraction of a
+ * second earlier is not a cost worth that.
  */
 export function Reveal({ children, className, delay = 0, as: Tag = "div" }: RevealProps) {
   const ref = useRef<HTMLElement>(null);
@@ -39,7 +53,7 @@ export function Reveal({ children, className, delay = 0, as: Tag = "div" }: Reve
           }
         }
       },
-      { rootMargin: "0px 0px -12% 0px", threshold: 0.08 },
+      { rootMargin: "0px", threshold: 0 },
     );
     observer.observe(node);
     return () => observer.disconnect();

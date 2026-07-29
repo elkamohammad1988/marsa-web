@@ -57,7 +57,6 @@ export function NewPasswordForm({
         label="New password"
         name="password"
         autoComplete="new-password"
-        autoFocus
         value={password}
         onChange={setPassword}
         error={errors.password}

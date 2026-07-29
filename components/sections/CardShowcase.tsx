@@ -27,18 +27,18 @@ export function CardShowcase({
   reverse,
 }: CardShowcaseProps) {
   return (
-    <Section tone="white" size="lg">
+    <Section tone="canvas" size="lg">
       <Container>
         <div
           className={`grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16 ${
             reverse ? "lg:[&>*:first-child]:order-2" : ""
           }`}
         >
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-card-lg bg-surface-blue-tint">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-card-lg bg-surface-tint">
             <BrandArt name={art} />
           </div>
           <div>
-            {eyebrow && <Badge tone="blue">{eyebrow}</Badge>}
+            {eyebrow && <Badge tone="brand">{eyebrow}</Badge>}
             <Heading level="h2" className="mt-4">
               {title}
             </Heading>
@@ -47,7 +47,7 @@ export function CardShowcase({
             )}
             <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {bullets.map((b) => (
-                <CheckBullet key={b} tone="blue">
+                <CheckBullet key={b} tone="brand">
                   {b}
                 </CheckBullet>
               ))}

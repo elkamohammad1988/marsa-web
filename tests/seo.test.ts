@@ -262,3 +262,72 @@ describe("manifest", () => {
     expect(manifest().icons?.some((i) => i.sizes === "any")).toBe(true);
   });
 });
+
+/**
+ * Titles and descriptions have a length budget, because a search result has
+ * one.
+ *
+ * Google renders roughly 60 characters of `<title>` and roughly 160 of the
+ * description, and truncates the rest with an ellipsis. Every blog post here
+ * overran the title budget — the longest headline was 111 characters against a
+ * document title of `${title} · Marsa` — so the qualifier that made the
+ * headline worth clicking was the exact part being cut. Eight marketing pages
+ * overran the description budget the same way.
+ *
+ * These assert the budget rather than the current strings, so a new post or a
+ * new page fails here instead of shipping truncated. The blog assertion runs
+ * against `seoTitle ?? title`, which is what `generateMetadata` uses.
+ */
+describe("search-result length budgets", () => {
+  /** What `app/layout.tsx`'s title template appends to a page title. */
+  const SUFFIX = " · Marsa";
+  const TITLE_BUDGET = 60;
+  const DESCRIPTION_BUDGET = 160;
+
+  it.each(posts.map((p) => [p.slug, p] as const))(
+    "blog/%s fits a search-result title",
+    (_slug, post) => {
+      const rendered = `${post.seoTitle ?? post.title}${SUFFIX}`;
+      expect(rendered.length).toBeLessThanOrEqual(TITLE_BUDGET);
+    },
+  );
+
+  it.each(posts.map((p) => [p.slug, p] as const))(
+    "blog/%s fits a search-result description",
+    (_slug, post) => {
+      expect(post.excerpt.length).toBeLessThanOrEqual(DESCRIPTION_BUDGET);
+    },
+  );
+
+  /**
+   * Page metadata is read from source rather than imported, because importing
+   * every route's module to reach `export const metadata` would execute each
+   * page's server-side dependencies for a string comparison.
+   */
+  const ROOT = process.cwd();
+  function pageFiles(dir: string): string[] {
+    const out: string[] = [];
+    for (const entry of readdirSync(path.join(ROOT, dir))) {
+      const rel = path.join(dir, entry);
+      if (statSync(path.join(ROOT, rel)).isDirectory()) out.push(...pageFiles(rel));
+      else if (entry === "page.tsx") out.push(rel);
+    }
+    return out;
+  }
+
+  const described = pageFiles("app")
+    .map((file) => {
+      const source = readFileSync(path.join(ROOT, file), "utf8");
+      const match = source.match(/\bdescription:\s*\n?\s*"((?:[^"\\]|\\.)*)"/);
+      return match ? ([file, match[1]] as const) : null;
+    })
+    .filter((x): x is readonly [string, string] => x !== null);
+
+  it("finds the described pages", () => {
+    expect(described.length).toBeGreaterThan(20);
+  });
+
+  it.each(described)("%s fits a search-result description", (_file, description) => {
+    expect(description.length).toBeLessThanOrEqual(DESCRIPTION_BUDGET);
+  });
+});

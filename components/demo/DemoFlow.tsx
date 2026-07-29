@@ -308,8 +308,8 @@ export function DemoFlow() {
               <span
                 className={cn(
                   "h-1.5 w-full rounded-full transition-colors",
-                  done && "rail-done bg-brand-blue",
-                  active && "animate-rail-pulse bg-brand-blue",
+                  done && "rail-done bg-brand",
+                  active && "animate-rail-pulse bg-brand",
                   !done && !active && "bg-line",
                 )}
                 aria-hidden
@@ -386,7 +386,7 @@ export function DemoFlow() {
                       // under `prefers-reduced-motion`.
                       "rounded-xl border bg-canvas/50 px-3 py-2.5 transition-colors duration-500",
                       flash.has(ccy)
-                        ? "border-brand-strong/50 bg-brand-blue/[0.07]"
+                        ? "border-brand-strong/50 bg-brand/[0.07]"
                         : "border-line/70",
                     )}
                   >
@@ -419,7 +419,7 @@ export function DemoFlow() {
                           ? "bg-success/[0.12] text-success"
                           : a.kind === "out"
                             ? "bg-ink/[0.06] text-ink-muted"
-                            : "bg-brand-blue/[0.12] text-brand-strong",
+                            : "bg-brand/[0.12] text-brand-strong",
                       )}
                     >
                       <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
@@ -505,8 +505,8 @@ export function DemoFlow() {
                           className={cn(
                             "rounded-xl border px-4 py-3 text-left text-sm capitalize transition-colors",
                             accountType === t
-                              ? "border-brand-blue bg-brand-blue/[0.06] text-ink"
-                              : "border-line text-ink-muted hover:border-brand-blue/40",
+                              ? "border-brand bg-brand/[0.06] text-ink"
+                              : "border-line text-ink-muted hover:border-brand/40",
                           )}
                         >
                           <span className="block font-semibold text-ink">{t}</span>
@@ -566,7 +566,7 @@ export function DemoFlow() {
                     Done. You now hold a European multi-currency IBAN in your own name, ready to
                     receive in 30+ currencies.
                   </p>
-                  <div className="rounded-xl border border-line bg-surface-blue-tint-2 p-4">
+                  <div className="rounded-xl border border-line bg-surface-tint-2 p-4">
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-subtle">
                       Your IBAN
                     </p>
@@ -598,7 +598,7 @@ export function DemoFlow() {
                     Move {money(DEMO_SCRIPT.convertUsd, "USD")} into euros at the real mid-market
                     rate — the same number banks quote each other, with no hidden spread.
                   </p>
-                  <div className="rounded-xl border border-line bg-surface-blue-tint-2 p-4 text-sm">
+                  <div className="rounded-xl border border-line bg-surface-tint-2 p-4 text-sm">
                     {rateState === "loading" && <span className="text-ink-subtle">Loading live rate…</span>}
                     {rateState === "error" && (
                       <div className="flex items-center justify-between gap-3">
@@ -606,7 +606,7 @@ export function DemoFlow() {
                         <button
                           type="button"
                           onClick={loadRate}
-                          className="rounded-full bg-brand-blue px-3 py-1 text-xs font-medium text-on-brand"
+                          className="rounded-full bg-brand px-3 py-1 text-xs font-medium text-on-brand"
                         >
                           Retry
                         </button>

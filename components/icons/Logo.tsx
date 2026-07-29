@@ -29,7 +29,7 @@ export function MarsaMark({ className }: { className?: string }) {
 type LogoProps = {
   className?: string;
   /** Wordmark colour. The mark tile is always the rose→plum gradient. */
-  tone?: "blue" | "white" | "ink";
+  tone?: "white" | "ink";
   /** Hide the wordmark and render only the mark tile. */
   markOnly?: boolean;
 };

@@ -73,7 +73,13 @@ export default function PrivacyPage() {
           paragraphs: [
             siteConfig.email.support
               ? `To exercise your rights or ask about this policy, contact our Data Protection team at ${siteConfig.email.support}.`
-              : "This build collects no personal data, so there is nothing to exercise a right against. In a real product this section would name a Data Protection contact.",
+              : // Was "This build collects no personal data, so there is
+                // nothing to exercise a right against." Registration stores an
+                // email address, so there now is — and stating the absent
+                // erasure path is the honest half of saying so, because a
+                // rights section that lists deletion without one is the same
+                // false promise in a longer form.
+                "Creating an account on this build stores your email address and, if you give one, your name. The marketing forms validate your input and discard it. There is no Data Protection contact to name and no erasure tooling built, so the only way to remove an account today is to ask the maintainer through GitHub.",
           ],
         },
       ]}

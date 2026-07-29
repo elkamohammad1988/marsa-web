@@ -59,7 +59,7 @@ export function FunnelView({ report, provider }: { report: FunnelReport; provide
               </div>
               <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-surface-tint">
                 <div
-                  className="h-full rounded-full bg-brand-blue"
+                  className="h-full rounded-full bg-brand"
                   style={{ width: `${Math.max(row.pctOfStart, row.sessions > 0 ? 3 : 0)}%` }}
                 />
               </div>

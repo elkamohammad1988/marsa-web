@@ -9,7 +9,6 @@ import { absoluteUrl } from "@/lib/site";
 import {
   accountBucket,
   AUTH_EMAIL_ACCOUNT_TIERS,
-  AUTH_EMAIL_GLOBAL,
   AUTH_EMAIL_TIERS,
   checkTiers,
   retryAfterSeconds,
@@ -218,11 +217,7 @@ export async function handleAuthEmailRequest(
   if (!pre.ok) return pre.response;
   const { config, body } = pre;
 
-  const byAddress = await checkTiers(
-    clientKey(request.headers, ""),
-    AUTH_EMAIL_TIERS,
-    AUTH_EMAIL_GLOBAL,
-  );
+  const byAddress = await checkTiers(clientKey(request.headers, ""), AUTH_EMAIL_TIERS);
   if (!byAddress.ok) return rateLimited(byAddress.resetAt);
 
   const result = validateEmailOnly(body);
@@ -247,20 +242,49 @@ export async function handleAuthEmailRequest(
 }
 
 /**
+ * Field errors we are willing to relay, keyed by GoTrue's machine-readable
+ * code — never by its message text or its status.
+ *
+ * Branching on the status was wrong and was removed: GoTrue answers 422 for a
+ * weak password, for an address it considers invalid, *and* for sign-ups being
+ * switched off in the dashboard. Mapping the status meant an operator who had
+ * disabled registration sent every visitor a permanent, confident instruction
+ * to choose a stronger password. The code is the only part of that response
+ * with a stable meaning.
+ *
+ * The password wording names both things a caller can do about it, because we
+ * cannot see which one the project's own policy is asking for: our validator
+ * has already enforced twelve characters, so reaching this means Supabase is
+ * applying a complexity rule this application has no way to read.
+ */
+const GOTRUE_FIELD_ERRORS: Record<string, { field: string; message: string }> = {
+  weak_password: {
+    field: "password",
+    message: "That password was rejected. Try a longer one, or mix in numbers and symbols.",
+  },
+  email_address_invalid: {
+    field: "email",
+    message: "That email address was not accepted. Check it and try again.",
+  },
+};
+
+/**
  * Turn a failed GoTrue exchange into a response.
  *
- * Three outcomes, and the default is the safe one. A weak password is the
- * caller's to fix, so it is reported against the field. An upstream 429 is
- * passed through as a 429, because Supabase's own limiter is telling us
- * something true. Everything else becomes a 503 with a reference and no
- * detail: GoTrue's message text is written for a developer reading a log, and
- * some of it distinguishes accounts that exist from accounts that do not.
+ * Three outcomes, and the default is the safe one. A fault the caller can fix
+ * is reported against the field it belongs to. An upstream 429 is passed
+ * through as a 429, because Supabase's own limiter is telling us something
+ * true. Everything else — including a 4xx we do not recognise — becomes a 503
+ * with a reference and no detail: GoTrue's message text is written for a
+ * developer reading a log, and some of it distinguishes accounts that exist
+ * from accounts that do not.
  */
 export function goTrueFailure(err: unknown, event: string): NextResponse {
   if (err instanceof GoTrueError) {
-    if (err.status === 422 || err.code === "weak_password") {
+    const known = err.code ? GOTRUE_FIELD_ERRORS[err.code] : undefined;
+    if (known) {
       return NextResponse.json(
-        { errors: { password: "Choose a stronger password." } },
+        { errors: { [known.field]: known.message } },
         { status: 422 },
       );
     }

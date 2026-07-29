@@ -18,7 +18,7 @@ const popular = [
 
 export default function NotFound() {
   return (
-    <section className="bg-surface-cream py-20 md:py-28">
+    <section className="bg-surface-alt py-20 md:py-28">
       <Container>
         <div className="mx-auto max-w-xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-strong">
@@ -33,8 +33,12 @@ export default function NotFound() {
             <Button href="/" variant="primary" size="lg">
               Back to home
             </Button>
-            <Button href="/contact" variant="outline" size="lg">
-              Contact support
+            {/* Not "Contact support". There is no support team and the contact
+                form reaches nobody, so offering it from an error state is the
+                one place the promise would actually be relied on. The demo is a
+                real destination that works, which is what a 404 should offer. */}
+            <Button href="/demo" variant="outline" size="lg">
+              Try the demo
             </Button>
           </div>
           <div className="mt-10">

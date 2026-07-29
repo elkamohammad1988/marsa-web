@@ -12,7 +12,7 @@ export function PricingHeader() {
   const current = audience === "personal" ? plans : businessPlans;
 
   return (
-    <section className="bg-surface-cream pb-12 pt-10 md:pb-16 md:pt-14">
+    <section className="bg-surface-alt pb-12 pt-10 md:pb-16 md:pt-14">
       <Container>
         <div className="flex flex-col items-center gap-6 text-center">
           <div className="inline-flex items-center gap-1 rounded-full bg-card p-1 shadow-card">
@@ -23,7 +23,7 @@ export function PricingHeader() {
                 className={cn(
                   "rounded-full px-4 py-1.5 text-sm font-medium capitalize transition-colors",
                   audience === k
-                    ? "bg-brand-blue text-on-brand"
+                    ? "bg-brand text-on-brand"
                     : "text-ink hover:bg-ink/5",
                 )}
                 aria-pressed={audience === k}

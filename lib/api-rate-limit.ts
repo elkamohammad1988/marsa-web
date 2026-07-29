@@ -44,6 +44,12 @@ export const ADMIN_LOGIN_TIERS = [
  * trips something. Sized well above any plausible legitimate volume: there is
  * one operator, and 50 login attempts in 15 minutes from the whole internet is
  * already an attack.
+ *
+ * A ceiling shared by every caller is only ever safe on a door with **one
+ * user**. Tripping it locks that door for everybody, so on the admin login —
+ * where "everybody" is the operator, who can wait 15 minutes — it is a good
+ * trade. On any endpoint the public uses it is an outage an attacker can cause
+ * on demand, which is why the customer tiers below have no equivalent.
  */
 export const ADMIN_LOGIN_GLOBAL = {
   key: "admin-login:global",
@@ -108,22 +114,40 @@ export const AUTH_EMAIL_ACCOUNT_TIERS: readonly RateLimitTier[] = [
 ];
 
 /**
- * Ceilings across all callers, so an attempt spread thinly over many addresses
- * still trips something. Sized well above plausible legitimate volume for a
- * site of this size — reaching either from real traffic would be a good
- * problem, and raising a number here is a one-line change.
+ * Confirmation and recovery links.
+ *
+ * `/auth/confirm` is unauthenticated and makes an upstream call to Supabase on
+ * every hit, so without a limit it is a free amplifier: one request in, one
+ * request out, from anybody. Generous, because a link can legitimately be
+ * clicked a few times — a mail client prefetching it, a person tapping twice,
+ * a shared address behind one NAT.
  */
-export const AUTH_SIGN_IN_GLOBAL: GlobalCeiling = {
-  key: "auth-signin:global",
-  limit: 200,
-  windowMs: 15 * 60_000,
-};
+export const AUTH_CONFIRM_TIERS: readonly RateLimitTier[] = [
+  { scope: "auth-confirm", limit: 30, windowMs: 15 * 60_000 },
+];
 
-export const AUTH_EMAIL_GLOBAL: GlobalCeiling = {
-  key: "auth-email:global",
-  limit: 50,
-  windowMs: 60 * 60_000,
-};
+/*
+ * There is deliberately **no** global ceiling on any of the customer tiers.
+ *
+ * One was written and removed. `auth-signin:global` at 200 per 15 minutes
+ * meant any anonymous caller could stop every customer signing in for a
+ * quarter of an hour, indefinitely, at about fourteen requests a minute.
+ * `auth-email:global` was worse: a single 50-request burst blocked
+ * registration *and* password recovery for an hour, because both endpoints
+ * shared the bucket.
+ *
+ * The attack a global ceiling is supposed to catch — many addresses, spread
+ * thin — is already caught where it matters. The per-account tiers cap guesses
+ * against a given account at ten per fifteen minutes however many machines are
+ * making them, and cap mail to a given inbox at three an hour. Those hold
+ * without giving an attacker a switch that turns the product off.
+ *
+ * The residual risk is a distributed attacker burning the project's outbound
+ * email quota across many different addresses. Supabase rate-limits its own
+ * sending, which is the right place for that ceiling — it is the resource
+ * being protected, and exhausting it degrades email rather than blocking every
+ * sign-in.
+ */
 
 /**
  * A rate-limit bucket for an email address that does not contain the address.

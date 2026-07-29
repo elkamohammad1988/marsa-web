@@ -42,7 +42,6 @@ export function RegisterForm() {
         label="Full name"
         name="fullName"
         autoComplete="name"
-        autoFocus
         value={fullName}
         onChange={(e) => setFullName(e.target.value)}
         error={errors.fullName}

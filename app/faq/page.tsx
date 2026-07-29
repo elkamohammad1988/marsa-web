@@ -76,17 +76,22 @@ const feesSecurity = [
 export default function Page() {
   return (
     <>
-      <Section tone="cream" size="md">
+      <Section tone="alt" size="md">
         <Container>
           <div className="mx-auto max-w-2xl text-center">
             <Heading level="display">Frequently Asked Questions</Heading>
+            {/* Was "Our team is one message away" over a Contact support
+                button. There is no team and the contact form reaches nobody,
+                so this is the same correction #26 made to the CTAs on
+                /company/about and /company/compliance — offer the destination
+                that actually answers the question instead. */}
             <p className="mt-4 text-base text-ink-muted md:text-lg">
               Everything you need to know about Marsa accounts, payments, fees, and security.
-              Can&apos;t find an answer? Our team is one message away.
+              Still curious? The demo walks the whole flow end to end.
             </p>
             <div className="mt-6 flex justify-center">
-              <Button href="/contact?topic=support" variant="primary" size="md">
-                Contact support
+              <Button href="/demo" variant="primary" size="md">
+                Try The Demo
               </Button>
             </div>
           </div>
@@ -94,9 +99,9 @@ export default function Page() {
       </Section>
 
       <JsonLd data={faqSchema([...accounts, ...payments, ...feesSecurity])} />
-      <FAQ title="Accounts & onboarding" items={accounts} tone="white" emitSchema={false} />
-      <FAQ title="Payments & FX" items={payments} tone="blue-tint" emitSchema={false} />
-      <FAQ title="Fees & security" items={feesSecurity} tone="white" emitSchema={false} />
+      <FAQ title="Accounts & onboarding" items={accounts} tone="canvas" emitSchema={false} />
+      <FAQ title="Payments & FX" items={payments} tone="tint" emitSchema={false} />
+      <FAQ title="Fees & security" items={feesSecurity} tone="canvas" emitSchema={false} />
     </>
   );
 }

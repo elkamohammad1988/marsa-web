@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { getAuthConfig } from "@/lib/auth-config";
 import { isOtpType, verifyOtp } from "@/lib/gotrue";
 import { attachSession, sessionFromGoTrue } from "@/lib/auth-session";
-import { ACCOUNT_HOME, safeRedirect, SIGN_IN_PATH } from "@/lib/auth-routes";
+import { ACCOUNT_HOME, safeRedirect, SIGN_IN_PATH, type AuthNotice } from "@/lib/auth-routes";
+import { AUTH_CONFIRM_TIERS, checkTiers } from "@/lib/api-rate-limit";
+import { clientKey } from "@/lib/rate-limit";
 import { fetchRole } from "@/lib/profiles";
 import { captureException } from "@/lib/observability";
 
@@ -40,14 +42,33 @@ export async function GET(request: Request) {
   // is not the only thing in that URL, and `next` is under the control of
   // whoever forwards the link.
   const next = safeRedirect(url.searchParams.get("next"), ACCOUNT_HOME);
-  const failed = new URL(`${SIGN_IN_PATH}?error=invalid-link`, url.origin);
+
+  /**
+   * Back to sign in, saying which of the three things went wrong.
+   *
+   * `no-store` because this is a GET, and a cached "that link is invalid"
+   * served to the next person holding a good one would be a bug nobody could
+   * reproduce. The success path gets the same header from `attachSession`.
+   */
+  const bounce = (notice: AuthNotice) =>
+    NextResponse.redirect(new URL(`${SIGN_IN_PATH}?error=${notice}`, url.origin), {
+      status: 303,
+      headers: { "cache-control": "no-store" },
+    });
 
   const config = getAuthConfig();
   // Nothing to verify against. The sign-in page explains the missing
   // configuration in full, so it is the right place to land.
   if (!config) return NextResponse.redirect(new URL(SIGN_IN_PATH, url.origin), { status: 303 });
 
-  if (!tokenHash || !isOtpType(type)) return NextResponse.redirect(failed, { status: 303 });
+  // Unauthenticated, and every hit costs one upstream call to Supabase — so
+  // without a limit this is a free amplifier for anybody who finds it. The
+  // allowance is generous because a real link is sometimes fetched more than
+  // once: a mail client prefetching it, a second tap, a shared NAT.
+  const limit = await checkTiers(clientKey(request.headers, ""), AUTH_CONFIRM_TIERS);
+  if (!limit.ok) return bounce("too-many-attempts");
+
+  if (!tokenHash || !isOtpType(type)) return bounce("invalid-link");
 
   try {
     const gotrue = await verifyOtp(config, { tokenHash, type });
@@ -65,6 +86,6 @@ export async function GET(request: Request) {
       severity: "warning",
       otpType: type,
     });
-    return NextResponse.redirect(failed, { status: 303 });
+    return bounce("invalid-link");
   }
 }

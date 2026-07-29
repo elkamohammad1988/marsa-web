@@ -13,7 +13,7 @@ import {
 } from "@/lib/auth-session";
 import { can } from "@/lib/auth-roles";
 import { ACCOUNT_HOME, policyFor, signInUrl, type RoutePolicy } from "@/lib/auth-routes";
-import { refreshSession } from "@/lib/gotrue";
+import { GoTrueError, refreshSession } from "@/lib/gotrue";
 import { fetchRole } from "@/lib/profiles";
 import { captureException } from "@/lib/observability";
 
@@ -38,6 +38,14 @@ import { captureException } from "@/lib/observability";
  * `lib/admin-auth` and `lib/auth`: middleware runs on the Edge runtime and
  * cannot use `next/headers`.
  */
+
+/** Every redirect either gate issues, built one way. */
+function redirectTo(request: NextRequest, pathname: string, search = ""): NextResponse {
+  const url = request.nextUrl.clone();
+  url.pathname = pathname;
+  url.search = search;
+  return NextResponse.redirect(url);
+}
 
 /* ------------------------------------------------------------------ admin -- */
 
@@ -71,17 +79,14 @@ async function adminGate(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const loginUrl = request.nextUrl.clone();
-  loginUrl.pathname = "/admin/login";
-  loginUrl.search = "";
-  return NextResponse.redirect(loginUrl);
+  return redirectTo(request, "/admin/login");
 }
 
 /* --------------------------------------------------------------- account -- */
 
 type Resolved = {
   session: UserSession | null;
-  /** True when a session existed and could not be renewed. */
+  /** True when a session existed and was definitively rejected upstream. */
   expired: boolean;
   /** True when the request's own cookie was rewritten and must be forwarded. */
   forwarded: boolean;
@@ -91,6 +96,8 @@ type Resolved = {
 
 const NO_COOKIE_CHANGE = async () => {};
 
+const clearCookie = async (response: NextResponse) => detachSession(response);
+
 /**
  * The session for this request, renewed if it was about to expire.
  *
@@ -99,25 +106,20 @@ const NO_COOKIE_CHANGE = async () => {};
  * request that can both notice an access token is expiring and hand the
  * replacement back to the browser — so putting it anywhere else would mean a
  * session that silently stops working an hour after sign-in.
- *
- * A refresh that fails is final: Supabase rotates refresh tokens, so the one
- * we hold is either spent, revoked, or past the session's own timebox, and
- * none of those is retryable. The cookie is cleared and the request continues
- * as an anonymous one.
  */
 async function resolveSession(request: NextRequest, config: AuthConfig): Promise<Resolved> {
   const cookie = request.cookies.get(SESSION_COOKIE)?.value;
   const session = await decodeSession(cookie, config.secret);
 
-  // No session, or one that verified and has life left in it.
   if (!session) {
     // A cookie that is present but did not decode is stale, forged or signed
     // with a rotated secret. Clearing it turns an infinite redirect loop into
     // one redirect.
     return cookie
-      ? { session: null, expired: false, forwarded: false, apply: async (res) => detachSession(res) }
+      ? { session: null, expired: false, forwarded: false, apply: clearCookie }
       : { session: null, expired: false, forwarded: false, apply: NO_COOKIE_CHANGE };
   }
+
   if (!needsRefresh(session)) {
     return { session, expired: false, forwarded: false, apply: NO_COOKIE_CHANGE };
   }
@@ -147,17 +149,33 @@ async function resolveSession(request: NextRequest, config: AuthConfig): Promise
       },
     };
   } catch (err) {
+    /*
+     * Two very different failures arrive here, and treating them alike is an
+     * outage.
+     *
+     * GoTrue *rejecting* the token — spent, revoked, or past the session's own
+     * timebox — is final. Retrying cannot help, so the cookie goes.
+     *
+     * A timeout, a refused connection or a 5xx says nothing about the session.
+     * Clearing on those means one brief Supabase wobble signs out every
+     * visitor whose access token happened to be inside the sixty-second
+     * renewal window — an incident measured in seconds upstream becoming a
+     * mass logout here. So the session is kept, this request proceeds on the
+     * credential it already holds, and the next one tries again.
+     */
+    const rejected = err instanceof GoTrueError && err.status >= 400 && err.status < 500;
+
     captureException(err, {
       event: "auth.refresh.failed",
       severity: "warning",
-      fallback: "session cleared; the visitor is asked to sign in again",
+      outcome: rejected
+        ? "session cleared; the visitor is asked to sign in again"
+        : "session kept; renewal retried on the next request",
     });
-    return {
-      session: null,
-      expired: true,
-      forwarded: false,
-      apply: async (res) => detachSession(res),
-    };
+
+    return rejected
+      ? { session: null, expired: true, forwarded: false, apply: clearCookie }
+      : { session, expired: false, forwarded: false, apply: NO_COOKIE_CHANGE };
   }
 }
 
@@ -178,40 +196,40 @@ function decide(
   const { pathname, search } = request.nextUrl;
   const isApi = pathname.startsWith("/api/");
 
-  const toSignIn = () => {
+  /**
+   * What a refusal looks like, decided in one place.
+   *
+   * An API caller gets a status it can act on: a `fetch` cannot follow a
+   * redirect into HTML and make anything of it. A person gets a page — the
+   * sign-in screen if they are nobody yet, and their own account home if they
+   * are somebody who simply may not use this, because that is somewhere they
+   * can act rather than a dead end explaining a boundary they cannot cross.
+   */
+  const deny = (reason: "unauthenticated" | "forbidden"): NextResponse => {
+    if (reason === "forbidden") {
+      return isApi
+        ? NextResponse.json({ error: "Forbidden." }, { status: 403 })
+        : redirectTo(request, ACCOUNT_HOME);
+    }
     if (isApi) return NextResponse.json({ error: "Please sign in." }, { status: 401 });
-    const url = request.nextUrl.clone();
-    const target = signInUrl(`${pathname}${search}`, expired ? "session-expired" : undefined);
-    const parsed = new URL(target, request.nextUrl.origin);
-    url.pathname = parsed.pathname;
-    url.search = parsed.search;
-    return NextResponse.redirect(url);
+
+    const target = new URL(
+      signInUrl(`${pathname}${search}`, expired ? "session-expired" : undefined),
+      request.nextUrl.origin,
+    );
+    return redirectTo(request, target.pathname, target.search);
   };
 
   switch (policy.access) {
-    case "guest-only": {
-      if (!session) return proceed();
-      const url = request.nextUrl.clone();
-      url.pathname = ACCOUNT_HOME;
-      url.search = "";
-      return NextResponse.redirect(url);
-    }
+    case "guest-only":
+      return session ? redirectTo(request, ACCOUNT_HOME) : proceed();
 
     case "authenticated":
-      return session ? proceed() : toSignIn();
+      return session ? proceed() : deny("unauthenticated");
 
-    case "permission": {
-      if (!session) return toSignIn();
-      if (can(session.role, policy.permission)) return proceed();
-      // Signed in, but not for this. An API gets a status it can act on; a
-      // person gets their account home, which is somewhere they can use,
-      // rather than a dead end explaining a boundary they cannot cross.
-      if (isApi) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-      const url = request.nextUrl.clone();
-      url.pathname = ACCOUNT_HOME;
-      url.search = "";
-      return NextResponse.redirect(url);
-    }
+    case "permission":
+      if (!session) return deny("unauthenticated");
+      return can(session.role, policy.permission) ? proceed() : deny("forbidden");
 
     case "public":
       return proceed();

@@ -31,7 +31,7 @@ export default function Page() {
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="phone-home"
-        tone="navy"
+        tone="deep"
       />
 
       <FeatureBullets

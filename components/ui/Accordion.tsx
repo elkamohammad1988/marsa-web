@@ -63,7 +63,7 @@ export function Accordion({ items, tone = "light", className }: AccordionProps) 
               <span
                 className={cn(
                   "inline-flex h-8 w-8 flex-none items-center justify-center rounded-full",
-                  isDark ? "bg-white/10 text-white" : "bg-brand-blue text-on-brand",
+                  isDark ? "bg-white/10 text-white" : "bg-brand text-on-brand",
                 )}
               >
                 <svg

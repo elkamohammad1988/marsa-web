@@ -36,7 +36,7 @@ export default async function ContactPage({
     : "general";
 
   return (
-    <section className="bg-surface-cream py-12 md:py-16">
+    <section className="bg-surface-alt py-12 md:py-16">
       <Container>
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-start lg:gap-16">
           <div className="lg:pt-4">
@@ -49,7 +49,7 @@ export default async function ContactPage({
             <ul className="mt-8 flex flex-col gap-5">
               {highlights.map((h) => (
                 <li key={h.title} className="flex items-start gap-4">
-                  <span className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-brand-blue/10 text-brand-strong [&_svg]:h-5 [&_svg]:w-5">
+                  <span className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-brand/10 text-brand-strong [&_svg]:h-5 [&_svg]:w-5">
                     {h.icon}
                   </span>
                   <div>

@@ -54,8 +54,8 @@ escaping behaviour; and the README's "four runtime dependencies" is a claim,
 which this repository keeps true.
 
 The trade is real: this is code we own, against an API we do not control. It is
-nine endpoints, no state, no refresh scheduling, no storage adapter — and every
-one is exercised in `tests/gotrue.test.ts`.
+eight endpoints, no state, no refresh scheduling, no storage adapter — and
+every one is exercised in `tests/gotrue.test.ts`.
 
 ### 2. Our own signed envelope around Supabase's tokens
 
@@ -99,6 +99,16 @@ data, once, for no visible reason.
 
 Renewal also re-reads the role, so a change of role takes effect within an hour
 rather than waiting out the 30-day session.
+
+**A failed renewal is not automatically a sign-out.** Two very different
+things arrive at the same `catch`, and treating them alike is an outage. GoTrue
+*rejecting* the token — spent, revoked, past the timebox — comes back as a 4xx
+and is final, so the cookie goes. A timeout, a refused connection or a 5xx says
+nothing about the session; clearing on those would sign out every visitor whose
+access token happened to be inside the 60-second renewal window, turning an
+incident measured in seconds at Supabase into one every customer notices. The
+session is kept, the request proceeds on the credential it already holds, and
+the next request tries again.
 
 ### 4. The database decides who may read what
 
@@ -315,6 +325,32 @@ Every row must show `{authenticated}` — never `{anon}` or `{public}`.
 | Host-header injection | Email links are built from the configured site origin, never from the request's `Host` |
 | Reflected content | Sign-in notices are looked up from a closed set; the page never renders text from the URL |
 | Weak passwords | 12 characters minimum, 72 bytes maximum (bcrypt's real ceiling), never the account's own address |
+| Cached credentials | `attachSession` and `detachSession` set `Cache-Control: no-store`, so **every** response carrying a session cookie is unstorable by construction rather than by each caller remembering |
+| Personal data in logs | `lib/observability.ts` redacts an event's context but not the error's own message, and GoTrue's messages are built from a response we do not control — so the client strips anything address-shaped before the error is constructed |
+| Upstream amplification | `/auth/confirm` is unauthenticated and calls Supabase on every hit, so it is rate-limited per address like the rest |
+
+### Rate limiting, and the ceiling that is not there
+
+Three shapes, and one deliberate omission.
+
+- **Per address**, in escalating tiers — a burst trips the short window, a
+  grinder trips a longer one. Stops one machine working through a list.
+- **Per account**, keyed by an HMAC of the address so the limiter table never
+  holds a customer's email. Stops a distributed attempt on one known account,
+  which trips no per-address tier at all, and caps mail to one inbox.
+- **No ceiling shared by all callers.** This is the omission, and it is the
+  point. A global limit is only safe on a door with a single user: the admin
+  login has one, because tripping it inconveniences the one operator who can
+  wait fifteen minutes. On a public endpoint the same limit is a switch any
+  anonymous caller can throw to stop everybody else — `auth-signin:global` at
+  200 per 15 minutes meant roughly fourteen requests a minute would keep the
+  entire customer base locked out indefinitely, and the registration ceiling
+  was shared with password recovery, so one burst blocked both.
+
+  The residual risk is a distributed attacker burning outbound email quota
+  across many addresses. Supabase rate-limits its own sending, which is the
+  right place for that ceiling: it is the resource being protected, and
+  exhausting it degrades email rather than blocking every sign-in.
 
 ### Deliberately not built
 

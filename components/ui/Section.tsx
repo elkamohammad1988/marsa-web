@@ -1,14 +1,22 @@
 import { cn } from "@/lib/utils";
 import type { HTMLAttributes } from "react";
 
-type Tone = "white" | "cream" | "navy" | "blue" | "blue-tint";
+/**
+ * Section surfaces, named for the role they play in the page rhythm.
+ *
+ * These were `white | cream | navy | blue | blue-tint`, which described a
+ * light theme the site stopped having: `white` painted near-black, `cream`
+ * painted near-black, and `navy` painted the darkest magenta-black of the
+ * three. Reading a page's source told you nothing about how it looked.
+ */
+type Tone = "canvas" | "alt" | "deep" | "brand" | "tint";
 
 const tones: Record<Tone, string> = {
-  white: "bg-canvas text-ink",
-  cream: "bg-surface-cream text-ink",
-  navy: "bg-surface-navy text-white",
-  blue: "bg-brand-blue text-on-brand",
-  "blue-tint": "bg-surface-blue-tint text-ink",
+  canvas: "bg-canvas text-ink",
+  alt: "bg-surface-alt text-ink",
+  deep: "bg-surface-deep text-white",
+  brand: "bg-brand text-on-brand",
+  tint: "bg-surface-tint text-ink",
 };
 
 type SectionProps = HTMLAttributes<HTMLElement> & {
@@ -16,7 +24,7 @@ type SectionProps = HTMLAttributes<HTMLElement> & {
   size?: "sm" | "md" | "lg";
 };
 
-export function Section({ tone = "white", size = "md", className, ...props }: SectionProps) {
+export function Section({ tone = "canvas", size = "md", className, ...props }: SectionProps) {
   const padding =
     size === "lg"
       ? "py-14 md:py-20 lg:py-24"

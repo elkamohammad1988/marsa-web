@@ -11,7 +11,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "About Marsa",
   description:
-    "Marsa is on a mission to make money borderless. Learn about the company building multi-currency accounts, SEPA payments, and fair FX for people and businesses everywhere.",
+    "Marsa is on a mission to make money borderless — multi-currency accounts, SEPA payments, and fair FX for people and businesses everywhere.",
   path: "/company/about",
 });
 
@@ -22,17 +22,32 @@ const values = [
   { icon: <IconUsers />, title: "Customer-obsessed", text: "Every decision starts with the person on the other side of the screen." },
 ];
 
+/**
+ * Design parameters, not operating metrics.
+ *
+ * This band used to read "180+ / Countries served", "30+ / Currencies held" —
+ * four numbers in the grammar every real company's about page uses, which is
+ * past tense about customers. Marsa has served nobody and holds nothing, so
+ * "countries served" was the one claim on this page that was false about the
+ * world rather than descriptive of a product that does not exist yet. The
+ * honesty programme draws its line there: describing a hypothetical product is
+ * fine, asserting a track record is not.
+ *
+ * The numbers are unchanged and still worth showing — they are the scope the
+ * product is designed against. Only the tense moved, plus a caption that stops
+ * the band being read as achievement.
+ */
 const stats = [
-  { value: "180+", label: "Countries served" },
-  { value: "30+", label: "Currencies held" },
+  { value: "180+", label: "Countries in scope" },
+  { value: "30+", label: "Currencies designed for" },
   { value: "36", label: "SEPA countries" },
-  { value: "<5 min", label: "To open an account" },
+  { value: "<5 min", label: "Target onboarding time" },
 ];
 
 export default function Page() {
   return (
     <>
-      <Section tone="cream" size="md">
+      <Section tone="alt" size="md">
         <Container>
           <BreadcrumbEyebrow
             items={[{ label: "Home", href: "/" }, { label: "Company" }, { label: "About" }]}
@@ -41,17 +56,20 @@ export default function Page() {
           <div className="max-w-3xl">
             <Heading level="display">Money Without Borders, For Everyone</Heading>
             <p className="mt-5 text-base text-ink-muted md:text-lg">
-              Marsa was founded on a simple belief: sending, holding, and converting money across
-              currencies and countries should be instant, transparent, and fair. We build the
-              multi-currency account we always wished existed — for individuals, freelancers, and
-              growing businesses alike.
+              Marsa starts from a simple belief: sending, holding, and converting money across
+              currencies and countries should be instant, transparent, and fair. It is a concept
+              for the multi-currency account we always wished existed — for individuals,
+              freelancers, and growing businesses alike — designed and built in the open.
             </p>
           </div>
         </Container>
       </Section>
 
-      <Section tone="navy" size="md">
+      <Section tone="deep" size="md">
         <Container>
+          <p className="mb-8 text-center text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
+            The product as designed — scope, not results
+          </p>
           <div className="grid grid-cols-2 gap-6 text-center md:grid-cols-4">
             {stats.map((s) => (
               <div key={s.label}>
@@ -63,7 +81,7 @@ export default function Page() {
         </Container>
       </Section>
 
-      <Section tone="white" size="lg">
+      <Section tone="canvas" size="lg">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
             <Heading level="h2">What We Stand For</Heading>
@@ -74,7 +92,7 @@ export default function Page() {
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((v) => (
               <div key={v.title} className="rounded-card-lg border border-line bg-card p-6">
-                <FeatureIcon tone="blue">{v.icon}</FeatureIcon>
+                <FeatureIcon tone="brand">{v.icon}</FeatureIcon>
                 <h3 className="mt-4 text-lg font-semibold text-ink">{v.title}</h3>
                 <p className="mt-2 text-sm text-ink-muted">{v.text}</p>
               </div>
@@ -83,7 +101,7 @@ export default function Page() {
         </Container>
       </Section>
 
-      <Section tone="blue-tint" size="lg">
+      <Section tone="tint" size="lg">
         <Container>
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
             <div>

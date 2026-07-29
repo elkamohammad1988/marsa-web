@@ -46,6 +46,15 @@ export const MIN_PASSWORD_LENGTH = 16;
 
 export type AdminConfig = { password: string; secret: string };
 
+/**
+ * Whether the weak-credential event has already been reported this process.
+ *
+ * `getAdminConfig()` runs in middleware on every `/admin` request, so an
+ * unguarded capture repeats a condition that cannot change without a restart
+ * once per request — a flood in whatever the reporter forwards to.
+ */
+let weakCredentialsReported = false;
+
 export function getAdminConfig(
   env: Record<string, string | undefined> = process.env,
 ): AdminConfig | null {
@@ -55,14 +64,19 @@ export function getAdminConfig(
   if (password.length < MIN_PASSWORD_LENGTH || secret.length < MIN_SECRET_LENGTH) {
     // Reported rather than logged, because this is the failure that looks like
     // nothing: the admin area simply stays shut, the login page still renders,
-    // and the only trace is one line in a stream nobody is reading.
-    captureException(
-      new Error(
-        `ADMIN_PASSWORD must be at least ${MIN_PASSWORD_LENGTH} characters and ` +
-          `ADMIN_SESSION_SECRET at least ${MIN_SECRET_LENGTH}; admin is disabled.`,
-      ),
-      { event: "admin.config.rejected" },
-    );
+    // and the only trace is one line in a stream nobody is reading. Reported
+    // once, and only when reading the process environment, so a caller passing
+    // an explicit one — every test does — is never silenced by an earlier call.
+    if (env === process.env && !weakCredentialsReported) {
+      weakCredentialsReported = true;
+      captureException(
+        new Error(
+          `ADMIN_PASSWORD must be at least ${MIN_PASSWORD_LENGTH} characters and ` +
+            `ADMIN_SESSION_SECRET at least ${MIN_SECRET_LENGTH}; admin is disabled.`,
+        ),
+        { event: "admin.config.rejected" },
+      );
+    }
     return null;
   }
   return { password, secret };

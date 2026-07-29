@@ -17,7 +17,7 @@ export const metadata: Metadata = buildMetadata({
 export default function Page() {
   return (
     <>
-      <Section tone="cream" size="md">
+      <Section tone="alt" size="md">
         <Container>
           <div className="mx-auto max-w-2xl text-center">
             <Heading level="display">FX Rate Calculator</Heading>
@@ -32,7 +32,7 @@ export default function Page() {
         </Container>
       </Section>
 
-      <Section tone="white" size="md">
+      <Section tone="canvas" size="md">
         <Container>
           <Heading level="h2">Where FX costs hide</Heading>
           <p className="mt-4 max-w-3xl text-base text-ink-muted">

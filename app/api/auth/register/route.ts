@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { AUTH_EMAIL_GLOBAL, AUTH_SIGN_UP_TIERS, checkTiers } from "@/lib/api-rate-limit";
+import { AUTH_SIGN_UP_TIERS, checkTiers } from "@/lib/api-rate-limit";
 import { clientKey } from "@/lib/rate-limit";
 import { emailRedirectUrl, goTrueFailure, preflight, rateLimited } from "@/lib/api-auth";
 import { isExistingAccountDecoy, signUp } from "@/lib/gotrue";
@@ -14,9 +14,10 @@ export const runtime = "nodejs";
 /**
  * Register an account.
  *
- * Rate-limited under the *email* ceiling rather than a registration one,
- * because what this endpoint really does is cause a message to be delivered to
- * an address the caller chose. The scarce resource is somebody else's inbox.
+ * Rate-limited per address only. A ceiling shared by every caller would mean
+ * one 50-request burst could stop anybody registering for an hour, which is a
+ * worse outcome than the one it prevents; see the note at the foot of
+ * `lib/api-rate-limit.ts`.
  *
  * The response is the same whether the address was free or already taken.
  * GoTrue arranges half of that itself, returning a decoy user with no
@@ -30,11 +31,7 @@ export async function POST(request: Request) {
   if (!pre.ok) return pre.response;
   const { config, body } = pre;
 
-  const limit = await checkTiers(
-    clientKey(request.headers, ""),
-    AUTH_SIGN_UP_TIERS,
-    AUTH_EMAIL_GLOBAL,
-  );
+  const limit = await checkTiers(clientKey(request.headers, ""), AUTH_SIGN_UP_TIERS);
   if (!limit.ok) return rateLimited(limit.resetAt);
 
   const result = validateRegistration(body);

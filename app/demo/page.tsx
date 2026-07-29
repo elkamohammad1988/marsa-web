@@ -9,14 +9,14 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "Interactive Demo — See Marsa Work End to End",
   description:
-    "Try Marsa in your browser: open an account, get a European IBAN, receive a payout from abroad, convert at the live interbank rate, and send over SEPA. Sandbox with real ECB rates — no sign-up.",
+    "Try Marsa in your browser: open an account, get a European IBAN, receive a payout, and convert at the live ECB rate. A labelled sandbox — no sign-up.",
   path: "/demo",
 });
 
 export default function DemoPage() {
   return (
     <>
-      <section className="relative isolate overflow-hidden bg-surface-navy py-14 text-white md:py-16">
+      <section className="relative isolate overflow-hidden bg-surface-deep py-14 text-white md:py-16">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-mesh-deep opacity-90" />
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-noise" />
         <Container className="relative">
@@ -37,7 +37,7 @@ export default function DemoPage() {
         </Container>
       </section>
 
-      <section className="bg-surface-cream py-12 md:py-16">
+      <section className="bg-surface-alt py-12 md:py-16">
         <Container>
           <DemoFlow />
         </Container>

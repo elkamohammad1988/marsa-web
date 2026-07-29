@@ -63,6 +63,17 @@ export const REFRESH_THRESHOLD_SECONDS = 60;
  */
 export const MAX_COOKIE_BYTES = 4096;
 
+/**
+ * What the attributes add on top of `name=value`.
+ *
+ * `; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000` is the longest
+ * form `cookieOptions` produces, rounded up. Browsers disagree about whether
+ * the 4096-byte limit covers the attributes or only the pair, so the check
+ * assumes the stricter reading — being wrong in that direction costs nothing,
+ * and being wrong in the other direction is a cookie silently dropped.
+ */
+const COOKIE_ATTRIBUTE_BYTES = 64;
+
 export type UserSession = {
   /** `auth.users.id`, and the primary key of the profile row. */
   userId: string;
@@ -131,7 +142,10 @@ function fromBase64Url(value: string): string | null {
  */
 export async function encodeSession(session: UserSession, secret: string): Promise<string> {
   const cookie = await signPayload(toBase64Url(JSON.stringify(session)), secret);
-  const bytes = cookie.length + SESSION_COOKIE.length;
+  // `.length` is bytes here: the payload is base64url and the signature is
+  // hex, so every character is one ASCII byte. `+ 1` for the `=` separator.
+  const bytes =
+    SESSION_COOKIE.length + 1 + cookie.length + COOKIE_ATTRIBUTE_BYTES;
   if (bytes > MAX_COOKIE_BYTES) throw new SessionTooLargeError(bytes);
   return cookie;
 }
@@ -241,6 +255,7 @@ export async function attachSession(
 ): Promise<void> {
   const value = await encodeSession(session, secret);
   response.cookies.set(SESSION_COOKIE, value, cookieOptions(remainingSeconds(session, now)));
+  denyCaching(response);
 }
 
 /**
@@ -252,6 +267,21 @@ export async function attachSession(
  */
 export function detachSession(response: NextResponse): void {
   response.cookies.set(SESSION_COOKIE, "", cookieOptions(0));
+  denyCaching(response);
+}
+
+/**
+ * Mark a response as never storable.
+ *
+ * Applied by both functions above, so that **every** response carrying a
+ * session cookie is uncacheable by construction rather than by each caller
+ * remembering. A shared cache that stored one of these would hand one
+ * person's session to the next requester of the same URL — and while
+ * well-behaved caches do not store a `Set-Cookie` response, "does not by
+ * default" is a weaker guarantee than a header, and the header costs nothing.
+ */
+function denyCaching(response: NextResponse): void {
+  response.headers.set("cache-control", "no-store");
 }
 
 /*

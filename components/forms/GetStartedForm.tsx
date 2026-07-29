@@ -79,7 +79,7 @@ export function GetStartedForm({ defaultType = "personal", defaultPlan }: Props)
               aria-pressed={accountType === t}
               className={cn(
                 "flex-1 rounded-lg px-5 py-2 text-sm font-medium capitalize transition-colors sm:flex-none",
-                accountType === t ? "bg-brand-blue text-on-brand" : "text-ink hover:bg-ink/5",
+                accountType === t ? "bg-brand text-on-brand" : "text-ink hover:bg-ink/5",
               )}
             >
               {t}

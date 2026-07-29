@@ -35,7 +35,7 @@ export default async function AdminLoginPage() {
         {enabled ? (
           <AdminLoginForm />
         ) : (
-          <div className="mt-6 rounded-xl border border-line bg-surface-cream p-4 text-sm text-ink-muted">
+          <div className="mt-6 rounded-xl border border-line bg-surface-alt p-4 text-sm text-ink-muted">
             <p className="font-medium text-ink">Admin is not configured</p>
             <p className="mt-1">
               Set <code className="font-mono text-xs">ADMIN_PASSWORD</code> (

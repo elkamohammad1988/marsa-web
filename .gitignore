@@ -101,15 +101,24 @@ screens/
 # ---------------------------------------------------------------------------
 # Generated portfolio screenshots.
 #
-# scripts/capture.mjs and scripts/render-icon.mjs write into this directory
-# (OUT_ROOT / out). Nothing in app/, components/, lib/ or next.config.ts reads
-# from it, so the output is regenerable and stays out of git — 44 MB of it.
-# The four shots embedded in README.md are the exception and ARE tracked.
+# scripts/capture.mjs and scripts/render-icon.mjs write into this directory.
+# Nothing in app/, components/, lib/ or next.config.ts reads from it, so the
+# output is regenerable and stays out of git. The eight shots embedded in
+# README.md are the exception and ARE tracked.
 #
-# Regenerate locally with:  npm run build && npm start   (then) node scripts/capture.mjs
+# The numbered set replaced 127 files (50 MB) — a per-section sweep of every
+# marketing route, captured before the rebrand, so every filename and every
+# pixel still showed the previous product. A screenshot directory that large
+# is not a portfolio; it is a place stale images go to be forgotten.
+#
+# Regenerate locally with:  npm run build && npm start   (then) npm run capture
 # ---------------------------------------------------------------------------
 portfolio-screenshots/*
-!portfolio-screenshots/br-home.png
-!portfolio-screenshots/br-demo-convert.png
-!portfolio-screenshots/br-demo-done.png
-!portfolio-screenshots/br-375-demo.png
+!portfolio-screenshots/01-hero.png
+!portfolio-screenshots/02-live-rates.png
+!portfolio-screenshots/03-feature-account.png
+!portfolio-screenshots/04-feature-convert.png
+!portfolio-screenshots/05-analytics.png
+!portfolio-screenshots/06-iban-validation.png
+!portfolio-screenshots/07-mobile.png
+!portfolio-screenshots/08-pricing.png

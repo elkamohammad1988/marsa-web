@@ -6,6 +6,7 @@ import { requireSession } from "@/lib/auth";
 import { getAuthConfig } from "@/lib/auth-config";
 import { permissionsFor, ROLE_LABELS } from "@/lib/auth-roles";
 import { getProfile, type Profile } from "@/lib/profiles";
+import { formatDay } from "@/lib/dates";
 import { captureException } from "@/lib/observability";
 import { buildMetadata } from "@/lib/seo";
 
@@ -17,17 +18,6 @@ export const metadata = buildMetadata({
   path: "/account",
   noindex: true,
 });
-
-function formatDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(date);
-}
 
 /** The two letters shown in place of an avatar. */
 function initials(profile: Profile): string {
@@ -97,7 +87,7 @@ export default async function AccountPage() {
             */}
             <span
               aria-hidden
-              className="grid h-14 w-14 flex-none place-items-center rounded-full bg-brand-blue/[0.12] text-lg font-semibold text-brand-strong"
+              className="grid h-14 w-14 flex-none place-items-center rounded-full bg-brand/[0.12] text-lg font-semibold text-brand-strong"
             >
               {initials(profile)}
             </span>
@@ -120,13 +110,13 @@ export default async function AccountPage() {
               <dt className="text-xs font-medium uppercase tracking-[0.14em] text-ink-subtle">
                 Member since
               </dt>
-              <dd className="mt-1 text-sm text-ink">{formatDate(profile.createdAt)}</dd>
+              <dd className="mt-1 text-sm text-ink">{formatDay(profile.createdAt)}</dd>
             </div>
             <div>
               <dt className="text-xs font-medium uppercase tracking-[0.14em] text-ink-subtle">
                 Last updated
               </dt>
-              <dd className="mt-1 text-sm text-ink">{formatDate(profile.updatedAt)}</dd>
+              <dd className="mt-1 text-sm text-ink">{formatDay(profile.updatedAt)}</dd>
             </div>
           </dl>
 

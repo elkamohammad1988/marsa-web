@@ -15,8 +15,11 @@ import { absoluteUrl, siteConfig } from "@/lib/site";
 import { IconGlobe, IconExchange, IconShield } from "@/components/icons";
 
 const title = "Marsa — Multi-Currency Accounts For Cross-Border Business";
+// Kept under 160 characters: past that Google truncates in the results page,
+// and the clause that gets cut is always the last one — which is where a
+// description written long tends to put the audience it is trying to reach.
 const description =
-  "Open a European multi-currency IBAN with Marsa. Get paid by marketplaces and clients abroad, convert at interbank rates, and send free SEPA transfers — for freelancers, sellers and businesses.";
+  "Open a European multi-currency IBAN. Get paid by marketplaces and clients abroad, hold 30+ currencies, convert at interbank rates, and send free SEPA.";
 
 export const metadata: Metadata = {
   title: { absolute: title },

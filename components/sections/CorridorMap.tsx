@@ -38,7 +38,7 @@ function Node({ label, meta, align }: { label: string; meta: string; align: "lef
 
 export function CorridorMap() {
   return (
-    <section className="relative isolate overflow-hidden bg-surface-navy py-14 md:py-20 lg:py-24">
+    <section className="relative isolate overflow-hidden bg-surface-deep py-14 md:py-20 lg:py-24">
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-mesh-deep opacity-90" />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-noise" />
 

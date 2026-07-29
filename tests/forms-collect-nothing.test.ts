@@ -113,3 +113,40 @@ describe("the rules a visitor sees are the real ones", () => {
     expect(code(file)).toMatch(/hp/);
   });
 });
+
+/**
+ * No page may claim the build collects no personal data.
+ *
+ * It was true, sitewide, until customer accounts shipped — and then it stayed
+ * on `/legal/privacy` and `/company/compliance`, the two pages where a stale
+ * data-protection sentence is least harmless. Registration writes an email
+ * address (and an optional name) to Postgres, so "collects no personal data"
+ * is now false everywhere it appears.
+ *
+ * The narrower true claim — that the *marketing forms* discard what you type —
+ * is the one the rest of this file defends, and it is unaffected. So this
+ * asserts the difference: a sentence may say the forms collect nothing, and
+ * may not say the build does.
+ */
+describe("no page claims the build collects nothing", () => {
+  const CLAIMS = [
+    /collects no personal data/i,
+    /no data (is )?collected/i,
+    /nothing (here )?is stored\b/i,
+  ];
+
+  const files = [...sourceFiles("app"), ...sourceFiles("components")].filter(
+    // This file names the strings in order to forbid them.
+    (f) => !f.includes("forms-collect-nothing"),
+  );
+
+  it.each(files)("%s", (file) => {
+    const source = code(file);
+    // Comments explain why the claim was removed; only rendered copy matters.
+    const rendered = source
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/(^|[^:])\/\/.*$/gm, "$1");
+    const found = CLAIMS.filter((rx) => rx.test(rendered)).map((rx) => rx.source);
+    expect(found).toEqual([]);
+  });
+});

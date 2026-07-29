@@ -22,7 +22,9 @@ export default function ForgotPasswordPage() {
       footer={
         <Link
           href="/login"
-          className="font-medium text-brand-strong underline-offset-4 hover:underline"
+          // Standalone, so no WCAG 2.2 inline-in-a-sentence exception applies
+          // the way it does to "Create one" inside a sentence on /login.
+          className="inline-flex min-h-[24px] items-center font-medium text-brand-strong underline-offset-4 hover:underline"
         >
           Back to sign in
         </Link>

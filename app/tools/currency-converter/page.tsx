@@ -8,6 +8,7 @@ import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
+import { BrandArt } from "@/components/art/BrandArt";
 import { IconExchange, IconChart, IconLightning } from "@/components/icons";
 
 export const metadata: Metadata = buildMetadata({
@@ -47,7 +48,7 @@ export default function Page() {
     <>
       <CurrencyConverter />
 
-      <Section tone="white" size="md">
+      <Section tone="canvas" size="md">
         <Container>
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
             <div>
@@ -63,10 +64,16 @@ export default function Page() {
                 follow the markets.
               </p>
             </div>
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-card-lg bg-surface-blue-tint">
-              <div className="flex h-full items-center justify-center text-ink-muted">
-                Live FX Insights
-              </div>
+            {/*
+              This slot used to be an empty tinted box containing the words
+              "Live FX Insights" and nothing else — the last surviving hole
+              from `public/images/`, missed when every other image slot was
+              replaced by a drawing. It read as an asset that had failed to
+              load, on the page most likely to be linked as a demonstration of
+              the FX work.
+            */}
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-card-lg bg-surface-tint">
+              <BrandArt name="phone-accounts" />
             </div>
           </div>
         </Container>
@@ -95,7 +102,7 @@ export default function Page() {
         ]}
       />
 
-      <Section tone="white" size="md">
+      <Section tone="canvas" size="md">
         <Container>
           <Heading level="h2">Key FX Concepts Explained</Heading>
           <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -109,7 +116,7 @@ export default function Page() {
         </Container>
       </Section>
 
-      <FeatureBullets items={tools} tone="blue-tint" />
+      <FeatureBullets items={tools} tone="tint" />
 
       <FAQ
         items={[

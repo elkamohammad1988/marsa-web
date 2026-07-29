@@ -94,9 +94,24 @@ export class GoTrueError extends Error {
   }
 }
 
+/** Longest upstream message kept. Enough to diagnose, not enough to bloat a log. */
+const MAX_UPSTREAM_MESSAGE = 300;
+
+/**
+ * Anything shaped like an email address in an upstream message.
+ *
+ * `lib/observability.ts` promises that nothing personal leaves the process,
+ * and it keeps that promise by redacting the *context* of an event — not the
+ * error's own message. This message is built from a response we do not
+ * control, so if GoTrue ever echoes the submitted address back in an error, it
+ * would ride into the reporter inside the one field `redact()` does not touch.
+ * Cheaper to guarantee here than to weaken the claim.
+ */
+const EMAIL_IN_TEXT = /[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+/g;
+
 /** GoTrue has used three error body shapes across versions; accept all of them. */
 function describeFailure(status: number, body: string): GoTrueError {
-  let message = body.slice(0, 300);
+  let message = body;
   let code: string | undefined;
   try {
     const parsed = JSON.parse(body) as {
@@ -111,9 +126,11 @@ function describeFailure(status: number, body: string): GoTrueError {
       parsed.msg ?? parsed.message ?? parsed.error_description ?? parsed.error ?? message;
     code = parsed.error_code ?? (typeof parsed.code === "string" ? parsed.code : undefined);
   } catch {
-    // Not JSON — an edge proxy error page, most likely. Keep the raw prefix.
+    // Not JSON — an edge proxy error page, most likely. Keep the raw body.
   }
-  return new GoTrueError(`GoTrue ${status}: ${message}`, status, code);
+
+  const safe = message.replace(EMAIL_IN_TEXT, "[redacted]").slice(0, MAX_UPSTREAM_MESSAGE);
+  return new GoTrueError(`GoTrue ${status}: ${safe}`, status, code);
 }
 
 /**

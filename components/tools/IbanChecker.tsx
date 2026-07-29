@@ -39,7 +39,7 @@ export function IbanChecker() {
             autoComplete="off"
             autoCapitalize="characters"
             placeholder="GB82 WEST 1234 5698 7654 32"
-            className="h-12 w-full rounded-xl border border-line bg-canvas px-4 font-mono text-sm uppercase tracking-wide text-ink placeholder:text-ink-subtle focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-strong/30"
+            className="h-12 w-full rounded-xl border border-line bg-canvas px-4 font-mono text-sm uppercase tracking-wide text-ink placeholder:text-ink-subtle focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-strong/30"
             aria-describedby={result ? "iban-result" : undefined}
           />
           <Button type="submit" variant="primary" size="lg" className="sm:w-auto">
@@ -58,7 +58,7 @@ export function IbanChecker() {
               setValue(ex);
               check(ex);
             }}
-            className="rounded-full bg-surface-blue-tint px-3 py-1 font-mono text-xs text-brand-strong hover:bg-surface-blue-tint/70"
+            className="rounded-full bg-surface-tint px-3 py-1 font-mono text-xs text-brand-strong hover:bg-surface-tint/70"
           >
             {ex}
           </button>

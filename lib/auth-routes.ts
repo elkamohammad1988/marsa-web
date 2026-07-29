@@ -114,6 +114,7 @@ export function safeRedirect(value: unknown, fallback: string = ACCOUNT_HOME): s
 export const AUTH_NOTICES = {
   "invalid-link": "That link has expired or has already been used. Request a new one below.",
   "session-expired": "Your session has ended. Please sign in again.",
+  "too-many-attempts": "Too many attempts from this connection. Wait a few minutes and try again.",
 } as const;
 
 export type AuthNotice = keyof typeof AUTH_NOTICES;

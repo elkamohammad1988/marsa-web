@@ -48,6 +48,17 @@ export type AuthConfig = {
 export const MIN_AUTH_SECRET_LENGTH = 32;
 
 /**
+ * Whether the weak-secret event has already been reported this process.
+ *
+ * `getAuthConfig()` runs in middleware on every protected request, so an
+ * unguarded `captureException` turns a one-line misconfiguration into
+ * thousands of identical events — a bill on a paid error tracker, and noise
+ * that buries the next real failure in the logs. The condition cannot change
+ * without a restart, so saying it once is saying it enough.
+ */
+let weakSecretReported = false;
+
+/**
  * A complete authentication configuration, or null when authentication is not
  * set up.
  *
@@ -66,13 +77,18 @@ export function getAuthConfig(
   if (!url || !anonKey || !secret) return null;
 
   if (secret.length < MIN_AUTH_SECRET_LENGTH) {
-    captureException(
-      new Error(
-        `AUTH_SESSION_SECRET must be at least ${MIN_AUTH_SECRET_LENGTH} characters; ` +
-          "authentication is disabled.",
-      ),
-      { event: "auth.config.rejected" },
-    );
+    // Guarded on reading the process environment, so a caller that passes an
+    // explicit one — every test does — is never silenced by an earlier call.
+    if (env === process.env && !weakSecretReported) {
+      weakSecretReported = true;
+      captureException(
+        new Error(
+          `AUTH_SESSION_SECRET must be at least ${MIN_AUTH_SECRET_LENGTH} characters; ` +
+            "authentication is disabled.",
+        ),
+        { event: "auth.config.rejected" },
+      );
+    }
     return null;
   }
 

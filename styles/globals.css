@@ -30,12 +30,12 @@
     /* Surfaces — near-black with a magenta undertone (dark by default) */
     --canvas: 12 8 11; /* #0C080B — page background */
     --card: 20 10 16; /* #140A10 — cards, sections */
-    --surface-cream: 20 10 16; /* sections (was the light alt; now dark) */
-    --surface-cream-2: 26 12 20;
+    --surface-alt: 20 10 16; /* sections (was the light alt; now dark) */
+    --surface-alt-2: 26 12 20;
     --surface-tint: 33 16 32; /* #211020 — inputs, inner panels, sandbox banner */
     --surface-tint-2: 26 12 22;
-    --surface-navy: 10 7 10; /* deepest band for spotlight/hero */
-    --surface-navy-2: 20 10 16;
+    --surface-deep: 10 7 10; /* deepest band for spotlight/hero */
+    --surface-deep-2: 20 10 16;
 
     /* Brand — "black rose" metallic magenta. */
     --brand: 204 31 134; /* #CC1F86 — CTA, progress, logo, key numbers */
@@ -114,10 +114,22 @@
     color: rgb(var(--ink));
   }
 
-  /* Respect users who prefer reduced motion. */
+  /*
+   * Respect users who prefer reduced motion.
+   *
+   * `animation-delay` is reset alongside the duration, and that line is not
+   * cosmetic. Several animations here are declared with `fill-mode: both`,
+   * whose `backwards` half applies the 0% keyframe — `opacity: 0` for
+   * `fade-up`, `scale-in`, `step-in` and `row-in` — for the whole of any
+   * delay. Resetting the duration but not the delay therefore left a
+   * reduced-motion reader looking at nothing for the length of the stagger:
+   * 120ms for the hero visual, and longer wherever a delay was larger. The
+   * element was not animating, it was simply invisible.
+   */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.001ms !important;
+      animation-delay: 0.001ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.001ms !important;
       scroll-behavior: auto !important;
@@ -346,25 +358,64 @@
   }
 
   /**
-   * Scroll reveal. Elements start shifted and transparent; <Reveal> adds
-   * `.is-visible` when they enter the viewport. Reduced motion shows them
-   * immediately rather than leaving them blank.
+   * Scroll reveal.
+   *
+   * **The default state is visible.** The hidden state exists only inside
+   * `@media (scripting: enabled)`, so a browser with JavaScript switched off —
+   * or one too old to understand that query — paints the content and simply
+   * never animates it.
+   *
+   * It used to be the other way round: `.reveal` set `opacity: 0`
+   * unconditionally, and a `useEffect` adding `.is-visible` was the only thing
+   * that ever removed it. Content whose visibility depends on an effect having
+   * run is content that disappears whenever the effect does not — with no
+   * error, nothing in the markup to explain it, and nothing a reader can do.
+   * A decorative animation had been made load-bearing.
+   *
+   * `reveal-fallback` covers the one case the media query cannot: scripting is
+   * enabled, but the bundle is slow, blocked, or never arrives. After four
+   * seconds the element reveals itself with no observer involved. When the
+   * observer does win — which is almost always, and long before then —
+   * `.is-visible` cancels the animation and the transition runs instead.
    */
   .reveal {
-    opacity: 0;
-    transform: translateY(18px);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-    will-change: opacity, transform;
-  }
-  .reveal.is-visible {
     opacity: 1;
     transform: none;
   }
+
+  @media (scripting: enabled) {
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+      /* `forwards`, not `both`: during the delay no animation styles apply, so
+         the element simply keeps the hidden state above rather than depending
+         on how an implicit `from` frame is resolved. */
+      animation: reveal-fallback 0.7s cubic-bezier(0.16, 1, 0.3, 1) 4s forwards;
+    }
+    .reveal.is-visible {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+  }
+
+  @keyframes reveal-fallback {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Last, so it wins over the scripting block whatever order the cascade
+     resolves those two media queries in. */
   @media (prefers-reduced-motion: reduce) {
     .reveal {
       opacity: 1;
       transform: none;
+      animation: none;
     }
   }
 }

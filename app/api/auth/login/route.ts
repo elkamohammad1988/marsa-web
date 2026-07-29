@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import {
   accountBucket,
   AUTH_SIGN_IN_ACCOUNT_TIERS,
-  AUTH_SIGN_IN_GLOBAL,
   AUTH_SIGN_IN_TIERS,
   checkTiers,
 } from "@/lib/api-rate-limit";
@@ -30,6 +29,10 @@ export const runtime = "nodejs";
  * all — and the account bucket is an HMAC of the address, so rationing per
  * account does not put a column of customer emails in the rate-limit table.
  *
+ * Not limited across all callers together. That would hand any anonymous
+ * caller a switch that stops every customer signing in; see the note at the
+ * foot of `lib/api-rate-limit.ts`.
+ *
  * The order matters: the address limit is checked before the body is
  * validated, so an attacker cannot spend our validation on rejected requests,
  * and the account limit after, because it needs the address to key on.
@@ -39,11 +42,7 @@ export async function POST(request: Request) {
   if (!pre.ok) return pre.response;
   const { config, body } = pre;
 
-  const byAddress = await checkTiers(
-    clientKey(request.headers, ""),
-    AUTH_SIGN_IN_TIERS,
-    AUTH_SIGN_IN_GLOBAL,
-  );
+  const byAddress = await checkTiers(clientKey(request.headers, ""), AUTH_SIGN_IN_TIERS);
   if (!byAddress.ok) return rateLimited(byAddress.resetAt);
 
   const result = validateSignIn(body);

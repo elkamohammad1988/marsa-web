@@ -35,7 +35,7 @@ export function Pagination({ currentPage, totalPages, basePath }: PaginationProp
           className={cn(
             "inline-flex h-9 w-9 items-center justify-center rounded-full text-sm",
             n === currentPage
-              ? "bg-brand-blue text-on-brand"
+              ? "bg-brand text-on-brand"
               : "text-ink hover:bg-ink/5",
           )}
         >

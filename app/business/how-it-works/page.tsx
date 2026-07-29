@@ -10,7 +10,7 @@ import { CTACard } from "@/components/sections/CTACard";
 export const metadata: Metadata = buildMetadata({
   title: "How To Open EU Business Account Online",
   description:
-    "See how to open an EU business account online with Marsa — submit your company documents, get approved in 24–48h, and receive an EU IBAN to send and receive SEPA.",
+    "Open an EU business account online with Marsa — submit your company documents, get approved in 24–48h, and receive an EU IBAN for SEPA payments.",
   path: "/business/how-it-works",
 });
 
@@ -28,7 +28,7 @@ export default function Page() {
         primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
         art="coin-warm"
-        tone="navy"
+        tone="deep"
       />
 
       <ProcessSteps

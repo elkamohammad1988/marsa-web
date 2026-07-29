@@ -181,9 +181,9 @@ export function Navbar() {
                               aria-current={current ? "page" : undefined}
                               onClick={() => setOpenGroup(null)}
                               className={cn(
-                                "block rounded-xl px-3 py-2 text-sm transition-colors hover:bg-brand-blue/[0.06] hover:text-ink",
-                                "focus-visible:bg-brand-blue/[0.06] focus-visible:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-brand-strong",
-                                current ? "bg-brand-blue/[0.06] text-ink" : "text-ink-muted",
+                                "block rounded-xl px-3 py-2 text-sm transition-colors hover:bg-brand/[0.06] hover:text-ink",
+                                "focus-visible:bg-brand/[0.06] focus-visible:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-brand-strong",
+                                current ? "bg-brand/[0.06] text-ink" : "text-ink-muted",
                               )}
                             >
                               {child.label}
@@ -257,14 +257,29 @@ export function Navbar() {
                     <details
                       className="group"
                       open={expandedMobileGroups.has(group.label)}
-                      onToggle={(e) =>
+                      onToggle={(e) => {
+                        // Read `open` here, synchronously, and close over the
+                        // boolean. React nulls `currentTarget` as soon as the
+                        // handler returns, but a `setState` updater does not
+                        // run until the next render — so reading it *inside*
+                        // the updater throws "Cannot read properties of null".
+                        //
+                        // That is not a theoretical race. The effect above
+                        // opens the group containing the current page on
+                        // mount, which fires this toggle during hydration, so
+                        // every route sitting inside a nav group took the
+                        // throw straight to `app/global-error.tsx` — eleven of
+                        // them, including /demo, /pricing and every /tools
+                        // page. The crash was invisible to the server render
+                        // and to any check that did not run the built client.
+                        const isOpen = e.currentTarget.open;
                         setExpandedMobileGroups((prev) => {
                           const next = new Set(prev);
-                          if (e.currentTarget.open) next.add(group.label);
+                          if (isOpen) next.add(group.label);
                           else next.delete(group.label);
                           return next;
-                        })
-                      }
+                        });
+                      }}
                     >
                       <summary
                         className={cn(
@@ -287,8 +302,8 @@ export function Navbar() {
                                 href={child.href}
                                 aria-current={current ? "page" : undefined}
                                 className={cn(
-                                  "block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-surface-blue-tint hover:text-ink",
-                                  current ? "bg-surface-blue-tint text-ink" : "text-ink-muted",
+                                  "block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-surface-tint hover:text-ink",
+                                  current ? "bg-surface-tint text-ink" : "text-ink-muted",
                                   FOCUS_RING,
                                 )}
                                 onClick={() => setMobileOpen(false)}

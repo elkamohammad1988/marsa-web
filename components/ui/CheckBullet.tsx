@@ -3,13 +3,13 @@ import { cn } from "@/lib/utils";
 type CheckBulletProps = {
   children: React.ReactNode;
   className?: string;
-  tone?: "green" | "blue" | "white";
+  tone?: "success" | "brand" | "white";
 };
 
-export function CheckBullet({ children, className, tone = "green" }: CheckBulletProps) {
+export function CheckBullet({ children, className, tone = "success" }: CheckBulletProps) {
   const dot =
-    tone === "blue"
-      ? "bg-brand-blue text-on-brand"
+    tone === "brand"
+      ? "bg-brand text-on-brand"
       : tone === "white"
         ? "bg-white text-brand-strong"
         : "bg-success/15 text-success";

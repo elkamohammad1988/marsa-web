@@ -3,6 +3,21 @@ import type { BlogMotif } from "@/components/art/captions";
 export type BlogPost = {
   slug: string;
   title: string;
+  /**
+   * The `<title>` for search results, when the headline is too long to be one.
+   *
+   * The document title is `${title} · Marsa`, and Google truncates around 60
+   * characters — so every one of these headlines was being cut mid-phrase in
+   * the results page, losing exactly the qualifier that made it worth clicking
+   * ("…— And How An EU IBAN Solves The Prob…").
+   *
+   * It is a separate field rather than a shortened `title` because the two
+   * jobs genuinely differ: the headline on the page can afford to be long and
+   * specific, and the one in a search result cannot.
+   * `tests/seo.test.ts` asserts the budget for every post, so a seventh post
+   * with a long headline fails the gate rather than shipping truncated.
+   */
+  seoTitle?: string;
   excerpt: string;
   /**
    * ISO 8601 (`YYYY-MM-DD`).
@@ -31,6 +46,7 @@ export type BlogPost = {
 const allPosts: BlogPost[] = [
   {
     slug: "why-non-eu-companies-struggle-with-european-payments",
+    seoTitle: "Why Non-EU Companies Need An EU IBAN",
     title:
       "Why Non-EU Companies Struggle To Receive Payments From European Clients — And How An EU IBAN Solves The Problem",
     excerpt:
@@ -69,6 +85,7 @@ const allPosts: BlogPost[] = [
   },
   {
     slug: "fx-savings-strategy-for-import-export-businesses",
+    seoTitle: "FX Savings Playbook For Import-Export",
     title: "The FX Savings Playbook For Import-Export Businesses In 2026",
     excerpt:
       "How to cut foreign-exchange costs on every international payment — practical strategies and tools for 2026.",
@@ -114,6 +131,7 @@ const allPosts: BlogPost[] = [
   },
   {
     slug: "how-fx-rates-impact-cross-border-payouts",
+    seoTitle: "How FX Rates Cut Into Cross-Border Payouts",
     title:
       "How FX Rates Impact Cross-Border Payouts — And How To Save Up To 87% On Every Transfer",
     excerpt:
@@ -157,6 +175,7 @@ const allPosts: BlogPost[] = [
   },
   {
     slug: "the-rise-of-multi-currency-accounts",
+    seoTitle: "Multi-Currency Accounts For Freelancers",
     title: "The Rise Of Multi-Currency Accounts For Global Freelancers — Why You Need One",
     excerpt:
       "Freelancers in 100+ countries are switching to multi-currency IBANs. Here's what changed in 2026.",
@@ -199,6 +218,7 @@ const allPosts: BlogPost[] = [
   },
   {
     slug: "amazon-fba-payouts-using-eu-iban",
+    seoTitle: "Amazon FBA Payouts And The EU IBAN",
     title: "Amazon FBA Payouts: Why Cross-Border Sellers Now Need A European IBAN",
     excerpt:
       "Marketplaces tightened payout rules in 2026. A European IBAN is no longer optional for cross-border sellers.",
@@ -240,6 +260,7 @@ const allPosts: BlogPost[] = [
   },
   {
     slug: "how-to-build-a-modern-treasury-system",
+    seoTitle: "Building A Modern Treasury System",
     title: "How To Build A Modern Treasury System For Import-Export Businesses",
     excerpt:
       "A practical five-step playbook to consolidate accounts, hold currencies, hedge FX, and accelerate growth in 2026.",

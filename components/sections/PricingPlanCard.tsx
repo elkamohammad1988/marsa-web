@@ -35,7 +35,7 @@ export function PricingPlanCard({ plan }: { plan: Plan }) {
 
         <ul className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {plan.features.map((f) => (
-            <CheckBullet key={f} tone="blue">
+            <CheckBullet key={f} tone="brand">
               {f}
             </CheckBullet>
           ))}

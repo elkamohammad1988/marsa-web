@@ -209,11 +209,15 @@ describe("renewing an access token", () => {
   };
 
   /** GoTrue answers the refresh; PostgREST answers the profile read. */
-  function stubUpstream(options: { role?: string; refreshFails?: boolean } = {}) {
+  function stubUpstream(options: { role?: string; refreshStatus?: number } = {}) {
     return vi.fn(async (url: string): Promise<UpstreamResponse> => {
       if (String(url).includes("/auth/v1/token")) {
-        if (options.refreshFails) {
-          return { ok: false, status: 400, text: async () => '{"msg":"invalid refresh token"}' };
+        if (options.refreshStatus) {
+          return {
+            ok: false,
+            status: options.refreshStatus,
+            text: async () => '{"msg":"refresh refused"}',
+          };
         }
         return {
           ok: true,
@@ -300,11 +304,11 @@ describe("renewing an access token", () => {
     expect(response.status).toBe(200);
   });
 
-  it("clears the session and explains itself when renewal is refused", async () => {
-    // A refresh token is spent, revoked or timed out — none of them
-    // retryable. The visitor gets one message they can act on rather than a
-    // silent bounce.
-    vi.stubGlobal("fetch", stubUpstream({ refreshFails: true }));
+  it("clears the session and explains itself when the token is refused", async () => {
+    // A refresh token that is spent, revoked or past the session timebox is
+    // refused with a 4xx, and none of those is retryable. The visitor gets one
+    // message they can act on rather than a silent bounce.
+    vi.stubGlobal("fetch", stubUpstream({ refreshStatus: 400 }));
 
     const nearlyExpired = await cookieFor({ accessExpiresAt: Math.floor(Date.now() / 1000) + 10 });
     const response = await middleware(request("/account", nearlyExpired));
@@ -312,6 +316,64 @@ describe("renewing an access token", () => {
     expect(response.status).toBe(307);
     expect(location(response)).toBe("/login?next=%2Faccount&error=session-expired");
     expect(setCookie(response)).toContain("Max-Age=0");
+  });
+
+  /**
+   * The distinction that separates a brief upstream wobble from a mass logout.
+   *
+   * A 5xx, a timeout or a refused connection says nothing about whether the
+   * session is still good. Treating those like a rejection would sign out
+   * every visitor whose access token happened to be inside the sixty-second
+   * renewal window — turning an incident measured in seconds at Supabase into
+   * one every customer notices.
+   */
+  describe("a transient upstream failure does not sign anybody out", () => {
+    it.each([500, 502, 503])("keeps the session through an upstream %i", async (status) => {
+      vi.stubGlobal("fetch", stubUpstream({ refreshStatus: status }));
+
+      const nearlyExpired = await cookieFor({
+        accessExpiresAt: Math.floor(Date.now() / 1000) + 10,
+      });
+      const response = await middleware(request("/account", nearlyExpired));
+
+      expect(response.status).toBe(200);
+      // Critically: no clearing cookie. The next request tries again.
+      expect(setCookie(response)).toBeNull();
+    });
+
+    it("keeps the session when the connection fails outright", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => {
+          throw new Error("ECONNREFUSED");
+        }),
+      );
+
+      const nearlyExpired = await cookieFor({
+        accessExpiresAt: Math.floor(Date.now() / 1000) + 10,
+      });
+      const response = await middleware(request("/account", nearlyExpired));
+
+      expect(response.status).toBe(200);
+      expect(setCookie(response)).toBeNull();
+    });
+
+    it("keeps the session when the refresh times out", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => {
+          throw new DOMException("The operation was aborted due to timeout", "TimeoutError");
+        }),
+      );
+
+      const nearlyExpired = await cookieFor({
+        accessExpiresAt: Math.floor(Date.now() / 1000) + 10,
+      });
+      const response = await middleware(request("/account", nearlyExpired));
+
+      expect(response.status).toBe(200);
+      expect(setCookie(response)).toBeNull();
+    });
   });
 });
 

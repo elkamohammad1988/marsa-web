@@ -35,7 +35,7 @@ export function RegulatedBand() {
     },
   ];
   return (
-    <Section tone="white" size="md">
+    <Section tone="canvas" size="md">
       <Container>
         <div className="mx-auto max-w-3xl text-center">
           <Heading level="h2">The Model Behind It</Heading>
@@ -51,7 +51,7 @@ export function RegulatedBand() {
               className="card-hover rounded-card-lg border border-line bg-card p-6 text-center"
             >
               <div className="flex justify-center">
-                <FeatureIcon tone="blue" size="lg">
+                <FeatureIcon tone="brand" size="lg">
                   {it.icon}
                 </FeatureIcon>
               </div>

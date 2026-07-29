@@ -10,7 +10,7 @@ import { CTACard } from "@/components/sections/CTACard";
 export const metadata: Metadata = buildMetadata({
   title: "How To Open EU Bank Account Online",
   description:
-    "See how to open an EU bank account online with Marsa. Sign up in minutes from any country, verify your ID, and get a multi-currency IBAN — no EU residency needed.",
+    "Open an EU account online with Marsa: sign up in minutes from any country, verify your ID, and get a multi-currency IBAN — no EU residency needed.",
   path: "/personal/how-it-works",
 });
 
@@ -28,7 +28,7 @@ export default function Page() {
         primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="phone-accounts"
-        tone="white"
+        tone="canvas"
       />
 
       <ProcessSteps

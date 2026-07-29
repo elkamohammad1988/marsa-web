@@ -316,3 +316,29 @@ describe("isOtpType", () => {
     }
   });
 });
+
+describe("nothing personal reaches the reporter through an error message", () => {
+  it("redacts an address GoTrue echoed back", async () => {
+    // `lib/observability.ts` redacts the *context* of an event, not the
+    // error's own message — and this message is built from a response we do
+    // not control. If GoTrue ever echoes the submitted address, this is the
+    // one field that would carry it to a third-party service.
+    stubFetch(fails(400, JSON.stringify({ msg: "User person@example.com is banned" })));
+    const error = await signInWithPassword(CFG, { email: "a@b.co", password: "x" }).catch(
+      (e: Error) => e,
+    );
+
+    expect((error as Error).message).not.toContain("person@example.com");
+    expect((error as Error).message).toContain("[redacted]");
+    // The rest of the sentence survives, so the failure is still diagnosable.
+    expect((error as Error).message).toContain("is banned");
+  });
+
+  it("caps a long upstream message rather than relaying all of it", async () => {
+    stubFetch(fails(500, JSON.stringify({ msg: "x".repeat(5_000) })));
+    const error = await signInWithPassword(CFG, { email: "a@b.co", password: "x" }).catch(
+      (e: Error) => e,
+    );
+    expect((error as Error).message.length).toBeLessThan(400);
+  });
+});

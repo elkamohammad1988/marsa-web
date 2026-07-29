@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
 import { Button } from "@/components/ui/Button";
+import { ScrollRegion } from "@/components/ui/ScrollRegion";
 import { isAdminRequest } from "@/lib/admin-auth";
 import {
   getStore,
@@ -145,7 +146,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           href={`/admin${buildQuery({ q })}`}
           className={cn(
             "rounded-full border px-3 py-1.5 text-sm",
-            kind ? "border-line text-ink-muted hover:text-ink" : "border-brand-blue bg-brand-blue/[0.08] text-ink",
+            kind ? "border-line text-ink-muted hover:text-ink" : "border-brand bg-brand/[0.08] text-ink",
           )}
         >
           All
@@ -157,7 +158,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             className={cn(
               "rounded-full border px-3 py-1.5 text-sm",
               kind === k
-                ? "border-brand-blue bg-brand-blue/[0.08] text-ink"
+                ? "border-brand bg-brand/[0.08] text-ink"
                 : "border-line text-ink-muted hover:text-ink",
             )}
           >
@@ -191,7 +192,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           No submissions{q ? ` matching “${q}”` : ""} yet.
         </p>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-card border border-line bg-card">
+        <ScrollRegion
+          label="Form submissions table"
+          className="mt-6 rounded-card border border-line bg-card"
+        >
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="border-b border-line text-xs uppercase tracking-wide text-ink-subtle">
               <tr>
@@ -233,7 +237,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
               })}
             </tbody>
           </table>
-        </div>
+        </ScrollRegion>
       )}
 
       {pages > 1 && (

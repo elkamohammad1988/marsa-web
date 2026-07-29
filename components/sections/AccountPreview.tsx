@@ -53,7 +53,7 @@ export function AccountPreview({ className }: { className?: string }) {
       {/* Ambient light behind the panel */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-10 rounded-[48px] bg-brand-blue/25 blur-[70px]"
+        className="pointer-events-none absolute -inset-10 rounded-[48px] bg-brand/25 blur-[70px]"
       />
 
       <div
@@ -93,9 +93,9 @@ export function AccountPreview({ className }: { className?: string }) {
               style={{ width: `${b.share}%` }}
               className={
                 i === 0
-                  ? "bg-brand-blue"
+                  ? "bg-brand"
                   : i === 1
-                    ? "bg-brand-blue/55"
+                    ? "bg-brand/55"
                     : "bg-accent/70"
               }
             />
@@ -127,7 +127,7 @@ export function AccountPreview({ className }: { className?: string }) {
                     ? "bg-success/[0.12] text-success"
                     : a.kind === "out"
                       ? "bg-ink/[0.06] text-ink-muted"
-                      : "bg-brand-blue/[0.12] text-brand-strong",
+                      : "bg-brand/[0.12] text-brand-strong",
                 )}
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">

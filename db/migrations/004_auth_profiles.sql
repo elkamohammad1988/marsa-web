@@ -212,6 +212,13 @@ as $$
   );
 $$;
 
+-- PostgreSQL grants EXECUTE on a new function to PUBLIC, which here means the
+-- anon role can call a definer-rights function that reads the profiles table.
+-- It answers false for an anonymous caller, because auth.uid() is null — so
+-- this is not a live hole, it is one policy edit away from being one. The
+-- revoke has to come first: granting to `authenticated` does not remove what
+-- PUBLIC already holds.
+revoke execute on function public.is_admin() from public;
 grant execute on function public.is_admin() to authenticated;
 
 -- `(select auth.uid())` rather than a bare call: wrapping it lets the planner

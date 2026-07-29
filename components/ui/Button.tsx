@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 
 type Variant = "primary" | "outline" | "outline-light" | "ghost-pill" | "white";
 type Size = "sm" | "md" | "lg";
@@ -16,11 +16,11 @@ const variants: Record<Variant, string> = {
   primary:
     "bg-cta-gradient text-on-brand shadow-cta hover:shadow-cta-hover hover:-translate-y-px active:translate-y-0 active:shadow-cta",
   outline:
-    "border border-line bg-card/60 text-ink shadow-e1 hover:border-brand-strong/45 hover:bg-brand-blue/[0.08] hover:-translate-y-px active:translate-y-0",
+    "border border-line bg-card/60 text-ink shadow-e1 hover:border-brand-strong/45 hover:bg-brand/[0.08] hover:-translate-y-px active:translate-y-0",
   "outline-light": "border border-white/25 text-white hover:bg-white/10 hover:border-white/40",
   "ghost-pill": "text-ink hover:bg-ink/5",
   white:
-    "bg-white text-surface-navy shadow-sm hover:bg-white/90 hover:-translate-y-0.5 active:translate-y-0",
+    "bg-white text-surface-deep shadow-sm hover:bg-white/90 hover:-translate-y-0.5 active:translate-y-0",
 };
 
 const sizes: Record<Size, string> = {
@@ -28,6 +28,38 @@ const sizes: Record<Size, string> = {
   md: "h-11 px-5 text-sm",
   lg: "h-12 px-7 text-[15px]",
 };
+
+function classesFor(variant: Variant, size: Size, className?: string) {
+  return cn(base, variants[variant], sizes[size], className);
+}
+
+/**
+ * A button's appearance with none of its behaviour — a `<span>`, not a link.
+ *
+ * For the call to action *inside* an already-clickable card. Reaching for
+ * `<Button href>` there produces an `<a>` nested in an `<a>`, which is invalid
+ * HTML: the browser repairs it by closing the outer anchor early, so the
+ * server's markup and the client's disagree and React throws away the whole
+ * tree and re-renders it. That is exactly what `/blog` was doing — the featured
+ * card wrapped a `Button href` pointing at the same post, and the resulting
+ * hydration failure was visible only in the production build.
+ *
+ * The card itself carries the href, so this needs no interactivity of its own;
+ * `group-hover` on the parent still drives the hover state.
+ */
+export function ButtonLabel({
+  variant = "primary",
+  size = "md",
+  className,
+  children,
+}: {
+  variant?: Variant;
+  size?: Size;
+  className?: string;
+  children: ReactNode;
+}) {
+  return <span className={classesFor(variant, size, className)}>{children}</span>;
+}
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;
@@ -44,7 +76,7 @@ type AnchorProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
 export function Button(props: ButtonProps | AnchorProps) {
   const variant = props.variant ?? "primary";
   const size = props.size ?? "md";
-  const cls = cn(base, variants[variant], sizes[size], props.className);
+  const cls = classesFor(variant, size, props.className);
 
   if (props.href !== undefined) {
     const { href, variant: _v, size: _s, className: _c, children, ...rest } =

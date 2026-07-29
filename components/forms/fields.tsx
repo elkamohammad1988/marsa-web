@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 const control =
   "w-full rounded-xl border bg-canvas px-4 text-sm text-ink placeholder:text-ink-subtle " +
-  "transition-colors focus:outline-none focus:ring-2 focus:ring-brand-strong/30 focus:border-brand-blue " +
+  "transition-colors focus:outline-none focus:ring-2 focus:ring-brand-strong/30 focus:border-brand " +
   "disabled:cursor-not-allowed disabled:opacity-60";
 
 function borderClass(hasError?: boolean): string {
@@ -207,7 +207,10 @@ export function CheckboxField({ label, error, className, id, ...props }: Checkbo
           id={fieldId}
           type="checkbox"
           className={cn(
-            "mt-0.5 h-5 w-5 flex-none rounded border-line text-brand-strong focus:ring-brand-strong/30",
+            // 24px, not 20px: WCAG 2.2 AA 2.5.8 sets the minimum target at
+            // 24×24 CSS px, and a consent checkbox has no inline-in-a-sentence
+            // exception to fall back on — it is the control that gates submit.
+            "mt-0.5 h-6 w-6 flex-none rounded border-line text-brand-strong focus:ring-brand-strong/30",
             className,
           )}
           aria-invalid={error ? true : undefined}
@@ -227,13 +230,22 @@ export function CheckboxField({ label, error, className, id, ...props }: Checkbo
   );
 }
 
-/** Visually-hidden honeypot input; real users never fill it, bots do. */
+/**
+ * Visually-hidden honeypot input; real users never fill it, bots do.
+ *
+ * The id comes from `useId` rather than the literal `hp-field` it used to be.
+ * Two forms on one page — which is every page carrying the footer newsletter
+ * alongside a contact or get-started form — emitted the same id twice, and a
+ * duplicate id makes `htmlFor` ambiguous: both labels resolve to whichever
+ * input the browser saw first, so one honeypot loses its label entirely.
+ */
 export function Honeypot({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const fieldId = useId();
   return (
     <div aria-hidden className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden">
-      <label htmlFor="hp-field">Do not fill this in</label>
+      <label htmlFor={fieldId}>Do not fill this in</label>
       <input
-        id="hp-field"
+        id={fieldId}
         type="text"
         tabIndex={-1}
         autoComplete="off"

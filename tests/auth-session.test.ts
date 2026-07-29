@@ -233,3 +233,21 @@ describe("the 4 KB cookie ceiling", () => {
     expect(cookie.length).toBeLessThan(MAX_COOKIE_BYTES);
   });
 });
+
+describe("a response carrying a session is never storable", () => {
+  it("marks an issued session no-store", async () => {
+    // A shared cache that stored this would hand one person's session to the
+    // next requester of the same URL. Well-behaved caches skip a Set-Cookie
+    // response, but "skips by default" is weaker than a header.
+    const response = NextResponse.json({});
+    await attachSession(response, session(), SECRET, NOW);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
+
+  it("marks a cleared session no-store too", () => {
+    // A cached sign-out would keep signing people out.
+    const response = NextResponse.json({});
+    detachSession(response);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
+});

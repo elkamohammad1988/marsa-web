@@ -36,7 +36,7 @@ export default async function LoginPage({
   return (
     <AuthShell
       title="Sign in"
-      description="Welcome back. Your account area is where the profile and role model built in this milestone actually run."
+      description="Welcome back."
       footer={
         <>
           No account yet?{" "}

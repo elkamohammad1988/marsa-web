@@ -1154,7 +1154,7 @@ exists, because the artwork batch replaced them with drawings in markup.
 ### Verification
 
 `npm run typecheck` · `npm run lint` · `npm test` · `npm run build` — all
-clean. 913 tests across 40 files, up from 691 across 34. All 49 statically
+clean. 945 tests across 41 files, up from 691 across 34. All 49 statically
 generated pages stay static: the account area is dynamic, the marketing site is
 not.
 
@@ -1165,3 +1165,259 @@ Migration 004 is written and tested but not run, and the two dashboard settings
 it needs — the redirect allow-list and the email templates — cannot be set from
 code. Until all four steps are done the account area is completely inert and
 every auth page says what is missing.
+
+---
+
+## Catalog readiness audit — 2026-07-28
+
+A review of the whole repository against the question "would this survive an
+unsympathetic reviewer opening it cold". Five defects, three of them shipping
+in committed code, and none of them visible to the existing gates.
+
+### The one that mattered
+
+**Eleven of twenty routes crashed in the production build.** `/demo`,
+`/pricing`, `/blog`, `/faq`, all four `/tools/*`, and both `how-it-works`
+pages rendered the server HTML, threw during hydration, and were replaced by
+`app/global-error.tsx`.
+
+`Navbar` read `e.currentTarget.open` *inside* a `setState` updater. React nulls
+`currentTarget` when the handler returns; the updater does not run until the
+next render, so the read threw. The trigger was the effect that opens the nav
+group containing the current page — which is why exactly the routes that sit
+inside a nav group failed, and the ones that do not (`/`, `/login`,
+`/contact`, `/legal/*`, `/company/*`) were fine. It shipped in `204021f`,
+an accessibility fix, and survived every gate since: `tsc` and ESLint cannot
+see it, the server render is valid on its own, and `npm run dev` never showed
+it because the CSP was blocking React's development build.
+
+Fixed by reading the boolean synchronously. `tests/nested-anchors.test.ts` and
+the CSP change below exist so the *class* of bug is visible next time.
+
+### The rest
+
+- **`/blog` hydration mismatch.** The featured card was a `<Link>` wrapping a
+  `<Button href>` to the same post — an `<a>` inside an `<a>`. Browsers repair
+  that by closing the outer anchor early, so the DOM stopped matching the
+  markup and React discarded the tree. Added `ButtonLabel` (a `<span>` with the
+  button's appearance) for CTAs inside clickable cards, and a source lint that
+  fails on any anchor nested in another.
+- **The CSP was applied in development.** Without `'unsafe-eval'`, React Fast
+  Refresh cannot run, so hot reload was dead *and* every descriptive React
+  diagnostic was suppressed — the reason both bugs above stayed invisible
+  locally. Now added under `next dev` only; production and test are unchanged,
+  and `tests/security-headers.test.ts` still asserts no `unsafe-eval`.
+- **The converter's amount field rendered 20 px wide.** `w-full` on a flex item
+  whose min-content width is a number input's spinner. The value, colour and
+  24 px type were all correct; "1000" was drawn as a two-pixel sliver. Now
+  `min-w-0 flex-1` (333 px). `/tools/fx-calculator` has the same markup shape
+  and was measured, not assumed — it is not affected, so it was left alone.
+- **An empty image slot on `/tools/currency-converter`** — an `aspect-[4/3]`
+  box containing the words "Live FX Insights" and nothing else, the last hole
+  left by deleting `public/images/`. It read as a broken asset on the page most
+  likely to be linked as evidence of the FX work. Now a `BrandArt` drawing,
+  with a guard in `tests/art.test.ts` against any slot left empty.
+
+### Screenshots
+
+127 files and 50 MB became eight. The old set was a per-`<section>` sweep of
+every marketing route captured *before the rebrand*, so all 118 of the
+directory-nested ones still showed the previous brand in both filename and
+pixels. They were untracked and never in git history, so nothing public was
+ever affected.
+
+`scripts/capture.mjs` was rewritten to produce exactly the eight the README
+embeds, reproducibly, from a production build. It could not have run as it
+stood: it imported `puppeteer-core`, which was neither declared nor installed,
+and it opened by `rmSync`-ing its own output directory — which would have
+deleted the four tracked images the README was embedding.
+
+`/admin` is deliberately not among the eight. It is a real dashboard, but it
+renders live submissions, and on this machine that meant a real name and email
+address in an image intended for a public listing.
+
+### Stale claims corrected
+
+- `package-lock.json` still declared `"name": "nowe-seo-pages"`.
+- The README's Lighthouse row asserted Performance 100. Re-measured: 87, 95 and
+  100 on three consecutive runs of the same build, tracking total blocking time
+  240 ms → 150 ms → 20 ms. The row now says that instead of picking the
+  flattering number. Accessibility, Best Practices, SEO and CLS 0 reproduced
+  exactly.
+- Test count 945/41 → 1065/43.
+
+### Verification
+
+`npm run typecheck` · `npm run lint` · `npm test` · `npm run build` — all
+clean, 1065 tests across 43 files. All twenty routes re-scanned in the
+production build with a real browser: no thrown errors, no console errors, no
+horizontal overflow.
+
+### Left for a human
+
+The account area still cannot be demonstrated. `.env.local` has no
+`SUPABASE_ANON_KEY` or `AUTH_SESSION_SECRET`, so `/login` and `/register`
+render the setup notice rather than a form — which means the newest and largest
+piece of work in the repository is the one a visitor cannot see. Supplying
+those two values is a change to authentication config and to Supabase, so it
+was left alone: see `H21` in `PROJECT-PLAN.md`.
+
+---
+
+## Catalog submission audit — 2026-07-28 (second pass)
+
+A second review of the whole repository against an unsympathetic reviewer, run
+with a real browser rather than by reading. Thirty-six routes at two viewport
+widths — seventy-two page-loads — measured for thrown errors, hydration,
+horizontal overflow, duplicate ids, nested anchors, heading order, tap-target
+size, metadata length, and axe-core with the **WCAG 2.2** tags added.
+
+### The finding that was invisible to every previous gate
+
+**Seven colour utilities named a token the palette did not define.** The rebrand
+had changed every value in `tailwind.config.ts` and kept every name, with the
+config saying so out loud — *"legacy `blue*` names kept for zero-churn"*. So the
+source asked for `bg-brand-blue` and got magenta, `bg-surface-navy` and got
+magenta-black, and `<Section tone="white">` painted the page near-black. Reading
+a page told you nothing about how it looked, which is the exact benefit
+`CASE-STUDY.md` claims for the token system in a section titled "roles, not
+shades".
+
+Underneath that, seven places had already been written as `bg-brand-soft/25`,
+`text-brand-soft` and `hover:border-brand-soft/40` — and there was no
+`brand.soft` key, only `brand["blue-soft"]`. Tailwind does not warn on an
+unknown utility, so it emitted nothing at all: the hero and corridor aurora
+glows, the CTA glow, two status dots and the corridor eyebrow had been
+rendering **with no colour**. `tsc` and ESLint never look inside a class string,
+and a missing decorative glow reads as a design choice rather than a fault.
+
+Renamed in one pass across 46 files — `brand` / `brand-deep` / `brand-soft`,
+`surface-deep` / `surface-alt` / `surface-tint`, and tones of
+`canvas | alt | deep | brand | tint`. Verified the only way a rename this wide
+can be: by diffing the compiled CSS of both builds and confirming every
+`property: value` pair was identical. It was, apart from the seven declarations
+that had never been emitted before and four from the accessibility fixes below
+— which is the evidence that the rename changed names and nothing else.
+
+`tests/dead-code.test.ts` now parses the palette out of the config and fails on
+any colour utility naming a token that does not exist. Its first version
+shipped a word-boundary escape inside a template literal, which JavaScript
+reads as a backspace character — so the pattern matched nothing and every file
+passed. It now contains a test that the detector detects, because a guard that
+cannot fail is worse than no guard: it also reports success.
+
+### Accessibility, with WCAG 2.2 switched on
+
+Adding the `wcag22aa` tag is what surfaced these. The A+AA run had been clean
+and stayed clean; none of this was regression, all of it was never-covered.
+
+- **`scrollable-region-focusable`** (serious) on `/tools/sepa-vs-swift` at
+  390px. A bare `overflow-x-auto` scrolls with a wheel or a finger and with
+  nothing else, so the columns past the right edge existed for pointer users and
+  did not exist for anyone on a keyboard. Now `components/ui/ScrollRegion.tsx`,
+  applied to all three tables, with `tests/scroll-regions.test.ts` failing on
+  any bare `overflow-x-auto` — the property worth defending is that there is one
+  way to build one, not that today's three are fixed.
+- **`heading-order`** on the same route: `h1` followed by `h3`.
+- **Five targets under the 24 x 24 minimum in SC 2.5.8** — the breadcrumb links
+  on fifteen routes (41 x 17), the blog back-link, the consent checkbox at
+  20 x 20, the FX markup slider at 16px tall, and the two standalone "Back to
+  sign in" footer links. The inline links inside sentences (`Create one`,
+  `Terms of Service`) were left alone: SC 2.5.8 exempts them explicitly, and
+  padding them would break the sentences they sit in.
+- **Duplicate `id="hp-field"`** on `/contact` and `/get-started`. The honeypot
+  hard-coded its id, and both pages carry two forms, so two labels resolved to
+  one input and the other honeypot lost its label entirely. `useId` now.
+
+Re-measured after: **72 page-loads, 0 axe violations, 0 thrown errors, 0
+hydration mismatches, 0 horizontal overflow.**
+
+### Claims that had gone stale
+
+The account work made three statements false, and they had survived in the two
+places where a false data-protection claim is least harmless:
+
+- `/legal/privacy` said *"This build collects no personal data, so there is
+  nothing to exercise a right against."* Registration writes an email address.
+  It now names what is stored and states plainly that no erasure tooling exists,
+  which is the honest half of saying so — a rights section listing deletion
+  without one is the same false promise at greater length.
+- `/company/compliance` said the same thing under "Data protection".
+- `app/error.tsx` reassured that *"nothing here is stored"*. It is the root
+  boundary, so it renders over `/account` too, where a profile edit is a real
+  write.
+
+Both legal passages were changed on the maintainer's explicit instruction
+rather than autonomously, per the standing rule about regulatory copy.
+
+Also corrected: `/faq` offered "Contact support" under *"Our team is one message
+away"* — there is no team, the same correction #26 made elsewhere; the 404 page
+offered "Contact support"; `CASE-STUDY.md` still claimed 655 tests against an
+actual 1,488, and still said there were no accounts.
+
+`tests/forms-collect-nothing.test.ts` now fails on any page claiming the
+*build* collects nothing, while still defending the true, narrower claim that
+the *marketing forms* do.
+
+### SEO
+
+Eight meta descriptions ran 161-192 characters and six blog titles ran 74-111,
+so the clause that made each worth clicking was the part being truncated. All
+trimmed, and `tests/seo.test.ts` now asserts the budget for every page and post
+rather than the current strings — a seventh post with a long headline fails the
+gate instead of shipping cut in half. Blog posts got a separate `seoTitle`,
+because the headline on the page and the one in a search result have genuinely
+different jobs.
+
+### Screenshots
+
+The eight were regenerated, but the real fix was to `scripts/capture.mjs`. It
+scrolled each subject to a hand-tuned offset, which is why `06` sliced a
+paragraph through the middle of its line at the top edge, `08` sliced the page
+heading in half, and `03`/`04` ended on a heading cut mid-word. Each had been
+fixed by nudging its own magic number, which only moved the cut: an offset that
+clears one page's header lands in the middle of the next page's paragraph.
+
+It now searches for a scroll position that bisects no line of text and leaves
+nothing meaningful under the floating navbar, scoring headings above paragraphs
+above controls, and prints the position it chose. Its first version scored
+`button` and not `a` — and every CTA on this site is a `Button href`, so it
+reported a cut score of zero while still slicing "Get Marsa Plus" across the
+bottom of `08`.
+
+### Repository presentation
+
+`AUDIT.md`, `PROJECT-PLAN.md` and `PROGRESS.md` were 200 KB of internal working
+record sitting in the repository root, which is the first thing anyone opening
+the repo saw. Moved to `docs/`, with an index explaining what each is for.
+Added `docs/UPWORK-LISTING.md`: title, description, tiers, image captions and
+FAQ for a Project Catalog entry, written so that every claim in it is either a
+description of future work or a checkable statement about this repository.
+
+### One flaky test, fixed as a flake
+
+`auth-routes` -> *"still signs in a fresh account after a long burst"* drives
+240 sequential requests through the real handler and the real limiter, and
+crossed vitest's 5-second default while a production build was running on the
+same machine. It passed three times out of three in isolation. Given an
+explicit 30-second budget rather than raising the global timeout, which would
+have hidden a genuinely hung test elsewhere. A test that goes red when the
+runner is busy is the worst kind of red for a project whose argument is that the
+CI badge is the live answer.
+
+### Verification
+
+`npm run typecheck` - `npm run lint` - `npm test` - `npm run build`, all clean.
+**1488 tests across 44 files**, up from 1065 across 43. Then the whole site
+re-measured in a real browser: 72 page-loads, zero violations of anything
+checked.
+
+### Left for a human
+
+Unchanged from the previous entry — `H21` in `PROJECT-PLAN.md`. `.env.local`
+still has no `SUPABASE_ANON_KEY` or `AUTH_SESSION_SECRET`, so `/login` and
+`/register` render the setup notice rather than a form, and the newest and
+largest piece of work in the repository is still the one a visitor cannot see.
+
+Account deletion is now named as missing on `/legal/privacy`, which makes
+building it the next honest step rather than an optional one.

@@ -67,7 +67,7 @@ export default function RootLayout({
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-brand-blue focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-on-brand focus:shadow-card"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-on-brand focus:shadow-card"
         >
           Skip to main content
         </a>

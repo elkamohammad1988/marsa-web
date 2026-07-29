@@ -15,7 +15,7 @@ import {
 const RateChart = dynamic(() => import("./RateChart"), {
   ssr: false,
   loading: () => (
-    <div className="h-full w-full animate-pulse rounded-card bg-surface-blue-tint-2" />
+    <div className="h-full w-full animate-pulse rounded-card bg-surface-tint-2" />
   ),
 });
 
@@ -103,7 +103,7 @@ export function CurrencyConverter({
   }
 
   return (
-    <section className="bg-surface-cream pb-12 pt-10 md:pb-16 md:pt-14">
+    <section className="bg-surface-alt pb-12 pt-10 md:pb-16 md:pt-14">
       <Container>
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-14">
           <div>
@@ -117,7 +117,7 @@ export function CurrencyConverter({
                   key={l}
                   className="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-xs font-medium ring-1 ring-line"
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-brand-blue" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand" />
                   {l}
                 </li>
               ))}
@@ -126,7 +126,7 @@ export function CurrencyConverter({
 
           <div className="rounded-card-lg bg-card p-5 shadow-card md:p-7">
             <div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-[1fr_auto_1fr]">
-              <div className="rounded-card bg-surface-blue-tint-2 p-4">
+              <div className="rounded-card bg-surface-tint-2 p-4">
                 <label htmlFor="fx-amount" className="text-xs font-medium text-ink-muted">
                   You Send
                 </label>
@@ -138,7 +138,20 @@ export function CurrencyConverter({
                     inputMode="decimal"
                     value={amount}
                     onChange={(e) => setAmount(Math.max(0, Number(e.target.value) || 0))}
-                    className="w-full bg-transparent text-2xl font-semibold text-ink outline-none"
+                    /*
+                     * `flex-1 min-w-0`, not `w-full`.
+                     *
+                     * `w-full` is `width: 100%`, which as a flex item resolves
+                     * against the row and then shrinks — and a number input's
+                     * min-content width is its spinner, not its text. The
+                     * amount collapsed to 20px next to the currency select, so
+                     * "1000" rendered as a two-pixel sliver of a digit while
+                     * the value, the colour and the 24px type were all
+                     * perfectly correct. Nothing threw, and the converted
+                     * figure beside it stayed right, which is why this
+                     * survived: it is only visible to someone looking.
+                     */
+                    className="min-w-0 flex-1 bg-transparent text-2xl font-semibold text-ink outline-none"
                   />
                   <label htmlFor="fx-from" className="sr-only">
                     From currency
@@ -162,12 +175,12 @@ export function CurrencyConverter({
                 type="button"
                 onClick={swap}
                 aria-label={`Swap ${from} and ${to}`}
-                className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue text-on-brand transition-colors hover:bg-brand-blue-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2"
+                className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-on-brand transition-colors hover:bg-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2"
               >
                 <span aria-hidden>⇄</span>
               </button>
 
-              <div className="rounded-card bg-surface-blue-tint-2 p-4">
+              <div className="rounded-card bg-surface-tint-2 p-4">
                 <span className="text-xs font-medium text-ink-muted">They Get</span>
                 <div className="mt-2 flex items-center gap-3">
                   <output
@@ -221,12 +234,12 @@ export function CurrencyConverter({
 
             <div className="mt-5 h-56">
               {status === "error" ? (
-                <div className="flex h-full flex-col items-center justify-center gap-3 rounded-card bg-surface-blue-tint-2 text-center">
+                <div className="flex h-full flex-col items-center justify-center gap-3 rounded-card bg-surface-tint-2 text-center">
                   <p className="max-w-xs px-4 text-sm text-ink-muted">{errorMsg}</p>
                   <button
                     type="button"
                     onClick={load}
-                    className="rounded-full bg-brand-blue px-4 py-1.5 text-xs font-medium text-on-brand hover:bg-brand-blue-deep"
+                    className="rounded-full bg-brand px-4 py-1.5 text-xs font-medium text-on-brand hover:bg-brand-deep"
                   >
                     Try again
                   </button>
@@ -234,7 +247,7 @@ export function CurrencyConverter({
               ) : points.length > 0 ? (
                 <RateChart points={points} from={from} to={to} />
               ) : (
-                <div className="h-full w-full animate-pulse rounded-card bg-surface-blue-tint-2" />
+                <div className="h-full w-full animate-pulse rounded-card bg-surface-tint-2" />
               )}
             </div>
 
@@ -247,7 +260,7 @@ export function CurrencyConverter({
                   aria-pressed={range === r.id}
                   className={cn(
                     "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-                    range === r.id ? "bg-brand-blue text-on-brand" : "text-ink-muted hover:bg-ink/5",
+                    range === r.id ? "bg-brand text-on-brand" : "text-ink-muted hover:bg-ink/5",
                   )}
                 >
                   {r.label}
