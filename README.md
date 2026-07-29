@@ -239,13 +239,36 @@ normal, ≥ 3:1 large/non-text):
 
 | Foreground on background | Ratio | Use |
 |---|---|---|
-| `#F6EAF1` on `#0C080B` | 17.0:1 | body / headings |
-| `#A97F97` on `#0C080B` | 5.85:1 | muted text |
-| `#EE4FA5` on `#0C080B` | 5.97:1 | links, eyebrows, focus rings |
+| `#F6EAF1` on `#160F15` | 16.1:1 | body / headings |
+| `#BE96AF` on `#160F15` | 7.34:1 | muted text |
+| `#EE4FA5` on `#160F15` | 5.66:1 | links, eyebrows, focus rings |
 | `#FFFFFF` on `#CC1F86` | 5.11:1 | button labels |
-| `#7FBF8A` on `#140A10` | 9.0:1 | success / payout amounts |
-| `#E88A8A` on `#140A10` | 7.80:1 | form errors, invalid-IBAN panel |
-| `#CC1F86` on `#0C080B` | 3.89:1 | large key numbers only (≥3 large) |
+| `#7FBF8A` on `#281C27` | 7.56:1 | success / payout amounts |
+| `#E88A8A` on `#281C27` | 6.56:1 | form errors, invalid-IBAN panel |
+| `#CC1F86` on `#2C1F2B` | 3.07:1 | large key numbers only (≥3 large) |
+
+### Elevation (verified)
+
+The surfaces used to sit within four RGB points of each other, with three of
+them byte-identical, so `--card` on `--canvas` computed to **1.024:1** — under
+the threshold at which two adjacent large areas are distinguishable at all.
+Cards, panels and glass dissolved into the page and only their drop shadows
+implied a boundary. The ladder is now spaced, and the base lifted rather than
+the surfaces brightened, so nothing moves toward grey:
+
+| Level | Token | Value | Separation from the level below |
+|---|---|---|---|
+| L0 | `--surface-deep` | `#0B070A` | — (deepest band: hero) |
+| L1 | `--canvas` | `#160F15` | 1.032 |
+| L2 | `--surface-alt` | `#1E151D` | 1.060 |
+| L3 | `--card` | `#281C27` | 1.045 → **1.155 vs canvas** (was 1.024) |
+| L4 | `--surface-tint` | `#2C1F2B` | 1.041 (inputs, inner panels) |
+
+The ceiling is not a matter of taste: `--brand` renders as large key numbers on
+`--surface-tint`, and that pair is 3.07:1 against a 3:1 large-text minimum.
+Two more points of lift breaks it. Hairlines moved with the surfaces — `--line`
+on `--canvas` goes 1.15:1 → **1.51:1**, because a border at 1.125:1 against the
+card it outlined was not drawing an edge.
 
 `tests/contrast.test.ts` recomputes these from `styles/globals.css` on every
 run rather than trusting the table, and asserts that the `red-600` these error

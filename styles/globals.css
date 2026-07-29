@@ -27,15 +27,36 @@
  */
 @layer base {
   :root {
-    /* Surfaces — near-black with a magenta undertone (dark by default) */
-    --canvas: 12 8 11; /* #0C080B — page background */
-    --card: 20 10 16; /* #140A10 — cards, sections */
-    --surface-alt: 20 10 16; /* sections (was the light alt; now dark) */
-    --surface-alt-2: 26 12 20;
-    --surface-tint: 33 16 32; /* #211020 — inputs, inner panels, sandbox banner */
-    --surface-tint-2: 26 12 22;
-    --surface-deep: 10 7 10; /* deepest band for spotlight/hero */
-    --surface-deep-2: 20 10 16;
+    /*
+     * Surfaces — an elevation ladder, deep rose-black with a magenta undertone.
+     *
+     * These used to be five values inside four RGB points of each other, and
+     * three of them (`card`, `surface-alt`, `surface-deep-2`) were byte-for-byte
+     * identical. `--card` on `--canvas` computed to **1.024:1** — below the
+     * threshold at which a human eye resolves two adjacent large areas at all.
+     * The result was the failure this palette is named for: every card, panel
+     * and glass surface dissolved into the page, so the only thing establishing
+     * hierarchy was the drop shadow, and the whole page read as one flat sheet.
+     *
+     * Each level below is now separated by ≥1.03 and the card/canvas pair by
+     * **1.155:1**. The base is lifted rather than the surfaces brightened, which
+     * buys separation without moving toward grey — every value here is still
+     * under 17% lightness, and `--surface-deep` keeps the original near-black so
+     * the hero band retains its depth.
+     *
+     * The ceiling is not arbitrary. `--brand` (#CC1F86) renders as large key
+     * numbers on `--surface-tint`, and at 44 31 43 that pair is 3.07:1 — a
+     * hair over the 3:1 large-text minimum. Lifting `--surface-tint` two more
+     * points breaks it. `tests/contrast.test.ts` recomputes these on every run.
+     */
+    --canvas: 22 15 21; /* #160F15 — page background (L1) */
+    --card: 40 28 39; /* #281C27 — elevated cards (L3) */
+    --surface-alt: 30 21 29; /* #1E151D — alternating sections (L2) */
+    --surface-alt-2: 35 25 34; /* #231922 */
+    --surface-tint: 44 31 43; /* #2C1F2B — inputs, inner panels, sandbox banner (L4) */
+    --surface-tint-2: 37 26 36; /* #251A24 */
+    --surface-deep: 11 7 10; /* #0B070A — deepest band for spotlight/hero (L0) */
+    --surface-deep-2: 17 11 16; /* #110B10 */
 
     /* Brand — "black rose" metallic magenta. */
     --brand: 204 31 134; /* #CC1F86 — CTA, progress, logo, key numbers */
@@ -58,21 +79,26 @@
     --cta-to: 165 21 106; /* #A5156A (white 7.1:1) */
     --on-brand: 255 255 255; /* #FFFFFF on magenta (≥4.85:1 across the gradient) */
 
-    /* Text */
-    --ink: 246 234 241; /* #F6EAF1 — headings + body */
-    --ink-muted: 169 127 151; /* #A97F97 — 5.5:1 on the near-black bg */
-    --ink-subtle: 174 130 150; /* #AE8296 — ≥4.5:1 on every surface (real text) */
+    /* Text — lifted alongside the surfaces so muted copy did not lose the
+       contrast the lift cost it. Both are *better* than before: muted goes
+       5.85 → 7.34:1 on the page background, and its worst case across every
+       surface is 6.11:1 rather than 5.32:1. */
+    --ink: 246 234 241; /* #F6EAF1 — headings + body, 16.1:1 on canvas */
+    --ink-muted: 190 150 175; /* #BE96AF — 7.3:1 on canvas, 6.1:1 worst case */
+    --ink-subtle: 196 156 179; /* #C49CB3 — ≥6.5:1 on every surface (real text) */
 
-    /* Borders */
-    --line: 46 16 36; /* #2E1024 — hairline */
-    --line-dark: 71 25 58; /* #47193A — emphasis */
+    /* Borders — the other half of the flatness problem. A hairline at 1.125:1
+       against the card it outlined was not drawing an edge, it was drawing a
+       rumour of one; cards had neither fill separation nor a rim. */
+    --line: 64 46 62; /* #402E3E — hairline, 1.51:1 on canvas (was 1.15) */
+    --line-dark: 92 64 89; /* #5C4059 — emphasis, 1.81:1 on card (was 1.36) */
 
     /* Chart (full colour strings — consumed via var() in RateChart) */
     --chart-line: #ee4fa5;
-    --chart-grid: #2e1024;
-    --chart-axis: #a97f97;
-    --chart-tooltip-bg: #140a10;
-    --chart-tooltip-border: #2e1024;
+    --chart-grid: #402e3e;
+    --chart-axis: #be96af;
+    --chart-tooltip-bg: #281c27;
+    --chart-tooltip-border: #402e3e;
     --chart-tooltip-fg: #f6eaf1;
 
     color-scheme: dark;
