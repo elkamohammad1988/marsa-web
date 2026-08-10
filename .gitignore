@@ -122,3 +122,19 @@ portfolio-screenshots/*
 !portfolio-screenshots/06-iban-validation.png
 !portfolio-screenshots/07-mobile.png
 !portfolio-screenshots/08-pricing.png
+
+# ---------------------------------------------------------------------------
+# Throwaway scripts.
+#
+# Puppeteer one-offs written to look at something once — check a nav state,
+# crop a box, watch the ticker tick. Nine of them had accumulated in the root,
+# untracked but NOT ignored, which on a public repository is one `git add -A`
+# away from being published. They are scratch paper: none is referenced by the
+# app, by a test, or by package.json, and anything worth keeping belongs in
+# scripts/ with a name and a reason.
+#
+# The convention this encodes: a scratch script is dot-prefixed and lives in
+# the root. Everything durable is in scripts/ and is tracked.
+# ---------------------------------------------------------------------------
+/.*.mjs
+!/.eslintrc.mjs
