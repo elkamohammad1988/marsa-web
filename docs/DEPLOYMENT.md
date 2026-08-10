@@ -29,7 +29,7 @@ so.
 
 | | Check | How |
 |---|---|---|
-| 1 | The gate is green on `main` | `npm run verify` — typecheck, lint, 1494 tests, production build |
+| 1 | The gate is green on `main` | `npm run verify` — typecheck, lint, 1530 tests, production build |
 | 2 | The production dependency tree is clean | `npm audit --omit=dev` → `found 0 vulnerabilities` |
 | 3 | Database migrations are applied | `npm run db:migrate -- --dry` → `0 pending` |
 | 4 | The Supabase secret key has been rotated since it was last pasted anywhere | [H2](PROJECT-PLAN.md#h2--rotate-the-supabase-secret-key) |

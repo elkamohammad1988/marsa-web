@@ -174,15 +174,16 @@ All measured on the production build — method reproducible from the repo.
   measures the machine as much as the page.
 - **Responsive (2026-07-28)** — no horizontal overflow on any of the 36 routes
   at 390 px or 1440 px (`scrollWidth <= innerWidth`).
-- **Tests (2026-07-29)** — **1494 / 1494** Vitest across 45 files, covering
+- **Tests (2026-08-10)** — **1530 / 1530** Vitest across 47 files, covering
   IBAN/MOD-97, FX, pagination, storage provider selection, admin auth (HMAC
   round-trip, tamper, expiry), session signing, RLS-backed profile reads, CSV
   injection-safety, and the analytics funnel (unique-session counting,
   drop-off, completion, divide-by-zero) — plus a set of source lints that
   assert properties the other gates cannot see: no anchor inside an anchor, no
-  bare `overflow-x-auto`, no colour utility naming an undefined token, no page
-  claiming the build collects nothing, and a length budget on every `<title>`
-  and meta description.
+  bare `overflow-x-auto`, no bare `<select>` left for the operating system to
+  paint, no colour utility naming an undefined token, no page claiming the
+  build collects nothing, and a length budget on every `<title>` and meta
+  description.
 - **Types / lint / audit** — `tsc` clean, ESLint clean, `npm audit --omit=dev`
   0 vulnerabilities, **zero `any`**.
 - **Contrast** — every fg/bg pair computed ≥ AA; e.g. body text 17.0:1, muted
@@ -225,7 +226,7 @@ is recorded batch by batch in [`docs/PROGRESS.md`](./docs/PROGRESS.md).
 > **Marsa** — a cross-border multi-currency account concept, delivered as a
 > production-grade marketing site, an interactive live-FX demo, customer
 > accounts on Postgres row-level security, and a first-party analytics backend.
-> Dark "black rose" design system on one set of role-named tokens; 1,494
+> Dark "black rose" design system on one set of role-named tokens; 1,530
 > passing tests and 0 axe violations across 72 page-loads; illustrations drawn
 > from those tokens rather than sourced; and a hard line between real software
 > and a build that tells you exactly what it is not. Next.js 15 / React 19 /

@@ -13,7 +13,7 @@ and freelancers. That product does not exist. **Marsa is not a bank, holds no
 money, and moves none** — there is no company, no licence and no regulator
 behind it, and every page of the site says so. What is real is the engineering:
 live European Central Bank rates, ISO 13616 IBAN validation, Supabase Auth over
-its REST API with Postgres row-level security, and 1,494 unit tests behind a
+its REST API with Postgres row-level security, and 1,530 unit tests behind a
 CI gate that runs on every push.
 
 **Live demo: https://marsa-web.vercel.app** — deployed with no credentials in
@@ -217,7 +217,7 @@ continuously-true version of the bottom two rows.
 | axe-core (WCAG 2.0 / 2.1 / 2.2, A + AA, plus best-practice) | **36 routes × 2 viewports = 72 page-loads, 0 violations.** The 2.2 tags are what found the last round: five link and control targets under the 24 × 24 minimum in `2.5.8`, none of which the A+AA-only run had flagged |
 | Console + page errors (72 page-loads) | **0** — nothing thrown, no hydration mismatch, no broken image, no duplicate `id`, no anchor nested in an anchor. The only aborted request is the converter cancelling its own in-flight history fetch on unmount, which is the `AbortController` working |
 | Responsive (390 / 1440) | No horizontal overflow on any route at either width |
-| Unit tests | **1494 / 1494 passing**, 45 files (1488 in 44 before this round) |
+| Unit tests | **1530 / 1530 passing**, 47 files (1494 in 45 before this round) |
 | Types / lint / audit | tsc clean · lint clean · 0 vulnerabilities in the production tree · zero `any` |
 
 **What the axe number does not cover.** It is an automated crawl of each route
