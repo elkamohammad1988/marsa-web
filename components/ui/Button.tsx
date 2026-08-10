@@ -5,16 +5,32 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "reac
 type Variant = "primary" | "outline" | "outline-light" | "ghost-pill" | "white";
 type Size = "sm" | "md" | "lg";
 
+/**
+ * `whitespace-nowrap` is load-bearing, not a nicety.
+ *
+ * Every variant here is a fixed-height pill (`h-12` at `lg`), so a label that
+ * wraps to a second line does not grow the button — it overflows it, and the
+ * text is clipped by the radius. That is exactly what "Check IBAN" was doing on
+ * /tools/iban-checker: as a flex item beside a `w-full` input it was allowed to
+ * shrink below its content width, so it rendered as "Check" over "IBAN" inside
+ * a 48px pill. A pill button with wrapped text always reads as broken, so the
+ * rule belongs to the component rather than to each call site.
+ *
+ * Paired with `flex-none` so the button holds its intrinsic width when it sits
+ * in a row next to something greedy.
+ */
 const base =
-  "relative inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 ring-offset-canvas disabled:pointer-events-none disabled:opacity-60";
+  "relative inline-flex flex-none items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 ring-offset-canvas disabled:pointer-events-none disabled:opacity-60";
 
 const variants: Record<Variant, string> = {
   // Metallic magenta CTA: vertical #CE2A8C→#A5156A gradient, inset top highlight
   // + magenta glow (shadow-cta), white text (≥4.85:1). Hover brightens the glow
-  // and lifts 1px; active presses down. Motion is transition-only (reduced-
-  // motion users keep the static gradient + highlight).
+  // and lifts 1px; active presses down. `sheen` adds one band of light crossing
+  // the fill on hover — the thing that makes a metallic surface read as metal
+  // rather than as a gradient. It plays once per entry and leaves nothing
+  // behind, so a reduced-motion visitor keeps the static gradient + highlight.
   primary:
-    "bg-cta-gradient text-on-brand shadow-cta hover:shadow-cta-hover hover:-translate-y-px active:translate-y-0 active:shadow-cta",
+    "sheen bg-cta-gradient text-on-brand shadow-cta hover:shadow-cta-hover hover:-translate-y-px active:translate-y-0 active:shadow-cta",
   outline:
     "border border-line bg-card/60 text-ink shadow-e1 hover:border-brand-strong/45 hover:bg-brand/[0.08] hover:-translate-y-px active:translate-y-0",
   "outline-light": "border border-white/25 text-white hover:bg-white/10 hover:border-white/40",

@@ -47,7 +47,7 @@ export default function DemoPage() {
         eyebrow="Ready when you are"
         title="Open the real thing in about 5 minutes"
         description="Same loop, real money. Free plan available, online application, no branch visit."
-        primaryCta={{ label: "Open An Account", href: "/get-started" }}
+        primaryCta={{ label: "Open an account", href: "/get-started" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"
       />

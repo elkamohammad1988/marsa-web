@@ -27,9 +27,9 @@ export default function Page() {
           { label: "Multi-Currency IBAN" },
         ]}
         title="Multi-Currency IBAN Business Account — No EU Residency Needed"
-        description="European Multi-Currency Business IBAN. Hold, Convert, And Pay In 15+ Currencies — All From A Single Account."
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        description="European multi-currency business IBAN. Hold, convert, and pay in 15+ currencies — all from a single account."
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="card-stack"
         tone="deep"
       />
@@ -58,8 +58,8 @@ export default function Page() {
       />
 
       <ProcessSteps
-        eyebrow="How It Works"
-        title="Set Up In 3 Steps"
+        eyebrow="How it works"
+        title="Set up in 3 steps"
         steps={[
           { number: "01", title: "Open Marsa Business", description: "Submit your company documents online." },
           { number: "02", title: "Verify Company", description: "Our team approves within 24-48h." },
@@ -69,7 +69,7 @@ export default function Page() {
 
       <ComparisonTable
         eyebrow="Marsa Vs Traditional Banks"
-        title="Built For Cross-Border Operations"
+        title="Built for cross-border operations"
         rows={[
           { label: "Currencies Supported", marsa: "15+", traditional: "1-3" },
           { label: "FX Markup", marsa: "0% (up to €10k)", traditional: "2-4%" },
@@ -82,7 +82,7 @@ export default function Page() {
 
       <CardShowcase
         eyebrow="Business Card"
-        title="Issue Cards To Your Team Instantly"
+        title="Issue cards to your team instantly"
         description="Spin up virtual cards in seconds, enforce spend rules, and reconcile in your accounting software."
         bullets={[
           "Unlimited virtual cards",
@@ -126,8 +126,8 @@ export default function Page() {
       <CTACard
         eyebrow="For Business"
         title="Your Business, Limitless"
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="coin-warm"
       />
     </>

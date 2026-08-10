@@ -32,9 +32,23 @@ type LogoProps = {
   tone?: "white" | "ink";
   /** Hide the wordmark and render only the mark tile. */
   markOnly?: boolean;
+  /**
+   * Extra classes on the wordmark alone, so a caller can drop it at one
+   * breakpoint and keep it at another. The navbar needs exactly that: it now
+   * carries the concept-build chip beside the logo, and below `sm` the mark,
+   * the wordmark, the chip and the menu button do not all fit — at 320px the
+   * chip ran under the menu button. The mark tile alone is still the brand,
+   * and the link keeps its `aria-label`, so nothing is lost but the repetition.
+   */
+  wordmarkClassName?: string;
 };
 
-export function Logo({ className, tone = "ink", markOnly = false }: LogoProps) {
+export function Logo({
+  className,
+  tone = "ink",
+  markOnly = false,
+  wordmarkClassName,
+}: LogoProps) {
   return (
     <span className={cn("group inline-flex items-center gap-2.5 select-none", className)}>
       <span
@@ -50,6 +64,7 @@ export function Logo({ className, tone = "ink", markOnly = false }: LogoProps) {
           className={cn(
             "font-display text-[22px] font-bold leading-none tracking-[-0.03em]",
             tone === "white" ? "text-white" : "text-ink",
+            wordmarkClassName,
           )}
         >
           marsa

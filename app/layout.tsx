@@ -3,7 +3,6 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "@/styles/globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { ConceptBadge } from "@/components/layout/ConceptBadge";
 import { JsonLd } from "@/components/JsonLd";
 import { siteConfig } from "@/lib/site";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
@@ -23,7 +22,7 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Marsa — Where Your Money Lands",
+    default: "Marsa — where your money lands",
     template: "%s · Marsa",
   },
   description: siteConfig.description,
@@ -74,10 +73,6 @@ export default function RootLayout({
         <Navbar />
         <main id="main-content">{children}</main>
         <Footer />
-        {/* Present on every route: this site presents as a regulated
-            institution and is not one. See the component for why it is a
-            disclosure rather than a banner or an interstitial. */}
-        <ConceptBadge />
       </body>
     </html>
   );

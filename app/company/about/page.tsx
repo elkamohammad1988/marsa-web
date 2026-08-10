@@ -54,7 +54,7 @@ export default function Page() {
             className="mb-6"
           />
           <div className="max-w-3xl">
-            <Heading level="display">Money Without Borders, For Everyone</Heading>
+            <Heading level="display">Money without borders, for everyone</Heading>
             <p className="mt-5 text-base text-ink-muted md:text-lg">
               Marsa starts from a simple belief: sending, holding, and converting money across
               currencies and countries should be instant, transparent, and fair. It is a concept
@@ -84,7 +84,7 @@ export default function Page() {
       <Section tone="canvas" size="lg">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
-            <Heading level="h2">What We Stand For</Heading>
+            <Heading level="h2">What we stand for</Heading>
             <p className="mt-3 text-ink-muted">
               Our values guide the products we build and the way we treat customers.
             </p>
@@ -129,11 +129,11 @@ export default function Page() {
       </Section>
 
       <CTACard
-        eyebrow="See It Working"
-        title="The Parts That Actually Run"
+        eyebrow="See it working"
+        title="The parts that actually run"
         description="Live ECB rates, offline IBAN validation, and a walkthrough of the onboarding flow — the software, without the company."
-        primaryCta={{ label: "Try The Demo", href: "/demo" }}
-        secondaryCta={{ label: "Check An IBAN", href: "/tools/iban-checker" }}
+        primaryCta={{ label: "Try the demo", href: "/demo" }}
+        secondaryCta={{ label: "Check an IBAN", href: "/tools/iban-checker" }}
         art="coin-warm"
       />
     </>

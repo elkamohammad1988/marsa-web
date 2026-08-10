@@ -8,7 +8,7 @@ import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
 
 export const metadata: Metadata = buildMetadata({
-  title: "How To Open EU Business Account Online",
+  title: "How to open EU business account online",
   description:
     "Open an EU business account online with Marsa — submit your company documents, get approved in 24–48h, and receive an EU IBAN for SEPA payments.",
   path: "/business/how-it-works",
@@ -21,12 +21,12 @@ export default function Page() {
         breadcrumb={[
           { label: "Home", href: "/" },
           { label: "Business" },
-          { label: "How It Works" },
+          { label: "How it works" },
         ]}
-        title="How To Open EU Business Account Online"
-        description="Personal And Business Accounts With A Multi-Currency IBAN. In Minutes, From Any Country."
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        title="How to open EU business account online"
+        description="Personal and business accounts with a multi-currency IBAN. In minutes, from any country."
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="coin-warm"
         tone="deep"
       />
@@ -96,9 +96,9 @@ export default function Page() {
 
       <CTACard
         eyebrow="For Business"
-        title="Manage Your Business Finance Globally"
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        title="Manage your business finance globally"
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="card-and-phone"
       />
     </>

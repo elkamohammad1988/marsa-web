@@ -11,7 +11,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { IconBank, IconCard, IconLock } from "@/components/icons";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Form An EU Company & Open A Business Account",
+  title: "Form an EU company & open a business account",
   description:
     "Launch your EU company and open a business account in one flow. Marsa gives founders a multi-currency IBAN, fast onboarding and cards from day one.",
   path: "/solutions/company-formation",
@@ -26,15 +26,15 @@ export default function Page() {
           { label: "Solutions" },
           { label: "Company Formation" },
         ]}
-        title="Form Your EU Company And Bank In One Place"
+        title="Form your EU company and bank in one place"
         description="Incorporate in the EU and open a multi-currency business account with a real IBAN — ready before your first invoice goes out."
         chips={[
           { label: "EU IBAN" },
           { label: "Cards from day one" },
           { label: "Onboarding under 48h" },
         ]}
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="phone-home"
         tone="deep"
       />
@@ -43,19 +43,19 @@ export default function Page() {
         items={[
           {
             icon: <IconBank />,
-            title: "A Real EU IBAN",
+            title: "A real EU IBAN",
             description:
               "Receive your dedicated business IBAN as soon as the company is registered — no waiting weeks for a high-street bank.",
           },
           {
             icon: <IconCard />,
-            title: "Cards From Day One",
+            title: "Cards from day one",
             description:
               "Issue physical and virtual cards to founders and staff and start spending the moment you incorporate.",
           },
           {
             icon: <IconLock />,
-            title: "Compliance Built In",
+            title: "Compliance built in",
             description:
               "KYB, UBO and AML checks are handled digitally, so onboarding stays fast without cutting regulatory corners.",
           },
@@ -63,12 +63,12 @@ export default function Page() {
       />
 
       <ProcessSteps
-        eyebrow="How It Works"
-        title="From Idea To Incorporated, Online"
+        eyebrow="How it works"
+        title="From idea to incorporated, online"
         steps={[
           {
             number: "01",
-            title: "Choose Your Structure",
+            title: "Choose your structure",
             description:
               "Pick the EU jurisdiction and company type that fit your business, with guidance from our onboarding team.",
           },
@@ -80,7 +80,7 @@ export default function Page() {
           },
           {
             number: "03",
-            title: "Bank On Day One",
+            title: "Bank on day one",
             description:
               "Activate your Marsa Business account, receive your IBAN and issue cards as soon as the company is live.",
           },
@@ -89,7 +89,7 @@ export default function Page() {
 
       <ComparisonTable
         eyebrow="Marsa Vs Traditional Banks"
-        title="Why Founders Start With Marsa"
+        title="Why founders start with Marsa"
         rows={[
           { label: "Formation + Account", marsa: "One flow", traditional: "Two separate processes" },
           { label: "Account Opening Time", marsa: "From day one", traditional: "2-6 weeks" },
@@ -101,8 +101,8 @@ export default function Page() {
       />
 
       <CardShowcase
-        eyebrow="Everything In One Onboarding"
-        title="From Idea To First Invoice, Without The Bank Queue"
+        eyebrow="Everything in one onboarding"
+        title="From idea to first invoice, without the bank queue"
         description="Founders no longer need to incorporate first and then spend weeks chasing a business account. Marsa runs both in parallel."
         bullets={[
           "Multi-currency IBAN for EUR, USD and GBP",
@@ -113,7 +113,7 @@ export default function Page() {
           "SEPA and SWIFT from a single dashboard",
         ]}
         art="card-stack"
-        cta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
+        cta={{ label: "Open a business account", href: "/get-started?type=business" }}
       />
 
       <RegulatedBand />
@@ -145,9 +145,9 @@ export default function Page() {
 
       <CTACard
         eyebrow="For New Founders"
-        title="Start Your EU Company With Marsa"
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        title="Start your EU company with Marsa"
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="coin-warm"
       />
     </>

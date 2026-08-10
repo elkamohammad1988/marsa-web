@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Select } from "@/components/ui/Select";
 import { FX_CURRENCIES, formatCurrency } from "@/lib/fx";
 
 const MARSA_MARKUP = 0.4; // % — matches Marsa's published FX markup above the free tier.
@@ -71,18 +72,18 @@ export function FxCalculator() {
             <label htmlFor="calc-from" className="sr-only">
               From currency
             </label>
-            <select
+            <Select
+              variant="chip"
               id="calc-from"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="rounded-lg bg-surface-tint-2 px-2 py-1.5 text-sm font-medium"
             >
               {FX_CURRENCIES.map((c) => (
                 <option key={c.code} value={c.code}>
                   {c.flag} {c.code}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -94,18 +95,17 @@ export function FxCalculator() {
           <label htmlFor="calc-to" className="mb-1.5 block text-sm font-medium text-ink">
             Convert to
           </label>
-          <select
+          <Select
             id="calc-to"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="h-11 w-full rounded-xl border border-line bg-canvas px-3 text-sm font-medium text-ink"
           >
             {FX_CURRENCIES.map((c) => (
               <option key={c.code} value={c.code}>
                 {c.flag} {c.code} — {c.label}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
 

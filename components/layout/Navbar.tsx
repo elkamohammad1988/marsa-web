@@ -7,6 +7,7 @@ import { mainNav, type NavGroup } from "@/lib/nav";
 import { siteConfig } from "@/lib/site";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/icons/Logo";
+import { ConceptBadge } from "@/components/layout/ConceptBadge";
 import { IconMenu, IconClose, IconChevronDown, IconUserCircle } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +65,42 @@ export function Navbar() {
   const triggerRefs = useRef(new Map<string, HTMLButtonElement | null>());
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
 
+  /**
+   * Scroll state, split deliberately in two.
+   *
+   * `scrolled` is a boolean that flips at most twice per journey, so it can be
+   * React state: the bar lifting off the page is worth a render. Progress is
+   * not — it changes on every frame of every scroll, and putting it in state
+   * would re-render the entire navigation tree sixty times a second to move a
+   * 2px rail. It is written straight to the node's transform instead.
+   */
+  const [scrolled, setScrolled] = useState(false);
+  const progressRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const y = window.scrollY;
+      setScrolled(y > 8);
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      const ratio = scrollable > 0 ? Math.min(1, Math.max(0, y / scrollable)) : 0;
+      if (progressRef.current) progressRef.current.style.transform = `scaleX(${ratio})`;
+    };
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, []);
+
   useEffect(() => {
     setMobileOpen(false);
     setOpenGroup(null);
@@ -79,19 +116,65 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full">
-      <div className="mx-auto max-w-container px-5 py-3 sm:px-6 lg:px-8">
+      <div
+        className={cn(
+          "mx-auto max-w-container px-5 transition-[padding] duration-300 sm:px-6 lg:px-8",
+          scrolled ? "py-2" : "py-3",
+        )}
+      >
         <nav
           aria-label="Main"
-          className="flex items-center justify-between gap-4 rounded-full border border-line/70 glass px-4 py-2 shadow-nav sm:px-5 lg:px-6"
+          className={cn(
+            "relative flex items-center justify-between gap-4 rounded-full border glass px-4 transition-[padding,border-color,box-shadow] duration-300 sm:px-5 lg:px-6",
+            scrolled
+              ? "border-brand-strong/25 py-1.5 shadow-e3"
+              : "border-line/70 py-2 shadow-nav",
+          )}
         >
-          <Link
-            href="/"
-            onClick={() => setMobileOpen(false)}
-            className={cn("flex items-center gap-2 rounded-full", FOCUS_RING)}
-            aria-label="Marsa home"
+          {/* Reading progress, clipped to the pill so it follows its radius.
+              Decorative: the same information is in the scrollbar, and a
+              scaled 2px rail has nothing to announce. */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"
           >
-            <Logo />
-          </Link>
+            <span
+              ref={progressRef}
+              style={{ transform: "scaleX(0)" }}
+              className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-gradient-to-r from-brand via-brand-strong to-halo"
+            />
+          </span>
+          {/*
+            Logo and concept marker travel together, and this wrapper is
+            deliberately *not* `relative`: the disclosure panel inside
+            `ConceptBadge` is absolutely positioned, and the containing block it
+            wants is the nav pill, so that `left-0` is an edge that is always on
+            screen. Making this wrapper positioned would anchor the panel to the
+            chip and push it off the right of a phone.
+          */}
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <Link
+              href="/"
+              onClick={() => setMobileOpen(false)}
+              className={cn("flex flex-none items-center gap-2 rounded-full", FOCUS_RING)}
+              aria-label="Marsa home"
+            >
+              {/*
+                The wordmark is dropped in exactly the two bands where the bar
+                runs out of room, and shown everywhere else.
+
+                Below `sm` the mark, wordmark, chip and menu button do not fit —
+                at 320px the chip ran under the menu button. Between `lg` and
+                `xl` the full desktop bar is live (five nav groups, Log In and
+                the CTA) while the container is still only 1024–1280 wide, and
+                the row overflowed by ~14px. Both bands keep the mark tile,
+                which is the brand at small sizes anyway, and the link keeps its
+                `aria-label`, so the accessible name never depends on this.
+              */}
+              <Logo wordmarkClassName="hidden sm:inline lg:hidden xl:inline" />
+            </Link>
+            <ConceptBadge />
+          </div>
 
           <ul className="hidden items-center gap-1 lg:flex">
             {mainNav.map((group) => {
@@ -106,7 +189,12 @@ export function Navbar() {
                       href={group.href ?? "#"}
                       aria-current={current ? "page" : undefined}
                       className={cn(
-                        "rounded-full px-3 py-2 text-sm font-medium transition-colors hover:bg-ink/5 hover:text-ink",
+                        // 10px of side padding between `lg` and `xl`, 12px above.
+                        // The desktop bar turns on at `lg`, where five nav
+                        // groups, the concept chip, Log In and the CTA have to
+                        // share 1024–1280px; at 12px the row overflowed its
+                        // container. Two pixels an item, taken back at `xl`.
+                        "rounded-full px-2.5 py-2 text-sm font-medium transition-colors hover:bg-ink/5 hover:text-ink xl:px-3",
                         current ? "text-ink" : "text-ink-muted",
                         FOCUS_RING,
                       )}
@@ -152,7 +240,9 @@ export function Navbar() {
                     aria-controls={panelId}
                     onClick={() => setOpenGroup(open ? null : group.label)}
                     className={cn(
-                      "inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium transition-colors hover:bg-ink/5 hover:text-ink",
+                      // Matches the plain nav link above: 10px of side padding
+                      // between `lg` and `xl`, 12px above.
+                      "inline-flex items-center gap-1 rounded-full px-2.5 py-2 text-sm font-medium transition-colors hover:bg-ink/5 hover:text-ink xl:px-3",
                       open || holdsCurrent ? "text-ink" : "text-ink-muted",
                       FOCUS_RING,
                     )}
@@ -202,7 +292,7 @@ export function Navbar() {
             <Link
               href={siteConfig.appUrl}
               className={cn(
-                "inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink/5",
+                "inline-flex flex-none items-center gap-2 whitespace-nowrap rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink/5",
                 FOCUS_RING,
               )}
             >
@@ -210,7 +300,7 @@ export function Navbar() {
               Log In
             </Link>
             <Button href="/get-started" size="md" variant="primary">
-              Open An Account
+              Open an account
             </Button>
           </div>
 
@@ -350,7 +440,7 @@ export function Navbar() {
                 className="w-full"
                 onClick={() => setMobileOpen(false)}
               >
-                Open An Account
+                Open an account
               </Button>
             </div>
           </div>

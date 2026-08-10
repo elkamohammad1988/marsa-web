@@ -80,7 +80,7 @@ export function AccountPreview({ className }: { className?: string }) {
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-ink-subtle">
             Total balance
           </p>
-          <p className="num-glow mt-1 font-display text-[40px] font-bold leading-none tabular-nums tracking-tight text-ink">
+          <p className="figure mt-1 font-display text-[40px] font-bold leading-none tabular-nums tracking-tight text-ink">
             €12,480<span className="text-ink-subtle">.55</span>
           </p>
         </div>

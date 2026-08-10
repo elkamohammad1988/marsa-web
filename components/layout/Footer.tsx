@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
+import { Logo } from "@/components/icons/Logo";
 import { footerColumns, footerBadges } from "@/lib/nav";
 import { siteConfig } from "@/lib/site";
 import { regulatoryDisclosure } from "@/lib/legal";
@@ -18,43 +19,92 @@ const socials = [
 ].filter((s) => s.href);
 
 /**
- * Four shortcuts, four destinations. This list previously read
- * "Tariffs · Help · Support · FAQ" with *Help* and *FAQ* both pointing at
- * `/faq`, and *Tariffs* labelling the page every other surface on the site
- * calls Pricing — two links to one page and one page under two names, on every
- * page of the site.
+ * The foot of every page. Four things were wrong with the previous one, and
+ * all four were structural rather than cosmetic:
+ *
+ * 1. **A 180px wordmark.** `text-[clamp(72px,14vw,180px)]` in the brand
+ *    gradient, centred, above everything else — by a wide margin the largest
+ *    and most saturated element on any page, appearing on all of them. It read
+ *    as placeholder art. Replaced by the ordinary logo lockup at the size the
+ *    navbar uses, which is what a footer signature is for.
+ *
+ * 2. **A label with nothing to label.** "Stay connected" was rendered
+ *    unconditionally beside `socials`, but `socials` is filtered to profiles
+ *    that are actually configured and none are — so every page showed the
+ *    words "Stay connected" floating alone at the far right of a dark pill,
+ *    roughly 400px from the newsletter field it appeared to belong to. It is
+ *    now inside the same conditional as the icons.
+ *
+ * 3. **"Fast links".** Pricing, FAQ, Support and Try the demo — all four
+ *    already present in the columns directly above, three of them under the
+ *    same label. A second navigation of the same destinations does not help a
+ *    reader find anything; it just makes the footer longer.
+ *
+ * 4. **A white button.** The newsletter's submit was the only pure-white
+ *    button in the product, sitting in a pill whose own background was the
+ *    deepest surface — maximum contrast on the least important action on the
+ *    page, out-shouting the primary CTA it sat below.
  */
-const fastLinks = [
-  { label: "Pricing", href: "/pricing" },
-  { label: "FAQ", href: "/faq" },
-  { label: "Support", href: "/contact?topic=support" },
-  { label: "Try the demo", href: "/demo" },
-];
-
 export function Footer() {
   return (
-    <footer className="bg-surface-tint-2 pt-12 md:pt-16">
+    <footer className="seam-top relative isolate bg-surface-tint-2 pt-16 md:pt-20">
       <Container>
-        <div className="flex justify-center pb-6 md:pb-8">
-          <Link
-            href="/"
-            aria-label="Marsa home"
-            className="select-none font-display text-[clamp(72px,14vw,180px)] font-bold leading-none tracking-tighter text-gradient"
-          >
-            <span aria-hidden>marsa</span>
-          </Link>
+        {/* Signature + newsletter, on one line at desktop. */}
+        <div className="flex flex-col gap-8 pb-12 md:flex-row md:items-start md:justify-between md:gap-16">
+          <div className="max-w-sm">
+            <Link
+              href="/"
+              aria-label="Marsa home"
+              className="inline-flex rounded-full transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+            >
+              <Logo />
+            </Link>
+            <p className="mt-4 text-sm leading-relaxed text-ink-muted">
+              One account for every currency you get paid in — receive, hold, convert and pay out
+              from a single European IBAN.
+            </p>
+          </div>
+
+          <div className="w-full max-w-md">
+            <NewsletterForm />
+            {socials.length > 0 && (
+              <div className="mt-5 flex items-center gap-3">
+                <span className="text-sm text-ink-muted">Stay connected</span>
+                <div className="flex items-center gap-2">
+                  {socials.map(({ label, href, Icon }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-card text-ink-muted ring-1 ring-line transition-colors hover:text-brand-strong hover:ring-brand-strong/40"
+                      aria-label={label}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-8 border-t border-line pt-8 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10 sm:grid-cols-3 lg:grid-cols-6">
           {footerColumns.map((col) => (
             <div key={col.title}>
-              <h2 className="text-sm font-semibold text-ink">{col.title}</h2>
-              <ul className="mt-4 flex flex-col gap-2">
+              {/* A micro-label, not another 14px semibold line. The headings
+                  and the links they head were the same size and nearly the
+                  same weight, so six columns read as six undifferentiated
+                  lists. */}
+              <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-subtle">
+                {col.title}
+              </h2>
+              <ul className="mt-4 flex flex-col gap-2.5">
                 {col.links.map((l) => (
                   <li key={l.label}>
                     <Link
                       href={l.href}
-                      className="inline-block py-1 text-sm text-ink-muted underline-offset-4 transition-colors hover:text-brand-strong hover:underline"
+                      className="link-underline inline-block text-sm text-ink-muted transition-colors hover:text-ink"
                     >
                       {l.label}
                     </Link>
@@ -65,58 +115,25 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="relative isolate mt-10 flex flex-col items-stretch gap-4 overflow-hidden rounded-card-lg bg-surface-deep px-6 py-6 text-white shadow-elevated ring-1 ring-white/10 md:flex-row md:items-center md:justify-between md:px-8">
-          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-mesh-deep opacity-80" />
-          <NewsletterForm />
-
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-white/80">Stay connected</span>
-            <div className="flex items-center gap-2">
-              {socials.map(({ label, href, Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-brand-strong transition-colors hover:bg-white/90"
-                  aria-label={label}
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 flex flex-col items-center gap-2 border-t border-line pt-6 text-center">
-          <h2 className="text-sm font-semibold text-ink">Fast links</h2>
-          <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-sm text-ink-muted">
-            {fastLinks.map((l) => (
-              <li key={l.label}>
-                <Link
-                  href={l.href}
-                  className="inline-block py-1 underline-offset-4 hover:text-brand-strong hover:underline"
-                >
-                  {l.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <p className="mt-8 max-w-5xl text-xs leading-relaxed text-ink-muted">
+        <p className="mt-14 max-w-4xl border-t border-line pt-8 text-xs leading-relaxed text-ink-subtle">
           {regulatoryDisclosure()} Marsa provides multi-currency accounts, SEPA &amp; SWIFT
           transfers, and FX services to individuals and businesses across the EU and beyond.
         </p>
 
-        <div className="mt-8 grid grid-cols-2 gap-3 border-t border-line pt-6 text-center text-xs text-ink-subtle md:grid-cols-6">
-          {footerBadges.map((b) => (
-            <span key={b}>{b}</span>
-          ))}
-        </div>
-
-        <div className="py-6 text-center text-xs text-ink-subtle">
-          © {new Date().getFullYear()} {siteConfig.legalName} All rights reserved.
+        <div className="mt-8 flex flex-col-reverse items-start gap-5 border-t border-line py-8 md:flex-row md:items-center md:justify-between">
+          <p className="text-xs text-ink-subtle">
+            © {new Date().getFullYear()} {siteConfig.legalName} All rights reserved.
+          </p>
+          <ul className="flex flex-wrap items-center gap-x-2 gap-y-2">
+            {footerBadges.map((b) => (
+              <li
+                key={b}
+                className="rounded-full bg-card px-2.5 py-1 text-[11px] text-ink-subtle ring-1 ring-line"
+              >
+                {b}
+              </li>
+            ))}
+          </ul>
         </div>
       </Container>
     </footer>

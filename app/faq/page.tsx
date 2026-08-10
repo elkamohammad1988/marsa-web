@@ -9,7 +9,7 @@ import { faqSchema } from "@/lib/schema";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Frequently Asked Questions",
+  title: "Frequently asked questions",
   description:
     "Answers to common questions about Marsa accounts, cards, SEPA and SWIFT transfers, FX, fees, and security.",
   path: "/faq",
@@ -79,7 +79,7 @@ export default function Page() {
       <Section tone="alt" size="md">
         <Container>
           <div className="mx-auto max-w-2xl text-center">
-            <Heading level="display">Frequently Asked Questions</Heading>
+            <Heading level="display">Frequently asked questions</Heading>
             {/* Was "Our team is one message away" over a Contact support
                 button. There is no team and the contact form reaches nobody,
                 so this is the same correction #26 made to the CTAs on
@@ -91,7 +91,7 @@ export default function Page() {
             </p>
             <div className="mt-6 flex justify-center">
               <Button href="/demo" variant="primary" size="md">
-                Try The Demo
+                Try the demo
               </Button>
             </div>
           </div>

@@ -10,7 +10,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { IconDocument, IconCoin, IconClock } from "@/components/icons";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Business Accounts For Agencies & Freelancers",
+  title: "Business accounts for agencies & freelancers",
   description:
     "Invoice international clients and get paid in their currency. Marsa gives agencies and freelancers multi-currency IBANs, interbank FX and same-day SEPA payouts.",
   path: "/solutions/agencies-freelancers",
@@ -25,15 +25,15 @@ export default function Page() {
           { label: "Solutions" },
           { label: "Agencies & Freelancers" },
         ]}
-        title="Get Paid By International Clients — In Their Currency"
+        title="Get paid by international clients — in their currency"
         description="Invoice in EUR, USD or GBP, receive with local account details, and keep more of every fee with interbank exchange rates."
         chips={[
           { label: "Local EUR, USD, GBP details" },
           { label: "Interbank FX" },
           { label: "Free SEPA payouts" },
         ]}
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="card-and-phone"
         tone="deep"
       />
@@ -42,19 +42,19 @@ export default function Page() {
         items={[
           {
             icon: <IconDocument />,
-            title: "Invoice In Any Currency",
+            title: "Invoice in any currency",
             description:
               "Share local account details so clients pay you in their own currency without costly international wires.",
           },
           {
             icon: <IconCoin />,
-            title: "Keep More Of Each Fee",
+            title: "Keep more of each fee",
             description:
               "Convert client payments at interbank rates instead of losing 3-4% to a high-street bank spread.",
           },
           {
             icon: <IconClock />,
-            title: "Get Paid Faster",
+            title: "Get paid faster",
             description:
               "Same-day SEPA and local receiving mean invoices clear in hours, not the usual multi-day wait.",
           },
@@ -62,8 +62,8 @@ export default function Page() {
       />
 
       <ProcessSteps
-        eyebrow="How It Works"
-        title="From Invoice To Paid, Without The FX Loss"
+        eyebrow="How it works"
+        title="From invoice to paid, without the FX loss"
         steps={[
           {
             number: "01",
@@ -73,7 +73,7 @@ export default function Page() {
           },
           {
             number: "02",
-            title: "Add Your Details To Invoices",
+            title: "Add your details to invoices",
             description:
               "Give clients local EUR, USD and GBP account details so they pay you as if you were down the street.",
           },
@@ -91,7 +91,7 @@ export default function Page() {
         title="Why Independent Businesses Choose Marsa"
         rows={[
           { label: "Client Payment Options", marsa: "Local EUR, USD, GBP", traditional: "SWIFT wire only" },
-          { label: "FX On Payouts", marsa: "Interbank + 0.3%", traditional: "3-4%" },
+          { label: "FX on payouts", marsa: "Interbank + 0.3%", traditional: "3-4%" },
           { label: "SEPA Payouts", marsa: "Free, same day", traditional: "€5-15 each" },
           { label: "Monthly Fee", marsa: "From €0", traditional: "€10-25" },
           { label: "Client Sub-Accounts", marsa: "Yes", traditional: "No" },
@@ -128,9 +128,9 @@ export default function Page() {
 
       <CTACard
         eyebrow="For Agencies & Freelancers"
-        title="Invoice The World, Keep More Of It"
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        title="Invoice the world, keep more of it"
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="coin"
       />
     </>

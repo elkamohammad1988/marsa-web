@@ -27,12 +27,20 @@ export function CTACard({
   return (
     <Section tone="canvas" size="sm">
       <Container>
-        <div className="relative isolate overflow-hidden rounded-card-lg bg-surface-deep text-white shadow-elevated">
-          {/* Ambient green glow + grid */}
+        {/* The one surface on the page that carries the bright rim. It is the
+            last thing before the footer and the only ask on the page, so it is
+            where the emphasis earns its keep — a page where every panel is
+            edge-lit has nothing left to emphasise. */}
+        <div className="gradient-ring-strong isolate overflow-hidden rounded-card-lg bg-surface-deep text-white shadow-e3">
+          {/* Ambient light: warm from the top, cool from the right. */}
           <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-radial-glow" />
           <div
             aria-hidden
             className="pointer-events-none absolute -right-16 -top-20 h-72 w-72 rounded-full bg-brand-soft/20 blur-[110px]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-24 -left-10 h-72 w-72 animate-drift rounded-full bg-halo/20 blur-[120px]"
           />
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid opacity-60" />
 

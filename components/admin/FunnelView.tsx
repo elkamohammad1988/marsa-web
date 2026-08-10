@@ -14,23 +14,43 @@ export function FunnelView({ report, provider }: { report: FunnelReport; provide
         <span className="font-medium text-ink">{provider}</span>
       </p>
 
-      <dl className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      {/*
+        One panel with hairline-divided cells, not four free-floating boxes.
+        Four separately-bordered cards put four competing rectangles on screen
+        and made the figures read as unrelated; a single surface with internal
+        rules is the shape every bank dashboard uses, because it says "these
+        four numbers describe one thing".
+      */}
+      <dl className="mt-6 grid grid-cols-2 overflow-hidden rounded-card bg-card shadow-e1 ring-1 ring-line md:grid-cols-4">
         {[
-          { label: "Sessions started", value: String(report.starts) },
-          { label: "Completed", value: String(report.completions) },
-          { label: "Completion rate", value: `${report.completionRate}%` },
+          { label: "Sessions started", value: String(report.starts), lead: true },
+          { label: "Completed", value: String(report.completions), lead: true },
+          { label: "Completion rate", value: `${report.completionRate}%`, lead: true },
           {
             label: "Biggest drop-off",
             value: report.biggestDrop ? `${report.biggestDrop.pct}%` : "—",
             hint: report.biggestDrop
               ? `${FUNNEL_LABELS[report.biggestDrop.from]} → ${FUNNEL_LABELS[report.biggestDrop.to]}`
               : undefined,
+            lead: false,
           },
         ].map((card) => (
-          <div key={card.label} className="rounded-card border border-line bg-card p-4">
-            <dt className="text-xs uppercase tracking-wide text-ink-subtle">{card.label}</dt>
-            <dd className="mt-1 font-display text-2xl font-bold text-ink">{card.value}</dd>
-            {card.hint && <p className="mt-0.5 text-[11px] text-ink-subtle">{card.hint}</p>}
+          <div
+            key={card.label}
+            className="border-line p-5 [&:not(:nth-child(-n+2))]:border-t md:[&:not(:first-child)]:border-l md:[&:not(:nth-child(-n+2))]:border-t-0 [&:nth-child(odd)]:border-r md:[&:nth-child(odd)]:border-r-0"
+          >
+            <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-subtle">
+              {card.label}
+            </dt>
+            <dd
+              className={
+                "mt-1.5 font-display text-[28px] font-bold leading-none tabular-nums " +
+                (card.lead ? "text-ink" : "text-ink-muted")
+              }
+            >
+              {card.value}
+            </dd>
+            {card.hint && <p className="mt-1.5 text-[11px] text-ink-subtle">{card.hint}</p>}
           </div>
         ))}
       </dl>
@@ -47,24 +67,68 @@ export function FunnelView({ report, provider }: { report: FunnelReport; provide
           </Button>
         </div>
       ) : (
-        <div className="mt-6 space-y-3">
-          {report.rows.map((row) => (
-            <div key={row.step} className="rounded-card border border-line bg-card p-4">
-              <div className="flex items-baseline justify-between gap-4 text-sm">
-                <span className="font-medium text-ink">{row.label}</span>
-                <span className="tabular-nums text-ink-muted">
-                  {row.sessions} · {row.pctOfStart}% of start
-                  {row.dropPct > 0 && <span className="ml-2 text-brand-strong">−{row.dropPct}%</span>}
-                </span>
-              </div>
-              <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-surface-tint">
+        /*
+          A funnel is one object, so it is drawn as one panel with hairline
+          rules — not six bordered cards stacked with gaps, which is what made
+          this read as a list of unrelated progress bars rather than a decay.
+
+          Three things carry the "funnel" reading that the flat `bg-brand`
+          rectangles did not:
+
+          1. The fill is a left-to-right gradient that *dims* along its own
+             length, so a long bar and a short bar are visibly different
+             objects rather than the same swatch at two widths.
+          2. The remainder of the track is drawn, faintly, as the portion
+             lost. A funnel step is a ratio, and only showing the numerator
+             hides the thing the chart exists to show.
+          3. Drop-off is no longer `text-brand-strong`. Magenta is this site's
+             affirmative colour — it is the CTA, the logo and the progress
+             rail — so painting an attrition figure in it told the reader that
+             losing 13% of sessions was on-brand good news. It is now muted,
+             and only the single worst step is called out, in `warning`.
+        */
+        <div className="mt-6 overflow-hidden rounded-card bg-card shadow-e1 ring-1 ring-line">
+          {report.rows.map((row, i) => {
+            const isWorstDrop =
+              report.biggestDrop != null && report.biggestDrop.to === row.step && row.dropPct > 0;
+            const width = Math.max(row.pctOfStart, row.sessions > 0 ? 2 : 0);
+            return (
+              <div
+                key={row.step}
+                className={"px-5 py-4" + (i > 0 ? " border-t border-line" : "")}
+              >
+                <div className="flex items-baseline justify-between gap-4 text-sm">
+                  <span className="font-medium text-ink">{row.label}</span>
+                  <span className="tabular-nums text-ink-muted">
+                    <span className="font-semibold text-ink">{row.sessions}</span>
+                    <span className="mx-1.5 text-ink-subtle">·</span>
+                    {row.pctOfStart}%
+                    {row.dropPct > 0 && (
+                      <span
+                        className={
+                          "ml-2.5 rounded-full px-1.5 py-0.5 text-[11px] font-medium tabular-nums " +
+                          (isWorstDrop
+                            ? "bg-warning/10 text-warning"
+                            : "bg-ink/[0.06] text-ink-subtle")
+                        }
+                      >
+                        −{row.dropPct}%
+                      </span>
+                    )}
+                  </span>
+                </div>
                 <div
-                  className="h-full rounded-full bg-brand"
-                  style={{ width: `${Math.max(row.pctOfStart, row.sessions > 0 ? 3 : 0)}%` }}
-                />
+                  className="mt-2.5 h-2 overflow-hidden rounded-full bg-surface-tint ring-1 ring-inset ring-line/60"
+                  aria-hidden
+                >
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-brand-strong to-brand"
+                    style={{ width: `${width}%` }}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </>

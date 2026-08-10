@@ -60,6 +60,22 @@
 
     /* Brand — "black rose" metallic magenta. */
     --brand: 204 31 134; /* #CC1F86 — CTA, progress, logo, key numbers */
+    /*
+     * The second light source, and the only hue on this site that is not
+     * magenta.
+     *
+     * A single-hue palette lit by a single-hue glow has nothing to model depth
+     * with: every ambient layer is the same colour as the thing it is lighting,
+     * so stacking them reads as one brighter magenta rather than as two lights
+     * at different distances. `--halo` is a cool violet placed *behind* the
+     * warm magenta in every backdrop, which is what gives the hero, the CTA
+     * panel and the process band an actual sense of space.
+     *
+     * It is decoration only — blurred orbs and mesh stops, never text, never a
+     * fill behind text, never a border. It has no contrast obligation because
+     * nothing is ever read on it.
+     */
+    --halo: 118 58 196; /* #763AC4 — cool ambient light, decoration only */
     --brand-deep: 184 26 120; /* #B81A78 — button hover fill (keeps white ≥6:1) */
     --brand-soft: 122 18 80; /* #7A1250 — accent-dim / secondary / in-progress */
     --brand-strong: 238 79 165; /* #EE4FA5 — accent-bright: text/links/rings/highlights */
@@ -217,10 +233,63 @@
       radial-gradient(72% 60% at 50% -6%, rgba(58, 15, 43, 0.9) 0%, rgba(58, 15, 43, 0.3) 32%, transparent 64%),
       radial-gradient(38% 34% at 84% 6%, rgba(204, 31, 134, 0.1) 0%, transparent 58%);
   }
+  /**
+   * The wash is sized in pixels but read as a proportion of the screen.
+   *
+   * At 1100px tall behind a 1440×900 desktop viewport it is a soft glow behind
+   * the top of the page. Behind a 390×844 phone it is the *entire* first
+   * screen and most of the second, so the same declaration that reads as
+   * atmosphere on a laptop reads on a phone as a page tinted magenta
+   * throughout — the single strongest "cheap gradient" signal in the product,
+   * on the viewport most people will actually see it in.
+   *
+   * Shorter and dimmer below `sm`, so the hero still sits in light but the
+   * page returns to its near-black surface within the first screen.
+   */
+  @media (max-width: 640px) {
+    .atmosphere-layer {
+      height: 620px;
+      opacity: 0.65;
+    }
+  }
 
-  /* Faint magenta glow on key numbers (converted amount, payout, balances). */
-  .num-glow {
-    text-shadow: 0 0 16px rgba(238, 79, 165, 0.35);
+  /**
+   * Key monetary figures — balances, converted amounts, payouts, prices.
+   *
+   * Renamed from `.num-glow`, because the glow is no longer what it is for.
+   * Three things were wrong with it:
+   *
+   * 1. **It was too bright to read as banking.** At `0 0 16px` / 0.35 alpha
+   *    the hero balance and the pricing figure wore a visible neon halo. A
+   *    glowing number is the vocabulary of crypto dashboards and game UI;
+   *    Stripe, Mercury and Revolut Business all render money as crisp,
+   *    unmodified type, because a balance that glows reads as a mockup of a
+   *    bank rather than a bank. Cut to 12px / 0.14 — enough to lift the figure
+   *    off a dark surface, not enough to notice as an effect.
+   *
+   * 2. **The colour was hardcoded and sometimes wrong.** `rgba(238,79,165)` is
+   *    `--brand-strong` spelled out, so the token could never move it — and
+   *    `DemoFlow`'s incoming-payment row combines it with `text-success`,
+   *    which rendered a *green* figure inside a *magenta* halo. The shadow now
+   *    derives from `currentColor`, so every figure glows its own colour and
+   *    that combination is unrepresentable.
+   *
+   * 3. The name described the decoration rather than the role, so a figure
+   *    that should not glow had nothing to opt into. `.figure` is the role.
+   *
+   * `tabular-nums` is folded in because every one of these is a number in a
+   * column or a number that animates, and both need fixed advance widths.
+   */
+  .figure {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    /* Fallback for browsers without color-mix(): the brand halo, dimmed. */
+    text-shadow: 0 0 12px rgb(var(--brand-strong) / 0.14);
+  }
+  @supports (color: color-mix(in srgb, red 50%, transparent)) {
+    .figure {
+      text-shadow: 0 0 12px color-mix(in srgb, currentColor 16%, transparent);
+    }
   }
 
   /**
@@ -247,18 +316,38 @@
    */
   .text-gradient-hero {
     color: rgb(var(--ink));
-    background-image: linear-gradient(
-      180deg,
-      #ffffff 0%,
-      #f6eaf1 42%,
-      #f4a9d0 100%
-    );
+    /*
+     * Two layers, clipped to the glyphs: a narrow diagonal highlight on top of
+     * the base vertical gradient. Only the highlight is wider than the element,
+     * so animating `background-position` moves it and leaves the base alone —
+     * one slow pass of light across the headline every seven seconds.
+     */
+    background-image:
+      linear-gradient(100deg, transparent 40%, rgba(255, 255, 255, 0.9) 50%, transparent 60%),
+      linear-gradient(180deg, #ffffff 0%, #f6eaf1 42%, #f4a9d0 100%);
+    background-size: 220% 100%, 100% 100%;
+    background-repeat: no-repeat;
+    /* The resting position is the animation's end frame — off the left edge —
+       so a reduced-motion reader, whose animation is cut to 0.001ms, lands on
+       a headline with no highlight rather than one frozen mid-sweep. */
+    background-position: -120% 0, 0 0;
     -webkit-background-clip: text;
     background-clip: text;
+    animation: headline-sheen 7s ease-in-out 0.9s infinite;
   }
   @supports ((-webkit-background-clip: text) or (background-clip: text)) {
     .text-gradient-hero {
       color: transparent;
+    }
+  }
+  @keyframes headline-sheen {
+    0% {
+      background-position: 220% 0, 0 0;
+    }
+    /* Both ends sit off the glyphs, so the loop's jump back is unseeable. */
+    38%,
+    100% {
+      background-position: -120% 0, 0 0;
     }
   }
 
@@ -381,6 +470,219 @@
     .skeleton::after {
       animation: none;
     }
+  }
+
+  /**
+   * Pointer spotlight — a surface lit from wherever the cursor actually is.
+   *
+   * `--mx`/`--my` are written by `components/ui/PointerGlow.tsx`; the fallbacks
+   * here are what the effect looks like with no script, no pointer, or on a
+   * touch device, which is a soft light at the top centre. That is deliberate:
+   * the resting state has to be a design in its own right, because for a phone
+   * it is the *only* state.
+   *
+   * Painted into `::after` rather than `::before` because `.gradient-ring`
+   * already owns `::before` and the two are used together on the same cards.
+   */
+  .spotlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    background: radial-gradient(
+      18rem 18rem at var(--mx, 50%) var(--my, 0%),
+      rgb(var(--brand-strong) / 0.14),
+      transparent 60%
+    );
+  }
+  .spotlight:hover::after,
+  .spotlight:focus-within::after {
+    opacity: 1;
+  }
+  /**
+   * Content has to sit above the light, or the light sits on the text.
+   *
+   * The exclusions are load-bearing. This rule and Tailwind's `.absolute` have
+   * the same specificity, and this file wins on source order — so a plain
+   * `.spotlight > *` silently rewrote `position: absolute` to `relative` on
+   * every decorative child of a spotlit surface, which put them back in flow.
+   * Three components were disfigured by it and none of them threw:
+   *
+   *   - `PricingPlanCard` — the blur behind the featured plan became a third
+   *     grid item, so it took column 1, pushed the copy into column 2 and
+   *     wrapped the illustration onto a second row. Every plan card on
+   *     /pricing rendered as a half-empty box with the artwork underneath it.
+   *   - `FeatureBullets` — the large faint index sat inline above the icon
+   *     instead of bleeding off the top-right corner.
+   *   - `ProcessSteps` — the 01/02/03 badges dropped inside the panels rather
+   *     than straddling their top edge, and the connecting rail collapsed.
+   *
+   * Excluding the positioning utilities by name keeps the fix where the
+   * problem is: a child that declares its own position keeps it, and only
+   * static content gets lifted.
+   */
+  .spotlight > *:not(.absolute):not(.fixed) {
+    position: relative;
+    z-index: 1;
+  }
+
+  /**
+   * A single band of light crossing a control on hover.
+   *
+   * Hover-only and un-filled on purpose: it plays once per entry and leaves
+   * nothing behind, so a reduced-motion visitor — whose duration is cut to
+   * 0.001ms — sees the band never leave its off-screen start position.
+   */
+  .sheen {
+    overflow: hidden;
+  }
+  .sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transform: translateX(-120%);
+    background: linear-gradient(
+      100deg,
+      transparent 38%,
+      rgba(255, 255, 255, 0.32) 50%,
+      transparent 62%
+    );
+  }
+  .sheen:hover::after {
+    animation: sheen-sweep 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes sheen-sweep {
+    to {
+      transform: translateX(120%);
+    }
+  }
+
+  /**
+   * The emphasis rim: `.gradient-ring` turned up, for the one surface on a page
+   * that is being recommended — the featured pricing plan, the closing CTA.
+   *
+   * This replaces `.border-spin`, a conic rim whose bright arc was animated
+   * around the edge on a nine-second loop. Two things were wrong with it, and
+   * only one of them was taste:
+   *
+   * 1. **It put `--halo` in a border.** The rule three hundred lines up says
+   *    the cool violet is "decoration only — blurred orbs and mesh stops, never
+   *    text, never a fill behind text, **never a border**", and it says so
+   *    because the violet is the only hue on this site that is not magenta. In
+   *    a 1px rim it does not read as a second light source; it reads as a stray
+   *    blue line, which is exactly how it rendered along the bottom edge of
+   *    every pricing card and the closing CTA panel.
+   * 2. **It never stopped.** A perpetually travelling highlight is the visual
+   *    grammar of crypto dashboards and game UI. On a page asking someone to
+   *    pick a paid plan, the effect that says "premium" is a still, brighter
+   *    edge — the same argument the CTA shadow already lost its bloom to.
+   *
+   * Static, brand-only, and stronger at the top where the light is: the same
+   * geometry as `.gradient-ring` so the two can be swapped freely, with a
+   * second stop along the bottom edge so a large panel is closed rather than
+   * fading out into the page.
+   */
+  .gradient-ring-strong {
+    position: relative;
+  }
+  .gradient-ring-strong::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      180deg,
+      rgb(var(--brand-strong) / 0.95) 0%,
+      rgb(var(--brand) / 0.45) 18%,
+      rgb(var(--line-dark) / 1) 55%,
+      rgb(var(--line) / 0.9) 100%
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /**
+   * The seam between two stacked sections: a hairline that brightens toward
+   * the middle, with a wide, faint bloom above it.
+   *
+   * Two flat bands meeting at a straight edge is what made the page below the
+   * hero read as a stack of unrelated rectangles. A seam gives the join a
+   * light source, which is what a reader interprets as depth.
+   */
+  .seam-top {
+    position: relative;
+  }
+  .seam-top::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    /* Above the section's own background, below its content — the painting
+       order a negative z-index gives you. Without it the bloom below would
+       wash over the text, since a positioned pseudo-element otherwise paints
+       on top of in-flow content. */
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--brand-strong) / 0.45) 30%,
+      rgb(var(--brand-strong) / 0.6) 50%,
+      rgb(var(--brand-strong) / 0.45) 70%,
+      transparent
+    );
+  }
+  .seam-top::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: min(70rem, 90%);
+    height: 8rem;
+    transform: translateX(-50%);
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(50% 100% at 50% 0%, rgb(var(--brand) / 0.16), transparent 70%);
+  }
+
+  /**
+   * Two-light backdrop: warm magenta in front, cool `--halo` behind and lower.
+   * The offset between them is the whole effect — matched positions would just
+   * add up to one brighter smudge.
+   */
+  .lightfield {
+    background-image:
+      radial-gradient(48% 52% at 18% 0%, rgb(var(--brand) / 0.22) 0%, transparent 62%),
+      radial-gradient(42% 46% at 82% 12%, rgb(var(--halo) / 0.16) 0%, transparent 64%),
+      radial-gradient(70% 60% at 50% 108%, rgb(var(--halo) / 0.1) 0%, transparent 62%);
+  }
+
+  /**
+   * Underline that grows from the left on hover, instead of appearing all at
+   * once. Uses a background layer rather than `text-decoration` so the growth
+   * is animatable.
+   */
+  .link-underline {
+    background-image: linear-gradient(90deg, rgb(var(--brand-strong)), rgb(var(--brand-strong)));
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    transition: background-size 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .link-underline:hover,
+  .link-underline:focus-visible {
+    background-size: 100% 1px;
   }
 
   /**

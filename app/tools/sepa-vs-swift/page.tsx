@@ -122,9 +122,9 @@ export default function Page() {
 
       <CTACard
         eyebrow="For Everyone"
-        title="Send SEPA And SWIFT From One Account"
+        title="Send SEPA and SWIFT from one account"
         description="Open a Marsa account for free SEPA transfers and low-cost SWIFT payments worldwide."
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"
       />

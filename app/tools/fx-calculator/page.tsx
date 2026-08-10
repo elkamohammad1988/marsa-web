@@ -8,7 +8,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "FX Rate Calculator — See The Real Cost Of A Transfer",
+  title: "FX rate calculator — see the real cost of a transfer",
   description:
     "Calculate the all-in cost of an international transfer. Compare the live mid-market rate against a typical bank markup and see how much you save with Marsa.",
   path: "/tools/fx-calculator",
@@ -67,8 +67,8 @@ export default function Page() {
         eyebrow="For Everyone"
         title="Stop Paying Hidden FX Markups"
         description="Open a Marsa account and convert 30+ currencies at the real interbank rate."
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
-        secondaryCta={{ label: "Try The Converter", href: "/tools/currency-converter" }}
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
+        secondaryCta={{ label: "Try the converter", href: "/tools/currency-converter" }}
         art="coin-warm"
       />
     </>

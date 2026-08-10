@@ -2,6 +2,7 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { Heading } from "@/components/ui/Heading";
 import { FeatureIcon } from "@/components/ui/FeatureIcon";
+import { PointerGlow } from "@/components/ui/PointerGlow";
 import { IconShield, IconBank, IconLock } from "@/components/icons";
 
 /**
@@ -38,17 +39,18 @@ export function RegulatedBand() {
     <Section tone="canvas" size="md">
       <Container>
         <div className="mx-auto max-w-3xl text-center">
-          <Heading level="h2">The Model Behind It</Heading>
+          <Heading level="h2">The model behind it</Heading>
           <p className="mt-3 text-ink-muted">
             Marsa is a concept, so it holds no authorisation of its own. This is the regulatory
             structure the product it describes would be built on.
           </p>
         </div>
-        <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
+        <PointerGlow className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
           {items.map((it) => (
             <div
               key={it.title}
-              className="card-hover rounded-card-lg border border-line bg-card p-6 text-center"
+              data-glow
+              className="spotlight card-hover gradient-ring group relative rounded-card-lg border border-line bg-card p-6 text-center shadow-e1"
             >
               <div className="flex justify-center">
                 <FeatureIcon tone="brand" size="lg">
@@ -59,7 +61,7 @@ export function RegulatedBand() {
               <p className="mt-2 text-sm text-ink-muted">{it.description}</p>
             </div>
           ))}
-        </div>
+        </PointerGlow>
       </Container>
     </Section>
   );

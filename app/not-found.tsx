@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const popular = [
   { label: "Pricing", href: "/pricing" },
   { label: "Currency Converter", href: "/tools/currency-converter" },
-  { label: "Open an Account", href: "/get-started" },
+  { label: "Open an account", href: "/get-started" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ];

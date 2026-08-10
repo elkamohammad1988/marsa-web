@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Select";
+import { IconClock } from "@/components/icons";
 import { MarsaMark } from "@/components/icons/Logo";
 import { cn } from "@/lib/utils";
 import { hasRejectedNonEssential } from "@/lib/consent";
@@ -338,7 +340,13 @@ export function DemoFlow() {
         {/* Live account panel */}
         <div
           className={cn(
-            "gradient-ring relative overflow-hidden rounded-card-lg border border-line bg-card p-5 shadow-e2 transition-opacity sm:p-6",
+            // `flex flex-col` so the Activity block below can claim the slack.
+            // Grid stretches both columns to the tallest, and the step panel
+            // opposite carries `min-h-[320px]`, so this card was routinely
+            // ~250px taller than its contents — all of it dumped as blank card
+            // under the empty state, which is the worst place on a dashboard
+            // to have a void.
+            "gradient-ring relative flex flex-col overflow-hidden rounded-card-lg border border-line bg-card p-5 shadow-e2 transition-opacity sm:p-6",
             accountLive ? "opacity-100" : "opacity-60",
           )}
         >
@@ -400,12 +408,20 @@ export function DemoFlow() {
             </div>
           </div>
 
-          <div className="mt-5">
+          <div className="mt-5 flex flex-1 flex-col">
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-ink-subtle">Activity</p>
             {activity.length === 0 ? (
-              <p className="mt-3 rounded-xl border border-dashed border-line px-3 py-6 text-center text-xs text-ink-subtle">
-                No activity yet — money you receive and send will appear here.
-              </p>
+              // Grows into the slack and centres itself in it, so the empty
+              // state *is* the panel's resting design rather than a small
+              // notice with a large hole beneath it.
+              <div className="mt-3 flex flex-1 flex-col items-center justify-center gap-2.5 rounded-xl border border-dashed border-line px-4 py-8 text-center">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink/[0.04] ring-1 ring-line">
+                  <IconClock className="h-4 w-4 text-ink-subtle" />
+                </span>
+                <p className="max-w-[22ch] text-xs leading-relaxed text-ink-subtle">
+                  No activity yet — money you receive and send will appear here.
+                </p>
+              </div>
             ) : (
               <ul className="mt-2 divide-y divide-line/70">
                 {activity.map((a) => (
@@ -439,7 +455,7 @@ export function DemoFlow() {
                     <span
                       className={cn(
                         "shrink-0 text-sm font-semibold tabular-nums",
-                        a.kind === "in" ? "text-success num-glow" : "text-ink",
+                        a.kind === "in" ? "text-success figure" : "text-ink",
                       )}
                     >
                       {a.amount}
@@ -483,12 +499,41 @@ export function DemoFlow() {
 
             <div className="mt-4 text-sm leading-relaxed text-ink-muted">
               {step === "welcome" && (
-                <p>
-                  Walk through the real Marsa journey in about a minute: open an account, get a
-                  European IBAN, receive a payout from abroad, convert it at the live interbank
-                  rate, and send it out over SEPA — the exact loop a cross-border seller runs every
-                  week.
-                </p>
+                <>
+                  <p>
+                    Walk through the real Marsa journey in about a minute: open an account, get a
+                    European IBAN, receive a payout from abroad, convert it at the live interbank
+                    rate, and send it out over SEPA — the exact loop a cross-border seller runs
+                    every week.
+                  </p>
+                  {/*
+                    The panel reserves 320px so the controls below it do not jump
+                    between steps, and `welcome` is the shortest step there is —
+                    so on the one screen a visitor always lands on, roughly two
+                    thirds of that reservation was empty. The void sat directly
+                    beside the account card, which made the busier column look
+                    like the real content and this one like a placeholder.
+
+                    Filled with the itinerary, read off `DEMO_STEPS` — the same
+                    array that draws the progress rail above, so this cannot
+                    drift from the steps the demo actually runs. `slice(1, -1)`
+                    drops `Start` and `Done`, which are this screen and its end,
+                    not stops along the way.
+                  */}
+                  <ol className="mt-5 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2">
+                    {DEMO_STEPS.slice(1, -1).map((s, i) => (
+                      <li key={s.id} className="flex items-center gap-3">
+                        <span
+                          aria-hidden
+                          className="grid h-6 w-6 flex-none place-items-center rounded-full border border-line bg-surface-tint text-[11px] font-semibold tabular-nums text-ink-subtle"
+                        >
+                          {i + 1}
+                        </span>
+                        <span className="text-ink-muted">{s.label}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </>
               )}
 
               {step === "profile" && (
@@ -521,18 +566,17 @@ export function DemoFlow() {
                     <label htmlFor="demo-country" className="mb-2 block font-medium text-ink">
                       Where are you based?
                     </label>
-                    <select
+                    <Select
                       id="demo-country"
                       value={country}
                       onChange={(e) => setCountry(e.target.value)}
-                      className="h-11 w-full rounded-xl border border-line bg-canvas px-4 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-brand-strong"
                     >
                       {DEMO_COUNTRIES.map((c) => (
                         <option key={c.code} value={c.code}>
                           {c.flag} {c.name}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                     <p className="mt-2 text-xs text-ink-subtle">
                       Marsa onboards from 180+ countries — this list is just a sample.
                     </p>
@@ -616,7 +660,7 @@ export function DemoFlow() {
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-ink-muted">
                           1 USD ={" "}
-                          <span className="num-glow font-semibold tabular-nums text-ink">
+                          <span className="figure font-semibold tabular-nums text-ink">
                             {rate.toFixed(4)}
                           </span>{" "}
                           EUR

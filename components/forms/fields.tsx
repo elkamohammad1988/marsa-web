@@ -7,6 +7,7 @@ import type {
   TextareaHTMLAttributes,
   ReactNode,
 } from "react";
+import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
 
 const control =
@@ -142,21 +143,25 @@ export function SelectField({
   const fieldId = id ?? autoId;
   return (
     <FieldShell id={fieldId} label={label} required={required} hint={hint} error={error}>
-      <select
+      {/*
+        The chevron used to be a `background-image` data URI with
+        `stroke='%235B6478'` baked into it — a slate blue-grey from the light
+        theme this site dropped. No token could reach it, so every form on the
+        site drew a chevron in a colour that is nowhere in the palette. `Select`
+        renders the arrow as an SVG sibling taking `currentColor`, which is how
+        it follows `--ink-muted` and brightens on focus.
+      */}
+      <Select
         id={fieldId}
-        className={cn(control, "h-11 appearance-none bg-no-repeat pr-9", borderClass(!!error), className)}
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235B6478' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
-          backgroundPosition: "right 0.75rem center",
-        }}
+        shellClassName={error ? "ring-danger/60" : undefined}
+        className={className}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${fieldId}-error` : hint ? `${fieldId}-hint` : undefined}
         required={required}
         {...props}
       >
         {children}
-      </select>
+      </Select>
     </FieldShell>
   );
 }
@@ -203,21 +208,56 @@ export function CheckboxField({ label, error, className, id, ...props }: Checkbo
   return (
     <div>
       <div className="flex items-start gap-3">
-        <input
-          id={fieldId}
-          type="checkbox"
-          className={cn(
-            // 24px, not 20px: WCAG 2.2 AA 2.5.8 sets the minimum target at
-            // 24×24 CSS px, and a consent checkbox has no inline-in-a-sentence
-            // exception to fall back on — it is the control that gates submit.
-            "mt-0.5 h-6 w-6 flex-none rounded border-line text-brand-strong focus:ring-brand-strong/30",
-            className,
-          )}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? `${fieldId}-error` : undefined}
-          {...props}
-        />
-        <label htmlFor={fieldId} className="text-sm text-ink-muted">
+        {/*
+          Drawn, not inherited.
+
+          `text-brand-strong border-line` on a checkbox are `@tailwindcss/forms`
+          idioms, and that plugin is not installed (`plugins: []`) — so the
+          colour classes were setting the *text* colour of a control that has no
+          text, and the box itself was the browser's own default. Against
+          `color-scheme: dark` that is a flat grey square with a system-blue
+          check: the one raw, unstyled control on a site whose every other input
+          is tokenised, sitting on the consent row that gates the primary form.
+
+          `appearance-none` takes the native rendering away and the sibling SVG
+          puts a mark back, driven by `peer-checked`. It is still a real
+          `<input type="checkbox">`, so the form, the label association and
+          keyboard behaviour are untouched.
+        */}
+        <span className="relative mt-0.5 grid h-6 w-6 flex-none place-items-center">
+          <input
+            id={fieldId}
+            type="checkbox"
+            className={cn(
+              // 24px, not 20px: WCAG 2.2 AA 2.5.8 sets the minimum target at
+              // 24×24 CSS px, and a consent checkbox has no inline-in-a-sentence
+              // exception to fall back on — it is the control that gates submit.
+              "peer h-6 w-6 flex-none cursor-pointer appearance-none rounded-md border bg-canvas transition-colors duration-150",
+              "checked:border-brand checked:bg-cta-gradient",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas",
+              error ? "border-danger/60" : "border-line hover:border-brand-strong/50",
+              className,
+            )}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? `${fieldId}-error` : undefined}
+            {...props}
+          />
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            fill="none"
+            className="pointer-events-none absolute h-3.5 w-3.5 scale-50 text-on-brand opacity-0 transition duration-150 ease-out peer-checked:scale-100 peer-checked:opacity-100"
+          >
+            <path
+              d="M4 12.5l5 5L20 6.5"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+        <label htmlFor={fieldId} className="cursor-pointer text-sm text-ink-muted">
           {label}
         </label>
       </div>

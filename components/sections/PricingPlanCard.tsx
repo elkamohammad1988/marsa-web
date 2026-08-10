@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { CheckBullet } from "@/components/ui/CheckBullet";
 import { BrandArt, type ArtName } from "@/components/art/BrandArt";
+import { cn } from "@/lib/utils";
 import type { Plan } from "@/lib/pricing";
 
 /**
@@ -20,13 +21,36 @@ const planArt: Record<string, ArtName> = {
 };
 
 export function PricingPlanCard({ plan }: { plan: Plan }) {
+  /**
+   * The badged plan is the one the page is recommending, so it gets the bright
+   * rim and a step more elevation; the others get the standard one. Never both
+   * on the same element: `.gradient-ring-strong` and `.gradient-ring` are two
+   * implementations of the same `::before`, and whichever loses the cascade
+   * simply vanishes.
+   */
+  const featured = Boolean(plan.badge);
+
   return (
-    <article className="grid grid-cols-1 items-center gap-6 rounded-card-lg bg-card p-6 shadow-card md:p-8 lg:grid-cols-[1.4fr_1fr] lg:gap-10">
+    <article
+      data-glow
+      className={cn(
+        "spotlight card-hover relative grid grid-cols-1 items-center gap-6 overflow-hidden rounded-card-lg border border-line bg-card p-6 md:p-8 lg:grid-cols-[1.4fr_1fr] lg:gap-10",
+        featured ? "gradient-ring-strong shadow-e3" : "gradient-ring shadow-e1",
+      )}
+    >
+      {featured && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand/15 blur-[100px]"
+        />
+      )}
       <div>
         {plan.badge && <Badge tone="ink">{plan.badge}</Badge>}
         <h2 className="mt-4 text-3xl font-bold text-ink md:text-4xl">{plan.name}</h2>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-ink">{plan.price}</span>
+          <span className="figure font-display text-4xl font-bold tracking-tight text-ink md:text-5xl">
+            {plan.price}
+          </span>
           {plan.priceSuffix && (
             <span className="text-base text-ink-muted">{plan.priceSuffix}</span>
           )}

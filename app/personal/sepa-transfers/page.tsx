@@ -27,8 +27,8 @@ export default function Page() {
           { label: "SEPA Transfers" },
         ]}
         title="Free SEPA Transfer Personal Account — No EU Residency Required"
-        description="European SEPA Payments For Modern Lifestyles. Send Money Across All 36 SEPA Countries For Free."
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
+        description="European SEPA payments for modern lifestyles. Send money across all 36 SEPA countries for free."
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="card-stack"
         tone="alt"
@@ -58,8 +58,8 @@ export default function Page() {
       />
 
       <ProcessSteps
-        eyebrow="How It Works"
-        title="Send SEPA Payments In 3 Easy Steps"
+        eyebrow="How it works"
+        title="Send SEPA payments in 3 easy steps"
         steps={[
           {
             number: "01",
@@ -87,14 +87,14 @@ export default function Page() {
           { label: "Transfer Fee", marsa: "€0", traditional: "€0-3 per transfer" },
           { label: "Daily Limit", marsa: "€50,000", traditional: "€10,000" },
           { label: "Mobile Support", marsa: "Full-feature", traditional: "Limited" },
-          { label: "Cancel In Flight", marsa: "Yes (within 5 sec)", traditional: "No" },
+          { label: "Cancel in flight", marsa: "Yes (within 5 sec)", traditional: "No" },
           { label: "Multi-Currency", marsa: "15+ currencies", traditional: "EUR only" },
         ]}
       />
 
       <CardShowcase
         eyebrow="The Card"
-        title="Spend Anywhere With The Marsa Card"
+        title="Spend anywhere with the Marsa card"
         description="Pair your SEPA account with a Marsa card for real-time spend control everywhere."
         bullets={[
           "Real-time payment notifications",
@@ -136,9 +136,9 @@ export default function Page() {
       />
 
       <CTACard
-        title="Fast SEPA, Your Way"
+        title="Fast SEPA, your way"
         description="Open a free Marsa personal account and start sending SEPA payments today."
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"
       />

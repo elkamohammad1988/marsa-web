@@ -167,7 +167,7 @@ function HomeScreen() {
       <p className="text-[0.5em] font-medium uppercase tracking-[0.18em] text-ink-subtle">
         Total balance
       </p>
-      <p className="num-glow mt-[3%] font-display text-[1.5em] font-bold leading-none tabular-nums tracking-tight text-ink">
+      <p className="figure mt-[3%] font-display text-[1.5em] font-bold leading-none tabular-nums tracking-tight text-ink">
         €12,480
         <span className="text-ink-subtle">.55</span>
       </p>
@@ -316,14 +316,28 @@ function Coin({ tone }: { tone: "brand" | "warm" }) {
  * bug that ships, because it looks right in the place you were testing.
  */
 const SCENES: Record<ArtName, () => React.ReactNode> = {
-  // Width follows the phone, so the card can overhang it in percentage terms
-  // without knowing the slot's dimensions.
+  /**
+   * Height-driven, with the frame declaring its own ratio rather than hugging
+   * the phone.
+   *
+   * `w-fit` was the obvious way to write this — let the box be as wide as the
+   * phone, then overhang the card in percentages of it — but fit-content has
+   * to compute a max-content width, and the phone has no intrinsic width to
+   * offer: its width comes from an aspect ratio against a height. So the
+   * wrapper fell back to sizing on the phone's *text*, and the whole drawing
+   * inflated with it.
+   *
+   * 11/10 is the ratio of the pair, not of the phone: the phone is 9/18.5, so
+   * at full height it is 0.442 of this frame's width, and the card's 74%/19%
+   * are that same 168%/42% of the phone re-expressed against the frame. The
+   * -7° tilt is inside the remaining margin, so nothing touches the edges.
+   */
   "card-and-phone": () => (
-    <div className="relative h-full w-fit">
-      <Phone className="h-full">
+    <div className="relative mx-auto aspect-[11/10] h-full">
+      <Phone className="absolute left-0 top-0 h-full">
         <HomeScreen />
       </Phone>
-      <PaymentCard className="absolute bottom-[7%] left-[42%] w-[168%] rotate-[-7deg] shadow-e3" />
+      <PaymentCard className="absolute bottom-[7%] left-[19%] w-[74%] rotate-[-7deg] shadow-e3" />
     </div>
   ),
 
@@ -386,8 +400,24 @@ export function BrandArt({ name, surface = "filled", className }: BrandArtProps)
       // rather than the viewport, so the type inside a drawing scales with the
       // drawing. A viewport-relative size would render the same 17px label on a
       // 560px hero illustration and a 300px pricing thumbnail.
+      // A block, not a grid, and that is the whole sizing contract.
+      //
+      // This was `grid place-items-center`. A grid's `auto` track grows to its
+      // item's max-content, so the stage below could not be held to the slot:
+      // its `h-full` was a percentage against a track that the stage's own
+      // contents were sizing, which resolves to `auto`. Every drawing then
+      // measured itself from its own text rather than from the slot it sits
+      // in, and `overflow-hidden` cropped the difference in silence.
+      // `card-and-phone` laid out at 676×1390 inside a 429×343 box — what
+      // rendered was not a phone beside a card, it was a corner of the phone.
+      // `card-stack` showed one and a half of the three cards its caption
+      // promises, which makes it a WCAG 1.1.1 problem as well as an ugly one.
+      //
+      // A block gives `h-full` a definite height to resolve against, and
+      // content overflows it instead of growing it. The centring the grid was
+      // doing is done by the flex stage below, where it costs nothing.
       className={cn(
-        "relative grid h-full w-full place-items-center overflow-hidden p-[6%] [container-type:size]",
+        "relative h-full w-full overflow-hidden p-[6%] [container-type:size]",
         surface === "filled" && "bg-surface-deep",
         className,
       )}

@@ -10,7 +10,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { IconExchange, IconGlobe, IconShield } from "@/components/icons";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Multi-Currency Accounts For Import & Export Businesses",
+  title: "Multi-currency accounts for import & export businesses",
   description:
     "Pay overseas suppliers and collect from international buyers at interbank FX, with multi-currency IBANs built for import-export businesses.",
   path: "/solutions/import-export",
@@ -25,15 +25,15 @@ export default function Page() {
           { label: "Solutions" },
           { label: "Import & Export" },
         ]}
-        title="Multi-Currency Accounts For Import & Export Businesses"
+        title="Multi-currency accounts for import & export businesses"
         description="Pay overseas suppliers and collect from international buyers in one account — at real exchange rates, with fast SEPA and SWIFT settlement."
         chips={[
           { label: "40+ currencies" },
           { label: "SEPA + SWIFT" },
           { label: "Interbank FX" },
         ]}
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="phone-accounts"
         tone="deep"
       />
@@ -48,13 +48,13 @@ export default function Page() {
           },
           {
             icon: <IconGlobe />,
-            title: "Pay Suppliers Worldwide",
+            title: "Pay suppliers worldwide",
             description:
               "Send SWIFT and SEPA payments to manufacturers across Asia, Europe and the Americas with transparent, upfront fees.",
           },
           {
             icon: <IconShield />,
-            title: "Lock In Your Landed Cost",
+            title: "Lock in your landed cost",
             description:
               "Convert at interbank rates so currency swings never quietly erode the margin on a shipment.",
           },
@@ -62,8 +62,8 @@ export default function Page() {
       />
 
       <ProcessSteps
-        eyebrow="How It Works"
-        title="Move Goods And Money Across Borders"
+        eyebrow="How it works"
+        title="Move goods and money across borders"
         steps={[
           {
             number: "01",
@@ -73,13 +73,13 @@ export default function Page() {
           },
           {
             number: "02",
-            title: "Fund In Any Currency",
+            title: "Fund in any currency",
             description:
               "Receive from buyers or top up in EUR, USD, GBP and more using local rails and your own IBAN.",
           },
           {
             number: "03",
-            title: "Pay & Convert On Demand",
+            title: "Pay & convert on demand",
             description:
               "Settle supplier invoices and convert balances at interbank rates the moment your purchase order is confirmed.",
           },
@@ -128,9 +128,9 @@ export default function Page() {
 
       <CTACard
         eyebrow="For Import & Export"
-        title="Trade Globally On One Account"
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        title="Trade globally on one account"
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="coin-warm"
       />
     </>

@@ -44,13 +44,13 @@ export default function PricingPage() {
       />
 
       <CTACard
-        eyebrow="For Individuals"
+        eyebrow="For individuals"
         title="Your Money, Accessible Everywhere You Go"
-        description="Up To 2% FX Fees, Free SEPA Transfers, And Support In 180+ Countries."
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
+        description="Up to 2% FX fees, free SEPA transfers, and support in 180+ countries."
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"
-        footnote="Physical Cards Available For Europe And UK Customers Only. All Other Features — IBAN, SEPA, SWIFT, FX Conversion — Are Available Worldwide."
+        footnote="Physical cards available for Europe and UK customers only. All other features — IBAN, SEPA, SWIFT, FX conversion — are available worldwide."
       />
     </>
   );

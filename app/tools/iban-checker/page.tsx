@@ -8,7 +8,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "IBAN Checker — Validate Any IBAN Free",
+  title: "IBAN checker — validate any IBAN free",
   description:
     "Validate any IBAN instantly. Marsa's free IBAN checker verifies the country, length, and ISO 13616 check digits — entirely in your browser.",
   path: "/tools/iban-checker",
@@ -85,9 +85,9 @@ export default function Page() {
 
       <CTACard
         eyebrow="For Individuals"
-        title="Get Your Own European IBAN"
+        title="Get your own European IBAN"
         description="Open a free Marsa account and receive a multi-currency IBAN in minutes."
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"
       />

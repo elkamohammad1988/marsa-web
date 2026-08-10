@@ -113,7 +113,7 @@ export default async function BlogPostPage({
 
       <section className="bg-canvas pb-12 md:pb-16">
         <Container>
-          <Heading level="h2">Recommended Blogs</Heading>
+          <Heading level="h2">Related articles</Heading>
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((p) => (
               <BlogCard key={p.slug} post={p} />
@@ -121,17 +121,17 @@ export default async function BlogPostPage({
           </div>
           <div className="mt-10 flex justify-center">
             <Button href="/blog" variant="outline" size="md">
-              See All Articles
+              See all articles
             </Button>
           </div>
         </Container>
       </section>
 
       <CTACard
-        eyebrow="For Individuals"
-        title="Your Money, Accessible Everywhere You Go"
-        description="Up To 2% FX Fees, Free SEPA Transfers, And Support In 180+ Countries."
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
+        eyebrow="For individuals"
+        title="Your money, accessible everywhere you go"
+        description="Up to 2% FX fees, free SEPA transfers, and support in 180+ countries."
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"
       />

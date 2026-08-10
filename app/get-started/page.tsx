@@ -8,7 +8,7 @@ import { plans, businessPlans } from "@/lib/pricing";
 import { ACCOUNT_TYPES, type AccountType } from "@/lib/validation";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Open Your Account",
+  title: "Open your account",
   description:
     "Open a free Marsa multi-currency account in minutes. Personal and business IBANs, SEPA transfers, and global FX — fully online.",
   path: "/get-started",
@@ -43,7 +43,7 @@ export default async function GetStartedPage({
       <Container>
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start lg:gap-16">
           <div className="lg:pt-4">
-            <Badge tone="ink">Open An Account</Badge>
+            <Badge tone="ink">Open an account</Badge>
             <h1 className="mt-4 text-display-sm font-bold text-ink">
               Money without borders, in a few minutes
             </h1>

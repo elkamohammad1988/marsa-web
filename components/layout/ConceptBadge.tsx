@@ -21,6 +21,20 @@ import { IconClose } from "@/components/icons";
  * a straight answer — and for the audience this site is built for, a project
  * that is scrupulous about not impersonating a regulated entity is making an
  * argument in its own favour.
+ *
+ * **It lives in the navbar, next to the wordmark.** It used to be
+ * `fixed bottom-4 left-4`, floating over the page — which is the one thing a
+ * permanent overlay cannot do safely, because it has no idea what is under it.
+ * It was covering the left half of the primary "Get started for free" button on
+ * /pricing, the account card on the mobile demo, and footer copy on several
+ * marketing pages. A disclosure that obscures a call to action is a usability
+ * bug; a disclosure that obscures *anything* is one waiting to happen, since
+ * every new page is another chance to put content in that corner.
+ *
+ * Moving it into the chrome fixes the occlusion and makes the marker *more*
+ * prominent rather than less: it is now beside the logo, above the fold, on
+ * every route and at every width, instead of in the corner a reader's eye
+ * reaches last. The panel it opens is unchanged.
  */
 
 const REAL = [
@@ -40,6 +54,7 @@ export function ConceptBadge() {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   // Escape closes and returns focus, the one affordance a disclosure owes.
   useEffect(() => {
@@ -54,12 +69,83 @@ export function ConceptBadge() {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
+  /**
+   * Outside-click closes. This is new, and it is owed by the new position: as
+   * a floating badge the panel was the only thing in its corner, but anchored
+   * under the navbar it is a dropdown, and a dropdown that survives a click on
+   * the page behind it reads as stuck. `pointerdown` rather than `click` so it
+   * resolves before the underlying control activates.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (panelRef.current?.contains(target) || triggerRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [open]);
+
   return (
-    <div className="pointer-events-none fixed bottom-4 left-4 z-50 flex flex-col items-start gap-2 print:hidden">
+    <>
+      <button
+        type="button"
+        ref={triggerRef}
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls={panelId}
+        className={cn(
+          "inline-flex flex-none items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors duration-200",
+          "sm:gap-2 sm:px-3 sm:py-1.5 sm:text-[11px] sm:tracking-[0.12em]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas",
+          open
+            ? "border-brand-strong/50 bg-brand/[0.12] text-ink"
+            : "border-line-dark bg-surface-tint/60 text-ink-muted hover:border-brand-strong/45 hover:text-ink",
+        )}
+      >
+        <span aria-hidden className="h-1.5 w-1.5 flex-none rounded-full bg-brand-strong" />
+        Concept build
+        {/* The affordance hint, not the disclosure — "Concept build" itself is
+            visible at every width, and the panel is what discloses. Held back
+            to `xl` for room: the desktop bar turns on at `lg`, and between
+            1024px and 1280px the five nav groups, Log In and the CTA already
+            have the width spoken for. */}
+        <span className="hidden font-normal normal-case tracking-normal text-ink-subtle xl:inline">
+          {open ? "— close" : "— what's real?"}
+        </span>
+      </button>
+
+      {/*
+        Anchored to the navbar pill, not to the chip.
+
+        The pill is the nearest positioned ancestor, so `left-0` is its left
+        edge — which is always on screen. Anchoring to the chip instead would
+        start the panel ~130px in from the left on a phone and push a 22rem
+        panel off the right edge.
+      */}
+      {/*
+        Near-opaque, not `.glass-panel`.
+
+        That utility is 55% alpha over a backdrop blur, which is right for the
+        demo card and the sandbox banner — both sit on quiet, dark surfaces of
+        their own. Anchored under the navbar this panel hangs over whatever the
+        page opens with, and on /pricing at 390px that is a display-size
+        headline: the disclosure and "Compare Marsa accounts and cards" rendered
+        on top of each other, and neither could be read.
+
+        A panel whose whole job is to state plainly what is and is not real
+        cannot be the one element on the site that is hard to read, so this one
+        is solid. At 95% the headline still ghosted through the "Real software"
+        and "Not real" headings; there is no amount of translucency worth that,
+        and a solid dropdown is what every menu on Stripe and Linear is. The
+        rim and `shadow-e3` are what lift it off the page instead.
+      */}
       <div
         id={panelId}
+        ref={panelRef}
         hidden={!open}
-        className="pointer-events-auto w-[min(22rem,calc(100vw-2rem))] origin-bottom-left animate-scale-in rounded-card-lg border border-line-dark glass-panel p-5 shadow-e3"
+        className="absolute left-0 top-full z-50 mt-3 w-[min(23rem,calc(100vw-2.5rem))] origin-top-left animate-scale-in rounded-card-lg border border-line-dark bg-card p-5 shadow-e3"
       >
         <div className="flex items-start justify-between gap-3">
           <h2 className="text-sm font-semibold text-ink">Marsa is a concept build</h2>
@@ -114,24 +200,6 @@ export function ConceptBadge() {
           See the interactive demo →
         </Link>
       </div>
-
-      <button
-        type="button"
-        ref={triggerRef}
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-        aria-controls={panelId}
-        className={cn(
-          "pointer-events-auto inline-flex items-center gap-2 rounded-full border border-line-dark glass px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink shadow-e2 transition-colors",
-          "hover:border-brand-strong/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas",
-        )}
-      >
-        <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-strong shadow-glow-sm" />
-        Concept build
-        <span className="font-normal normal-case tracking-normal text-ink-subtle">
-          {open ? "— close" : "— what's real?"}
-        </span>
-      </button>
-    </div>
+    </>
   );
 }

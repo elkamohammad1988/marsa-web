@@ -11,7 +11,7 @@ import { posts, featuredPost, formatPostDate } from "@/lib/blog";
 import { clampPage, pageCount, paginate } from "@/lib/pagination";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Blogs",
+  title: "Blog",
   description:
     "Clear insights on global finance, payments, and business growth — by the Marsa team.",
   path: "/blog",
@@ -35,7 +35,7 @@ export default async function BlogListPage({
       <section className="bg-surface-alt pb-12 pt-10 md:pb-16 md:pt-14">
         <Container>
           <Heading level="display" className="max-w-4xl">
-            Blogs
+            Blog
           </Heading>
           <p className="mt-4 max-w-3xl text-base text-ink-muted md:text-lg">
             Explore clear insights on global finance, payments, and business growth — helping you
@@ -47,7 +47,15 @@ export default async function BlogListPage({
               href={`/blog/${featuredPost.slug}`}
               className="group mt-10 block overflow-hidden rounded-card-lg"
             >
-              <div className="relative aspect-[16/8] w-full overflow-hidden">
+              {/*
+                Was a flat `aspect-[16/8]` — 568px tall at container width, and
+                the generated cover art is a sparse motif, so the card read as
+                a very large rectangle of near-black with eight small currency
+                chips adrift in the middle of it. Shortening it toward a
+                letterbox concentrates the same art and puts the headline back
+                in proportion to the space it sits in.
+              */}
+              <div className="relative aspect-[16/10] w-full overflow-hidden sm:aspect-[16/7] lg:aspect-[21/8]">
                 <BlogCover
                   motif={featuredPost.cover}
                   category={featuredPost.category}
@@ -70,7 +78,7 @@ export default async function BlogListPage({
                       HTML that cost this page its hydration.
                     */}
                     <ButtonLabel variant="white" size="md">
-                      Read More
+                      Read article
                     </ButtonLabel>
                   </div>
                 </div>

@@ -11,7 +11,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { IconGlobe, IconExchange, IconShield } from "@/components/icons";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Multi-Currency IBAN For Expats And Non-Residents",
+  title: "Multi-currency IBAN for expats and non-residents",
   description:
     "A multi-currency IBAN account for expats and non-residents. Open a European IBAN online and hold, convert, and spend in 15+ currencies at real interbank rates.",
   path: "/personal/multi-currency-iban",
@@ -26,9 +26,9 @@ export default function Page() {
           { label: "Personal" },
           { label: "Multi-Currency IBAN" },
         ]}
-        title="Multi-Currency IBAN Account For Expats And Non-Residents"
-        description="European Multi-Currency Account For Modern Lifestyles. Hold, Convert, And Spend In 15+ Currencies From A Single IBAN."
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
+        title="Multi-currency IBAN account for expats and non-residents"
+        description="European multi-currency account for modern lifestyles. Hold, convert, and spend in 15+ currencies from a single IBAN."
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="phone-home"
         tone="alt"
@@ -38,7 +38,7 @@ export default function Page() {
         items={[
           {
             icon: <IconGlobe />,
-            title: "Welcome To Marsa",
+            title: "Welcome to Marsa",
             description:
               "Open a European IBAN in minutes — even if you don't live in the EU. Receive SEPA payments instantly.",
           },
@@ -58,8 +58,8 @@ export default function Page() {
       />
 
       <ProcessSteps
-        eyebrow="How It Works"
-        title="Open Your IBAN In 3 Steps"
+        eyebrow="How it works"
+        title="Open your IBAN in 3 steps"
         description="Everything you need to start receiving payments from European clients."
         steps={[
           {
@@ -76,7 +76,7 @@ export default function Page() {
           },
           {
             number: "03",
-            title: "Get Your IBAN",
+            title: "Get your IBAN",
             description:
               "Receive your personal European IBAN, ready to receive SEPA transfers worldwide.",
           },
@@ -85,7 +85,7 @@ export default function Page() {
 
       <ComparisonTable
         eyebrow="Marsa Vs Traditional Banks"
-        title="A Modern Account Without The Banking Friction"
+        title="A modern account without the banking friction"
         rows={[
           { label: "Account Opening", marsa: "Online, 5 min", traditional: "Branch visit, 2-4 weeks" },
           { label: "Verification", marsa: "Fully Digital", traditional: "Paper documentation" },
@@ -139,9 +139,9 @@ export default function Page() {
       />
 
       <CTACard
-        title="Bring Your Finance Wherever Life Takes You"
+        title="Bring your finance wherever life takes you"
         description="Open a free Marsa personal account and start receiving SEPA payments in minutes."
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"
       />

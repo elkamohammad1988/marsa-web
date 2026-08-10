@@ -14,7 +14,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { absoluteUrl, siteConfig } from "@/lib/site";
 import { IconGlobe, IconExchange, IconShield } from "@/components/icons";
 
-const title = "Marsa — Multi-Currency Accounts For Cross-Border Business";
+const title = "Marsa — multi-currency accounts for cross-border business";
 // Kept under 160 characters: past that Google truncates in the results page,
 // and the clause that gets cut is always the last one — which is where a
 // description written long tends to put the audience it is trying to reach.
@@ -49,8 +49,8 @@ export default function HomePage() {
           { label: "30+ currencies" },
           { label: "SEPA & SWIFT" },
         ]}
-        primaryCta={{ label: "Open An Account", href: "/get-started" }}
-        secondaryCta={{ label: "Try The Demo", href: "/demo" }}
+        primaryCta={{ label: "Open an account", href: "/get-started" }}
+        secondaryCta={{ label: "Try the demo", href: "/demo" }}
         footnote="Free plan available · Online application in about 5 minutes · No branch visit"
         visual={<AccountPreview />}
         stats={[
@@ -74,13 +74,13 @@ export default function HomePage() {
           },
           {
             icon: <IconExchange />,
-            title: "Free SEPA, Low-Cost SWIFT",
+            title: "Free SEPA, low-cost SWIFT",
             description:
               "Send free SEPA transfers across 36 countries and low-cost SWIFT payments worldwide, all from one place.",
           },
           {
             icon: <IconShield />,
-            title: "Safeguarded By Design",
+            title: "Safeguarded by design",
             description:
               "The model a product like this needs: licensed partner institutions holding customer balances in segregated safeguarding accounts, separate from the operator's own funds.",
           },
@@ -97,7 +97,7 @@ export default function HomePage() {
 
       <ProcessSteps
         eyebrow="Get Started"
-        title="Open Your Account In 3 Steps"
+        title="Open your account in 3 steps"
         description="No branch visits, no paperwork — fully online from any device."
         steps={[
           { number: "01", title: "Sign Up", description: "Create your free account online in about 5 minutes." },
@@ -108,7 +108,7 @@ export default function HomePage() {
 
       <CardShowcase
         eyebrow="The Marsa Card"
-        title="Spend Anywhere, Without The Hidden Fees"
+        title="Spend anywhere, without the hidden fees"
         description="Pair your account with a Marsa card for real-time control and interbank rates everywhere you go."
         bullets={[
           "Apple Pay & Google Pay",
@@ -123,7 +123,7 @@ export default function HomePage() {
 
       <ComparisonTable
         eyebrow="Marsa Vs Traditional Banks"
-        title="Banking Without The Friction"
+        title="Banking without the friction"
         rows={[
           { label: "Account Opening", marsa: "Online, ~5 min", traditional: "Branch visit, 1–4 weeks" },
           { label: "Residency Required", marsa: "No", traditional: "Usually yes" },
@@ -164,10 +164,10 @@ export default function HomePage() {
       />
 
       <CTACard
-        eyebrow="For Individuals & Business"
-        title="Your Money, Accessible Everywhere You Go"
+        eyebrow="For individuals & business"
+        title="Your money, accessible everywhere you go"
         description="Low FX fees, free SEPA transfers, and support across 180+ countries."
-        primaryCta={{ label: "Open An Account", href: "/get-started" }}
+        primaryCta={{ label: "Open an account", href: "/get-started" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"
         footnote="Physical cards available for Europe and UK customers only. All other features — IBAN, SEPA, SWIFT, FX conversion — are available worldwide."

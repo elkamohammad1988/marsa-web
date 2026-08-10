@@ -19,7 +19,7 @@ export const metadata: Metadata = buildMetadata({
 });
 
 const concepts = [
-  { label: "Mid Market Rate", value: "Average between bid and ask" },
+  { label: "Mid-market rate", value: "Average between bid and ask" },
   { label: "FX Margin", value: "Spread on top of the mid rate" },
   { label: "EUR/USD Volatility", value: "Daily fluctuation range" },
   { label: "ECB Reference Rate", value: "Published each ECB business day" },
@@ -33,12 +33,12 @@ const tools = [
   },
   {
     icon: <IconExchange />,
-    title: "SEPA Vs SWIFT",
+    title: "SEPA vs SWIFT",
     description: "Compare the two main European transfer rails.",
   },
   {
     icon: <IconLightning />,
-    title: "FX Rate Calculator",
+    title: "FX rate calculator",
     description: "Calculate the all-in cost of any FX transfer.",
   },
 ];
@@ -52,7 +52,7 @@ export default function Page() {
         <Container>
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
             <div>
-              <Heading level="h2">What Is A Currency Converter?</Heading>
+              <Heading level="h2">What is a currency converter?</Heading>
               <p className="mt-4 text-base text-ink-muted">
                 A currency converter is a tool that calculates how much one currency is worth in
                 another at any given moment. Marsa&apos;s converter uses European Central Bank reference
@@ -80,8 +80,8 @@ export default function Page() {
       </Section>
 
       <ProcessSteps
-        eyebrow="How To Use"
-        title="How To Use The Marsa Currency Converter"
+        eyebrow="How to use"
+        title="How to use the Marsa currency converter"
         description="Three steps to a precise conversion."
         steps={[
           {
@@ -91,12 +91,12 @@ export default function Page() {
           },
           {
             number: "02",
-            title: "Enter The Amount",
+            title: "Enter the amount",
             description: "Type the source amount — we recalculate live.",
           },
           {
             number: "03",
-            title: "See The Live Rate",
+            title: "See the live rate",
             description: "Get the mid-market rate, plus historical chart.",
           },
         ]}
@@ -104,7 +104,7 @@ export default function Page() {
 
       <Section tone="canvas" size="md">
         <Container>
-          <Heading level="h2">Key FX Concepts Explained</Heading>
+          <Heading level="h2">Key FX concepts explained</Heading>
           <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {concepts.map((c) => (
               <div key={c.label} className="rounded-card border border-line bg-card p-5">
@@ -146,8 +146,8 @@ export default function Page() {
       <CTACard
         eyebrow="For Individuals"
         title="Your Money, Accessible Everywhere You Go"
-        description="Up To 2% FX Fees, Free SEPA Transfers, And Support In 180+ Countries."
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
+        description="Up to 2% FX fees, free SEPA transfers, and support in 180+ countries."
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"
       />

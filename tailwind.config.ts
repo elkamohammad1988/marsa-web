@@ -71,6 +71,10 @@ const config: Config = {
           DEFAULT: withAlpha("--accent"),
           soft: withAlpha("--accent-soft"),
         },
+        // The cool second light source — see `--halo` in globals.css. Blurred
+        // decoration only: it is never a text colour and never a fill behind
+        // text, so it carries no contrast obligation.
+        halo: withAlpha("--halo"),
         // Text/icon colour guaranteed readable on the rose button fill.
         "on-brand": withAlpha("--on-brand"),
         warning: withAlpha("--warning"),
@@ -122,9 +126,25 @@ const config: Config = {
         e1: "0 1px 2px rgba(0,0,0,0.45), 0 10px 26px -14px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(204,31,134,0.12)",
         e2: "0 2px 6px rgba(0,0,0,0.5), 0 20px 44px -18px rgba(0,0,0,0.65), 0 16px 44px -18px rgba(204,31,134,0.20)",
         e3: "0 10px 16px rgba(0,0,0,0.55), 0 34px 74px -26px rgba(0,0,0,0.72), 0 26px 66px -22px rgba(204,31,134,0.24)",
-        // The metallic CTA stack: inner top highlight + inner rim + magenta glow.
-        cta: "inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.06), 0 8px 22px -8px rgba(206,42,140,0.5)",
-        "cta-hover": "inset 0 1px 0 rgba(255,255,255,0.34), inset 0 0 0 1px rgba(255,255,255,0.08), 0 12px 30px -8px rgba(238,79,165,0.66)",
+        /**
+         * The metallic CTA stack: inner top highlight + inner rim + a drop.
+         *
+         * The coloured half of that drop used to be `rgba(206,42,140,0.5)` at
+         * rest and `rgba(238,79,165,0.66)` on hover — a magenta bloom bright
+         * enough to be read as a light the button was emitting. That is the
+         * visual grammar of game UI and crypto dashboards. Stripe, Mercury and
+         * Revolut Business all seat a primary button on a neutral drop shadow
+         * with no coloured bloom at all, because on a product that holds
+         * money, "expensive" is conveyed by restraint.
+         *
+         * The fix is not to delete the glow — the metallic read depends on it —
+         * but to demote it from a light source to an ambient tint, and to give
+         * the button an actual neutral shadow to sit on, which it never had.
+         * Rest drops 0.50 → 0.24; hover 0.66 → 0.34, still a clear brightening
+         * on interaction.
+         */
+        cta: "inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.06), 0 2px 6px -2px rgba(0,0,0,0.5), 0 8px 22px -10px rgba(206,42,140,0.24)",
+        "cta-hover": "inset 0 1px 0 rgba(255,255,255,0.34), inset 0 0 0 1px rgba(255,255,255,0.08), 0 4px 10px -3px rgba(0,0,0,0.55), 0 12px 28px -10px rgba(238,79,165,0.34)",
         // Back-compat aliases (older components) → mapped onto the new system.
         card: "0 1px 2px rgba(0,0,0,0.45), 0 10px 26px -14px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(204,31,134,0.12)",
         nav: "0 8px 30px -12px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(204,31,134,0.14)",
@@ -220,6 +240,39 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(-6px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        /**
+         * A decorative satellite travelling around the hero panel. Applied to a
+         * wrapper centred on the panel, with the dot pushed out along one axis,
+         * so a plain rotation reads as an orbit.
+         */
+        orbit: {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        /** Counter-rotation, so an orbiting label stays upright. */
+        "orbit-reverse": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(-360deg)" },
+        },
+        /** Slower, larger drift than `float` — for elements far behind glass. */
+        drift: {
+          "0%, 100%": { transform: "translate3d(0, 0, 0)" },
+          "50%": { transform: "translate3d(0, -18px, 0)" },
+        },
+        /**
+         * The scroll cue: a dot falling down a short track, on a loop.
+         *
+         * Keyed `0%, 100%` rather than `0%`→`100%` because it is an infinite
+         * decorative cycle that must return to where it started — the same
+         * shape as `glow-pulse` and `float`. The one-way `fill-mode: both`
+         * animations are the ones that must end visible; this never fills, and
+         * the track it runs in is drawn unconditionally.
+         */
+        "scroll-hint": {
+          "0%, 100%": { opacity: "0", transform: "translateY(-4px)" },
+          "30%": { opacity: "1", transform: "translateY(0)" },
+          "70%": { opacity: "0", transform: "translateY(10px)" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
@@ -235,6 +288,10 @@ const config: Config = {
         shimmer: "shimmer 2.4s linear infinite",
         "step-in": "step-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both",
         "row-in": "row-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both",
+        orbit: "orbit 26s linear infinite",
+        "orbit-reverse": "orbit-reverse 26s linear infinite",
+        drift: "drift 11s ease-in-out infinite",
+        "scroll-hint": "scroll-hint 2.6s ease-in-out infinite",
       },
     },
   },

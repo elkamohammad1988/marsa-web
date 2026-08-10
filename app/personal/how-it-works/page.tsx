@@ -8,7 +8,7 @@ import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
 
 export const metadata: Metadata = buildMetadata({
-  title: "How To Open EU Bank Account Online",
+  title: "How to open EU bank account online",
   description:
     "Open an EU account online with Marsa: sign up in minutes from any country, verify your ID, and get a multi-currency IBAN — no EU residency needed.",
   path: "/personal/how-it-works",
@@ -21,11 +21,11 @@ export default function Page() {
         breadcrumb={[
           { label: "Home", href: "/" },
           { label: "Personal" },
-          { label: "How It Works" },
+          { label: "How it works" },
         ]}
-        title="How To Open EU Bank Account Online"
-        description="Personal And Business Accounts With A Multi-Currency IBAN. In Minutes, From Any Country, 100% Online."
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
+        title="How to open EU bank account online"
+        description="Personal and business accounts with a multi-currency IBAN. In minutes, from any country, 100% online."
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="phone-accounts"
         tone="canvas"
@@ -44,7 +44,7 @@ export default function Page() {
           },
           {
             number: "02",
-            title: "Pay With Marsa",
+            title: "Pay with Marsa",
             description:
               "Transfer money worldwide and pay across 180+ countries with your Marsa card.",
           },
@@ -98,8 +98,8 @@ export default function Page() {
       />
 
       <CTACard
-        title="Simplify Your Finance Wherever Life Takes You"
-        primaryCta={{ label: "Open A Personal Account", href: "/get-started?type=personal" }}
+        title="Simplify your finance wherever life takes you"
+        primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="card-stack"
       />

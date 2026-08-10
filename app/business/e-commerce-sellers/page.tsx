@@ -10,7 +10,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { IconChart, IconGlobe, IconExchange } from "@/components/icons";
 
 export const metadata: Metadata = buildMetadata({
-  title: "EU Business Account For E-Commerce Sellers",
+  title: "EU business account for e-commerce sellers",
   description:
     "An EU business account for e-commerce sellers. Get an IBAN accepted by Amazon, Shopify and Stripe — receive payouts locally and convert at real interbank rates.",
   path: "/business/e-commerce-sellers",
@@ -25,10 +25,10 @@ export default function Page() {
           { label: "Solutions" },
           { label: "E-Commerce Sellers" },
         ]}
-        title="EU Business Account For E-Commerce Sellers"
-        description="Optimised Receiving From Amazon, Shopify, Stripe, And All Major Marketplaces. Settle Inside SEPA."
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        title="EU business account for e-commerce sellers"
+        description="Optimised receiving from Amazon, Shopify, Stripe, and all major marketplaces. Settle inside SEPA."
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="phone-accounts"
         tone="deep"
       />
@@ -37,7 +37,7 @@ export default function Page() {
         items={[
           {
             icon: <IconChart />,
-            title: "Marketplace-Ready IBAN",
+            title: "Marketplace-ready IBAN",
             description:
               "Accepted by Amazon, Shopify, Stripe, PayPal, Etsy, Wayfair and 100+ marketplaces.",
           },
@@ -49,7 +49,7 @@ export default function Page() {
           },
           {
             icon: <IconExchange />,
-            title: "Convert At Interbank Rate",
+            title: "Convert at interbank rate",
             description:
               "Bring your global earnings to your home currency at real interbank rates.",
           },
@@ -57,8 +57,8 @@ export default function Page() {
       />
 
       <ProcessSteps
-        eyebrow="How It Works"
-        title="Plug Marsa Into Your Marketplace Stack"
+        eyebrow="How it works"
+        title="Plug Marsa into your marketplace stack"
         steps={[
           {
             number: "01",
@@ -72,7 +72,7 @@ export default function Page() {
           },
           {
             number: "03",
-            title: "Settle In Your Currency",
+            title: "Settle in your currency",
             description: "Convert payouts to your home currency at interbank rates — instantly.",
           },
         ]}
@@ -120,9 +120,9 @@ export default function Page() {
 
       <CTACard
         eyebrow="For E-Commerce"
-        title="Open Your EU E-Commerce Business Account"
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        title="Open your EU e-commerce business account"
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="coin-warm"
       />
     </>

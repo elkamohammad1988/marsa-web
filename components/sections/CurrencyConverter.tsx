@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Container } from "@/components/ui/Container";
+import { Select } from "@/components/ui/Select";
+import { IconExchange } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import {
   FX_CURRENCIES,
@@ -14,9 +16,7 @@ import {
 
 const RateChart = dynamic(() => import("./RateChart"), {
   ssr: false,
-  loading: () => (
-    <div className="h-full w-full animate-pulse rounded-card bg-surface-tint-2" />
-  ),
+  loading: () => <div className="skeleton h-full w-full rounded-card" />,
 });
 
 type CurrencyConverterProps = {
@@ -103,11 +103,33 @@ export function CurrencyConverter({
   }
 
   return (
-    <section className="bg-surface-alt pb-12 pt-10 md:pb-16 md:pt-14">
+    <section className="relative isolate overflow-hidden bg-surface-alt pb-12 pt-10 md:pb-16 md:pt-14">
+      {/* The panel is the product on this page, so it gets a light source of
+          its own rather than sitting on the flat section colour: warm in
+          front, the cool `--halo` behind and offset, same two-light rule the
+          hero and the process band are built on. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-24 top-0 -z-10 h-[26rem] w-[26rem] rounded-full bg-brand/10 blur-[120px]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-32 bottom-0 -z-10 h-[22rem] w-[22rem] animate-drift rounded-full bg-halo/10 blur-[130px]"
+      />
       <Container>
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-14">
+        {/*
+          The panel column is now the wider of the two (was 1.05fr copy /
+          1fr panel). The copy beside it is a headline and three lines of
+          prose, both of which reflow happily; the panel is a fixed-shape
+          control containing two currency pickers and two monetary figures,
+          and at the old split each half resolved to 198px — too narrow to
+          hold a 24px figure and a currency chip at once, so "1000" rendered
+          as "100" with the last digit clipped. Width should go to the side
+          that cannot give any up.
+        */}
+        <div className="grid grid-cols-1 gap-10 xl:grid-cols-[0.9fr_1.1fr] xl:items-center xl:gap-12">
           <div>
-            <HeadingTag className="text-display font-bold tracking-tight text-ink">
+            <HeadingTag className="text-gradient-hero text-display font-bold tracking-tight">
               {title}
             </HeadingTag>
             <p className="mt-5 max-w-xl text-base text-ink-muted md:text-lg">{subtitle}</p>
@@ -115,20 +137,36 @@ export function CurrencyConverter({
               {["ECB reference rates", "30 currencies", "No account needed"].map((l) => (
                 <li
                   key={l}
-                  className="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-xs font-medium ring-1 ring-line"
+                  className="inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-xs font-medium shadow-card ring-1 ring-line transition-all duration-200 hover:-translate-y-px hover:ring-brand-strong/40"
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand-gradient shadow-glow-sm" />
                   {l}
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="rounded-card-lg bg-card p-5 shadow-card md:p-7">
-            <div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-[1fr_auto_1fr]">
-              <div className="rounded-card bg-surface-tint-2 p-4">
+          <div className="gradient-ring relative rounded-card-lg border border-line bg-card p-5 shadow-e2 md:p-7">
+            {/*
+              `minmax(0,1fr)`, not `1fr`.
+
+              `1fr` is shorthand for `minmax(auto, 1fr)`, so a column never
+              shrinks below its own min-content however much the `fr` share
+              says it should. The "You Send" column contains a number input
+              whose min-content includes the UA spinner, so it claimed its
+              intrinsic width first and the remaining space went to "They Get":
+              the two halves of a symmetrical control resolved to **419px and
+              182px**. It reads as a misaligned layout because it is one — the
+              two panels are supposed to be mirror images.
+
+              Flooring the minimum at 0 lets both columns take an equal share
+              and lets their contents shrink, which is also what stopped the
+              currency chip overflowing the right-hand panel by 38px.
+            */}
+            <div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+              <div className="rounded-card bg-surface-tint-2 p-4 ring-1 ring-line transition-shadow duration-200 focus-within:ring-brand-strong/50">
                 <label htmlFor="fx-amount" className="text-xs font-medium text-ink-muted">
-                  You Send
+                  You send
                 </label>
                 <div className="mt-2 flex items-center gap-3">
                   <input
@@ -151,23 +189,23 @@ export function CurrencyConverter({
                      * figure beside it stayed right, which is why this
                      * survived: it is only visible to someone looking.
                      */
-                    className="min-w-0 flex-1 bg-transparent text-2xl font-semibold text-ink outline-none"
+                    className="min-w-0 flex-1 bg-transparent text-xl font-semibold tabular-nums text-ink outline-none"
                   />
                   <label htmlFor="fx-from" className="sr-only">
                     From currency
                   </label>
-                  <select
+                  <Select
+                    variant="chip"
                     id="fx-from"
                     value={from}
                     onChange={(e) => setFrom(e.target.value)}
-                    className="rounded-full bg-card px-3 py-1.5 text-sm font-medium ring-1 ring-line"
                   >
                     {FX_CURRENCIES.map((c) => (
                       <option key={c.code} value={c.code}>
                         {c.flag} {c.code}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               </div>
 
@@ -175,20 +213,37 @@ export function CurrencyConverter({
                 type="button"
                 onClick={swap}
                 aria-label={`Swap ${from} and ${to}`}
-                className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-on-brand transition-colors hover:bg-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2"
+                className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-cta-gradient text-on-brand shadow-cta transition-transform duration-300 hover:rotate-180 hover:shadow-cta-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2"
               >
-                <span aria-hidden>⇄</span>
+                {/*
+                  Was the text glyph "⇄" (U+21C4). A character, not an icon:
+                  its weight, size and vertical centring came from whichever
+                  font on the visitor's machine happened to cover that
+                  codepoint, so the control looked different on every OS and
+                  matched none of the site's other icons. This one inherits
+                  stroke weight from the shared icon set.
+                */}
+                <IconExchange aria-hidden className="h-4 w-4" />
               </button>
 
-              <div className="rounded-card bg-surface-tint-2 p-4">
-                <span className="text-xs font-medium text-ink-muted">They Get</span>
+              <div className="rounded-card bg-surface-tint-2 p-4 ring-1 ring-line transition-shadow duration-200 focus-within:ring-brand-strong/50">
+                <span className="text-xs font-medium text-ink-muted">They get</span>
                 <div className="mt-2 flex items-center gap-3">
                   <output
                     htmlFor="fx-amount fx-from fx-to"
-                    className="w-full text-2xl font-semibold text-ink"
+                    /*
+                     * `min-w-0 flex-1`, for the reason given on the amount
+                     * input above — this is the same bug on the other side of
+                     * the control, which the earlier fix did not reach.
+                     * `w-full` resolves to 100% of the row and then refuses to
+                     * shrink past its content, so the output plus the gap plus
+                     * the currency chip exceeded the panel and pushed the chip
+                     * out through the right-hand edge.
+                     */
+                    className="figure min-w-0 flex-1 text-xl font-semibold text-ink"
                   >
                     {status === "loading" && converted == null ? (
-                      <span className="inline-block h-7 w-24 animate-pulse rounded bg-line" />
+                      <span className="skeleton inline-block h-7 w-24 rounded" />
                     ) : status === "error" ? (
                       <span className="text-base font-medium text-ink-subtle">—</span>
                     ) : (
@@ -198,18 +253,18 @@ export function CurrencyConverter({
                   <label htmlFor="fx-to" className="sr-only">
                     To currency
                   </label>
-                  <select
+                  <Select
+                    variant="chip"
                     id="fx-to"
                     value={to}
                     onChange={(e) => setTo(e.target.value)}
-                    className="rounded-full bg-card px-3 py-1.5 text-sm font-medium ring-1 ring-line"
                   >
                     {FX_CURRENCIES.map((c) => (
                       <option key={c.code} value={c.code}>
                         {c.flag} {c.code}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -221,7 +276,10 @@ export function CurrencyConverter({
                 ) : rate != null ? (
                   <>
                     1 {fromCcy.code} ={" "}
-                    <span className="font-semibold text-ink">{rate.toFixed(4)}</span> {toCcy.code}
+                    <span className="figure font-semibold tabular-nums text-ink">
+                      {rate.toFixed(4)}
+                    </span>{" "}
+                    {toCcy.code}
                   </>
                 ) : (
                   <span className="text-ink-subtle">Loading rate…</span>
@@ -247,7 +305,7 @@ export function CurrencyConverter({
               ) : points.length > 0 ? (
                 <RateChart points={points} from={from} to={to} />
               ) : (
-                <div className="h-full w-full animate-pulse rounded-card bg-surface-tint-2" />
+                <div className="skeleton h-full w-full rounded-card" />
               )}
             </div>
 
@@ -260,7 +318,9 @@ export function CurrencyConverter({
                   aria-pressed={range === r.id}
                   className={cn(
                     "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-                    range === r.id ? "bg-brand text-on-brand" : "text-ink-muted hover:bg-ink/5",
+                    range === r.id
+                      ? "bg-cta-gradient text-on-brand shadow-glow-sm"
+                      : "text-ink-muted hover:bg-ink/5 hover:text-ink",
                   )}
                 >
                   {r.label}

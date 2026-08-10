@@ -15,7 +15,7 @@ type FAQProps = {
 };
 
 export function FAQ({
-  title = "Frequently Asked Questions",
+  title = "Frequently asked questions",
   description,
   items,
   tone = "tint",
@@ -25,8 +25,19 @@ export function FAQ({
     <Section tone={tone} size="lg">
       {emitSchema && <JsonLd data={faqSchema(items)} />}
       <Container>
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
-          <div>
+        {/*
+          The left column holds a heading and one line of copy against an
+          accordion three times its height, so it bottomed out with roughly
+          300px of empty column beneath it — the page's largest single void,
+          directly beside its densest block.
+
+          Sticking it rather than padding it is the fix: the heading now
+          travels with the questions instead of scrolling away, so the space
+          below it is doing something (it is the room the heading needs to
+          move in) rather than merely being empty.
+        */}
+        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
+          <div className="lg:sticky lg:top-28">
             <Heading level="h2" className={tone === "deep" ? "text-white" : undefined}>
               {title}
             </Heading>

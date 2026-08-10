@@ -11,7 +11,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { IconBank, IconExchange, IconLightning } from "@/components/icons";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Open An EU Business Account For Non-Residents",
+  title: "Open an EU business account for non-residents",
   description:
     "Open an EU business account with a real IBAN as a non-resident. Marsa onboards non-EU companies online in 24–48h — SEPA payments, 15+ currencies, bulk payouts.",
   path: "/business/eu-business-account",
@@ -26,9 +26,9 @@ export default function Page() {
           { label: "Business" },
           { label: "EU Business Account" },
         ]}
-        title="Open An EU Business Account For Non-Residents"
-        description="European Business IBAN For Modern Operations. No Branch Visits. Funds Settle Inside SEPA In Seconds."
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
+        title="Open an EU business account for non-residents"
+        description="European business IBAN for modern operations. No branch visits. Funds settle inside SEPA in seconds."
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="phone-home"
         tone="deep"
@@ -59,7 +59,7 @@ export default function Page() {
 
       <ProcessSteps
         eyebrow="3 Step Onboarding"
-        title="Open Your EU Business Account Online"
+        title="Open your EU business account online"
         description="No travel. No legalese. Fully digital onboarding for non-residents."
         steps={[
           {
@@ -85,7 +85,7 @@ export default function Page() {
 
       <ComparisonTable
         eyebrow="Marsa Vs Traditional Banks"
-        title="A Business Account Without The Friction"
+        title="A business account without the friction"
         rows={[
           { label: "Account Opening", marsa: "Fully Online", traditional: "In-person, 2-6 weeks" },
           { label: "EU IBAN", marsa: "Yes", traditional: "Often denied to non-residents" },
@@ -140,9 +140,9 @@ export default function Page() {
 
       <CTACard
         eyebrow="For Business"
-        title="Manage Your Business Finance Globally With Marsa"
-        primaryCta={{ label: "Open A Business Account", href: "/get-started?type=business" }}
-        secondaryCta={{ label: "Talk To Sales", href: "/contact?topic=sales" }}
+        title="Manage your business finance globally with Marsa"
+        primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
+        secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="coin-warm"
       />
     </>

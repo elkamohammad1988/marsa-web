@@ -29,6 +29,7 @@ import path from "node:path";
 const ROOT = process.cwd();
 const css = readFileSync(path.join(ROOT, "styles", "globals.css"), "utf8");
 const revealSource = readFileSync(path.join(ROOT, "components", "ui", "Reveal.tsx"), "utf8");
+const countUpSource = readFileSync(path.join(ROOT, "components", "ui", "CountUp.tsx"), "utf8");
 const tailwind = readFileSync(path.join(ROOT, "tailwind.config.ts"), "utf8");
 
 /** Every declaration block written for exactly this selector, in source order. */
@@ -147,5 +148,61 @@ describe("reduced motion never leaves an element mid-animation", () => {
       expect(end?.[0], `a 0%-opacity keyframe near index ${start.index} has no visible end`).
         toMatch(/opacity:\s*"1"/);
     }
+  });
+});
+
+/**
+ * The same property, applied to a figure rather than a block: a statistic is
+ * content, and an animation is not allowed to be the thing that supplies it.
+ *
+ * `CountUp` is the riskiest shape of this in the codebase, because the honest
+ * implementation and the broken one differ by one line. Start the state at `0`
+ * and the effect owns the number — with the bundle missing, an observer absent,
+ * or reduced motion honoured by returning early, the page is left showing a
+ * zero balance that is not merely unanimated but *wrong*. Start it at the value
+ * and the animation can only ever replace a correct figure with itself.
+ */
+describe("a counted figure is content, not an animation", () => {
+  it("renders the authored value before any effect runs", () => {
+    // The server emits this and the component mounts holding it. Nothing in
+    // the initial render is a placeholder waiting to be corrected.
+    expect(countUpSource).toMatch(/useState\(value\)/);
+    expect(countUpSource).not.toMatch(/useState\(\s*(?:0|"0"|`0`)\s*\)/);
+  });
+
+  it("writes a zero only after the element has been seen", () => {
+    // The one legitimate zero is the animation's first frame, and it is written
+    // inside the observer callback — after a browser has confirmed it can
+    // animate. A zero written anywhere earlier is a zero somebody can be left
+    // looking at.
+    const zeroWrites = [...countUpSource.matchAll(/format\.format\(0\)/g)];
+    expect(zeroWrites.length, "expected exactly one zero write").toBe(1);
+    expect(zeroWrites[0].index).toBeGreaterThan(countUpSource.indexOf("new IntersectionObserver("));
+  });
+
+  it("leaves the number alone when the reader has asked for less motion", () => {
+    expect(countUpSource).toMatch(/prefers-reduced-motion: reduce/);
+    // Bails before the observer is ever constructed, so the reduced-motion path
+    // is "the value, unmoved" rather than "the value, after a jump from zero".
+    const bail = countUpSource.indexOf("prefers-reduced-motion");
+    expect(bail).toBeGreaterThan(-1);
+    expect(bail).toBeLessThan(countUpSource.indexOf("new IntersectionObserver("));
+  });
+
+  it("does nothing at all where there is no observer to ask", () => {
+    expect(countUpSource).toMatch(/typeof IntersectionObserver === "undefined"/);
+  });
+
+  it("ends on the authored string rather than on a formatted approximation", () => {
+    // The final frame is assigned from `value`, so no rounding drift and no
+    // lost trailing zero can survive the animation.
+    expect(countUpSource).toMatch(/else setDisplay\(value\)/);
+  });
+
+  it("announces the figure once, not sixty times a second", () => {
+    // Assistive technology reads the static value; the moving text is marked
+    // decorative so intermediate frames are never announced.
+    expect(countUpSource).toMatch(/aria-hidden>\{display\}/);
+    expect(countUpSource).toMatch(/className="sr-only">\{value\}/);
   });
 });

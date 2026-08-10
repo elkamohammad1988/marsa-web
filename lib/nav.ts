@@ -10,38 +10,38 @@ export const mainNav: NavGroup[] = [
   {
     label: "Product",
     children: [
-      { label: "Interactive Demo", href: "/demo" },
-      { label: "EU Business Account", href: "/business/eu-business-account" },
-      { label: "Multi-Currency IBAN (Business)", href: "/business/multi-currency-iban" },
-      { label: "Multi-Currency IBAN (Personal)", href: "/personal/multi-currency-iban" },
-      { label: "SEPA Transfers", href: "/personal/sepa-transfers" },
+      { label: "Interactive demo", href: "/demo" },
+      { label: "EU business account", href: "/business/eu-business-account" },
+      { label: "Multi-currency IBAN (business)", href: "/business/multi-currency-iban" },
+      { label: "Multi-currency IBAN (personal)", href: "/personal/multi-currency-iban" },
+      { label: "SEPA transfers", href: "/personal/sepa-transfers" },
       { label: "Pricing", href: "/pricing" },
     ],
   },
   {
     label: "Solutions",
     children: [
-      { label: "E-Commerce Sellers", href: "/business/e-commerce-sellers" },
-      { label: "Import & Export", href: "/solutions/import-export" },
-      { label: "Agencies & Freelancers", href: "/solutions/agencies-freelancers" },
-      { label: "Company Formation", href: "/solutions/company-formation" },
+      { label: "E-commerce sellers", href: "/business/e-commerce-sellers" },
+      { label: "Import & export", href: "/solutions/import-export" },
+      { label: "Agencies & freelancers", href: "/solutions/agencies-freelancers" },
+      { label: "Company formation", href: "/solutions/company-formation" },
     ],
   },
   {
     label: "Tools",
     children: [
-      { label: "Currency Converter", href: "/tools/currency-converter" },
-      { label: "IBAN Checker", href: "/tools/iban-checker" },
-      { label: "SEPA Vs SWIFT", href: "/tools/sepa-vs-swift" },
-      { label: "FX Rate Calculator", href: "/tools/fx-calculator" },
+      { label: "Currency converter", href: "/tools/currency-converter" },
+      { label: "IBAN checker", href: "/tools/iban-checker" },
+      { label: "SEPA vs SWIFT", href: "/tools/sepa-vs-swift" },
+      { label: "FX rate calculator", href: "/tools/fx-calculator" },
     ],
   },
   {
     label: "Resources",
     children: [
       { label: "Blog", href: "/blog" },
-      { label: "How It Works (Personal)", href: "/personal/how-it-works" },
-      { label: "How It Works (Business)", href: "/business/how-it-works" },
+      { label: "How it works (personal)", href: "/personal/how-it-works" },
+      { label: "How it works (business)", href: "/business/how-it-works" },
       { label: "FAQ", href: "/faq" },
     ],
   },
@@ -52,36 +52,36 @@ export const footerColumns: Array<{ title: string; links: NavLink[] }> = [
   {
     title: "Product",
     links: [
-      { label: "Interactive Demo", href: "/demo" },
-      { label: "EU Business Account", href: "/business/eu-business-account" },
-      { label: "Multi-Currency IBAN", href: "/business/multi-currency-iban" },
-      { label: "SEPA Payments", href: "/personal/sepa-transfers" },
+      { label: "Interactive demo", href: "/demo" },
+      { label: "EU business account", href: "/business/eu-business-account" },
+      { label: "Multi-currency IBAN", href: "/business/multi-currency-iban" },
+      { label: "SEPA payments", href: "/personal/sepa-transfers" },
       { label: "Pricing", href: "/pricing" },
     ],
   },
   {
     title: "Solutions",
     links: [
-      { label: "E-Commerce Sellers", href: "/business/e-commerce-sellers" },
-      { label: "Import & Export", href: "/solutions/import-export" },
-      { label: "Agencies & Freelancers", href: "/solutions/agencies-freelancers" },
-      { label: "Company Formation", href: "/solutions/company-formation" },
+      { label: "E-commerce sellers", href: "/business/e-commerce-sellers" },
+      { label: "Import & export", href: "/solutions/import-export" },
+      { label: "Agencies & freelancers", href: "/solutions/agencies-freelancers" },
+      { label: "Company formation", href: "/solutions/company-formation" },
     ],
   },
   {
     title: "Tools",
     links: [
-      { label: "Currency Converter", href: "/tools/currency-converter" },
-      { label: "IBAN Checker", href: "/tools/iban-checker" },
-      { label: "SEPA Vs SWIFT", href: "/tools/sepa-vs-swift" },
-      { label: "FX Rate Calculator", href: "/tools/fx-calculator" },
+      { label: "Currency converter", href: "/tools/currency-converter" },
+      { label: "IBAN checker", href: "/tools/iban-checker" },
+      { label: "SEPA vs SWIFT", href: "/tools/sepa-vs-swift" },
+      { label: "FX rate calculator", href: "/tools/fx-calculator" },
     ],
   },
   {
     title: "Resources",
     links: [
       { label: "Blog", href: "/blog" },
-      { label: "How It Works", href: "/personal/how-it-works" },
+      { label: "How it works", href: "/personal/how-it-works" },
       { label: "FAQ", href: "/faq" },
       { label: "Contact", href: "/contact" },
     ],
@@ -89,7 +89,7 @@ export const footerColumns: Array<{ title: string; links: NavLink[] }> = [
   {
     title: "Company",
     links: [
-      { label: "About Us", href: "/company/about" },
+      { label: "About us", href: "/company/about" },
       { label: "Contact", href: "/contact" },
       { label: "Compliance", href: "/company/compliance" },
     ],
@@ -97,10 +97,12 @@ export const footerColumns: Array<{ title: string; links: NavLink[] }> = [
   {
     title: "Legal",
     links: [
-      { label: "Privacy Policy", href: "/legal/privacy" },
-      { label: "Terms Of Service", href: "/legal/terms" },
-      { label: "Cookie Policy", href: "/legal/cookies" },
-      { label: "Compliance", href: "/company/compliance" },
+      { label: "Privacy policy", href: "/legal/privacy" },
+      { label: "Terms of service", href: "/legal/terms" },
+      { label: "Cookie policy", href: "/legal/cookies" },
+      // `Compliance` is not repeated here. It appeared in both this column and
+      // Company, same label and same href — one page listed twice in one
+      // footer, eight inches apart.
     ],
   },
 ];
@@ -118,12 +120,18 @@ export const footerColumns: Array<{ title: string; links: NavLink[] }> = [
  * would still take sitewide. The precise disclosure of what an account stores
  * lives in `ConceptBadge`, which is also on every page and has room to say it
  * exactly.
+ *
+ * `Next.js 15 · React 19` was removed from the list. A framework version is a
+ * fact about the repository, not about the product, and a customer reading the
+ * foot of a banking page learns nothing from it — what it signals is that the
+ * page was built to impress developers. The vendor name went the same way:
+ * "Supabase Auth + row-level security" says who supplies the database, where
+ * the reassuring part is that per-row permissions exist at all.
  */
 export const footerBadges = [
   "Concept build",
-  "Live ECB rates",
+  "Live ECB reference rates",
   "ISO 13616 IBAN validation",
-  "Supabase Auth + row-level security",
-  "Next.js 15 · React 19",
+  "Row-level database security",
   "Open source",
 ];

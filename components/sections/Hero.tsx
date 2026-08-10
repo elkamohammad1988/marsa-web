@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
 import { Button } from "@/components/ui/Button";
+import { CountUp } from "@/components/ui/CountUp";
+import { PointerGlow } from "@/components/ui/PointerGlow";
 import { BrandArt, type ArtName } from "@/components/art/BrandArt";
 import { BreadcrumbEyebrow } from "./BreadcrumbEyebrow";
 import { cn } from "@/lib/utils";
@@ -75,18 +77,45 @@ export function Hero({
         className,
       )}
     >
-      {/* Ambient decoration. Two slow-drifting light sources plus grain: enough
-          depth to feel designed, cheap enough to stay on the main thread. */}
+      {/* Ambient decoration, in depth order: mesh furthest back, then the two
+          drifting lights, then the grid, then grain over everything. The third
+          light is `halo` — cool, low, and behind the warm pair, which is what
+          stops the backdrop reading as one flat magenta wash. */}
+      {/*
+        Every light below is sized in absolute units chosen against a 1440px
+        canvas, where they read as the depth the comment above describes. On a
+        390px phone the first orb alone is 480px across — wider than the
+        screen — so all three plus `mesh-deep` (brand at 0.38) and `lightfield`
+        overlap across the entire viewport and resolve to exactly the one flat
+        magenta wash the halo exists to prevent. It was the strongest "cheap
+        gradient" signal left in the product, on the viewport most visitors
+        will actually use.
+
+        Each light is therefore scaled and dimmed below `sm` only; from `sm`
+        upward the values are byte-for-byte what they were, so the desktop
+        composition these were tuned for is untouched.
+      */}
       {tone === "spotlight" && (
         <>
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-mesh-deep" />
           <div
             aria-hidden
-            className="pointer-events-none absolute -left-24 -top-32 h-[30rem] w-[30rem] animate-aurora-a rounded-full bg-brand-soft/25 blur-[110px]"
+            className="pointer-events-none absolute inset-0 bg-mesh-deep opacity-55 sm:opacity-100"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-20 top-10 h-[26rem] w-[26rem] animate-aurora-b rounded-full bg-accent/15 blur-[120px]"
+            className="pointer-events-none absolute inset-0 lightfield opacity-70 sm:opacity-100"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-24 -top-32 h-[16rem] w-[16rem] animate-aurora-a rounded-full bg-brand-soft/25 blur-[110px] sm:h-[30rem] sm:w-[30rem]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-20 top-10 h-[14rem] w-[14rem] animate-aurora-b rounded-full bg-accent/15 blur-[120px] sm:h-[26rem] sm:w-[26rem]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-40 left-1/3 h-[13rem] w-[18rem] animate-drift rounded-full bg-halo/15 blur-[130px] sm:h-[24rem] sm:w-[34rem]"
           />
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid opacity-60" />
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-noise" />
@@ -112,13 +141,18 @@ export function Hero({
             {eyebrow && (
               <span
                 className={cn(
-                  "mb-5 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]",
+                  "sheen relative mb-5 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]",
                   isDark
-                    ? "border border-white/15 bg-white/[0.04] text-brand-strong"
+                    ? "border border-white/15 bg-white/[0.04] text-brand-strong backdrop-blur"
                     : "border border-line bg-card text-brand-strong shadow-card",
                 )}
               >
-                <span className="h-1.5 w-1.5 rounded-full bg-brand-strong shadow-glow-sm" />
+                {/* A dot with a ring pulsing out of it, rather than a dot that
+                    dims and brightens in place. */}
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-glow-pulse rounded-full bg-brand-strong opacity-70" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-strong shadow-glow-sm" />
+                </span>
                 {eyebrow}
               </span>
             )}
@@ -144,13 +178,13 @@ export function Hero({
                   <li
                     key={c.label}
                     className={cn(
-                      "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium",
+                      "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 hover:-translate-y-px",
                       isDark
-                        ? "border border-white/10 bg-white/[0.06] text-white backdrop-blur"
-                        : "bg-card text-ink shadow-card ring-1 ring-line",
+                        ? "border border-white/10 bg-white/[0.06] text-white backdrop-blur hover:border-brand-strong/40 hover:bg-white/[0.1]"
+                        : "bg-card text-ink shadow-card ring-1 ring-line hover:ring-brand-strong/40",
                     )}
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-brand-soft" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-gradient shadow-glow-sm" />
                     {c.label}
                     {c.value && (
                       <span className={isDark ? "text-white/60" : "text-ink-muted"}>{c.value}</span>
@@ -187,7 +221,21 @@ export function Hero({
           </div>
 
           {visual ? (
-            <div className="animate-scale-in [animation-delay:120ms]">{visual}</div>
+            <div className="relative animate-scale-in [animation-delay:120ms]">
+              {/* Two lights revolving behind the panel, one warm and one cool,
+                  half a turn apart. Slow enough (26s) that it registers as the
+                  panel being lit rather than as something moving. */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -z-10 grid place-items-center"
+              >
+                <div className="relative h-[108%] w-[108%] animate-orbit rounded-full">
+                  <span className="absolute left-1/2 top-0 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/45 blur-3xl" />
+                  <span className="absolute bottom-0 left-1/2 h-24 w-24 -translate-x-1/2 translate-y-1/2 rounded-full bg-halo/40 blur-3xl" />
+                </div>
+              </div>
+              {visual}
+            </div>
           ) : (
             art && (
               <div className="relative animate-scale-in [animation-delay:120ms]">
@@ -220,39 +268,55 @@ export function Hero({
         </div>
 
         {stats && stats.length > 0 && (
-          <dl
-            className={cn(
-              "mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-card-lg border md:mt-16 md:grid-cols-4",
-              isDark ? "border-white/10 bg-white/10" : "border-line bg-line",
-            )}
-          >
-            {stats.map((s) => (
-              <div
-                key={s.label}
-                className={cn("px-5 py-6 text-center", isDark ? "bg-surface-deep" : "bg-canvas")}
-              >
-                <dt className="sr-only">{s.label}</dt>
-                <dd>
-                  <span
-                    className={cn(
-                      "num-glow block font-display text-3xl font-bold tabular-nums tracking-tight md:text-4xl",
-                      isDark ? "text-white" : "text-ink",
-                    )}
-                  >
-                    {s.value}
-                  </span>
-                  <span
-                    className={cn(
-                      "mt-1 block text-xs",
-                      isDark ? "text-white/55" : "text-ink-subtle",
-                    )}
-                  >
-                    {s.label}
-                  </span>
-                </dd>
-              </div>
-            ))}
-          </dl>
+          <PointerGlow>
+            <dl
+              className={cn(
+                "mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-card-lg border shadow-e2 md:mt-16 md:grid-cols-4",
+                isDark ? "border-white/10 bg-white/10" : "border-line bg-line",
+              )}
+            >
+              {stats.map((s) => (
+                <div
+                  key={s.label}
+                  data-glow
+                  className={cn(
+                    "spotlight relative px-5 py-7 text-center transition-colors duration-300",
+                    isDark ? "bg-surface-deep" : "bg-canvas",
+                  )}
+                >
+                  <dt className="sr-only">{s.label}</dt>
+                  <dd>
+                    <CountUp
+                      value={s.value}
+                      className={cn(
+                        "figure block font-display text-3xl font-bold tabular-nums tracking-tight md:text-4xl",
+                        isDark ? "text-white" : "text-ink",
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "mt-1.5 block text-xs",
+                        isDark ? "text-white/55" : "text-ink-subtle",
+                      )}
+                    >
+                      {s.label}
+                    </span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </PointerGlow>
+        )}
+
+        {/* Only where the page continues into a long scroll, and only as a
+            hint: the track is drawn unconditionally, and the dot inside it is
+            the only part that moves. */}
+        {tone === "spotlight" && (
+          <div aria-hidden className="mt-10 flex justify-center md:mt-12">
+            <span className="flex h-9 w-[22px] items-start justify-center rounded-full border border-white/20 pt-1.5">
+              <span className="h-1.5 w-1.5 animate-scroll-hint rounded-full bg-brand-strong" />
+            </span>
+          </div>
         )}
       </Container>
     </section>
