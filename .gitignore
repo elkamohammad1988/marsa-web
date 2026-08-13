@@ -121,7 +121,20 @@ portfolio-screenshots/*
 !portfolio-screenshots/05-analytics.png
 !portfolio-screenshots/06-iban-validation.png
 !portfolio-screenshots/07-mobile.png
-!portfolio-screenshots/08-pricing.png
+
+# ---------------------------------------------------------------------------
+# Portfolio video.
+#
+# scripts/record-demo.mjs writes the raw take here and encodes it alongside.
+# None of it is tracked, and that is a deliberate difference from the
+# screenshots above: the eight PNGs are embedded in README.md, so the repository
+# has to carry them, while the video is uploaded to a listing and read from
+# nowhere in this codebase. Twenty-seven megabytes of takes would sit in the
+# history of a public repository forever to serve a file nothing here loads.
+#
+# Regenerate locally with:  npm run build && npm start   (then) npm run record
+# ---------------------------------------------------------------------------
+portfolio-video/
 
 # ---------------------------------------------------------------------------
 # Throwaway scripts.
