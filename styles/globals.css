@@ -737,9 +737,209 @@
     }
   }
 
+  /**
+   * Direction, for the one case where it means something.
+   *
+   * A reveal that travels sideways is not a nicer fade — it is a claim about
+   * where the thing came from, and it is only worth making where the content
+   * is already making it. On the corridor diagram the left column is money
+   * arriving and the right column is money leaving, which is what the arcs
+   * between them draw; having the two halves enter along the same axis is the
+   * difference between motion that was applied to the page and motion that was
+   * designed for it. Everywhere else, `up`.
+   *
+   * `.reveal.is-visible` outranks these on specificity, so the resting state
+   * stays a single rule and a variant can never strand an element off-centre.
+   */
+  @media (scripting: enabled) {
+    .reveal-left {
+      transform: translate3d(-32px, 0, 0);
+    }
+    .reveal-right {
+      transform: translate3d(32px, 0, 0);
+    }
+  }
+
+  /**
+   * Group reveal — a row, grid or list arriving one child at a time.
+   *
+   * Same contract as `.reveal`, for the same reason: **visible by default**,
+   * hidden only where scripting exists to unhide it, and carrying a CSS-only
+   * fallback so a bundle that never arrives costs a delay rather than the
+   * content. `components/ui/Stagger.tsx` adds `.is-visible` when the group
+   * enters the viewport; the delays are here rather than in inline styles so
+   * the component never has to clone a child to reach it.
+   *
+   * Children move with `translate`, not `transform`, and that is load-bearing.
+   * Nearly everything this wraps is a `.card-hover` surface whose hover state
+   * writes `transform: translateY(-3px)`. Had the reveal used `transform` too,
+   * the two rules would be competing for one property at equal specificity and
+   * the cascade would decide by source order — which is how a reveal silently
+   * deletes a hover. Independent transform properties multiply instead of
+   * overwriting, so the lift survives the reveal and vice versa.
+   */
+  .stagger > * {
+    opacity: 1;
+    translate: none;
+  }
+
+  @media (scripting: enabled) {
+    .stagger > * {
+      opacity: 0;
+      translate: 0 var(--stagger-shift, 20px);
+      transition: opacity 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+        translate 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: stagger-fallback 0.62s cubic-bezier(0.16, 1, 0.3, 1) 4s forwards;
+    }
+    .stagger.is-visible > * {
+      opacity: 1;
+      translate: none;
+      animation: none;
+    }
+
+    /*
+     * Ten steps, written out because CSS cannot multiply an `nth-child` index.
+     * Ten is not arbitrary: it covers every group on the site (the longest is
+     * an eight-row comparison table), and a group longer than that wants a
+     * smaller `--stagger-step` rather than a longer tail — past about 700ms
+     * the last child is no longer arriving with the others, it is late.
+     */
+    .stagger > *:nth-child(2) {
+      transition-delay: calc(var(--stagger-step, 70ms) * 1);
+    }
+    .stagger > *:nth-child(3) {
+      transition-delay: calc(var(--stagger-step, 70ms) * 2);
+    }
+    .stagger > *:nth-child(4) {
+      transition-delay: calc(var(--stagger-step, 70ms) * 3);
+    }
+    .stagger > *:nth-child(5) {
+      transition-delay: calc(var(--stagger-step, 70ms) * 4);
+    }
+    .stagger > *:nth-child(6) {
+      transition-delay: calc(var(--stagger-step, 70ms) * 5);
+    }
+    .stagger > *:nth-child(7) {
+      transition-delay: calc(var(--stagger-step, 70ms) * 6);
+    }
+    .stagger > *:nth-child(8) {
+      transition-delay: calc(var(--stagger-step, 70ms) * 7);
+    }
+    .stagger > *:nth-child(9) {
+      transition-delay: calc(var(--stagger-step, 70ms) * 8);
+    }
+    .stagger > *:nth-child(n + 10) {
+      transition-delay: calc(var(--stagger-step, 70ms) * 9);
+    }
+  }
+
+  @keyframes stagger-fallback {
+    to {
+      opacity: 1;
+      translate: none;
+    }
+  }
+
+  /**
+   * A line of type rising from behind its own baseline.
+   *
+   * The clip is what separates this from a fade: the glyphs are not
+   * semi-transparent on the way in, they are *hidden by an edge* and then
+   * uncovered — so the eye reads a physical thing moving past a mask rather
+   * than an opacity keyframe. It is the one motion on the site that exists for
+   * no reason but craft, which is why it is spent only on section headings:
+   * an effect used on everything is a template, and used once per section it
+   * is a signature.
+   *
+   * Written as a descendant rule (`.is-visible .rise`) so it works both inside
+   * a `Reveal` wrapper and as a child of a `Stagger`, without either component
+   * needing to know about it.
+   *
+   * The insets keep top, left and right fixed and animate only the bottom —
+   * same value count, same units, so the interpolation is exact. The negative
+   * verticals stop the clip from cropping ascenders, descenders and the soft
+   * text-shadow `.figure` puts under a heading figure.
+   */
+  .rise {
+    clip-path: none;
+  }
+
+  @media (scripting: enabled) {
+    .rise {
+      clip-path: inset(-40% 0 105% 0);
+      transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+        translate 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+        clip-path 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+      /* Its own fallback, and it has to be its own: `stagger-fallback` and
+         `reveal-fallback` restore opacity and position but know nothing about
+         a clip, so a `.rise` heading relying on either would time out into a
+         fully opaque, fully invisible heading. */
+      animation: rise-fallback 0.85s cubic-bezier(0.16, 1, 0.3, 1) 4s forwards;
+    }
+    .is-visible .rise,
+    .is-visible.rise {
+      clip-path: inset(-40% 0 -40% 0);
+      animation: none;
+    }
+  }
+
+  @keyframes rise-fallback {
+    to {
+      opacity: 1;
+      translate: none;
+      transform: none;
+      clip-path: inset(-40% 0 -40% 0);
+    }
+  }
+
+  /**
+   * A rule that draws itself left-to-right as its group arrives — the connector
+   * between the numbered steps, which is a line describing a sequence and so
+   * should be seen to run in the direction the sequence runs.
+   *
+   * Scoped to `.is-visible` the same way `.rise` is, so it inherits whichever
+   * observer already covers the block it sits in.
+   */
+  .draw-x {
+    transform-origin: left center;
+  }
+
+  @media (scripting: enabled) {
+    .draw-x {
+      transform: scaleX(0);
+      transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+      animation: draw-x-fallback 0.9s cubic-bezier(0.16, 1, 0.3, 1) 4s forwards;
+    }
+    .is-visible .draw-x {
+      transform: scaleX(1);
+      animation: none;
+    }
+  }
+
+  @keyframes draw-x-fallback {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
   /* Last, so it wins over the scripting block whatever order the cascade
-     resolves those two media queries in. */
+     resolves those two media queries in. `.reveal` is written on its own line
+     rather than folded into the group above it because the guard in
+     `tests/animation-visibility.test.ts` reads the final rule written for
+     exactly that selector, and a comma would hide it. */
   @media (prefers-reduced-motion: reduce) {
+    .stagger > *,
+    .rise {
+      opacity: 1;
+      transform: none;
+      translate: none;
+      clip-path: none;
+      animation: none;
+    }
+    .draw-x {
+      transform: none;
+    }
     .reveal {
       opacity: 1;
       transform: none;

@@ -47,7 +47,7 @@ export function CorridorMap() {
           <Heading level="eyebrow" className="text-brand-soft">
             One account, both directions
           </Heading>
-          <Heading level="h2" className="mt-3 text-white">
+          <Heading level="h2" className="rise mt-3 text-white">
             Get paid from anywhere. Pay out locally.
           </Heading>
           <p className="mt-4 text-white/70">
@@ -103,7 +103,13 @@ export function CorridorMap() {
           </svg>
 
           <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-[1fr_auto_1fr] lg:gap-4">
-            <Reveal>
+            {/* Each column enters along the axis its own arcs travel: inbound
+                from the left, outbound to the right, converging on the mark in
+                the middle. It is the one place on the site where the direction
+                of a reveal is saying the same thing as the diagram it is
+                revealing — which is the difference between motion applied to a
+                page and motion designed for one. */}
+            <Reveal variant="left">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
                 Money in
               </p>
@@ -126,7 +132,7 @@ export function CorridorMap() {
               </div>
             </Reveal>
 
-            <Reveal delay={200}>
+            <Reveal variant="right" delay={200}>
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/45 lg:text-right">
                 Money out
               </p>

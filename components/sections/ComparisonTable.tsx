@@ -1,6 +1,8 @@
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { Heading } from "@/components/ui/Heading";
+import { Reveal } from "@/components/ui/Reveal";
+import { Stagger } from "@/components/ui/Stagger";
 
 export type ComparisonRow = {
   label: string;
@@ -18,18 +20,18 @@ export function ComparisonTable({ eyebrow, title, rows }: ComparisonTableProps) 
   return (
     <Section tone="canvas" size="lg">
       <Container>
-        <div className="mx-auto max-w-3xl text-center">
+        <Stagger className="mx-auto max-w-3xl text-center" step={90}>
           {eyebrow && (
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-strong">
+            <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-brand-strong">
               {eyebrow}
             </span>
           )}
-          <Heading level="h2" className="mt-3">
+          <Heading level="h2" className="rise mt-3">
             {title}
           </Heading>
-        </div>
+        </Stagger>
 
-        <div className="relative mt-10 overflow-hidden rounded-card-lg border border-line shadow-e2">
+        <Reveal className="relative mt-10 overflow-hidden rounded-card-lg border border-line shadow-e2">
           {/*
             The Marsa column, lit as one continuous band from the header to the
             last row rather than as a tint repeated per cell. Two flat columns
@@ -53,23 +55,32 @@ export function ComparisonTable({ eyebrow, title, rows }: ComparisonTableProps) 
             <div className="px-3 py-3 text-center text-white/70 sm:px-5 sm:py-4">Traditional</div>
           </div>
 
-          {rows.map((r, i) => (
-            <div
-              key={r.label}
-              className={`group relative grid grid-cols-3 text-xs transition-colors duration-200 sm:text-sm ${
-                i % 2 === 0 ? "bg-card" : "bg-surface-tint-2"
-              } hover:bg-surface-tint`}
-            >
-              <div className="px-3 py-3 font-medium text-ink sm:px-5 sm:py-4">{r.label}</div>
-              <div className="relative z-20 px-3 py-3 text-center font-semibold text-ink sm:px-5 sm:py-4">
-                {r.marsa}
+          {/*
+            The rows arrive one after another rather than as a block, so the
+            table reads down the way it is meant to be read. A shorter step
+            than the card rows elsewhere on the page: six rows at 70ms would
+            still be landing most of a second after the reader reached them,
+            which stops being a rhythm and becomes a wait.
+          */}
+          <Stagger step={45}>
+            {rows.map((r, i) => (
+              <div
+                key={r.label}
+                className={`group relative grid grid-cols-3 text-xs transition-colors duration-200 sm:text-sm ${
+                  i % 2 === 0 ? "bg-card" : "bg-surface-tint-2"
+                } hover:bg-surface-tint`}
+              >
+                <div className="px-3 py-3 font-medium text-ink sm:px-5 sm:py-4">{r.label}</div>
+                <div className="relative z-20 px-3 py-3 text-center font-semibold text-ink sm:px-5 sm:py-4">
+                  {r.marsa}
+                </div>
+                <div className="px-3 py-3 text-center text-ink-muted sm:px-5 sm:py-4">
+                  {r.traditional}
+                </div>
               </div>
-              <div className="px-3 py-3 text-center text-ink-muted sm:px-5 sm:py-4">
-                {r.traditional}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </Stagger>
+        </Reveal>
       </Container>
     </Section>
   );

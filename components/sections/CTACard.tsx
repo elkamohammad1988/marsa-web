@@ -2,6 +2,7 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { Heading } from "@/components/ui/Heading";
 import { Button } from "@/components/ui/Button";
+import { Reveal } from "@/components/ui/Reveal";
 import { BrandArt, type ArtName } from "@/components/art/BrandArt";
 
 type CTACardProps = {
@@ -31,7 +32,7 @@ export function CTACard({
             last thing before the footer and the only ask on the page, so it is
             where the emphasis earns its keep — a page where every panel is
             edge-lit has nothing left to emphasise. */}
-        <div className="gradient-ring-strong isolate overflow-hidden rounded-card-lg bg-surface-deep text-white shadow-e3">
+        <Reveal className="gradient-ring-strong isolate overflow-hidden rounded-card-lg bg-surface-deep text-white shadow-e3">
           {/* Ambient light: warm from the top, cool from the right. */}
           <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-radial-glow" />
           <div
@@ -52,7 +53,11 @@ export function CTACard({
                   {eyebrow}
                 </span>
               )}
-              <Heading level="h2" className="mt-4 text-white">
+              {/* The panel's own reveal drives this: `.rise` keys off the
+                  `.is-visible` the wrapper already carries, so the closing ask
+                  uncovers its headline as the panel lands rather than needing a
+                  second observer to do it. */}
+              <Heading level="h2" className="rise mt-4 text-white">
                 {title}
               </Heading>
               {description && (
@@ -86,7 +91,7 @@ export function CTACard({
               {footnote}
             </div>
           )}
-        </div>
+        </Reveal>
       </Container>
     </Section>
   );

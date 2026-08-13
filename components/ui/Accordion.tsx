@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, type CSSProperties } from "react";
+import { useInView } from "./useInView";
 import { cn } from "@/lib/utils";
 
 export type AccordionEntry = {
@@ -33,8 +34,26 @@ export function Accordion({ items, tone = "light", className }: AccordionProps) 
   const baseId = useId();
 
   const isDark = tone === "dark";
+
+  /*
+   * The questions arrive one row at a time.
+   *
+   * This is done here rather than by wrapping the component in a `Stagger`
+   * because the rows have to be the *direct children* of the staggered element
+   * — a wrapper would only ever see one child, this component's root, and
+   * reveal the whole stack at once. Since the component is already a client
+   * component holding open/closed state, carrying its own observer costs
+   * nothing new. `.stagger` in globals.css keeps the usual guarantee: the rows
+   * are visible by default and hidden only where scripting can unhide them.
+   */
+  const { ref, visible } = useInView<HTMLDivElement>();
+
   return (
-    <div className={cn("flex flex-col", className)}>
+    <div
+      ref={ref}
+      style={{ "--stagger-step": "55ms" } as CSSProperties}
+      className={cn("stagger flex flex-col", visible && "is-visible", className)}
+    >
       {items.map((item, i) => {
         const open = openIndex === i;
         const panelId = `${baseId}-panel-${i}`;

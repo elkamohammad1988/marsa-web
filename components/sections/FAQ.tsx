@@ -2,8 +2,10 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { Heading } from "@/components/ui/Heading";
 import { Accordion, type AccordionEntry } from "@/components/ui/Accordion";
+import { Stagger } from "@/components/ui/Stagger";
 import { JsonLd } from "@/components/JsonLd";
 import { faqSchema } from "@/lib/schema";
+import { cn } from "@/lib/utils";
 
 type FAQProps = {
   title?: string;
@@ -37,8 +39,11 @@ export function FAQ({
           move in) rather than merely being empty.
         */}
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
-          <div className="lg:sticky lg:top-28">
-            <Heading level="h2" className={tone === "deep" ? "text-white" : undefined}>
+          <Stagger className="lg:sticky lg:top-28" step={90}>
+            <Heading
+              level="h2"
+              className={cn("rise", tone === "deep" && "text-white")}
+            >
               {title}
             </Heading>
             {description && (
@@ -50,7 +55,7 @@ export function FAQ({
                 {description}
               </p>
             )}
-          </div>
+          </Stagger>
           <Accordion items={items} tone={tone === "deep" ? "dark" : "light"} />
         </div>
       </Container>

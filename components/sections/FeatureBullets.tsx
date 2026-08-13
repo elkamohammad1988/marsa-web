@@ -2,6 +2,7 @@ import { FeatureIcon } from "@/components/ui/FeatureIcon";
 import { Container } from "@/components/ui/Container";
 import { PointerGlow } from "@/components/ui/PointerGlow";
 import { Section } from "@/components/ui/Section";
+import { Stagger } from "@/components/ui/Stagger";
 
 export type FeatureBullet = {
   icon: React.ReactNode;
@@ -37,18 +38,20 @@ export function FeatureBullets({ items, tone = "canvas" }: FeatureBulletsProps) 
           icon is already the second focal point, and three of them across the
           row are already the rhythm.
         */}
-        <PointerGlow className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((it) => (
-            <div
-              key={it.title}
-              data-glow
-              className="spotlight card-hover gradient-ring group relative overflow-hidden rounded-card border border-line bg-card p-6 shadow-e1"
-            >
-              <FeatureIcon tone="brand">{it.icon}</FeatureIcon>
-              <h3 className="mt-4 text-lg font-semibold text-ink">{it.title}</h3>
-              <p className="mt-2 text-sm text-ink-muted">{it.description}</p>
-            </div>
-          ))}
+        <PointerGlow>
+          <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" step={90}>
+            {items.map((it) => (
+              <div
+                key={it.title}
+                data-glow
+                className="spotlight card-hover gradient-ring group relative overflow-hidden rounded-card border border-line bg-card p-6 shadow-e1"
+              >
+                <FeatureIcon tone="brand">{it.icon}</FeatureIcon>
+                <h3 className="mt-4 text-lg font-semibold text-ink">{it.title}</h3>
+                <p className="mt-2 text-sm text-ink-muted">{it.description}</p>
+              </div>
+            ))}
+          </Stagger>
         </PointerGlow>
       </Container>
     </Section>

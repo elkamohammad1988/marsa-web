@@ -738,7 +738,15 @@ export function DemoFlow() {
 
               {step === "done" && (
                 <>
-                  <Button href="/get-started">Open a real account</Button>
+                  {/* "Open a *real* account" — the word did work nobody wanted
+                      it to do. It sits at the end of a flow whose own banner
+                      says no real money is involved, so the only thing "real"
+                      can distinguish this from is the sandbox above it, which
+                      reads as: that was the demo, this one is the product. It
+                      is not. The rest of the site says "Open an account", and
+                      the honest emphasis is on what the loop was, not on a
+                      realness the next page cannot deliver. */}
+                  <Button href="/get-started">Open an account</Button>
                   <Button href="/pricing" variant="outline">
                     See pricing
                   </Button>

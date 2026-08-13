@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 
 /**
@@ -28,15 +28,84 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const css = readFileSync(path.join(ROOT, "styles", "globals.css"), "utf8");
+const observerSource = readFileSync(path.join(ROOT, "components", "ui", "useInView.ts"), "utf8");
 const revealSource = readFileSync(path.join(ROOT, "components", "ui", "Reveal.tsx"), "utf8");
+const staggerSource = readFileSync(path.join(ROOT, "components", "ui", "Stagger.tsx"), "utf8");
 const countUpSource = readFileSync(path.join(ROOT, "components", "ui", "CountUp.tsx"), "utf8");
 const tailwind = readFileSync(path.join(ROOT, "tailwind.config.ts"), "utf8");
 
 /** Every declaration block written for exactly this selector, in source order. */
 function blocksFor(selector: string): string[] {
-  const escaped = selector.replace(/\./g, "\\.");
+  // Escape the regex metacharacters a selector can legitimately contain — `.`
+  // for a class, `*` for the universal selector — and let any whitespace in
+  // the selector match any whitespace in the file, so `.stagger > *` finds a
+  // rule however it happens to be formatted.
+  const escaped = selector
+    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    .replace(/\s+/g, "\\s*");
   const pattern = new RegExp(`(?:^|[\\s{};])${escaped}\\s*\\{([^}]*)\\}`, "g");
   return [...css.matchAll(pattern)].map((match) => match[1]);
+}
+
+/** Index of the first `@media (scripting: enabled)` — the hide/show boundary. */
+const scriptingAt = css.indexOf("@media (scripting: enabled)");
+
+/**
+ * The property every scroll animation on this site has to hold: it may only
+ * ever make content appear *sooner*.
+ *
+ * Applied to each primitive in turn, because the shape of the bug is identical
+ * whichever one grows it — a rule that hides something outside the one media
+ * query that guarantees a script exists to unhide it.
+ */
+function assertCannotHideContent(name: string, selector: string, fallback: string) {
+  describe(`${name} cannot hide content`, () => {
+    const blocks = blocksFor(selector);
+
+    it("finds the rules to check", () => {
+      expect(blocks.length).toBeGreaterThan(1);
+    });
+
+    it("paints by default, before and without any script", () => {
+      expect(blocks[0]).toMatch(/opacity:\s*1|clip-path:\s*none/);
+      expect(blocks[0]).not.toMatch(/opacity:\s*0/);
+    });
+
+    it("hides only where scripting is available to unhide it", () => {
+      expect(scriptingAt, "no scripting media query").toBeGreaterThan(-1);
+      const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s*");
+      const hidden = [
+        ...css.matchAll(new RegExp(`(?:^|[\\s{};])${escaped}\\s*\\{([^}]*)\\}`, "g")),
+      ].filter((m) => /opacity:\s*0|clip-path:\s*inset\([^)]*10\d%/.test(m[1]));
+      expect(hidden.length, "nothing hides, so nothing is being animated in").
+        toBeGreaterThan(0);
+      for (const match of hidden) {
+        expect(match.index, `a ${selector} rule hides content outside the scripting query`).
+          toBeGreaterThan(scriptingAt);
+      }
+    });
+
+    it("reveals itself even if the bundle never arrives", () => {
+      // The one case the media query cannot cover: scripting enabled, script
+      // absent. A CSS-only animation ends the wait without an observer.
+      expect(css).toMatch(new RegExp(`@keyframes\\s+${fallback}`));
+      const hiddenRule = blocks.find((b) => /opacity:\s*0|clip-path:\s*inset/.test(b));
+      expect(hiddenRule).toMatch(new RegExp(`animation:\\s*${fallback}`));
+    });
+
+    it("has a fallback that ends visible rather than merely ending", () => {
+      const frame = css.slice(css.indexOf(`@keyframes ${fallback}`));
+      const to = frame.slice(0, frame.indexOf("\n  }"));
+      expect(to).not.toMatch(/opacity:\s*0/);
+      expect(to).toMatch(/opacity:\s*1|clip-path:\s*inset\(-/);
+    });
+
+    it("is fully reset under reduced motion", () => {
+      const reduced = css.slice(css.lastIndexOf("@media (prefers-reduced-motion: reduce)"));
+      const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s*");
+      expect(reduced).toMatch(new RegExp(escaped));
+    });
+  });
 }
 
 describe("content is visible without JavaScript", () => {
@@ -54,7 +123,6 @@ describe("content is visible without JavaScript", () => {
   });
 
   it("hides the element only where scripting is available to unhide it", () => {
-    const scriptingAt = css.indexOf("@media (scripting: enabled)");
     expect(scriptingAt, "no scripting media query").toBeGreaterThan(-1);
 
     // Every `.reveal` rule that hides the element must come after that query
@@ -98,21 +166,84 @@ describe("content is visible without JavaScript", () => {
   });
 });
 
+/**
+ * The same three properties as `.reveal`, asserted for the two primitives added
+ * alongside it — a group that arrives one child at a time, and a heading
+ * uncovered by a moving clip. The clip is the one worth stating plainly: a
+ * `clip-path` that never opens hides a fully opaque element, so "opacity is 1"
+ * is not on its own a proof that anything is on screen.
+ */
+assertCannotHideContent("a staggered group", ".stagger > *", "stagger-fallback");
+assertCannotHideContent("a clipped heading", ".rise", "rise-fallback");
+
+describe("a reveal never fights the hover state of what it reveals", () => {
+  it("moves staggered children with `translate`, not `transform`", () => {
+    /*
+     * Nearly every staggered child is a `.card-hover` surface, and that rule
+     * writes `transform: translateY(-3px)`. Had the reveal used `transform`
+     * too, the two would be competing for one property at equal specificity
+     * and source order would decide — which is how a reveal silently deletes a
+     * hover, with nothing to see in either rule on its own. Independent
+     * transform properties compose, so both survive.
+     */
+    const hidden = blocksFor(".stagger > *").find((b) => /opacity:\s*0/.test(b));
+    expect(hidden, "no hidden state to check").toBeDefined();
+    expect(hidden).toMatch(/translate:\s*0\s/);
+    expect(hidden).not.toMatch(/transform:/);
+  });
+});
+
 describe("the observer can only make content appear sooner", () => {
   it("watches the viewport exactly, with no shrinking margin", () => {
     // A negative root margin carves out a strip that content can sit in
     // forever if the page cannot scroll any further.
-    expect(revealSource).toMatch(/rootMargin:\s*"0px"/);
-    expect(revealSource).not.toMatch(/rootMargin:\s*"[^"]*-\s*\d/);
+    expect(observerSource).toMatch(/rootMargin:\s*"0px"/);
+    expect(observerSource).not.toMatch(/rootMargin:\s*"[^"]*-\s*\d/);
   });
 
   it("reveals on any intersection at all", () => {
-    expect(revealSource).toMatch(/threshold:\s*0\b/);
+    expect(observerSource).toMatch(/threshold:\s*0\b/);
   });
 
   it("shows the element when there is no observer to ask", () => {
-    expect(revealSource).toMatch(/typeof IntersectionObserver === "undefined"/);
-    expect(revealSource).toMatch(/setVisible\(true\)/);
+    expect(observerSource).toMatch(/typeof IntersectionObserver === "undefined"/);
+    expect(observerSource).toMatch(/setVisible\(true\)/);
+  });
+
+  it("is the only observer the reveal components have", () => {
+    // The rules above are worth nothing if a second component writes its own
+    // observer and gets one of them wrong. `Reveal` and `Stagger` must reach
+    // for the shared hook rather than construct anything.
+    for (const source of [revealSource, staggerSource]) {
+      expect(source).toMatch(/useInView/);
+      expect(source).not.toMatch(/new IntersectionObserver/);
+    }
+  });
+
+  it("is the only observer anywhere outside the one component that needs its own", () => {
+    // `CountUp` is the documented exception: it observes to start a number
+    // animation, not to decide whether content exists, and has its own
+    // reduced-motion bail asserted further down. Anything else appearing here
+    // is a second copy of the rules above, which is how they drift.
+    const allowed = new Set([
+      path.join("components", "ui", "useInView.ts"),
+      path.join("components", "ui", "CountUp.tsx"),
+    ]);
+    const offenders: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(path.join(ROOT, dir))) {
+        const rel = path.join(dir, entry);
+        if (statSync(path.join(ROOT, rel)).isDirectory()) walk(rel);
+        else if (/\.tsx?$/.test(entry) && !allowed.has(rel)) {
+          if (readFileSync(path.join(ROOT, rel), "utf8").includes("new IntersectionObserver")) {
+            offenders.push(rel);
+          }
+        }
+      }
+    };
+    walk("components");
+    walk("app");
+    expect(offenders).toEqual([]);
   });
 });
 
