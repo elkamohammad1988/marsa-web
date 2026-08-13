@@ -95,6 +95,13 @@ export function ConceptBadge() {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls={panelId}
+        /* The hook `scripts/capture.mjs` refuses to write a portfolio image
+           without. It used to find this by its classes, and moving the badge
+           from the page corner into the navbar broke that selector — the guard
+           threw, correctly, and no unmarked image was written, but a styling
+           change should not be able to reach the capture gate at all. An
+           attribute that exists to be found cannot drift with the design. */
+        data-disclosure=""
         className={cn(
           "inline-flex flex-none items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors duration-200",
           "sm:gap-2 sm:px-3 sm:py-1.5 sm:text-[11px] sm:tracking-[0.12em]",

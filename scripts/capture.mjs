@@ -141,10 +141,19 @@ async function settle(page) {
  * It throws rather than warns. A run that quietly wrote eight unmarked images is
  * precisely the failure this exists to prevent, and a class-based selector is a
  * thing that drifts silently when a component is restyled.
+ *
+ * It drifted. The badge was moved out of the page corner and into the navbar —
+ * a good change, because a permanent overlay has no idea what is under it and
+ * that one was covering the primary call to action on /pricing — and
+ * `.fixed.bottom-4.left-4` stopped matching anything. The guard did its job and
+ * threw, so no unmarked image was written; the lesson is that it should not have
+ * been reachable by a styling decision in the first place. `[data-disclosure]`
+ * is an attribute that exists to be found, and `tests/portfolio-honesty.test.ts`
+ * now asserts that this script and `ConceptBadge` name the same one.
  */
 async function requireDisclosure(page) {
   const found = await page.evaluate(() => {
-    const el = document.querySelector(".fixed.bottom-4.left-4");
+    const el = document.querySelector("[data-disclosure]");
     if (!el) return null;
     const rect = el.getBoundingClientRect();
     const style = getComputedStyle(el);

@@ -74,6 +74,36 @@ describe("capture script keeps the concept disclosure in frame", () => {
     // images would go back to being unmarked without the test noticing.
     expect(executable).toMatch(/concept build/i);
   });
+
+  /**
+   * The guard has to be able to find the badge, and for a while it could not.
+   *
+   * It looked for `.fixed.bottom-4.left-4`, which is where the disclosure lived
+   * until it was moved into the navbar — a fix for a real bug, since a floating
+   * overlay was covering the primary call to action on `/pricing`. Nothing in
+   * that change was wrong and nothing in it mentioned the capture script, but
+   * the selector stopped matching and the next capture run aborted.
+   *
+   * That run aborting is the system working: the script throws rather than
+   * writes, so the failure surfaced as an error instead of eight unmarked
+   * images. But a class selector means any restyle can reach the honesty gate,
+   * and the fix is a hook that exists to be found. This asserts the two ends
+   * agree — the script cannot look for an attribute the badge does not carry.
+   */
+  it("looks for a hook the disclosure actually carries", () => {
+    const selector = executable.match(/document\.querySelector\("(\[[\w-]+\])"\)/);
+    expect(selector, "requireDisclosure no longer queries a plain attribute hook").
+      not.toBeNull();
+
+    const attribute = selector![1].slice(1, -1);
+    const badge = readFileSync(
+      path.join(ROOT, "components", "layout", "ConceptBadge.tsx"),
+      "utf8",
+    );
+    expect(withoutComments(badge), `ConceptBadge carries no ${selector![1]}`).toMatch(
+      new RegExp(`${attribute}=`),
+    );
+  });
 });
 
 describe("the eight portfolio images exist and are committable", () => {
