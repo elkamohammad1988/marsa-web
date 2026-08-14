@@ -43,7 +43,7 @@ is unconfigured, and the app refuses the file-store fallback in production
 instead of pretending a lead was saved.
 
 **If a buyer asks why auth is not clickable:** the code, the row-level-security
-migration and 1,530 tests are all in the public repository and run from a clean
+migration and 1,560 tests are all in the public repository and run from a clean
 clone. What is missing from the demo is a database, not a feature. Standing up a
 live account system for a concept nobody can sign up to would mean holding real
 email addresses for a product that does not exist.
@@ -135,7 +135,7 @@ every word that could read as a financial service.
 >   app reads real ones, server-cached and degrading gracefully, instead of
 >   invented figures that date the moment they ship.
 > - **A test suite and a CI gate.** Typecheck, lint, unit tests and a production
->   build on every push. The reference build runs 1,530 tests and ships with zero
+>   build on every push. The reference build runs 1,560 tests and ships with zero
 >   `any` in strict TypeScript.
 > - **Documentation written for the developer after me.** How to run it, how to
 >   deploy it, what every environment variable turns on, and comments that record
@@ -208,15 +208,16 @@ work is worth.
 
 ## 6. Images
 
-Eight, in this order. All are regenerated from a production build by
-`npm run capture`, so they cannot drift from the application they show.
+Seven, in this order, with the video first if the listing type accepts one. All
+are regenerated from a production build by `npm run capture`, so they cannot
+drift from the application they show.
 
-**Every image carries the "Concept build — what's real?" marker in its corner.**
-That is not decoration and it is not optional: the capture script throws rather
-than write an image without it, and `tests/portfolio-honesty.test.ts` fails if
-that rule is ever softened. Without it, image 1 is a European IBAN, a €12,480.55
-balance and an "Open An Account" button — which is a listing that looks like it
-is offering banking, and a reviewer is right to stop there.
+**Every image carries the "Concept build — what's real?" marker.** That is not
+decoration and it is not optional: the capture script throws rather than write an
+image without it, and `tests/portfolio-honesty.test.ts` fails if that rule is
+ever softened. Without it, image 1 is a European IBAN, a €12,480.55 balance and
+an "Open An Account" button — which is a listing that looks like it is offering
+banking, and a reviewer is right to stop there.
 
 | # | File | Caption to enter in Upwork |
 |---|---|---|
@@ -224,13 +225,33 @@ is offering banking, and a reviewer is right to stop there.
 | 2 | `02-live-rates.png` | Live third-party API data, server-cached — real European Central Bank rates with 30-day history, not placeholders |
 | 3 | `03-feature-account.png` | Interactive product demo a visitor can complete end to end — clearly labelled as a sandbox |
 | 4 | `04-feature-convert.png` | Real arithmetic on live data — the demo computes, it does not animate |
-| 5 | `05-analytics.png` | Operator dashboard behind authentication — first-party funnel analytics, no third-party trackers |
+| 5 | `05-analytics.png` | Operator dashboard behind authentication — first-party funnel analytics on the demo sandbox, no third-party trackers |
 | 6 | `06-iban-validation.png` | Working business logic, unit-tested — ISO 13616 / MOD-97 validation, fully offline |
-| 7 | `07-mobile.png` | Built mobile-first — no horizontal overflow at any width, tap targets ≥ 24px |
-| 8 | `08-pricing.png` | Pricing and plan-comparison screens built to the same bar as the rest of the app. These are the concept product's invented tiers, not my rates — my packages are the three above |
+| 7 | `07-mobile.png` | The same flow on a phone — not a reflowed landing page, the demo mid-conversion at 390 px |
+
+**Two images were dropped, and the reasoning is worth keeping** in case either is
+ever proposed again.
+
+`08-pricing.png` showed the concept product's own subscription tiers. The page is
+built to the same bar as the rest of the app, which is the argument that kept it,
+and it is not what the image communicates to a reviewer: it communicates €4.99 a
+month for a financial product. The caption defending it had grown longer than the
+caption describing it, and an image that needs a disclaimer to be safe is doing
+negative work in a gallery skimmed in ten seconds.
+
+The old `07-mobile.png` was the landing page at 390 px — image 1, narrower. A
+portfolio slot has to earn its place with information the previous image did not
+carry, and "the hero reflows" is not it.
 
 **Thumbnail:** `01-hero.png`. It carries the wordmark, the headline, the product
 panel and the concept marker in one frame.
+
+**Video** (`portfolio-video/marsa-demo.mp4`, regenerate with `npm run record`):
+one continuous take of the production build — hero, live ECB rate, the demo end
+to end. Upload it wherever the listing type allows a video, because the strongest
+thing in this project is a *flow*, and a flow is the one thing a still cannot
+carry. It is gitignored: the repository has to carry the PNGs because README.md
+embeds them, and nothing here loads the video.
 
 **Before uploading, check each one for:** a real name or email address (there is
 none in this set — `/admin`'s submissions view is deliberately never captured for
@@ -304,7 +325,8 @@ discover it in week three.
 - [x] Three tier prices and delivery times set
 - [x] Category set to Full Stack Development, **not** any finance category
 - [x] Every image carries the concept marker (enforced by `requireDisclosure()`)
-- [ ] Eight images uploaded in order, each with its caption
+- [ ] Seven images uploaded in order, each with its caption
+- [ ] Video uploaded if the listing type accepts one
 - [ ] Thumbnail set to `01-hero.png`, checked for legibility of the marker at
       gallery size
 - [ ] Title under 80 characters and free of superlatives Upwork rejects

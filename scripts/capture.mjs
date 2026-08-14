@@ -13,7 +13,7 @@
  *   - it began by `rmSync`-ing the output directory, which would have deleted
  *     the four tracked images the README embeds.
  *
- * This version captures a fixed set of eight, chosen to tell the product story
+ * This version captures a fixed set of seven, chosen to tell the product story
  * in order, and each one is a surface that actually exists in this repository:
  *
  *   01-hero              the landing page, above the fold
@@ -22,12 +22,25 @@
  *   04-feature-convert   the demo converting at the live ECB rate
  *   05-analytics         /admin/funnel — the demo funnel behind a password
  *   06-iban-validation   /tools/iban-checker — ISO 13616 / MOD-97, offline
- *   07-mobile            the landing page at 390px
- *   08-pricing           the pricing table
+ *   07-mobile            the demo, mid-flow, at 390px
  *
  * There is no AI screenshot because there is no AI in this product, and no
  * team/billing screenshot because there is no billing. Inventing either would
  * be the exact failure this repository's honesty programme exists to prevent.
+ *
+ * Two used to be here and are not.
+ *
+ * `08-pricing` photographed the concept product's own subscription tiers. The
+ * page is built to the same bar as everything else, which is the argument that
+ * kept it, and it is not what the image says to someone deciding whether to
+ * hire a developer: it says €4.99 a month for a financial product. The caption
+ * defending it had grown longer than the caption describing it.
+ *
+ * `07-mobile` used to be the landing page at 390px — the same hero as `01`,
+ * narrower. It proved the breakpoint and nothing else. A portfolio image has to
+ * earn its slot with information the previous one did not carry, so it is now
+ * the demo mid-flow, which is the claim worth making on mobile: not that the
+ * layout reflows, but that the whole interaction works down there.
  *
  * `/admin` itself is deliberately not captured. It is a real dashboard and it
  * looks like one, but it renders live form submissions — which on any machine
@@ -262,9 +275,21 @@ async function frame(page, selector, offset = NAV_BAND) {
       for (const node of document.querySelectorAll(SELECTOR)) {
         const rect = node.getBoundingClientRect();
         if (rect.width <= 0 || rect.height <= 0) continue;
-        // Taller than this and it is a layout box that happens to use a text
-        // tag, not a line someone would notice being sliced.
-        if (rect.height > 240) continue;
+        const heading = /^H[1-6]$/.test(node.tagName);
+        /*
+         * Taller than this and it is a layout box that happens to use a text
+         * tag, not a line someone would notice being sliced.
+         *
+         * Headings are exempt, and that exemption is the whole reason `02`
+         * shipped with the word "Instant" cut through the middle at the top
+         * edge. `/tools/currency-converter` sets its `<h1>` at display size and
+         * it wraps to five lines, which is comfortably over this ceiling — so
+         * the one element on the page that matters most was the one element the
+         * scorer never saw, and every candidate position scored as if slicing it
+         * were free. A heading is never a layout container. Excluding it by
+         * height is excluding it by importance, backwards.
+         */
+        if (!heading && rect.height > 240) continue;
         const style = getComputedStyle(node);
         if (style.visibility === "hidden" || style.opacity === "0") continue;
         boxes.push({
@@ -272,8 +297,7 @@ async function frame(page, selector, offset = NAV_BAND) {
           bottom: rect.bottom + window.scrollY,
           // A heading cut in half is the worst thing in the frame; a list item
           // is bad; an icon is untidy.
-          weight:
-            /^H[1-6]$/.test(node.tagName) ? 6 : node.tagName === "P" ? 4 : /^(A|BUTTON)$/.test(node.tagName) ? 3 : 2,
+          weight: heading ? 6 : node.tagName === "P" ? 4 : /^(A|BUTTON)$/.test(node.tagName) ? 3 : 2,
         });
       }
 
@@ -455,16 +479,19 @@ async function main() {
     await frame(page, "#iban-input, input", 150);
     await shot(page, "06-iban-validation");
 
-    console.log("08 pricing");
-    await goto(page, "/pricing");
-    // Frame on the first plan card. At scroll zero this page is mostly its own
-    // headline, which says nothing a reviewer cannot already guess from the
-    // word "Pricing"; the cards are the part that carries the offer.
-    await frame(page, "article", 120);
-    await shot(page, "08-pricing");
-
-    console.log("07 mobile");
-    await goto(page, "/", MOBILE);
+    console.log("07 mobile demo");
+    // Driven through the same steps as 03, at 390px, because the claim worth
+    // making about mobile is not that the hero reflows — 01 already implies
+    // that, and the previous version of this shot proved only that. It is that
+    // the whole interaction works down here: the progress rail, the balances,
+    // the live conversion and the controls, on a phone.
+    await goto(page, "/demo", MOBILE);
+    await advance(page, 4);
+    await clickLabel(page, /receive|payout/);
+    await advance(page, 1);
+    await clickLabel(page, /→ EUR/, 1800);
+    await settle(page);
+    await frame(page, "ol[aria-label='Demo progress']", 84);
     await shot(page, "07-mobile");
 
     const password = adminPassword();

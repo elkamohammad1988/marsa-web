@@ -174,7 +174,7 @@ All measured on the production build — method reproducible from the repo.
   measures the machine as much as the page.
 - **Responsive (2026-07-28)** — no horizontal overflow on any of the 36 routes
   at 390 px or 1440 px (`scrollWidth <= innerWidth`).
-- **Tests (2026-08-10)** — **1530 / 1530** Vitest across 47 files, covering
+- **Tests (2026-08-10)** — **1560 / 1560** Vitest across 47 files, covering
   IBAN/MOD-97, FX, pagination, storage provider selection, admin auth (HMAC
   round-trip, tamper, expiry), session signing, RLS-backed profile reads, CSV
   injection-safety, and the analytics funnel (unique-session counting,
@@ -226,7 +226,7 @@ is recorded batch by batch in [`docs/PROGRESS.md`](./docs/PROGRESS.md).
 > **Marsa** — a cross-border multi-currency account concept, delivered as a
 > production-grade marketing site, an interactive live-FX demo, customer
 > accounts on Postgres row-level security, and a first-party analytics backend.
-> Dark "black rose" design system on one set of role-named tokens; 1,530
+> Dark "black rose" design system on one set of role-named tokens; 1,560
 > passing tests and 0 axe violations across 72 page-loads; illustrations drawn
 > from those tokens rather than sourced; and a hard line between real software
 > and a build that tells you exactly what it is not. Next.js 15 / React 19 /

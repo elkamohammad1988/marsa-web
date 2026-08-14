@@ -75,16 +75,29 @@ const VIEWPORT = { width: 1920, height: 1080, deviceScaleFactor: 1 };
 const FPS = 30;
 
 /**
+ * The number `npm test` prints, written once.
+ *
+ * It used to be written twice in the object below — once as `tests` and once
+ * inside the first chip — and the two were the same string only because nobody
+ * had edited one of them yet. It is now a constant for the ordinary reason, and
+ * for a second one: `tests/portfolio-honesty.test.ts` scans this file for test
+ * counts and fails if it finds more than one distinct figure across every
+ * artefact that quotes it. A duplicated literal here is a second place for the
+ * claim to go stale in a frame of video, which is the hardest place to notice
+ * it and the hardest to correct after the fact.
+ */
+const TEST_COUNT = "1,560";
+
+/**
  * The engineering claims shown on the credibility card.
  *
  * Every one of these is checkable from this repository, which is the point of
- * showing them at all. `tests` is the number `npm test` prints; it is asserted
- * against the README's copy of the same number so the two cannot diverge.
+ * showing them at all.
  */
 const FACTS = {
-  tests: "1,558",
+  tests: TEST_COUNT,
   chips: [
-    ["1,558", "unit tests, green"],
+    [TEST_COUNT, "unit tests, green"],
     ["0", "axe violations, 72 page-loads"],
     ["100", "Lighthouse accessibility"],
     ["0", "production vulnerabilities"],

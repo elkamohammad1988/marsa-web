@@ -106,7 +106,21 @@ describe("capture script keeps the concept disclosure in frame", () => {
   });
 });
 
-describe("the eight portfolio images exist and are committable", () => {
+describe("the seven portfolio images exist and are committable", () => {
+  /**
+   * Seven, not eight. `08-pricing.png` was the concept product's own
+   * subscription tiers — €4.99 a month for something nobody can buy — and it
+   * was carried on the argument that the page is built to the same bar as the
+   * rest of the app, which is true and is not what the image communicates.
+   *
+   * Two things decided it. A listing that sells application development should
+   * not lead a reviewer through a euro price list for a financial product; the
+   * caption defending that image had grown longer than the caption describing
+   * it, and an image that needs a disclaimer to be safe is an image doing
+   * negative work. And it was the one frame in the set cut through a card,
+   * ending mid-way down a feature list, so it argued for less care than the
+   * repository it advertises.
+   */
   const EXPECTED = [
     "01-hero.png",
     "02-live-rates.png",
@@ -115,12 +129,11 @@ describe("the eight portfolio images exist and are committable", () => {
     "05-analytics.png",
     "06-iban-validation.png",
     "07-mobile.png",
-    "08-pricing.png",
   ];
 
   /**
    * `.gitignore` ignores `portfolio-screenshots/*` and then re-includes exactly
-   * these eight. That pairing is what stops the directory growing back into the
+   * these seven. That pairing is what stops the directory growing back into the
    * 127-file contact sheet it used to be — and it is also what would silently
    * drop a renamed image from the repository, leaving a broken embed in the
    * README on GitHub. Assert the two lists are the same list.
@@ -146,7 +159,7 @@ describe("the eight portfolio images exist and are committable", () => {
     );
     expect(embedded.length).toBeGreaterThan(0);
     for (const name of new Set(embedded)) {
-      expect(EXPECTED, `README embeds ${name}, which is not one of the eight`).toContain(name);
+      expect(EXPECTED, `README embeds ${name}, which is not one of the seven`).toContain(name);
     }
   });
 
@@ -169,5 +182,103 @@ describe("the eight portfolio images exist and are committable", () => {
       expect(bytes, `${name} is over 2 MB`).toBeLessThan(2 * 1024 * 1024);
     }
     expect(total, "the eight images exceed 8 MB in total").toBeLessThan(8 * 1024 * 1024);
+  });
+});
+
+/**
+ * Every number this project quotes about itself has to be the same number.
+ *
+ * This is the failure mode the repository has been caught by three times, and
+ * the only one that attacks its central claim directly. An early `README.md`
+ * advertised "94 passing tests" against an actual 367. A later `CASE-STUDY.md`
+ * claimed 655 when the real figure had passed 1,000. At the point this test was
+ * written, six documents said 1,530 and `scripts/record-demo.mjs` — which burns
+ * its number into a video frame — said 1,558, while the suite returned neither.
+ *
+ * Each of those was one edit away from correct and nothing failed, because a
+ * number in prose is invisible to `tsc`, to ESLint, and to every other test
+ * here. For a project whose entire argument is "the claims are checkable", a
+ * silently stale claim is worse than a missing one: it is the specific error
+ * that invalidates the argument rather than merely weakening it.
+ *
+ * What this can and cannot do. It cannot know the suite's own total — a run
+ * counting itself would need the run to finish first. It asserts the property
+ * that is actually achievable and that catches every real drift: **every
+ * artefact quotes the same figure.** Re-measure with `npx vitest run`, update
+ * one place, and this fails until the rest agree. `scripts/record-demo.mjs` is
+ * in the list because its comment already promised this test existed.
+ */
+describe("the test count is one number everywhere it is claimed", () => {
+  const CLAIM_SITES = [
+    "README.md",
+    "CASE-STUDY.md",
+    path.join("docs", "DEPLOYMENT.md"),
+    path.join("docs", "UPWORK-LISTING.md"),
+    path.join("scripts", "record-demo.mjs"),
+  ];
+
+  /**
+   * The shapes a test count is actually written in, rather than "a number near
+   * the word test".
+   *
+   * Proximity was the first attempt and it read `| Responsive (390 / 1440) |` as
+   * a claim of 1,440 tests, because the next table row happens to be the one
+   * that says "Unit tests". A viewport width is not a count, and a rule that
+   * cannot tell them apart either fails forever or trains someone to reword a
+   * correct sentence to appease it. These three patterns match the claim and not
+   * its neighbours.
+   */
+  const CLAIM_SHAPES = [
+    /\b(\d{4})\s*\/\s*\d{4}\b/g, //            1560 / 1560 passing
+    /\b(\d{4})\s+(?:unit\s+|passing\s+)*tests?\b/gi, // 1560 unit tests
+    /\btests?\s*[:=]\s*"?(\d{4})"?/gi, //      tests: "1560"
+  ];
+
+  /**
+   * Thousands separators normalised so `1,560` and `1560` are the same claim;
+   * ISO dates removed so `**Tests (2026-08-10)**` is not read as a count; and
+   * blockquote markers stripped, because the catalog blurb in `CASE-STUDY.md`
+   * wraps mid-claim and `1,560\n> passing tests` is one sentence.
+   */
+  function claimedCounts(text: string): number[] {
+    const flat = text
+      .replace(/\d{4}-\d{2}-\d{2}/g, "<date>")
+      .replace(/^[ \t]*>[ \t]?/gm, "")
+      .replace(/(\d),(\d{3})\b/g, "$1$2");
+
+    const found: number[] = [];
+    for (const shape of CLAIM_SHAPES) {
+      for (const match of flat.matchAll(shape)) found.push(Number(match[1]));
+    }
+    return found;
+  }
+
+  const perFile = CLAIM_SITES.map((file) => ({
+    file,
+    counts: claimedCounts(readFileSync(path.join(ROOT, file), "utf8")),
+  }));
+
+  it("is claimed somewhere at all", () => {
+    const total = perFile.reduce((n, entry) => n + entry.counts.length, 0);
+    expect(total, "no document quotes a test count any more").toBeGreaterThan(0);
+  });
+
+  it("agrees across every document and the video script", () => {
+    const quoted = new Map<number, string[]>();
+    for (const { file, counts } of perFile) {
+      for (const count of new Set(counts)) {
+        quoted.set(count, [...(quoted.get(count) ?? []), file]);
+      }
+    }
+
+    const report = [...quoted.entries()]
+      .map(([count, files]) => `${count} (${files.join(", ")})`)
+      .join(" vs ");
+
+    expect(
+      quoted.size,
+      `the project quotes more than one test count: ${report}. Re-measure with ` +
+        "`npx vitest run` and update every site.",
+    ).toBe(1);
   });
 });

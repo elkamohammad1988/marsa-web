@@ -26,16 +26,24 @@ import { validateEmailOnly } from "@/lib/validation";
  */
 
 /**
- * Shown when the environment has no authentication configured.
+ * Returned when the environment has no authentication configured.
  *
- * Names what is missing, because the person who sees this is running the
- * project locally and is the same person who can fix it. It is not a security
- * disclosure: which environment variables this application reads is in
- * `.env.example`, in the README, and in the public repository.
+ * This used to name the three missing environment variables, on the reasoning
+ * that whoever sees it is running the project locally and is the same person
+ * who can fix it. The first half of that is not true. This string is a 503
+ * response body, so it reaches anything that can issue a request — including a
+ * visitor's devtools on the deployed build, which runs with no credentials by
+ * design and therefore returns this to every auth call made against it.
+ *
+ * Nothing in the old message was secret; which variables this application reads
+ * is in `.env.example` and in the public repository. It was simply addressed to
+ * a reader who was not there, and configuration prose surfacing in a product is
+ * a composition failure whether or not it discloses anything. The operator who
+ * *is* there reads the server log, which still names what is missing —
+ * `lib/env.ts` and `getAuthConfig()` both say so, loudly, at start-up.
  */
 export const AUTH_UNAVAILABLE_MESSAGE =
-  "Accounts are not configured on this deployment. Set SUPABASE_URL, " +
-  "SUPABASE_ANON_KEY and AUTH_SESSION_SECRET, then apply db/migrations/.";
+  "Accounts are not available on this deployment.";
 
 /**
  * One message for every credential failure.

@@ -151,11 +151,30 @@ describe("POST /api/auth/register", () => {
     expect(response.status).toBe(403);
   });
 
-  it("reports missing configuration rather than failing obscurely", async () => {
+  /**
+   * A 503 with a plain-language reason, and specifically *not* the variable
+   * that is missing.
+   *
+   * This assertion used to require the opposite — the body had to name
+   * `SUPABASE_ANON_KEY`, because whoever saw it was assumed to be the developer
+   * who could set it. A response body does not get to choose its reader. On the
+   * deployed build, which runs with no credentials by design, this is what every
+   * auth call returns to anyone with devtools open. Nothing in it was secret and
+   * that was never the point: configuration prose surfacing in a product reads
+   * as an unfinished side project whatever it discloses.
+   *
+   * The operator who genuinely needs the variable name gets it where it is
+   * actionable — `lib/env.ts` and `getAuthConfig()` both name it at start-up, on
+   * the server, in the log. See `tests/config-copy-leaks.test.ts`.
+   */
+  it("reports unavailability without naming what is missing", async () => {
     vi.stubEnv("SUPABASE_ANON_KEY", "");
     const response = await register(VALID);
     expect(response.status).toBe(503);
-    expect((await response.json()).error).toContain("SUPABASE_ANON_KEY");
+
+    const { error } = (await response.json()) as { error: string };
+    expect(error).toMatch(/not available/i);
+    expect(error).not.toMatch(/SUPABASE|AUTH_SESSION_SECRET|migrations/i);
   });
 
   it("rejects a body that is not JSON", async () => {
