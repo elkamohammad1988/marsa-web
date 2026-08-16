@@ -3,14 +3,25 @@ import { cn } from "@/lib/utils";
 type Tone = "brand" | "alt" | "deep" | "card";
 
 /**
- * `brand` is a lit tile rather than a flat 10%-magenta square: a warm-to-cool
- * gradient, a 1px inset rim to catch the light, and a soft magenta cast beneath
+ * `brand` is a lit tile rather than a flat 10%-gold square: a warm-to-cool
+ * gradient, a 1px inset rim to catch the light, and a soft gold cast beneath
  * it. At this size a single translucent fill has no edge a viewer can find, so
  * the icon read as floating on the card instead of sitting in a container.
+ *
+ * The three stops now run the identity in miniature — lit gold at the top-left
+ * corner, the gold itself through the middle, water at the bottom-right — which
+ * is what the brief means by tonal variation rather than one flat gold. It is
+ * the same light every other gold surface is under, and it costs one gradient.
+ *
+ * No reflection animation here, deliberately. A feature grid is six to nine of
+ * these at once, several times down a page; the moment they all breathe, the
+ * effect stops being a property of the *important* thing and becomes wallpaper.
+ * The moving light stays on the surfaces there is only ever one of — the
+ * primary button, the corridor mark, the closing panel.
  */
 const tones: Record<Tone, string> = {
   brand:
-    "bg-gradient-to-br from-brand/25 via-brand/10 to-halo/15 text-brand-strong ring-1 ring-inset ring-brand-strong/25 shadow-glow-sm",
+    "bg-gradient-to-br from-gold-light/22 via-gold/12 to-halo/18 text-brand-strong ring-1 ring-inset ring-brand-strong/25 shadow-glow-sm",
   alt: "bg-surface-alt text-ink",
   deep: "bg-surface-deep text-white",
   card: "bg-card text-brand-strong border border-line",

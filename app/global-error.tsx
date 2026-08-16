@@ -32,11 +32,14 @@ import { captureException } from "@/lib/observability";
  * `style` attributes need no policy change.
  */
 
-const canvas = "#0c080b";
-const ink = "#f6eaf1";
-const inkMuted = "#a97f97";
-const inkSubtle = "#ae8296";
-const brand = "#cc1f86";
+const canvas = "#0b1216";
+const ink = "#e9f1f4";
+const inkMuted = "#9bb0b8";
+const inkSubtle = "#a8bdc4";
+const brand = "#d4af37";
+/* The label that rides on `brand`. Gold is a light fill, so this is the
+   near-black `--on-brand` rather than white — white on #d4af37 is 2.1:1. */
+const onBrand = "#0c1114";
 
 export default function GlobalError({
   error,
@@ -120,7 +123,7 @@ export default function GlobalError({
                 padding: "0.75rem 1.5rem",
                 fontSize: "0.9375rem",
                 fontWeight: 600,
-                color: "#ffffff",
+                color: onBrand,
                 backgroundColor: brand,
               }}
             >

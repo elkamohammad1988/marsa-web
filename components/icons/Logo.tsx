@@ -6,7 +6,9 @@ import { cn } from "@/lib/utils";
  * A `marsa` is the harbour a ship — or a payment — comes home to. The disc is
  * the money; the two arcs beneath are the water it lands in. It says the
  * tagline ("where your money lands") in one glyph, and the shapes stay legible
- * down to a 16px favicon. Drawn with `currentColor` so it inherits the tile.
+ * down to a 16px favicon. Drawn with `currentColor` so it inherits the tile —
+ * which, since the tile went gold, means a dark mark stamped into the metal
+ * rather than a white one laid on it. See `.logo-tile` in globals.css.
  */
 export function MarsaMark({ className }: { className?: string }) {
   return (
@@ -28,7 +30,7 @@ export function MarsaMark({ className }: { className?: string }) {
 
 type LogoProps = {
   className?: string;
-  /** Wordmark colour. The mark tile is always the rose→plum gradient. */
+  /** Wordmark colour. The mark tile is always the gold gradient. */
   tone?: "white" | "ink";
   /** Hide the wordmark and render only the mark tile. */
   markOnly?: boolean;
@@ -53,7 +55,7 @@ export function Logo({
     <span className={cn("group inline-flex items-center gap-2.5 select-none", className)}>
       <span
         aria-hidden
-        className="logo-tile relative grid h-9 w-9 place-items-center rounded-[11px] text-white shadow-glow-sm ring-1 ring-inset ring-white/15 transition-transform duration-300 group-hover:-translate-y-0.5"
+        className="logo-tile relative grid h-9 w-9 place-items-center rounded-[11px] shadow-glow-sm ring-1 ring-inset ring-gold-highlight/25 transition-transform duration-300 group-hover:-translate-y-0.5"
       >
         <MarsaMark className="h-[22px] w-[22px]" />
       </span>

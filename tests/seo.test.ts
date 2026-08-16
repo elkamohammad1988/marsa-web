@@ -244,12 +244,42 @@ describe("organizationSchema", () => {
 });
 
 describe("manifest", () => {
+  /**
+   * `--canvas`, read from the stylesheet rather than restated here.
+   *
+   * This test was called "matches the palette" while asserting a hex literal,
+   * which is not the same thing: when the palette went from rose-black to
+   * water-slate the manifest and the stylesheet disagreed, and the only reason
+   * that surfaced was that the literal had been written down twice. Deriving it
+   * means the assertion is now about the property the name claims — the browser
+   * chrome and the page paint the same colour — and it will hold through the
+   * next palette too.
+   *
+   * The manifest and `viewport.themeColor` are the two places a palette value
+   * must be duplicated as a literal, because both are consumed before any
+   * stylesheet exists. So both are checked against the token here.
+   */
+  const canvas = (() => {
+    const css = readFileSync(path.join(process.cwd(), "styles", "globals.css"), "utf8");
+    const match = css.match(/--canvas:\s*(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})\s*;/);
+    expect(match, "no --canvas token in globals.css").not.toBeNull();
+    const hex = match!.slice(1, 4).map((n) => Number(n).toString(16).padStart(2, "0"));
+    return `#${hex.join("")}`;
+  })();
+
   it("names the app and matches the palette", () => {
     const m = manifest();
     expect(m.short_name).toBe("Marsa");
-    expect(m.theme_color).toBe("#0c080b");
-    expect(m.background_color).toBe("#0c080b");
+    expect(m.theme_color).toBe(canvas);
+    expect(m.background_color).toBe(canvas);
     expect(m.start_url).toBe("/");
+  });
+
+  it("agrees with the theme colour the document shell declares", () => {
+    const layout = readFileSync(path.join(process.cwd(), "app", "layout.tsx"), "utf8");
+    const declared = layout.match(/themeColor:\s*"(#[0-9a-f]{6})"/i);
+    expect(declared, "no themeColor in app/layout.tsx").not.toBeNull();
+    expect(declared![1].toLowerCase()).toBe(canvas);
   });
 
   it("keeps the address bar visible", () => {

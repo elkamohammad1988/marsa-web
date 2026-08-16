@@ -1,13 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Marsa">
   <defs>
-    <linearGradient id="rose" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#EE4FA5"/>
-      <stop offset="1" stop-color="#7A1250"/>
+    <linearGradient id="gold" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F5D76E"/>
+      <stop offset="0.46" stop-color="#D4AF37"/>
+      <stop offset="1" stop-color="#A67C00"/>
     </linearGradient>
   </defs>
-  <rect width="32" height="32" rx="8" fill="url(#rose)"/>
-  <circle cx="16" cy="10" r="3.6" fill="#FFFFFF"/>
-  <g fill="none" stroke="#FFFFFF" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round">
+  <rect width="32" height="32" rx="8" fill="url(#gold)"/>
+  <circle cx="16" cy="10" r="3.6" fill="#0C1114"/>
+  <g fill="none" stroke="#0C1114" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round">
     <path d="M8.5 17.4q7.5 4.4 15 0"/>
     <path d="M6 21.8q10 5.4 20 0" opacity="0.7"/>
   </g>

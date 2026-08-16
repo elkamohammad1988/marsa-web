@@ -97,7 +97,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
     <Container>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <Heading level="h3">Submissions</Heading>
+          <Heading level="h1" size="panel">
+            Submissions
+          </Heading>
           <p className="mt-1 text-sm text-ink-muted">
             Storage:{" "}
             <span className="font-medium text-ink">{store.provider}</span>

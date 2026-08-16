@@ -45,7 +45,11 @@ export function PricingPlanCard({ plan }: { plan: Plan }) {
         />
       )}
       <div>
-        {plan.badge && <Badge tone="ink">{plan.badge}</Badge>}
+        {/* Gold, not white. This badge and the bright rim are the two things
+            marking the recommended plan, and a white pill was the only white
+            fill on the page — it read as a sticker applied to the card rather
+            than as the page's own way of saying "this one". */}
+        {plan.badge && <Badge tone="brand">{plan.badge}</Badge>}
         <h2 className="mt-4 text-3xl font-bold text-ink md:text-4xl">{plan.name}</h2>
         <div className="mt-2 flex items-baseline gap-2">
           <span className="figure font-display text-4xl font-bold tracking-tight text-ink md:text-5xl">

@@ -45,10 +45,14 @@ export const metadata: Metadata = {
 /**
  * One colour, unconditionally. The site is dark-only, so browser UI should not
  * be told to expect anything else — the previous two-entry array named the same
- * `#0c080b` under both `prefers-color-scheme` media queries.
+ * value under both `prefers-color-scheme` media queries.
+ *
+ * `#0b1216` is `--canvas`. It has to be restated as a literal here because this
+ * is consumed by the browser chrome before any stylesheet exists, which is also
+ * why it is the one place a palette change has to be made twice.
  */
 export const viewport: Viewport = {
-  themeColor: "#0c080b",
+  themeColor: "#0b1216",
   width: "device-width",
   initialScale: 1,
 };

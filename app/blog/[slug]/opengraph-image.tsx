@@ -25,8 +25,8 @@ export const alt = "Marsa article";
 
 const MARK = `data:image/svg+xml,${encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-    <circle cx="16" cy="10" r="3.6" fill="#FFFFFF"/>
-    <g fill="none" stroke="#FFFFFF" stroke-width="2.9"
+    <circle cx="16" cy="10" r="3.6" fill="#0C1114"/>
+    <g fill="none" stroke="#0C1114" stroke-width="2.9"
        stroke-linecap="round" stroke-linejoin="round">
       <path d="M8.5 17.4q7.5 4.4 15 0"/>
       <path d="M6 21.8q10 5.4 20 0" opacity="0.7"/>
@@ -58,7 +58,7 @@ export default async function BlogOpengraphImage({
           justifyContent: "space-between",
           padding: "72px",
           background:
-            "radial-gradient(900px 520px at 8% -6%, rgba(204,31,134,0.38), transparent 60%), radial-gradient(760px 460px at 92% 10%, rgba(238,79,165,0.20), transparent 60%), linear-gradient(160deg, #14090f 0%, #0c080b 100%)",
+            "radial-gradient(900px 520px at 8% -6%, rgba(212,175,55,0.20), transparent 60%), radial-gradient(760px 460px at 92% 10%, rgba(26,108,122,0.34), transparent 60%), linear-gradient(160deg, #0f1c21 0%, #070d10 100%)",
           color: "#fff",
           fontFamily: "sans-serif",
         }}
@@ -72,7 +72,7 @@ export default async function BlogOpengraphImage({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "linear-gradient(135deg, #EE4FA5, #7A1250)",
+              background: "linear-gradient(135deg, #F5D76E, #D4AF37 46%, #A67C00)",
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -90,7 +90,7 @@ export default async function BlogOpengraphImage({
                 fontSize: 22,
                 letterSpacing: 2,
                 textTransform: "uppercase",
-                color: "#EE4FA5",
+                color: "#E8C95A",
               }}
             >
               {post.category}
@@ -123,7 +123,7 @@ export default async function BlogOpengraphImage({
           <div style={{ display: "flex" }}>
             {post ? formatPostDate(post.date) : ""}
           </div>
-          <div style={{ display: "flex", color: "#EE4FA5", fontWeight: 600 }}>
+          <div style={{ display: "flex", color: "#E8C95A", fontWeight: 600 }}>
             Concept build
           </div>
         </div>

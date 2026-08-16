@@ -23,14 +23,28 @@ const base =
   "relative inline-flex flex-none items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 ring-offset-canvas disabled:pointer-events-none disabled:opacity-60";
 
 const variants: Record<Variant, string> = {
-  // Metallic magenta CTA: vertical #CE2A8C→#A5156A gradient, inset top highlight
-  // + magenta glow (shadow-cta), white text (≥4.85:1). Hover brightens the glow
-  // and lifts 1px; active presses down. `sheen` adds one band of light crossing
-  // the fill on hover — the thing that makes a metallic surface read as metal
-  // rather than as a gradient. It plays once per entry and leaves nothing
-  // behind, so a reduced-motion visitor keeps the static gradient + highlight.
+  /**
+   * Metallic gold CTA: the vertical #ECC860→#B48C20 gradient with the water
+   * reflection moving across it, a warm inset top highlight (shadow-cta) and
+   * near-black `on-brand` text at 6.1:1 in the shade and 11.8:1 in the light.
+   *
+   * `liquid-gold` supplies the fill *and* the reflection — it defaults
+   * `--liquid-base` to the CTA gradient, so it replaces `bg-cta-gradient`
+   * rather than layering on top of it. The light is painted into the button's
+   * own background, which is what keeps it under the label.
+   *
+   * Hover does the three things a lit metal does and nothing more: brightens
+   * 6%, lifts 1px, and lets `sheen` pass one reflection across. `brightness`
+   * rather than a second gradient because it multiplies — the gold gains 6%,
+   * the near-black label gains almost nothing, so the hover state ends up
+   * *more* readable than the rest state rather than less. Active presses back
+   * down to the resting shadow.
+   *
+   * A reduced-motion visitor keeps the gradient, the highlight and the resting
+   * frame of the reflection; only the movement stops.
+   */
   primary:
-    "sheen bg-cta-gradient text-on-brand shadow-cta hover:shadow-cta-hover hover:-translate-y-px active:translate-y-0 active:shadow-cta",
+    "sheen liquid-gold text-on-brand shadow-cta hover:shadow-cta-hover hover:brightness-[1.06] hover:-translate-y-px active:translate-y-0 active:brightness-100 active:shadow-cta",
   outline:
     "border border-line bg-card/60 text-ink shadow-e1 hover:border-brand-strong/45 hover:bg-brand/[0.08] hover:-translate-y-px active:translate-y-0",
   "outline-light": "border border-white/25 text-white hover:bg-white/10 hover:border-white/40",

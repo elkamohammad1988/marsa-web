@@ -56,7 +56,7 @@ export default async function AccountDirectoryPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Heading level="h1" className="text-2xl md:text-3xl">
+        <Heading level="h1" size="panel">
           Accounts
         </Heading>
         <p className="mt-2 text-sm leading-relaxed text-ink-muted">

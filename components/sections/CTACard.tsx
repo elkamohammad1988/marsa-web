@@ -33,8 +33,16 @@ export function CTACard({
             where the emphasis earns its keep — a page where every panel is
             edge-lit has nothing left to emphasise. */}
         <Reveal className="gradient-ring-strong isolate overflow-hidden rounded-card-lg bg-surface-deep text-white shadow-e3">
-          {/* Ambient light: warm from the top, cool from the right. */}
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-radial-glow" />
+          {/*
+            Ambient light: warm from the top, cool from the right — and here,
+            on the one panel that is the whole page's ask, moving. This is the
+            `.gold-veil` half of the water language (globals.css): the same two
+            lights the static `bg-radial-glow` it replaces was drawing, drifting
+            ±4% against each other so the panel reads as lit through something
+            rather than lit flatly. Layer count is unchanged; it is the same
+            light, alive. Freezes to a composed still under reduced motion.
+          */}
+          <div aria-hidden className="gold-veil" />
           <div
             aria-hidden
             className="pointer-events-none absolute -right-16 -top-20 h-72 w-72 rounded-full bg-brand-soft/20 blur-[110px]"

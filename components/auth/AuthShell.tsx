@@ -91,7 +91,7 @@ export function AuthShell({
       */}
       <div className="mx-auto w-full max-w-md lg:mx-0 lg:max-w-none">
         <div className="rounded-card-lg border border-line bg-card p-6 shadow-e2 sm:p-8">
-          <Heading level="h1" className="text-2xl md:text-[28px]">
+          <Heading level="h1" size="panel">
             {title}
           </Heading>
           <p className="mt-2 text-sm leading-relaxed text-ink-muted">{description}</p>

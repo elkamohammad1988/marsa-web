@@ -62,7 +62,7 @@ export function AccountPreview({ className }: { className?: string }) {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="logo-tile grid h-8 w-8 place-items-center rounded-[10px] text-white">
+            <span className="logo-tile grid h-8 w-8 place-items-center rounded-[10px]">
               <MarsaMark className="h-5 w-5" />
             </span>
             <div className="leading-tight">

@@ -41,7 +41,9 @@ export default async function AdminLoginPage() {
   return (
     <Container>
       <div className="mx-auto max-w-md rounded-card-lg border border-line bg-card p-7 shadow-card">
-        <Heading level="h3">Marsa admin</Heading>
+        <Heading level="h1" size="panel">
+          Marsa admin
+        </Heading>
         <p className="mt-2 text-sm text-ink-muted">
           Sign in to review form submissions from the site.
         </p>

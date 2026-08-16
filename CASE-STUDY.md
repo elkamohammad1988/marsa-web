@@ -22,9 +22,13 @@ sandbox.
 
 ## The solution
 
-- A **dark-only "Black Rose" design system** — metallic magenta on near-black —
-  implemented purely through CSS-variable tokens, so the entire site re-themes
-  from one file and stays coherent (no leftover light sections).
+- A **dark-only "Liquid Gold" design system** — metallic gold on deep
+  water-slate, with a reusable water-reflection effect on the surfaces that
+  carry the brand — implemented purely through CSS-variable tokens, so the
+  entire site re-themes from one file and stays coherent (no leftover light
+  sections). The palette it replaced, "Black Rose", was metallic magenta on
+  near-black; the hue swap touched two files and no component logic, which is
+  the claim the token layer exists to make good on.
 - A **live currency converter and rate ticker** using real ECB reference rates.
 - An **interactive `/demo` sandbox** that walks the full loop — open account →
   KYC → European IBAN → receive a payout → **convert at the live interbank
@@ -66,8 +70,8 @@ and the interesting failures are always in the theme nobody is looking at. This
 project chose depth over breadth — one palette, every pair measured, rather than
 two palettes and a hope.
 
-*The values are RGB channels, not colours.* `--brand: 204 31 134`, not
-`#CC1F86`. Tailwind wraps each in `rgb(var(--brand) / <alpha-value>)`, which is
+*The values are RGB channels, not colours.* `--brand: 212 175 55`, not
+`#D4AF37`. Tailwind wraps each in `rgb(var(--brand) / <alpha-value>)`, which is
 what makes `bg-brand/[0.12]`, `ring-line/70` and `from-ink/5` work at all.
 Storing a hex would have cost every opacity modifier in the codebase — a
 constraint worth knowing before you pick the format, and expensive to discover
@@ -128,22 +132,42 @@ applying a value nobody designed against, on a palette that is already dark.
 token is ever declared twice, which is the shape a second palette would take on
 its way back in.
 
-**The `#CC1F86` vs `#EE4FA5` contrast decision (the interesting one).**
-The brief specified vivid magenta `#CC1F86` for CTAs *and* accent-bright
-`#EE4FA5` for hover/links, plus a non-negotiable WCAG AA bar. These collide:
+**The contrast decision (the interesting one), twice.**
 
-- White text on `#CC1F86` = **5.11:1** ✓ (good button).
-- White text on the brighter `#EE4FA5` = **3.33:1** ✗ — a *lighter* hover fill
-  fails AA for button labels.
-- `#CC1F86` as small *text* on the near-black bg = **3.66:1** ✗.
+The magenta palette had one: the brief specified vivid `#CC1F86` for CTAs *and*
+accent-bright `#EE4FA5` for hover/links, plus a non-negotiable WCAG AA bar, and
+those collide — white on `#CC1F86` is 5.11:1 ✓, white on the *brighter*
+`#EE4FA5` is 3.33:1 ✗, and `#CC1F86` as small text on near-black is 3.66:1 ✗.
+The fix was to give the two magentas non-overlapping jobs: `#CC1F86` a **fill**
+carrying white text, `#EE4FA5` the **text/link/focus-ring** colour (5.97:1), and
+a hover that **darkens** to `#B81A78` so white stays at 6.07:1. The metallic pop
+came from a glow rather than a lower-contrast fill.
 
-So the two magentas were given distinct, non-overlapping jobs:
-`#CC1F86` is a **fill** (buttons, progress, logo, large numbers) that carries
-white text; `#EE4FA5` is the **accessible text/link/focus-ring** colour on dark
-(**5.97:1**). Button hover **darkens** to `#B81A78` (white 6.07:1) instead of
-brightening — the "metallic pop" comes from a glow, not a lower-contrast fill.
-The result honours both exact brand colours *and* AA, verified with computed
-ratios rather than eyeballing.
+The gold palette is the same decision with every sign flipped, which is the part
+worth reading. Magenta was a *dark* accent; gold is a *light* one:
+
+- White on `#D4AF37` = **2.10:1** ✗. Not marginal — unreadable. So `--on-brand`
+  became a near-black (`#0C1114`) and the primary button inverted: dark label on
+  a gold face, **6.06:1** at the shaded end of the gradient and **11.75:1** at
+  the lit end. Better than the magenta button ever managed.
+- Hover therefore **brightens** rather than darkens, because on a light fill
+  brightening is what *raises* contrast against the label. It is applied as a
+  6% `brightness` multiply, so the gold gains 6% and the near-black gains
+  almost nothing.
+- The surface ladder kept its lightness values to within 0.0001 and changed only
+  its hue — rose-black (R and B above G) to water-slate (B above G above R).
+  Every text token came out ahead: muted body copy went from 7.3:1 to **8.4:1**
+  on the page background, and its worst case across all eight surfaces from
+  6.11:1 to **6.55:1**.
+- One semantic colour had to move. `--warning` was `#E0B84A`, which is within a
+  few points of the new accent — a warning state coloured like the brand is not
+  a state. It went to `#E0894C`, 21° around the wheel, still amber to a reader.
+
+`tests/contrast.test.ts` recomputes all of it from the token values on every
+run, so none of the above is a claim about a moment; and the two places a
+palette value must be duplicated as a literal — the web manifest and
+`viewport.themeColor`, both read before a stylesheet exists — are now asserted
+against `--canvas` rather than against a hex someone remembered to update.
 
 ## Verified metrics
 
@@ -172,9 +196,16 @@ All measured on the production build — method reproducible from the repo.
   87 / 95 / 100 as total blocking time moved 240 ms → 150 ms → 20 ms. Both
   numbers are real, which is the point — a single Lighthouse performance score
   measures the machine as much as the page.
-- **Responsive (2026-07-28)** — no horizontal overflow on any of the 36 routes
-  at 390 px or 1440 px (`scrollWidth <= innerWidth`).
-- **Tests (2026-08-10)** — **1560 / 1560** Vitest across 47 files, covering
+- **Route sweep (Liquid Gold build, 2026-08-16)** — 35 routes × three viewports
+  (390 / 768 / 1440 px), driven in headless Chrome: **no horizontal overflow**
+  (`scrollWidth <= innerWidth`), no console or page error, no failed request,
+  **exactly one `<h1>` per route and no skipped heading level**, no link or
+  button without an accessible name, and no `<img>` without an `alt`. This is
+  the run that found the `/admin` pages opening at `<h3>` with no `<h1>` above
+  them — a defect confined to the three routes behind the password, which is
+  why the suite as it then stood — well over a thousand checks — and an axe
+  pass over the public site had never seen it.
+- **Tests (2026-08-16)** — **1703 / 1703** Vitest across 48 files, covering
   IBAN/MOD-97, FX, pagination, storage provider selection, admin auth (HMAC
   round-trip, tamper, expiry), session signing, RLS-backed profile reads, CSV
   injection-safety, and the analytics funnel (unique-session counting,
@@ -182,14 +213,20 @@ All measured on the production build — method reproducible from the repo.
   assert properties the other gates cannot see: no anchor inside an anchor, no
   bare `overflow-x-auto`, no bare `<select>` left for the operating system to
   paint, no colour utility naming an undefined token, no page claiming the
-  build collects nothing, and a length budget on every `<title>` and meta
-  description.
+  build collects nothing, every page providing a top-level heading, no font
+  size passed to `<Heading>` through `className`, and a length budget on every
+  `<title>` and meta description. All of it runs in Node: there is **no automated browser or
+  end-to-end suite**, and the count should be read as unit, property and
+  repository-integrity checks rather than as rendered-UI coverage.
 - **Types / lint / audit** — `tsc` clean, ESLint clean, `npm audit --omit=dev`
   0 vulnerabilities, **zero `any`**.
-- **Contrast** — every fg/bg pair computed ≥ AA; e.g. body text 17.0:1, muted
-  5.85:1, links 5.97:1, button labels 5.11:1, success 9.0:1. Recomputed from
-  `styles/globals.css` on every test run rather than trusted from a table.
-- **End-to-end** — drove the full `/demo` flow through real Chrome; the live
+- **Contrast (Liquid Gold, recomputed 2026-08-15)** — every fg/bg pair computed
+  ≥ AA: body text 16.5:1, gold links 11.6:1, button labels on the gold fill
+  9.0:1, muted 8.4:1, success 7.4:1, large key numbers 7.0:1, form errors
+  6.4:1. Recomputed from `styles/globals.css` on every test run rather than
+  trusted from a table — the figures above are what the palette swap produced,
+  and every one of them improved on the magenta values it replaced.
+- **End-to-end (manual, not a suite)** — drove the full `/demo` flow through real Chrome; the live
   ECB conversion checked out ($4,820 − $3,000 = $1,820.00, and $3,000 at the
   day's 0.8797 gave €2,639.22), and all six funnel events landed in the store.
 
@@ -226,7 +263,7 @@ is recorded batch by batch in [`docs/PROGRESS.md`](./docs/PROGRESS.md).
 > **Marsa** — a cross-border multi-currency account concept, delivered as a
 > production-grade marketing site, an interactive live-FX demo, customer
 > accounts on Postgres row-level security, and a first-party analytics backend.
-> Dark "black rose" design system on one set of role-named tokens; 1,560
+> Dark "liquid gold" design system on one set of role-named tokens; 1,703
 > passing tests and 0 axe violations across 72 page-loads; illustrations drawn
 > from those tokens rather than sourced; and a hard line between real software
 > and a build that tells you exactly what it is not. Next.js 15 / React 19 /

@@ -61,7 +61,7 @@ export default async function AccountPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Heading level="h1" className="text-2xl md:text-3xl">
+      <Heading level="h1" size="panel">
         Your account
       </Heading>
 

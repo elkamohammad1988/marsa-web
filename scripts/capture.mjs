@@ -292,6 +292,36 @@ async function frame(page, selector, offset = NAV_BAND) {
         if (!heading && rect.height > 240) continue;
         const style = getComputedStyle(node);
         if (style.visibility === "hidden" || style.opacity === "0") continue;
+        /*
+         * Skip anything that travels with the viewport — the floating navbar
+         * and its links, the disclosure badge inside it.
+         *
+         * These are not part of the composition being framed: they are drawn
+         * at the same place on screen whatever the scroll position, so they
+         * can neither be cut by an edge nor hidden behind the bar they *are*.
+         * Counting them did both. `rect.top + scrollY` for a fixed element
+         * grows as the page scrolls, so the navbar's own contents kept landing
+         * inside the navbar band and being charged the obscured penalty — a
+         * tax on every candidate near the top of a page, largest at scroll 0.
+         *
+         * On `/tools/currency-converter` that tax was decisive. Scroll 0 frames
+         * the page exactly as designed — the whole five-line `<h1>` clear of
+         * the bar, the live converter and its chart beneath it — and scored
+         * **73.5** against 9.8 for a position that tucks the first line of the
+         * headline behind the navbar. So the scorer rejected the correct frame
+         * because of the bar it was trying to avoid, and `02` shipped with
+         * "Instant" sliced through the middle. The heading-height exemption
+         * above was a real fix for a real fault and was never the whole one.
+         */
+        let floating = false;
+        for (let el = node; el; el = el.parentElement) {
+          const position = getComputedStyle(el).position;
+          if (position === "fixed" || position === "sticky") {
+            floating = true;
+            break;
+          }
+        }
+        if (floating) continue;
         boxes.push({
           top: rect.top + window.scrollY,
           bottom: rect.bottom + window.scrollY,
@@ -301,37 +331,91 @@ async function frame(page, selector, offset = NAV_BAND) {
         });
       }
 
+      /*
+       * The three faults are not equally bad, and the first version of this
+       * scorer had them ranked backwards.
+       *
+       * It charged a full weight for a cut at *either* edge and a half weight
+       * for sitting under the navbar — making "hide a paragraph behind the
+       * navbar" the cheapest outcome available. On `03`/`04` that is exactly
+       * what it bought: given a choice between tucking the demo page's intro
+       * paragraph under the translucent navbar (2) and cutting the section
+       * heading below the fold at the bottom edge (6), it picked the former,
+       * and the frame it wrote had a line of text showing through the navigation
+       * bar. In a still, with no scroll position to explain it, that reads as a
+       * rendering fault rather than as a crop.
+       *
+       * How each fault actually reads in a still image:
+       *
+       *   • **Under the navbar** — worst. Nothing in a screenshot tells the
+       *     viewer the bar is floating over a longer page, so text emerging
+       *     from behind it looks like a z-index bug.
+       *   • **Cut at the top edge** — bad. The frame appears to start
+       *     mid-sentence.
+       *   • **Cut at the bottom edge** — mild, and unavoidable on any page
+       *     taller than the viewport. A part-visible heading at the bottom is
+       *     how every screenshot of a long page ends; it reads as "the page
+       *     continues", which is true.
+       */
+      const OBSCURED = 1.5;
+      const TOP_CUT = 1;
+      const BOTTOM_CUT = 0.4;
+
       const score = (scroll) => {
         const top = scroll;
         const bottom = scroll + viewport;
         let total = 0;
         for (const box of boxes) {
           // Straddling either edge: the element is drawn cut in half.
-          if (box.top < top && box.bottom > top) total += box.weight;
-          if (box.top < bottom && box.bottom > bottom) total += box.weight;
+          if (box.top < top && box.bottom > top) total += box.weight * TOP_CUT;
+          if (box.top < bottom && box.bottom > bottom) total += box.weight * BOTTOM_CUT;
           // Sitting behind the floating navbar: not cut, but obscured, which
           // is what made the converter's own <h1> unreadable in `02`.
-          if (box.top < top + navBand && box.bottom > top) total += box.weight / 2;
+          if (box.top < top + navBand && box.bottom > top) total += box.weight * OBSCURED;
         }
         return total;
       };
 
-      // Search around the ideal position and keep the closest best score.
+      /*
+       * Search around the ideal position, paying for the distance travelled.
+       *
+       * Distance used to be a tie-break only: any position with a strictly
+       * lower cut score won, however far away it was. That is not what framing
+       * means. Each of these shots names a subject — the converter's amount
+       * field, the demo's progress rail — and `offset` says how far below the
+       * top of the frame that subject belongs; a position that cuts nothing but
+       * has scrolled 400px off the mark is a picture of something else.
+       *
+       * It duly took one. With the navbar tax removed, scroll 20 on `/demo`
+       * cuts nothing at all — because it is the marketing hero, with the demo
+       * widget half in frame beneath it — and it beat the correct 340 on score
+       * alone. Both demo captures became a second photograph of the page header.
+       *
+       * So distance enters the objective rather than the tie-break. At 0.04 a
+       * unit of cut weight is worth 25px of travel, which puts a sliced heading
+       * (weight 6) at 150px — far enough to clear the thing being avoided,
+       * never far enough to leave the subject behind.
+       */
+      const DISTANCE_COST = 0.04;
+
       let best = ideal;
       let bestScore = Infinity;
+      let bestCut = Infinity;
       for (let delta = 0; delta <= 420; delta += 4) {
         for (const candidate of delta === 0 ? [ideal] : [ideal - delta, ideal + delta]) {
           const scroll = Math.min(maxScroll, Math.max(0, candidate));
-          const value = score(scroll);
+          const cut = score(scroll);
+          const value = cut + Math.abs(scroll - ideal) * DISTANCE_COST;
           if (value < bestScore - 0.001) {
             bestScore = value;
+            bestCut = cut;
             best = scroll;
           }
         }
       }
 
       window.scrollTo({ top: best, behavior: "instant" });
-      return { ideal: Math.round(ideal), chosen: Math.round(best), score: bestScore };
+      return { ideal: Math.round(ideal), chosen: Math.round(best), score: bestCut };
     },
     selector,
     offset,

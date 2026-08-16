@@ -23,8 +23,10 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     scope: "/",
     display: "browser",
-    background_color: "#0c080b",
-    theme_color: "#0c080b",
+    /* `--canvas`, restated as a literal: the OS reads these before the app
+       has a stylesheet. Keep in step with `viewport.themeColor` in layout.tsx. */
+    background_color: "#0b1216",
+    theme_color: "#0b1216",
     lang: "en-GB",
     categories: ["finance", "business"],
     icons: [

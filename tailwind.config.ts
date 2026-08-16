@@ -56,16 +56,30 @@ const config: Config = {
           // `blue-soft` — kept "for zero-churn" through the rebrand, so the
           // whole codebase asked for `bg-brand-blue` and got magenta. A token
           // whose name contradicts its value is worse than a churny rename:
-          // it makes every colour decision in the codebase unreadable.
+          // it makes every colour decision in the codebase unreadable. Which is
+          // also why the gold palette did not rename these: the roles did not
+          // change, only the hue filling them.
           //
           // DEFAULT is the fill (CTAs, progress rail, logo tile, large key
-          // numbers) and carries `on-brand` white at 5.1:1. `deep` is the
-          // hover fill, darker so white stays ≥6:1. `strong` is the accessible
-          // magenta for text, links and focus rings on the dark background.
+          // numbers) and carries `on-brand` — a near-black — at 9.0:1. `deep`
+          // is the shaded face: gradient undersides, pressed states, a gold
+          // hairline that must sit down rather than glow. `strong` is the
+          // accessible bright gold for text, links and focus rings.
           DEFAULT: withAlpha("--brand"),
           deep: withAlpha("--brand-deep"),
           soft: withAlpha("--brand-soft"),
           strong: withAlpha("--brand-strong"),
+        },
+        // The gold scale itself, for the few places that need a specific step
+        // rather than a role — chiefly the specular highlights in the water
+        // reflection. Prefer the `brand-*` roles everywhere else.
+        gold: {
+          DEFAULT: withAlpha("--gold"),
+          light: withAlpha("--gold-light"),
+          soft: withAlpha("--gold-soft"),
+          deep: withAlpha("--gold-deep"),
+          dark: withAlpha("--gold-dark"),
+          highlight: withAlpha("--gold-highlight"),
         },
         accent: {
           DEFAULT: withAlpha("--accent"),
@@ -120,12 +134,17 @@ const config: Config = {
       boxShadow: {
         /**
          * Elevation system — 3 levels, each a soft black drop plus a faint
-         * magenta ambient (rgba(204,31,134,~0.12)). Used consistently:
+         * gold ambient (rgba(212,175,55,~0.12)). Used consistently:
          * e1 = resting card, e2 = raised/hover, e3 = floating/modal.
+         *
+         * The ambient tint is what stops a card on a cool surface from reading
+         * as cut out of it: a warm bleed under a cool panel is the shadow a gold
+         * light in the room would actually cast. It stays at the same alphas the
+         * magenta ambient used, because the job was never the hue.
          */
-        e1: "0 1px 2px rgba(0,0,0,0.45), 0 10px 26px -14px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(204,31,134,0.12)",
-        e2: "0 2px 6px rgba(0,0,0,0.5), 0 20px 44px -18px rgba(0,0,0,0.65), 0 16px 44px -18px rgba(204,31,134,0.20)",
-        e3: "0 10px 16px rgba(0,0,0,0.55), 0 34px 74px -26px rgba(0,0,0,0.72), 0 26px 66px -22px rgba(204,31,134,0.24)",
+        e1: "0 1px 2px rgba(0,0,0,0.45), 0 10px 26px -14px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(212,175,55,0.12)",
+        e2: "0 2px 6px rgba(0,0,0,0.5), 0 20px 44px -18px rgba(0,0,0,0.65), 0 16px 44px -18px rgba(212,175,55,0.18)",
+        e3: "0 10px 16px rgba(0,0,0,0.55), 0 34px 74px -26px rgba(0,0,0,0.72), 0 26px 66px -22px rgba(212,175,55,0.22)",
         /**
          * The metallic CTA stack: inner top highlight + inner rim + a drop.
          *
@@ -140,34 +159,59 @@ const config: Config = {
          * The fix is not to delete the glow — the metallic read depends on it —
          * but to demote it from a light source to an ambient tint, and to give
          * the button an actual neutral shadow to sit on, which it never had.
-         * Rest drops 0.50 → 0.24; hover 0.66 → 0.34, still a clear brightening
-         * on interaction.
+         * Rest drops 0.50 → 0.22; hover 0.66 → 0.30, still a clear brightening
+         * on interaction. The restraint matters *more* under gold, not less:
+         * a glowing gold button is the one thing on this list that would read
+         * as a casino rather than a bank.
+         *
+         * The inner top highlight is warmed from white to `--gold-highlight`.
+         * On a magenta fill a white inset read as a hard edge light; on gold it
+         * read as a chip in the plating. Warm, it reads as the metal catching
+         * the light — which is the whole point of the layer.
          */
-        cta: "inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.06), 0 2px 6px -2px rgba(0,0,0,0.5), 0 8px 22px -10px rgba(206,42,140,0.24)",
-        "cta-hover": "inset 0 1px 0 rgba(255,255,255,0.34), inset 0 0 0 1px rgba(255,255,255,0.08), 0 4px 10px -3px rgba(0,0,0,0.55), 0 12px 28px -10px rgba(238,79,165,0.34)",
+        cta: "inset 0 1px 0 rgba(255,241,168,0.45), inset 0 0 0 1px rgba(255,241,168,0.10), 0 2px 6px -2px rgba(0,0,0,0.5), 0 8px 22px -10px rgba(212,175,55,0.22)",
+        "cta-hover": "inset 0 1px 0 rgba(255,241,168,0.60), inset 0 0 0 1px rgba(255,241,168,0.14), 0 4px 10px -3px rgba(0,0,0,0.55), 0 12px 28px -10px rgba(245,215,110,0.30)",
         // Back-compat aliases (older components) → mapped onto the new system.
-        card: "0 1px 2px rgba(0,0,0,0.45), 0 10px 26px -14px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(204,31,134,0.12)",
-        nav: "0 8px 30px -12px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(204,31,134,0.14)",
-        elevated: "0 10px 16px rgba(0,0,0,0.55), 0 34px 74px -26px rgba(0,0,0,0.72), 0 26px 66px -22px rgba(204,31,134,0.24)",
-        glow: "0 20px 60px -28px rgb(var(--brand) / 0.6)",
-        "glow-sm": "0 10px 30px -16px rgb(var(--brand) / 0.55)",
-        "glow-lg": "0 30px 90px -30px rgb(var(--brand) / 0.55)",
+        card: "0 1px 2px rgba(0,0,0,0.45), 0 10px 26px -14px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(212,175,55,0.12)",
+        nav: "0 8px 30px -12px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(212,175,55,0.14)",
+        elevated: "0 10px 16px rgba(0,0,0,0.55), 0 34px 74px -26px rgba(0,0,0,0.72), 0 26px 66px -22px rgba(212,175,55,0.22)",
+        /**
+         * Gold blooms, dimmer than the magenta ones they replace (0.60 → 0.40,
+         * 0.55 → 0.36). Gold sits ~0.45 luminance against surfaces at ~0.006;
+         * at the old alphas the same declaration that read as a soft magenta
+         * halo reads as a lamp, and a lamp behind a logo tile is the single
+         * fastest way to make a payments product look like a slot machine.
+         */
+        glow: "0 20px 60px -28px rgb(var(--brand) / 0.40)",
+        "glow-sm": "0 10px 30px -16px rgb(var(--brand) / 0.36)",
+        "glow-lg": "0 30px 90px -30px rgb(var(--brand) / 0.36)",
       },
       backgroundImage: {
-        // Decorative gradient (tiles, glows, illustration fills).
+        // Decorative gradient (tiles, glows, illustration fills). Lit face at
+        // the top-left, shaded face at the bottom-right — a gold surface under
+        // a single light, rather than three arbitrary stops of the same hue.
         "brand-gradient":
-          "linear-gradient(135deg, rgb(var(--brand-soft)) 0%, rgb(var(--brand)) 55%, rgb(var(--brand-deep)) 100%)",
-        // Interactive CTA — vertical metallic magenta. Pair only with text-on-brand.
+          "linear-gradient(135deg, rgb(var(--gold-light)) 0%, rgb(var(--gold)) 52%, rgb(var(--gold-deep)) 100%)",
+        // Interactive CTA — vertical metallic gold. Pair only with text-on-brand.
         "cta-gradient":
           "linear-gradient(180deg, rgb(var(--cta-from)) 0%, rgb(var(--cta-to)) 100%)",
         "radial-glow":
-          "radial-gradient(60% 60% at 50% 0%, rgb(var(--brand) / 0.20) 0%, transparent 72%)",
-        // Atmospheric magenta glow (#3A0F2B → transparent) behind hero/headers.
+          "radial-gradient(60% 60% at 50% 0%, rgb(var(--brand) / 0.14) 0%, transparent 72%)",
+        /**
+         * The wash behind hero/headers: deep water first, a gold cast second.
+         *
+         * This was a single magenta-black (#3A0F2B), i.e. the accent darkened.
+         * Under gold that recipe gives an olive-brown fog. The two layers here
+         * are the palette's actual thesis — a cool medium with a warm light
+         * *inside* it — and they are ordered so the gold is the smaller, higher
+         * layer: light entering water, not water tinted gold.
+         */
         "atmosphere":
-          "radial-gradient(60% 55% at 50% 0%, rgba(58,15,43,0.9) 0%, rgba(58,15,43,0.35) 32%, transparent 68%)",
-        // Layered light sources for hero / section backdrops.
+          "radial-gradient(60% 55% at 50% 0%, rgba(9,38,45,0.92) 0%, rgba(9,38,45,0.38) 34%, transparent 68%), radial-gradient(34% 30% at 50% -2%, rgb(var(--brand) / 0.10) 0%, transparent 62%)",
+        // Layered light sources for hero / section backdrops. Gold leads, the
+        // water halo sits behind and lower, and the floor is deep water.
         "mesh-deep":
-          "radial-gradient(58% 68% at 14% 4%, rgb(var(--brand) / 0.38) 0%, transparent 58%), radial-gradient(46% 58% at 86% 16%, rgb(var(--brand-strong) / 0.16) 0%, transparent 60%), radial-gradient(72% 82% at 50% 112%, rgba(58,15,43,0.55) 0%, transparent 64%)",
+          "radial-gradient(58% 68% at 14% 4%, rgb(var(--brand) / 0.11) 0%, transparent 58%), radial-gradient(46% 58% at 86% 16%, rgb(var(--halo) / 0.26) 0%, transparent 60%), radial-gradient(72% 82% at 50% 112%, rgba(9,38,45,0.55) 0%, transparent 64%)",
       },
       ringOffsetColor: {
         canvas: "rgb(var(--canvas))",
@@ -222,8 +266,8 @@ const config: Config = {
         },
         // Gentle glow breathing for the active progress-rail segment.
         "rail-pulse": {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(238,79,165,0.0)", opacity: "0.92" },
-          "50%": { boxShadow: "0 0 12px 1px rgba(238,79,165,0.55)", opacity: "1" },
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(212,175,55,0.0)", opacity: "0.92" },
+          "50%": { boxShadow: "0 0 12px 1px rgba(232,201,90,0.45)", opacity: "1" },
         },
         /**
          * Demo step change. Short and small on purpose: the panel is what the

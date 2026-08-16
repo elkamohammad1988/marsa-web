@@ -76,6 +76,62 @@ const ARROW = {
   fx: "M4 8h13l-3-3M20 16H7l3 3",
 };
 
+/**
+ * A step's one irreversible action, and what stands in its place afterwards.
+ *
+ * The three steps that do something — receive, convert, send — used to render
+ * `<Button disabled>` with a tick appended to the label once it was done. That
+ * conflated two different states in one control, and the palette exposed it.
+ *
+ * `disabled:opacity-60` over a card composites the gold fill down to roughly
+ * `#887732` and the near-black label to `#3E3A20`: a **2.6:1** olive lozenge
+ * with the confirmation the reader is looking for written inside it in the
+ * least legible colour on the page. It is also the wrong pattern regardless of
+ * the colour — "you did this successfully" is not a control the reader may not
+ * use, and dimming is how an interface says *unavailable*, not *achieved*.
+ *
+ * So the completed state stops being a button at all and becomes a
+ * confirmation, on the same `--success` tint the account panel already uses for
+ * money arriving (7.4:1). Nothing announces it here: the panel's `aria-live`
+ * region above already reports what changed, and a `role="status"` on top of
+ * that would read the outcome to a screen reader twice.
+ */
+function StepAction({
+  done,
+  doneLabel,
+  label,
+  onClick,
+  disabled,
+}: {
+  done: boolean;
+  doneLabel: string;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  if (done) {
+    return (
+      <p className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/[0.12] px-4 py-2 text-sm font-medium text-success">
+        <svg aria-hidden viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+          <path
+            d="M4 12.5l5 5L20 6.5"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        {doneLabel}
+      </p>
+    );
+  }
+  return (
+    <Button type="button" onClick={onClick} disabled={disabled}>
+      {label}
+    </Button>
+  );
+}
+
 export function DemoFlow() {
   const [step, setStep] = useState<DemoStepId>("welcome");
   const [accountType, setAccountType] = useState<AccountType>("business");
@@ -336,23 +392,38 @@ export function DemoFlow() {
         })}
       </ol>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.05fr]">
+      {/*
+        `items-start`, so each panel is the height of what is in it.
+
+        Grid's default `stretch` made both columns as tall as the taller one,
+        and the slack did not land anywhere useful. The account panel absorbed
+        its share into the activity list, which is a list and can take it; the
+        step panel had nowhere to put it, so it opened a gap between the step's
+        own controls and the Back/Continue row pinned beneath them — around
+        300px of empty card on `receive` and `convert`, the two steps that are
+        the product's whole argument and the two frames the portfolio captures.
+
+        The anti-jump reserve that `stretch` was doing by accident is done on
+        purpose by `min-h-[320px]` on the step body below, which is where it
+        belongs: it holds the controls still between steps without tying the
+        panel's height to a list in the other column.
+      */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_1.05fr]">
         {/* Live account panel */}
         <div
           className={cn(
-            // `flex flex-col` so the Activity block below can claim the slack.
-            // Grid stretches both columns to the tallest, and the step panel
-            // opposite carries `min-h-[320px]`, so this card was routinely
-            // ~250px taller than its contents — all of it dumped as blank card
-            // under the empty state, which is the worst place on a dashboard
-            // to have a void.
+            // `flex flex-col` so the Activity block below can claim any slack
+            // this card is given. It is no longer given any — the grid above
+            // is `items-start`, so this panel is the height of its contents —
+            // but the rule stays because the list is still the right place for
+            // the slack if the layout ever stretches it again.
             "gradient-ring relative flex flex-col overflow-hidden rounded-card-lg border border-line bg-card p-5 shadow-e2 transition-opacity sm:p-6",
             accountLive ? "opacity-100" : "opacity-60",
           )}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <span className="logo-tile grid h-8 w-8 place-items-center rounded-[10px] text-white">
+              <span className="logo-tile grid h-8 w-8 place-items-center rounded-[10px]">
                 <MarsaMark className="h-5 w-5" />
               </span>
               <div className="leading-tight">
@@ -479,9 +550,29 @@ export function DemoFlow() {
             {announcement}
           </p>
 
-          {/* `key` restarts the entrance on each step; 320px reserves the
-              height so the controls below do not jump between steps. */}
-          <div key={step} className="min-h-[320px] animate-step-in">
+          {/*
+            `key` restarts the entrance on each step; the min-height reserves
+            room so Back/Continue do not move as the reader steps through.
+
+            The reserve has to be at least the tallest step's content and there
+            is nothing to gain above it — every pixel over is a void on all
+            eight. It was a round 320px, and the eight steps actually measure
+            (content height, excluding the reserve):
+
+              1440px  welcome 251 · profile 264 · identity 164 · account 209
+                      receive 154 · convert 224 · send 154 · done 204
+               390px  welcome 395 · profile 296 · identity 183 · account 244
+                      receive 172 · convert 242 · send 172 · done 286
+
+            So 320 was 56px above anything desktop needed, and the two steps
+            the product is judged on — receive and convert — were carrying
+            160px and 96px of empty card underneath their controls.
+
+            Each breakpoint now reserves its own measured maximum. `welcome` on
+            a phone is taller than the reserve at 395px and always was; it is
+            the entry step, so nothing precedes it to jump from.
+          */}
+          <div key={step} className="min-h-[300px] animate-step-in lg:min-h-[270px]">
             <h2
               ref={headingRef}
               tabIndex={-1}
@@ -630,9 +721,12 @@ export function DemoFlow() {
                     A client abroad pays a {money(DEMO_SCRIPT.payoutUsd, "USD")} invoice into your
                     USD balance — no intermediary bank, no lost days. Tap to receive it.
                   </p>
-                  <Button type="button" onClick={receivePayout} disabled={balances.USD > 0}>
-                    {balances.USD > 0 ? "Payout received ✓" : `Receive ${money(DEMO_SCRIPT.payoutUsd, "USD")}`}
-                  </Button>
+                  <StepAction
+                    done={balances.USD > 0}
+                    doneLabel="Payout received"
+                    label={`Receive ${money(DEMO_SCRIPT.payoutUsd, "USD")}`}
+                    onClick={receivePayout}
+                  />
                 </div>
               )}
 
@@ -669,15 +763,13 @@ export function DemoFlow() {
                       </div>
                     )}
                   </div>
-                  <Button
-                    type="button"
+                  <StepAction
+                    done={balances.EUR > 0}
+                    doneLabel="Converted"
+                    label={`Convert ${money(DEMO_SCRIPT.convertUsd, "USD")} → EUR`}
                     onClick={convert}
-                    disabled={rateState !== "ready" || balances.EUR > 0 || balances.USD < DEMO_SCRIPT.convertUsd}
-                  >
-                    {balances.EUR > 0
-                      ? "Converted ✓"
-                      : `Convert ${money(DEMO_SCRIPT.convertUsd, "USD")} → EUR`}
-                  </Button>
+                    disabled={rateState !== "ready" || balances.USD < DEMO_SCRIPT.convertUsd}
+                  />
                 </div>
               )}
 
@@ -687,15 +779,13 @@ export function DemoFlow() {
                     Pay a supplier {money(DEMO_SCRIPT.sendEur, "EUR")} over SEPA — free, and it
                     lands the same day across 36 countries.
                   </p>
-                  <Button
-                    type="button"
+                  <StepAction
+                    done={activity.some((a) => a.kind === "out")}
+                    doneLabel="Transfer sent"
+                    label={`Send ${money(DEMO_SCRIPT.sendEur, "EUR")} SEPA`}
                     onClick={sendSepa}
                     disabled={balances.EUR < DEMO_SCRIPT.sendEur}
-                  >
-                    {activity.some((a) => a.kind === "out")
-                      ? "Transfer sent ✓"
-                      : `Send ${money(DEMO_SCRIPT.sendEur, "EUR")} SEPA`}
-                  </Button>
+                  />
                 </div>
               )}
 

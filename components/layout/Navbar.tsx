@@ -195,7 +195,11 @@ export function Navbar() {
                         // share 1024–1280px; at 12px the row overflowed its
                         // container. Two pixels an item, taken back at `xl`.
                         "rounded-full px-2.5 py-2 text-sm font-medium transition-colors hover:bg-ink/5 hover:text-ink xl:px-3",
-                        current ? "text-ink" : "text-ink-muted",
+                        // Gold is how this site says "important", so it is what
+                        // the current page gets. `text-ink` alone was a
+                        // lightness difference on a bar where the CTA, the
+                        // wordmark and every hovered item are also `text-ink`.
+                        current ? "nav-current text-brand-strong" : "text-ink-muted",
                         FOCUS_RING,
                       )}
                     >
@@ -243,7 +247,12 @@ export function Navbar() {
                       // Matches the plain nav link above: 10px of side padding
                       // between `lg` and `xl`, 12px above.
                       "inline-flex items-center gap-1 rounded-full px-2.5 py-2 text-sm font-medium transition-colors hover:bg-ink/5 hover:text-ink xl:px-3",
-                      open || holdsCurrent ? "text-ink" : "text-ink-muted",
+                      // The indicator tracks the *page*, the gold text tracks
+                      // either. An open panel is a thing the reader is doing;
+                      // the rule underneath is a statement about where they
+                      // are, and drawing it on hover would make it a lie.
+                      holdsCurrent && "nav-current",
+                      open || holdsCurrent ? "text-brand-strong" : "text-ink-muted",
                       FOCUS_RING,
                     )}
                   >
@@ -273,7 +282,9 @@ export function Navbar() {
                               className={cn(
                                 "block rounded-xl px-3 py-2 text-sm transition-colors hover:bg-brand/[0.06] hover:text-ink",
                                 "focus-visible:bg-brand/[0.06] focus-visible:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-brand-strong",
-                                current ? "bg-brand/[0.06] text-ink" : "text-ink-muted",
+                                current
+                                  ? "bg-brand/[0.08] text-brand-strong"
+                                  : "text-ink-muted",
                               )}
                             >
                               {child.label}
@@ -393,7 +404,9 @@ export function Navbar() {
                                 aria-current={current ? "page" : undefined}
                                 className={cn(
                                   "block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-surface-tint hover:text-ink",
-                                  current ? "bg-surface-tint text-ink" : "text-ink-muted",
+                                  current
+                                    ? "bg-surface-tint text-brand-strong"
+                                    : "text-ink-muted",
                                   FOCUS_RING,
                                 )}
                                 onClick={() => setMobileOpen(false)}
@@ -410,8 +423,10 @@ export function Navbar() {
                       href={group.href ?? "#"}
                       aria-current={isCurrent(pathname, group.href) ? "page" : undefined}
                       className={cn(
-                        "block rounded-lg px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink/5",
-                        isCurrent(pathname, group.href) && "bg-ink/5",
+                        "block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-ink/5",
+                        isCurrent(pathname, group.href)
+                          ? "bg-ink/5 text-brand-strong"
+                          : "text-ink",
                         FOCUS_RING,
                       )}
                       onClick={() => setMobileOpen(false)}

@@ -31,7 +31,9 @@ export default async function AdminFunnelPage() {
   return (
     <Container>
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <Heading level="h3">Demo funnel</Heading>
+        <Heading level="h1" size="panel">
+          Demo funnel
+        </Heading>
         <Button href="/admin" variant="outline" size="sm">
           ← Submissions
         </Button>

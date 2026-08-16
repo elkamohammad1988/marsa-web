@@ -77,23 +77,34 @@ export function Hero({
         className,
       )}
     >
-      {/* Ambient decoration, in depth order: mesh furthest back, then the two
-          drifting lights, then the grid, then grain over everything. The third
-          light is `halo` — cool, low, and behind the warm pair, which is what
-          stops the backdrop reading as one flat magenta wash. */}
+      {/* Ambient decoration, in depth order: mesh furthest back, then the three
+          drifting lights, then the grid, then grain over everything. `halo` is
+          the water — cool, low, and behind the warm pair, which is what stops
+          the backdrop reading as one flat gold wash. */}
       {/*
         Every light below is sized in absolute units chosen against a 1440px
         canvas, where they read as the depth the comment above describes. On a
         390px phone the first orb alone is 480px across — wider than the
-        screen — so all three plus `mesh-deep` (brand at 0.38) and `lightfield`
-        overlap across the entire viewport and resolve to exactly the one flat
-        magenta wash the halo exists to prevent. It was the strongest "cheap
-        gradient" signal left in the product, on the viewport most visitors
-        will actually use.
+        screen — so all three plus `mesh-deep` and `lightfield` overlap across
+        the entire viewport and resolve to exactly the one flat wash the halo
+        exists to prevent. It was the strongest "cheap gradient" signal left in
+        the product, on the viewport most visitors will actually use.
 
         Each light is therefore scaled and dimmed below `sm` only; from `sm`
-        upward the values are byte-for-byte what they were, so the desktop
+        upward the geometry is byte-for-byte what it was, so the desktop
         composition these were tuned for is untouched.
+
+        What did change with the palette is the *balance* between the three.
+        The warm pair used to lead (`brand-soft/25` + `accent/15`) because
+        magenta at those alphas was still a dark light. Gold is not: the second
+        orb at `accent/15` is a 26rem disc of bright gold, and at that size it
+        stops being a light and becomes the background colour. So the gold
+        halved and the water doubled — which is the correct order for a hero
+        that is supposed to depict the second one containing the first.
+
+        No `.gold-veil` here on purpose. Three of these already drift on
+        `aurora-a`/`aurora-b`/`drift`; a fourth moving layer would not add
+        depth, it would add traffic.
       */}
       {tone === "spotlight" && (
         <>
@@ -107,15 +118,15 @@ export function Hero({
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute -left-24 -top-32 h-[16rem] w-[16rem] animate-aurora-a rounded-full bg-brand-soft/25 blur-[110px] sm:h-[30rem] sm:w-[30rem]"
+            className="pointer-events-none absolute -left-24 -top-32 h-[16rem] w-[16rem] animate-aurora-a rounded-full bg-brand/[0.09] blur-[110px] sm:h-[30rem] sm:w-[30rem]"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-20 top-10 h-[14rem] w-[14rem] animate-aurora-b rounded-full bg-accent/15 blur-[120px] sm:h-[26rem] sm:w-[26rem]"
+            className="pointer-events-none absolute -right-20 top-10 h-[14rem] w-[14rem] animate-aurora-b rounded-full bg-brand/[0.08] blur-[120px] sm:h-[26rem] sm:w-[26rem]"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute -bottom-40 left-1/3 h-[13rem] w-[18rem] animate-drift rounded-full bg-halo/15 blur-[130px] sm:h-[24rem] sm:w-[34rem]"
+            className="pointer-events-none absolute -bottom-40 left-1/3 h-[13rem] w-[18rem] animate-drift rounded-full bg-halo/30 blur-[130px] sm:h-[24rem] sm:w-[34rem]"
           />
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid opacity-60" />
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-noise" />
@@ -289,8 +300,11 @@ export function Hero({
                     <CountUp
                       value={s.value}
                       className={cn(
-                        "figure block font-display text-3xl font-bold tabular-nums tracking-tight md:text-4xl",
-                        isDark ? "text-white" : "text-ink",
+                        // The KPI strip is where "gold means important" is
+                        // cashed in: four numbers, once per page, on their own
+                        // band. 12.3:1 on the dark tone and 11.6:1 on canvas —
+                        // brighter than the white it replaces was on either.
+                        "figure block font-display text-3xl font-bold tabular-nums tracking-tight text-brand-strong md:text-4xl",
                       )}
                     />
                     <span

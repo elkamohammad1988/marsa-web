@@ -126,7 +126,7 @@ export function CorridorMap() {
                   aria-hidden
                   className="absolute inset-0 animate-glow-pulse rounded-full bg-brand-soft/25 blur-2xl"
                 />
-                <span className="logo-tile relative grid h-20 w-20 place-items-center rounded-[26px] text-white shadow-glow ring-1 ring-inset ring-white/20">
+                <span className="logo-tile liquid-gold relative grid h-20 w-20 place-items-center overflow-hidden rounded-[26px] shadow-glow ring-1 ring-inset ring-gold-highlight/30">
                   <MarsaMark className="h-11 w-11" />
                 </span>
               </div>

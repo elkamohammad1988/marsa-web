@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /**
- * Marsa design tokens — "Black Rose": metallic magenta on near-black.
+ * Marsa design tokens — "Liquid Gold": gold seen through deep water.
  *
  * Values are space-separated RGB channels so Tailwind's `<alpha-value>` opacity
  * modifiers keep working (see tailwind.config.ts).
@@ -16,106 +16,175 @@
  * is ever wanted it should be written as a real second palette, not
  * reconstructed from the shape of the dead one.
  *
- * Magenta roles:
- *   • `--brand` (#CC1F86) is the fill — CTAs, progress rail, logo tile, large
- *     key numbers. It carries `--on-brand` white text (5.1:1). Button hover
- *     darkens to `--brand-deep` (#B81A78) so white stays ≥6:1 — the "metallic
- *     pop" comes from a glow, not a lighter fill that would fail contrast.
- *   • `--brand-strong` / `--accent` (#EE4FA5, accent-bright) is the bright
- *     magenta for TEXT, links, highlights and focus rings on the dark bg
- *     (5.6:1). `--brand-soft` (#7A1250) is the dim/secondary accent.
+ * ## What changed from "Black Rose", and why it is more than a hue swap
+ *
+ * The palette this replaces was metallic magenta on rose-black: the accent was
+ * a *dark* colour, so every gold-coloured decision here is the mirror image of
+ * the one it replaces.
+ *
+ *   • **The fill carries dark text, not white.** White on #CC1F86 was 5.1:1;
+ *     white on #D4AF37 is **2.1:1** and unreadable. `--on-brand` is therefore a
+ *     near-black (#0C1114) and clears 6.1:1 across the whole CTA gradient — a
+ *     better result than the magenta button ever had. Anything that hardcoded
+ *     `text-white` on a brand fill had to move to `text-on-brand`.
+ *   • **Hover brightens instead of darkening.** Magenta had to go *darker* on
+ *     hover to keep white legible. Gold goes lighter, which is both what a lit
+ *     metal does and what raises contrast rather than spending it.
+ *   • **The surfaces lost their rose undertone.** They were tinted toward the
+ *     accent (R and B lifted above G). Under gold that undertone reads as pink,
+ *     and pink-under-gold is the exact register — flashy, costume — that this
+ *     palette is trying not to be. The ladder below keeps its *lightness* values
+ *     almost to the decimal and re-hues the undertone cool: B > G > R, a deep
+ *     slate-teal that reads as water, so the gold sits *in* something rather
+ *     than being painted on top of it.
+ *
+ * ## Gold roles
+ *
+ * A palette, not a value. One gold used for everything reads as a highlighter;
+ * the tonal range between these six is what makes a gold surface read as metal.
+ *
+ *   • `--brand` (#D4AF37) is the fill — CTAs, progress rail, logo tile, large
+ *     key numbers. It carries `--on-brand` at 9.0:1.
+ *   • `--brand-strong` / `--accent` (#E8C95A) is the bright gold for TEXT,
+ *     links, highlights and focus rings on the dark surfaces (9.1:1 worst case,
+ *     11.6:1 on the page background).
+ *   • `--brand-deep` (#A67C00) is depth: the underside of a gold fill, the
+ *     pressed state, a gold hairline that must sit down rather than glow.
+ *   • `--brand-soft` (#806000) is the dim/secondary/in-progress accent. It is
+ *     2.5:1 on the darkest surface, so — exactly like the `--brand-soft` it
+ *     replaces — it is a fill and never a text colour.
+ *   • `--gold-light` (#F5D76E) and `--gold-highlight` (#FFF1A8) are the light
+ *     ON the gold rather than the gold itself: the specular in the water
+ *     reflection, the top of a lit rim. See `.liquid-gold` further down.
  */
 @layer base {
   :root {
     /*
-     * Surfaces — an elevation ladder, deep rose-black with a magenta undertone.
+     * Surfaces — an elevation ladder, deep water-slate with a cool undertone.
      *
      * These used to be five values inside four RGB points of each other, and
      * three of them (`card`, `surface-alt`, `surface-deep-2`) were byte-for-byte
      * identical. `--card` on `--canvas` computed to **1.024:1** — below the
      * threshold at which a human eye resolves two adjacent large areas at all.
-     * The result was the failure this palette is named for: every card, panel
-     * and glass surface dissolved into the page, so the only thing establishing
-     * hierarchy was the drop shadow, and the whole page read as one flat sheet.
+     * The result was that every card, panel and glass surface dissolved into the
+     * page, so the only thing establishing hierarchy was the drop shadow, and
+     * the whole page read as one flat sheet.
      *
-     * Each level below is now separated by ≥1.03 and the card/canvas pair by
-     * **1.155:1**. The base is lifted rather than the surfaces brightened, which
-     * buys separation without moving toward grey — every value here is still
-     * under 17% lightness, and `--surface-deep` keeps the original near-black so
-     * the hero band retains its depth.
+     * Each level below is separated by ≥1.03 and the card/canvas pair by
+     * **1.19:1**. Every value is still under 17% lightness, and `--surface-deep`
+     * keeps the original near-black so the hero band retains its depth.
      *
-     * The ceiling is not arbitrary. `--brand` (#CC1F86) renders as large key
-     * numbers on `--surface-tint`, and at 44 31 43 that pair is 3.07:1 — a
-     * hair over the 3:1 large-text minimum. Lifting `--surface-tint` two more
-     * points breaks it. `tests/contrast.test.ts` recomputes these on every run.
+     * The lightness of each rung is inherited from the rose-black ladder these
+     * replace — `--canvas` moved from L=0.00567 to L=0.00562, which is below
+     * what a display can resolve. What moved is the *hue*: R and B used to sit
+     * above G (a magenta cast), and now B > G > R. That is the whole reason the
+     * gold reads as submerged rather than applied. A warm accent on a warm-dark
+     * surface has no depth cue between them; a warm accent on a cool-dark
+     * surface is a light source with water in front of it.
+     *
+     * The old ceiling on `--surface-tint` — the magenta fill was only 3.07:1 on
+     * it, so two more points of lift broke large-text AA — is gone, because gold
+     * is a *light* accent: `--brand` is 7.04:1 there. `tests/contrast.test.ts`
+     * recomputes these on every run.
      */
-    --canvas: 22 15 21; /* #160F15 — page background (L1) */
-    --card: 40 28 39; /* #281C27 — elevated cards (L3) */
-    --surface-alt: 30 21 29; /* #1E151D — alternating sections (L2) */
-    --surface-alt-2: 35 25 34; /* #231922 */
-    --surface-tint: 44 31 43; /* #2C1F2B — inputs, inner panels, sandbox banner (L4) */
-    --surface-tint-2: 37 26 36; /* #251A24 */
-    --surface-deep: 11 7 10; /* #0B070A — deepest band for spotlight/hero (L0) */
-    --surface-deep-2: 17 11 16; /* #110B10 */
+    --canvas: 11 18 22; /* #0B1216 — page background (L1) */
+    --card: 22 36 42; /* #16242A — elevated cards (L3) */
+    --surface-alt: 15 24 28; /* #0F181C — alternating sections (L2) */
+    --surface-alt-2: 18 28 33; /* #121C21 */
+    --surface-tint: 26 42 49; /* #1A2A31 — inputs, inner panels, sandbox banner (L4) */
+    --surface-tint-2: 19 30 35; /* #131E23 */
+    --surface-deep: 5 9 11; /* #05090B — deepest band for spotlight/hero (L0) */
+    --surface-deep-2: 8 14 17; /* #080E11 */
 
-    /* Brand — "black rose" metallic magenta. */
-    --brand: 204 31 134; /* #CC1F86 — CTA, progress, logo, key numbers */
     /*
-     * The second light source, and the only hue on this site that is not
-     * magenta.
+     * Gold — the palette, spelled out once.
+     *
+     * The role tokens below (`--brand`, `--accent`, `--cta-*`) point into this
+     * scale rather than restating hex values, so "what is our gold" has one
+     * answer and "what is the gold *for*" has another. A component asks for a
+     * role; only this block knows the hue.
+     */
+    --gold-highlight: 255 241 168; /* #FFF1A8 — specular; the light, not the metal */
+    --gold-light: 245 215 110; /* #F5D76E — lit face of a gold surface */
+    --gold-soft: 232 201 90; /* #E8C95A — bright gold, legible as text */
+    --gold: 212 175 55; /* #D4AF37 — the gold */
+    --gold-deep: 166 124 0; /* #A67C00 — shaded face, gradient underside */
+    --gold-dark: 128 96 0; /* #806000 — dim/secondary; a fill, never text */
+
+    /* Brand roles → the gold scale. */
+    --brand: 212 175 55; /* = --gold — CTA, progress, logo, key numbers */
+    /*
+     * The second light source, and the only hue on this site that is not gold.
      *
      * A single-hue palette lit by a single-hue glow has nothing to model depth
      * with: every ambient layer is the same colour as the thing it is lighting,
-     * so stacking them reads as one brighter magenta rather than as two lights
-     * at different distances. `--halo` is a cool violet placed *behind* the
-     * warm magenta in every backdrop, which is what gives the hero, the CTA
-     * panel and the process band an actual sense of space.
+     * so stacking them reads as one brighter gold rather than as two lights at
+     * different distances. `--halo` is the *water* — a cool deep aqua placed
+     * behind the warm gold in every backdrop. It was a violet under the magenta
+     * palette, where its only job was to be cool; here it is also the literal
+     * subject, which is why the hero, the CTA panel and the process band read as
+     * something seen through a medium rather than lit from two sides.
      *
      * It is decoration only — blurred orbs and mesh stops, never text, never a
      * fill behind text, never a border. It has no contrast obligation because
      * nothing is ever read on it.
      */
-    --halo: 118 58 196; /* #763AC4 — cool ambient light, decoration only */
-    --brand-deep: 184 26 120; /* #B81A78 — button hover fill (keeps white ≥6:1) */
-    --brand-soft: 122 18 80; /* #7A1250 — accent-dim / secondary / in-progress */
-    --brand-strong: 238 79 165; /* #EE4FA5 — accent-bright: text/links/rings/highlights */
-    --accent: 238 79 165; /* #EE4FA5 */
-    --accent-soft: 122 18 80; /* #7A1250 */
+    --halo: 26 108 122; /* #1A6C7A — cool water light, decoration only */
+    --brand-deep: 166 124 0; /* = --gold-deep — depth, pressed state, shaded rim */
+    --brand-soft: 128 96 0; /* = --gold-dark — accent-dim / secondary / in-progress */
+    --brand-strong: 232 201 90; /* = --gold-soft — text/links/rings/highlights */
+    --accent: 232 201 90; /* #E8C95A */
+    --accent-soft: 128 96 0; /* #806000 */
 
     /* Semantic */
-    --success: 127 191 138; /* #7FBF8A — 8.6:1 on the near-black bg */
+    --success: 127 191 138; /* #7FBF8A — 8.7:1 on the page background */
     --success-strong: 127 191 138;
-    --warning: 224 184 74; /* readable amber on dark */
+    /*
+     * Warning moved 224 184 74 (#E0B84A) → #E0894C, i.e. hue 46° → 25°.
+     *
+     * The old amber was, to within a few points, `--gold-soft`. A semantic state
+     * whose colour is the brand accent is not a semantic state — the one badge
+     * that renders it (the worst step in the admin funnel) would have read as
+     * "highlighted" rather than "look at this". Pushed toward orange it stays in
+     * the amber family a reader expects of a warning, and sits 21° off the gold
+     * and 25° off `--danger`. 7.1:1 on the page background.
+     */
+    --warning: 224 137 76; /* #E0894C — readable orange-amber, distinct from gold */
     --danger: 232 138 138; /* readable red on dark */
 
-    /* Metallic CTA gradient (vertical) + the text colour that rides on it.
-       Top #CE2A8C is the AA-safe near-equivalent of the requested #E23A9B
-       (white on #E23A9B is only 3.95:1; on #CE2A8C it is 4.85:1). */
-    --cta-from: 206 42 140; /* #CE2A8C */
-    --cta-to: 165 21 106; /* #A5156A (white 7.1:1) */
-    --on-brand: 255 255 255; /* #FFFFFF on magenta (≥4.85:1 across the gradient) */
+    /*
+     * The gold CTA gradient (vertical) + the text colour that rides on it.
+     *
+     * Light at the top, shaded at the bottom: the reading a metal surface gets
+     * from a light source above it. The stops are inset from the ends of the
+     * gold scale so hover has somewhere brighter to go without leaving the
+     * palette.
+     */
+    --cta-from: 236 200 96; /* #ECC860 — lit top edge */
+    --cta-to: 180 140 32; /* #B48C20 — shaded underside */
+    --on-brand: 12 17 20; /* #0C1114 — 6.1:1 at the darkest point of the gradient,
+                             11.8:1 at the lightest. White would be 1.6:1. */
 
-    /* Text — lifted alongside the surfaces so muted copy did not lose the
-       contrast the lift cost it. Both are *better* than before: muted goes
-       5.85 → 7.34:1 on the page background, and its worst case across every
-       surface is 6.11:1 rather than 5.32:1. */
-    --ink: 246 234 241; /* #F6EAF1 — headings + body, 16.1:1 on canvas */
-    --ink-muted: 190 150 175; /* #BE96AF — 7.3:1 on canvas, 6.1:1 worst case */
-    --ink-subtle: 196 156 179; /* #C49CB3 — ≥6.5:1 on every surface (real text) */
+    /* Text — cooled to match the surfaces. Both are *better* than the rose
+       values they replace: muted is 8.36:1 on the page background against 7.3,
+       and its worst case across every surface is 6.55:1 rather than 6.11. */
+    --ink: 233 241 244; /* #E9F1F4 — headings + body, 16.5:1 on canvas */
+    --ink-muted: 155 176 184; /* #9BB0B8 — 8.4:1 on canvas, 6.6:1 worst case */
+    --ink-subtle: 168 189 196; /* #A8BDC4 — ≥7.5:1 on every surface (real text) */
 
     /* Borders — the other half of the flatness problem. A hairline at 1.125:1
        against the card it outlined was not drawing an edge, it was drawing a
        rumour of one; cards had neither fill separation nor a rim. */
-    --line: 64 46 62; /* #402E3E — hairline, 1.51:1 on canvas (was 1.15) */
-    --line-dark: 92 64 89; /* #5C4059 — emphasis, 1.81:1 on card (was 1.36) */
+    --line: 42 58 65; /* #2A3A41 — hairline, 1.59:1 on canvas */
+    --line-dark: 62 82 91; /* #3E525B — emphasis, 1.94:1 on card */
 
     /* Chart (full colour strings — consumed via var() in RateChart) */
-    --chart-line: #ee4fa5;
-    --chart-grid: #402e3e;
-    --chart-axis: #be96af;
-    --chart-tooltip-bg: #281c27;
-    --chart-tooltip-border: #402e3e;
-    --chart-tooltip-fg: #f6eaf1;
+    --chart-line: #e8c95a;
+    --chart-grid: #2a3a41;
+    --chart-axis: #9bb0b8;
+    --chart-tooltip-bg: #16242a;
+    --chart-tooltip-border: #2a3a41;
+    --chart-tooltip-fg: #e9f1f4;
 
     color-scheme: dark;
   }
@@ -217,9 +286,16 @@
   }
 
   /**
-   * Atmospheric magenta glow (#3A0F2B → transparent) behind the hero and the
-   * top of the page. Bounded to the top ~1100px and absolutely positioned (not
-   * fixed) so it paints once and never re-composites on scroll — keeps LCP fast.
+   * The atmosphere behind the hero and the top of the page: deep water first
+   * (#09262D → transparent), then a small gold cast entering it from above.
+   *
+   * Bounded to the top ~1100px and absolutely positioned (not fixed) so it
+   * paints once and never re-composites on scroll — keeps LCP fast.
+   *
+   * The gold layer is 0.07 rather than the magenta's 0.10 and sits high and
+   * narrow. It has to read as light *reaching* the page, and a warm wash spread
+   * across the whole top of a viewport stops reading as light and starts
+   * reading as a tint someone applied.
    */
   .atmosphere-layer {
     position: absolute;
@@ -230,8 +306,8 @@
     z-index: -10;
     pointer-events: none;
     background-image:
-      radial-gradient(72% 60% at 50% -6%, rgba(58, 15, 43, 0.9) 0%, rgba(58, 15, 43, 0.3) 32%, transparent 64%),
-      radial-gradient(38% 34% at 84% 6%, rgba(204, 31, 134, 0.1) 0%, transparent 58%);
+      radial-gradient(72% 60% at 50% -6%, rgba(9, 38, 45, 0.92) 0%, rgba(9, 38, 45, 0.32) 32%, transparent 64%),
+      radial-gradient(38% 34% at 84% 6%, rgb(var(--brand) / 0.07) 0%, transparent 58%);
   }
   /**
    * The wash is sized in pixels but read as a proportion of the screen.
@@ -293,15 +369,23 @@
   }
 
   /**
-   * Brand gradient clipped to text. Only legible on DARK surfaces (light rose
-   * on charcoal); never use it for informational text on light backgrounds.
+   * Brand gradient clipped to text. Only legible on DARK surfaces; never use it
+   * for informational text on light backgrounds.
+   *
+   * The stops moved *up* the scale, not just across the wheel. The magenta
+   * version ran `--brand-soft` → `--brand` → `--brand-deep`, and `--brand-soft`
+   * was 1.8:1 on the page background — a third of every glyph was, in practice,
+   * unreadable, which nothing caught because a gradient has no single colour to
+   * test. The gold equivalents (`--gold-dark`, 2.5:1) would have been no better,
+   * so the ramp is now taken from the legible half of the scale: 9.1:1 at the
+   * dimmest stop, 14.1:1 at the brightest.
    */
   .text-gradient {
     background-image: linear-gradient(
       120deg,
-      rgb(var(--brand-soft)),
-      rgb(var(--brand)) 55%,
-      rgb(var(--brand-deep))
+      rgb(var(--gold-light)),
+      rgb(var(--gold-soft)) 52%,
+      rgb(var(--gold))
     );
     -webkit-background-clip: text;
     background-clip: text;
@@ -309,22 +393,43 @@
   }
 
   /**
-   * Hero headline: white → rose gradient. `color` is set to an accessible solid
-   * (ink, 17:1 on the dark hero) FIRST, so if background-clip:text is
-   * unsupported the headline is a legible solid. Both gradient stops are ≥4.5:1
-   * on the hero surface, so the clipped version is accessible too.
+   * Hero headline: white descending into gold. `color` is set to an accessible
+   * solid (ink, 17:1 on the dark hero) FIRST, so if background-clip:text is
+   * unsupported the headline is a legible solid. Every gradient stop is ≥4.5:1
+   * on the hero surface, so the clipped version is accessible too — the warmest
+   * stop, `--gold-light`, is 14.1:1 there.
+   *
+   * The headline is the one piece of type that takes the gold, and it takes it
+   * as a *descent*: white at the cap line, gold at the baseline. Typography
+   * elsewhere stays neutral, because gold on this site means "this is the
+   * number that matters", and a page where the prose is also gold has no way
+   * left to say that.
    */
   .text-gradient-hero {
     color: rgb(var(--ink));
     /*
-     * Two layers, clipped to the glyphs: a narrow diagonal highlight on top of
-     * the base vertical gradient. Only the highlight is wider than the element,
-     * so animating `background-position` moves it and leaves the base alone —
-     * one slow pass of light across the headline every seven seconds.
+     * Two layers, clipped to the glyphs: a diagonal highlight on top of the
+     * base vertical gradient. Only the highlight is wider than the element, so
+     * animating `background-position` moves it and leaves the base alone — one
+     * slow pass of light across the headline every seven seconds.
+     *
+     * The highlight carries *two* glints rather than one: a narrow warm one
+     * (`--gold-highlight`) leading a wider cool one. A single white band moving
+     * left to right is the stock CSS shine, and it reads as a sweep applied to
+     * the text. Two bands of different width, colour and spacing crossing the
+     * glyphs read as one light refracted by a surface between the reader and
+     * the letters — which is the effect this palette is for.
      */
     background-image:
-      linear-gradient(100deg, transparent 40%, rgba(255, 255, 255, 0.9) 50%, transparent 60%),
-      linear-gradient(180deg, #ffffff 0%, #f6eaf1 42%, #f4a9d0 100%);
+      linear-gradient(
+        100deg,
+        transparent 30%,
+        rgba(255, 241, 168, 0.5) 37%,
+        transparent 43%,
+        rgba(255, 255, 255, 0.85) 54%,
+        transparent 62%
+      ),
+      linear-gradient(180deg, #ffffff 0%, #e9f1f4 52%, #f5d76e 100%);
     background-size: 220% 100%, 100% 100%;
     background-repeat: no-repeat;
     /* The resting position is the animation's end frame — off the left edge —
@@ -352,13 +457,32 @@
   }
 
   /**
-   * The logo tile: a fixed blush gradient with a charcoal mark in BOTH themes.
-   * A mark that changes colour with the theme stops being a mark; charcoal on
-   * blush clears 6.7:1. `currentColor` on the mark inherits this.
+   * The logo tile: a lit gold face with a dark mark. A mark that changes colour
+   * with its surroundings stops being a mark, so the tile owns both halves and
+   * `currentColor` on the glyph inherits the second.
+   *
+   * The mark went white → `--on-brand` because the tile went dark → light. That
+   * is not a preference: white on this gradient is 1.6:1 at the top and 3.8:1 at
+   * the bottom, i.e. the coin in the harbour would have disappeared into the
+   * plating. The near-black clears 12.7:1 at the lit end and 5.0:1 at the
+   * shaded one, and it is what a stamped coin actually looks like.
+   *
+   * Four call sites used to pass `text-white` alongside this class, which won
+   * on source order and would have re-broken it silently; they now pass nothing
+   * and let the tile decide.
    */
   .logo-tile {
-    background-image: linear-gradient(135deg, #ee4fa5 0%, #7a1250 100%);
-    color: #ffffff;
+    /* Declared as `--liquid-base` as well as applied, so adding `.liquid-gold`
+       to a tile composites the water onto *this* gradient rather than
+       replacing it with the CTA one. See `.liquid-gold` below. */
+    --liquid-base: linear-gradient(
+      135deg,
+      rgb(var(--gold-light)) 0%,
+      rgb(var(--gold)) 46%,
+      rgb(var(--gold-deep)) 100%
+    );
+    background-image: var(--liquid-base);
+    color: rgb(var(--on-brand));
   }
 
   /* Subtle dotted grid, fades toward the edges. */
@@ -381,9 +505,15 @@
   }
 
   /**
-   * Gradient hairline border: magenta strong along the TOP edge, fading out
-   * toward the bottom. Painted into the padding box with a mask so it reads as
-   * a 1px rim on any surface.
+   * Gradient hairline border: bright gold along the TOP edge, fading out toward
+   * the bottom. Painted into the padding box with a mask so it reads as a 1px
+   * rim on any surface.
+   *
+   * Every alpha here came down when the accent went gold (0.70 → 0.52 at the
+   * top, 0.18 → 0.14 below it). The magenta these replace was ~0.12 luminance;
+   * gold is ~0.60. Ported at the old alphas the same rim that read as a lit
+   * edge reads as a drawn gold line — jewellery rather than light — on every
+   * card at once, which is precisely the "everything is gold" failure mode.
    */
   .gradient-ring {
     position: relative;
@@ -396,8 +526,8 @@
     padding: 1px;
     background: linear-gradient(
       180deg,
-      rgb(var(--brand-strong) / 0.7) 0%,
-      rgb(var(--brand) / 0.18) 26%,
+      rgb(var(--brand-strong) / 0.52) 0%,
+      rgb(var(--brand) / 0.14) 26%,
       rgb(var(--line) / 1) 62%,
       rgb(var(--line) / 0.6) 100%
     );
@@ -412,10 +542,49 @@
   .card-hover.gradient-ring:hover::before {
     background: linear-gradient(
       180deg,
-      rgb(var(--brand-strong) / 0.95) 0%,
-      rgb(var(--brand) / 0.3) 28%,
+      rgb(var(--brand-strong) / 0.8) 0%,
+      rgb(var(--brand) / 0.24) 28%,
       rgb(var(--line) / 1) 64%,
       rgb(var(--line) / 0.6) 100%
+    );
+  }
+
+  /**
+   * The active navigation item's indicator: a hairline of gold under the label,
+   * brightest in the middle and dissolving at both ends.
+   *
+   * The nav used to say "you are here" with `text-ink` against `text-ink-muted`
+   * — a lightness difference, on a bar where several other things are also
+   * `text-ink`. The label is now `text-brand-strong` and this draws the rule
+   * under it, which is what makes the state findable rather than merely
+   * present.
+   *
+   * Deliberately *not* animated, and that is the one place this identity says
+   * no to itself. The navbar is on every page, at the top, in peripheral
+   * vision, for the whole session. A reflection travelling across a 2px line
+   * there is not "premium", it is a tab that will not stop blinking. The
+   * gradient still has a lit centre, so it reads as the same lit metal as
+   * everything else — it is just holding still.
+   */
+  .nav-current {
+    position: relative;
+  }
+  .nav-current::after {
+    content: "";
+    position: absolute;
+    left: 0.625rem;
+    right: 0.625rem;
+    bottom: 0.1rem;
+    height: 2px;
+    border-radius: 999px;
+    pointer-events: none;
+    background-image: linear-gradient(
+      90deg,
+      rgb(var(--gold) / 0) 0%,
+      rgb(var(--gold) / 0.8) 24%,
+      rgb(var(--gold-highlight) / 0.9) 50%,
+      rgb(var(--gold) / 0.8) 76%,
+      rgb(var(--gold) / 0) 100%
     );
   }
 
@@ -431,14 +600,14 @@
   }
   .card-hover:hover {
     transform: translateY(-3px);
-    border-color: rgb(var(--brand) / 0.4);
+    border-color: rgb(var(--brand) / 0.35);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 20px 44px -18px rgba(0, 0, 0, 0.65),
-      0 16px 44px -18px rgba(204, 31, 134, 0.2);
+      0 16px 44px -18px rgba(212, 175, 55, 0.18);
   }
 
-  /* Soft magenta glow on completed progress-rail segments. */
+  /* Soft gold glow on completed progress-rail segments. */
   .rail-done {
-    box-shadow: 0 0 10px 0 rgba(238, 79, 165, 0.4);
+    box-shadow: 0 0 10px 0 rgb(var(--brand) / 0.32);
   }
 
   /* Skeleton shimmer for loading states. */
@@ -453,10 +622,10 @@
     inset: 0;
     transform: translateX(-100%);
     background: linear-gradient(
-      90deg,
+      100deg,
       transparent,
-      rgb(var(--brand-strong) / 0.14) 45%,
-      rgb(255 255 255 / 0.05) 50%,
+      rgb(var(--gold-highlight) / 0.10) 42%,
+      rgb(var(--brand-strong) / 0.16) 50%,
       transparent
     );
     animation: skeleton-sweep 1.6s ease-in-out infinite;
@@ -495,7 +664,7 @@
     transition: opacity 0.35s ease;
     background: radial-gradient(
       18rem 18rem at var(--mx, 50%) var(--my, 0%),
-      rgb(var(--brand-strong) / 0.14),
+      rgb(var(--brand-strong) / 0.10),
       transparent 60%
     );
   }
@@ -531,11 +700,20 @@
   }
 
   /**
-   * A single band of light crossing a control on hover.
+   * The reflection crossing a control on hover — the fast, one-shot half of the
+   * water language whose resting half is `.liquid-gold` below.
    *
    * Hover-only and un-filled on purpose: it plays once per entry and leaves
    * nothing behind, so a reduced-motion visitor — whose duration is cut to
    * 0.001ms — sees the band never leave its off-screen start position.
+   *
+   * It was one white band at 0.32. Two things were wrong with that on gold:
+   * a pure white band across a gold face reads as a scratch of chrome rather
+   * than as light, and a single band travelling at a single speed is the stock
+   * CSS shine — the one shape this identity is explicitly not. It is now the
+   * same double glint the headline uses: a narrow warm leading edge, a wider
+   * cool one behind it, unequally spaced, so the pass reads as one light
+   * refracted rather than one gradient moved.
    */
   .sheen {
     overflow: hidden;
@@ -548,9 +726,11 @@
     transform: translateX(-120%);
     background: linear-gradient(
       100deg,
-      transparent 38%,
-      rgba(255, 255, 255, 0.32) 50%,
-      transparent 62%
+      transparent 30%,
+      rgba(255, 241, 168, 0.30) 39%,
+      transparent 45%,
+      rgba(255, 255, 255, 0.26) 55%,
+      transparent 64%
     );
   }
   .sheen:hover::after {
@@ -559,6 +739,199 @@
   @keyframes sheen-sweep {
     to {
       transform: translateX(120%);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * The water reflection — `.liquid-gold` and `.gold-veil`
+   * ═══════════════════════════════════════════════════════════════════════
+   *
+   * The identity in one mechanism: light moving through a thin layer of water
+   * over a gold surface. Two classes, one vocabulary, no library.
+   *
+   * ## Why it is not a shine
+   *
+   * The stock CSS "premium" effect is a white band translated left to right at
+   * one speed. It fails at this because a single band moving in a straight line
+   * at a constant rate is the one thing light on water never does. What the eye
+   * actually reads as caustics is *interference*: several light structures of
+   * different shape and frequency crossing each other, so brightness appears
+   * and disappears at points that never travel in a straight line.
+   *
+   * So each of these paints three layers of light on top of the gold —
+   *
+   *   1. a broad soft hotspot (the pool of light),
+   *   2. a smaller, dimmer hotspot travelling the *other* way,
+   *   3. a wide diagonal ripple comb at 104°, well off the axis of either,
+   *
+   * — and drives them with two animations of different length running on
+   * different properties:
+   *
+   *   • `liquid-drift` (4.5s) moves each layer a different distance, in a
+   *     different direction. Nothing is phase-locked to anything.
+   *   • `liquid-swell` (3.5s) resizes them, and does so unevenly: layer 1
+   *     grows while layer 2 shrinks. A gradient that changes size while it
+   *     moves is what supplies the *distortion* — the highlight stretches and
+   *     compresses as it crosses, the way a reflection does when the surface
+   *     above it is not flat.
+   *
+   * The two are `alternate`, so their real periods are 9s and 7s, and their
+   * combined pattern does not repeat for 63 seconds. That is the point of the
+   * mismatch: at 4.5s alone the eye finds the loop in about three passes.
+   *
+   * ## Why the light is in the background rather than in an overlay
+   *
+   * The obvious build is a blurred `::after` with `mix-blend-mode: screen`. It
+   * looks slightly better and it is wrong here, because a positioned pseudo
+   * element paints *above* inline text: the caustic would cross the button's
+   * own label and lift it toward the fill, and the one moment the label is
+   * hardest to read would be the moment the animation draws the eye to it.
+   * Painting into the element's own `background-image` puts the water under the
+   * type by construction — and since every layer is gold on gold, the effect
+   * can only ever *raise* contrast against the dark `--on-brand` label.
+   *
+   * `--liquid-base` is the last layer and the caller's: set it to whatever gold
+   * fill the surface already had (`.logo-tile` does), and the reflection
+   * composites onto that instead of the default CTA gradient.
+   *
+   * ## Restraint
+   *
+   * This belongs on the surfaces a reader is meant to act on or identify the
+   * product by — the primary button, the logo tile, the one featured panel.
+   * It is not a card treatment. A page where every surface is breathing is not
+   * a premium page, it is a screensaver.
+   */
+  .liquid-gold {
+    background-image:
+      radial-gradient(42% 58% at 24% 30%, rgb(var(--gold-highlight) / 0.34) 0%, transparent 62%),
+      radial-gradient(34% 46% at 76% 66%, rgb(var(--gold-light) / 0.24) 0%, transparent 64%),
+      repeating-linear-gradient(
+        104deg,
+        transparent 0 7%,
+        rgb(var(--gold-highlight) / 0.10) 10%,
+        rgb(var(--gold-light) / 0.05) 13%,
+        transparent 16% 27%
+      ),
+      var(--liquid-base, linear-gradient(180deg, rgb(var(--cta-from)) 0%, rgb(var(--cta-to)) 100%));
+    background-repeat: no-repeat;
+    /*
+     * Every caustic layer is larger than the element, which is what makes any
+     * `background-position` percentage a valid frame: for an over-sized layer
+     * the offset is `(box − layer) × pct`, so 0%–100% all resolve to negative
+     * offsets that still cover the box. Nothing can slide off an edge and
+     * expose the base, at rest or mid-animation.
+     */
+    background-size: 190% 190%, 150% 150%, 260% 260%, 100% 100%;
+    /*
+     * The resting frame, and it is a designed one rather than an accident of
+     * where the keyframes happen to start: both hotspots are on the face and
+     * offset from each other, so a visitor who never sees the animation — the
+     * reduced-motion reader below, or anyone looking at a screenshot — still
+     * gets a lit gold surface with depth in it.
+     */
+    background-position: 18% 26%, 78% 72%, 12% 0%, 0 0;
+    animation:
+      liquid-drift 4.5s ease-in-out infinite alternate,
+      liquid-swell 3.5s ease-in-out infinite alternate;
+  }
+  @keyframes liquid-drift {
+    from {
+      background-position: 8% 18%, 88% 80%, 0% 0%, 0 0;
+    }
+    to {
+      background-position: 34% 40%, 62% 56%, 34% 0%, 0 0;
+    }
+  }
+  @keyframes liquid-swell {
+    from {
+      background-size: 178% 178%, 158% 158%, 250% 250%, 100% 100%;
+    }
+    to {
+      background-size: 214% 214%, 138% 138%, 285% 285%, 100% 100%;
+    }
+  }
+
+  /**
+   * The same light, at section scale: a decorative layer for the one or two
+   * premium areas on a page that want gold moving somewhere behind the copy.
+   *
+   * Applied to its own absolutely-positioned `aria-hidden` div, the way
+   * `.atmosphere-layer` and `bg-mesh-deep` already are — not as a pseudo
+   * element — because at this size it has to sit at a specific depth in the
+   * stack, and because `::before` and `::after` are already spoken for by
+   * `.gradient-ring` and `.spotlight` on exactly the panels that want this.
+   *
+   * Two differences from `.liquid-gold`, both forced by the area:
+   *
+   *   • It animates `transform` and `opacity`, not `background-position`.
+   *     Those two are the properties a compositor can run without repainting;
+   *     over a full-width section the background-position build would repaint
+   *     the band on every frame.
+   *   • The alphas are a third of the button's and the travel is ±4%. The brief
+   *     for a background is "almost imperceptible", and the knob for that is
+   *     amplitude, not duration — a slow animation you can see is still an
+   *     animation you can see. Kept at 4.8s/3.6s it stays in the same rhythm as
+   *     everything else here, and you have to look for it to find it.
+   */
+  .gold-veil {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .gold-veil::after {
+    content: "";
+    position: absolute;
+    /* Oversized so the drift never brings the layer's own edge into view. */
+    inset: -40%;
+    background-image:
+      radial-gradient(30% 34% at 30% 28%, rgb(var(--brand) / 0.11) 0%, transparent 64%),
+      radial-gradient(26% 30% at 72% 62%, rgb(var(--halo) / 0.16) 0%, transparent 66%),
+      repeating-linear-gradient(
+        100deg,
+        transparent 0 9%,
+        rgb(var(--gold-highlight) / 0.035) 12%,
+        transparent 15% 30%
+      );
+    filter: blur(18px);
+    transform: translate3d(-3%, -2%, 0) scale(1.05);
+    opacity: 0.75;
+    animation:
+      veil-drift 4.8s ease-in-out infinite alternate,
+      veil-breathe 3.6s ease-in-out infinite;
+  }
+  @keyframes veil-drift {
+    from {
+      transform: translate3d(-4%, -3%, 0) scale(1.03);
+    }
+    to {
+      transform: translate3d(4%, 3%, 0) scale(1.09);
+    }
+  }
+  @keyframes veil-breathe {
+    0%,
+    100% {
+      opacity: 0.58;
+    }
+    50% {
+      opacity: 0.92;
+    }
+  }
+
+  /**
+   * Reduced motion keeps the gold and loses the water.
+   *
+   * The blanket rule in the base layer would already land both of these on
+   * their declared frames, since neither fills. This says so out loud, because
+   * "the static state is a design" is a property of these two rules that a
+   * later edit could break without any test noticing — move the resting
+   * `background-position` into the `from` keyframe and a reduced-motion reader
+   * gets a flat gold rectangle.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .liquid-gold,
+    .gold-veil::after {
+      animation: none;
     }
   }
 
@@ -598,8 +971,8 @@
     padding: 1px;
     background: linear-gradient(
       180deg,
-      rgb(var(--brand-strong) / 0.95) 0%,
-      rgb(var(--brand) / 0.45) 18%,
+      rgb(var(--brand-strong) / 0.75) 0%,
+      rgb(var(--brand) / 0.32) 18%,
       rgb(var(--line-dark) / 1) 55%,
       rgb(var(--line) / 0.9) 100%
     );
@@ -637,9 +1010,9 @@
     background: linear-gradient(
       90deg,
       transparent,
-      rgb(var(--brand-strong) / 0.45) 30%,
-      rgb(var(--brand-strong) / 0.6) 50%,
-      rgb(var(--brand-strong) / 0.45) 70%,
+      rgb(var(--brand-strong) / 0.28) 30%,
+      rgb(var(--brand-strong) / 0.42) 50%,
+      rgb(var(--brand-strong) / 0.28) 70%,
       transparent
     );
   }
@@ -653,19 +1026,25 @@
     transform: translateX(-50%);
     z-index: -1;
     pointer-events: none;
-    background: radial-gradient(50% 100% at 50% 0%, rgb(var(--brand) / 0.16), transparent 70%);
+    background: radial-gradient(50% 100% at 50% 0%, rgb(var(--brand) / 0.10), transparent 70%);
   }
 
   /**
-   * Two-light backdrop: warm magenta in front, cool `--halo` behind and lower.
-   * The offset between them is the whole effect — matched positions would just
-   * add up to one brighter smudge.
+   * Two-light backdrop: warm gold in front, cool `--halo` water behind and
+   * lower. The offset between them is the whole effect — matched positions
+   * would just add up to one brighter smudge.
+   *
+   * The ratio inverted with the hue. Under magenta the accent led at 0.22 and
+   * the halo supported at 0.16, because the accent was dark enough to need the
+   * volume. Gold at 0.22 across half a section is a yellow cast, so the water
+   * now leads and the gold is the smaller, warmer light inside it — which is
+   * also the right way round for what this backdrop is supposed to depict.
    */
   .lightfield {
     background-image:
-      radial-gradient(48% 52% at 18% 0%, rgb(var(--brand) / 0.22) 0%, transparent 62%),
-      radial-gradient(42% 46% at 82% 12%, rgb(var(--halo) / 0.16) 0%, transparent 64%),
-      radial-gradient(70% 60% at 50% 108%, rgb(var(--halo) / 0.1) 0%, transparent 62%);
+      radial-gradient(48% 52% at 18% 0%, rgb(var(--brand) / 0.07) 0%, transparent 62%),
+      radial-gradient(42% 46% at 82% 12%, rgb(var(--halo) / 0.22) 0%, transparent 64%),
+      radial-gradient(70% 60% at 50% 108%, rgb(var(--halo) / 0.14) 0%, transparent 62%);
   }
 
   /**

@@ -43,8 +43,8 @@ is unconfigured, and the app refuses the file-store fallback in production
 instead of pretending a lead was saved.
 
 **If a buyer asks why auth is not clickable:** the code, the row-level-security
-migration and 1,560 tests are all in the public repository and run from a clean
-clone. What is missing from the demo is a database, not a feature. Standing up a
+migration and 1,703 automated checks are all in the public repository and run
+from a clean clone. What is missing from the demo is a database, not a feature. Standing up a
 live account system for a concept nobody can sign up to would mean holding real
 email addresses for a product that does not exist.
 
@@ -135,8 +135,12 @@ every word that could read as a financial service.
 >   app reads real ones, server-cached and degrading gracefully, instead of
 >   invented figures that date the moment they ship.
 > - **A test suite and a CI gate.** Typecheck, lint, unit tests and a production
->   build on every push. The reference build runs 1,560 tests and ships with zero
->   `any` in strict TypeScript.
+>   build on every push. The reference build runs 1,703 automated checks —
+>   unit tests for business logic and security boundaries, property tests that
+>   recompute accessibility contrast from the design tokens, and
+>   repository-integrity checks — and ships with zero `any` in strict
+>   TypeScript. There is no browser or end-to-end suite in it, and I will say so
+>   before you ask.
 > - **Documentation written for the developer after me.** How to run it, how to
 >   deploy it, what every environment variable turns on, and comments that record
 >   *why* rather than *what*.

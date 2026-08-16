@@ -69,7 +69,7 @@ function PaymentCard({
       <div className="relative flex h-full flex-col justify-between p-[7%]">
         <div className="flex items-start justify-between">
           <span className="flex items-center gap-1.5">
-            <span className="logo-tile grid aspect-square w-[13%] min-w-[18px] place-items-center rounded-[22%] text-white">
+            <span className="logo-tile grid aspect-square w-[13%] min-w-[18px] place-items-center rounded-[22%]">
               <MarsaMark className="h-[62%] w-[62%]" />
             </span>
             <span className="font-display text-[0.7em] font-bold leading-none tracking-[-0.03em] text-white">
@@ -285,7 +285,21 @@ function Coin({ tone }: { tone: "brand" | "warm" }) {
 
       <span
         className={cn(
-          "absolute inset-[20%] grid place-items-center overflow-hidden rounded-full text-white ring-1 ring-inset ring-white/25",
+          /*
+           * The mark is dark on the metal, exactly as it is in `.logo-tile`.
+           *
+           * It was `text-white`, which was correct while the disc was magenta
+           * and became invisible when it went gold: white on `--gold-light` is
+           * 1.4:1 at the lit end of this gradient. The mark did not disappear
+           * from the page so much as dissolve into it, and because the drawing
+           * is `aria-hidden` decoration no contrast gate had an opinion. The
+           * same glyph was rendering dark-on-gold in the navbar and
+           * white-on-gold here — one mark, two treatments.
+           *
+           * `--on-brand` clears 12.7:1 at the lit end and 5.0:1 at the shaded
+           * one, and holds on the `warm` gradient too (7.4:1 → 4.0:1).
+           */
+          "absolute inset-[20%] grid place-items-center overflow-hidden rounded-full text-on-brand ring-1 ring-inset ring-gold-highlight/30",
           tone === "warm"
             ? "bg-[linear-gradient(135deg,rgb(var(--warning))_0%,rgb(var(--brand-deep))_100%)] shadow-e3"
             : "bg-brand-gradient shadow-glow",

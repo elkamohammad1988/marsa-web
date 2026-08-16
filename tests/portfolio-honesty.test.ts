@@ -230,9 +230,38 @@ describe("the test count is one number everywhere it is claimed", () => {
    */
   const CLAIM_SHAPES = [
     /\b(\d{4})\s*\/\s*\d{4}\b/g, //            1560 / 1560 passing
-    /\b(\d{4})\s+(?:unit\s+|passing\s+)*tests?\b/gi, // 1560 unit tests
-    /\btests?\s*[:=]\s*"?(\d{4})"?/gi, //      tests: "1560"
+    /\b(\d{4})\s+(?:unit\s+|passing\s+|automated\s+)*(?:tests?|checks?)\b/gi, // 1560 unit tests, 1,560 automated checks
+    /\btests?(?:_?count)?\s*[:=]\s*"?(\d{4})"?/gi, // tests: "1560", TEST_COUNT = "1,560"
   ];
+  /*
+   * `(?:_?count)?` is not decoration. Without it this shape required the `:` or
+   * `=` to follow "test" immediately, so `const TEST_COUNT = "1,561"` in
+   * `scripts/record-demo.mjs` never matched — the `_` ended the word. That file
+   * was listed as a claim site and read on every run, and the one claim it
+   * actually contains was the one thing here that could not see it. It sat a
+   * full count behind the rest of the project until an audit read it by eye,
+   * which is precisely the failure the constant's own comment says it exists to
+   * prevent: a stale number burnt into a frame of video.
+   *
+   * A blind spot in a gate is worse than no gate, because the green tick is
+   * read as coverage. Widening the shape rather than adding a fourth keeps one
+   * rule per way a count is written.
+   *
+   * `checks?` alongside `tests?` is the same lesson, found by checking that the
+   * fix above had actually worked. `README.md`, `docs/DEPLOYMENT.md` and
+   * `docs/UPWORK-LISTING.md` every one write the figure as "1,703 **automated
+   * checks**" — deliberately, because the suite is not only unit tests — and
+   * the shape required the literal word "test". Three of the five sites listed
+   * below were therefore read on every run and asserted nothing. The rule this
+   * file states is "every artefact quotes the same figure"; until now it held
+   * for two of them.
+   *
+   * The general form of both bugs: a gate that names its inputs and then
+   * matches a narrower shape than its inputs are written in reports the
+   * *intersection* as the whole, and the sites it silently drops are exactly
+   * the ones free to drift. If a claim site is added below, check it appears
+   * in the probe rather than assuming the shapes cover it.
+   */
 
   /**
    * Thousands separators normalised so `1,560` and `1560` are the same claim;
