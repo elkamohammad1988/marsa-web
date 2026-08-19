@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "@/styles/globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { HydrationSignal } from "@/components/layout/HydrationSignal";
 import { JsonLd } from "@/components/JsonLd";
 import { siteConfig } from "@/lib/site";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
@@ -65,8 +66,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen bg-canvas antialiased">
-        {/* Atmosphere: a fixed, subtle magenta glow behind all content. */}
+        {/* Atmosphere: a fixed, subtle gold glow behind all content. */}
         <div aria-hidden className="atmosphere-layer" />
+        <HydrationSignal />
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <a
           href="#main-content"
