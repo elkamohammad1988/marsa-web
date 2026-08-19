@@ -43,7 +43,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Lint
-        run: npx next lint
+        run: npm run lint
 
       - name: Unit tests
         run: npx vitest run
@@ -51,8 +51,55 @@ jobs:
       - name: Production build
         run: npm run build
 
-      # Production dependency tree only. The dev tree carries known high
-      # advisories from the end-of-life ESLint 8 chain (audit finding P6);
-      # those ship to nobody, so they must not block the pipeline.
-      - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
+      # The whole tree, not just production. This was `--omit=dev` because the
+      # end-of-life ESLint 8 chain carried 13 high advisories that shipped to
+      # nobody (audit finding P6) — exempting them was the only way to keep the
+      # gate meaningful. Migrating to ESLint 9 and bumping puppeteer-core
+      # removed every one, so the exemption has nothing left to excuse and the
+      # stricter gate is the one that now holds.
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+  # A second job, not a step in `verify`, for the reason vitest.smoke.config.ts
+  # gives: the unit gate is fast because it builds nothing and starts nothing,
+  # and folding a suite that compiles the app and launches Chrome into it would
+  # cost that. Run in parallel, both required.
+  #
+  # This gate was absent while the suite existed, and the suite was red the
+  # whole time — every one of its fifty tests timed out waiting on a hydration
+  # signal the application never sent. A browser suite nothing runs is not a
+  # gate; it is a directory.
+  smoke:
+    name: Browser smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # `next start` serves a production build and will not compile one, so the
+      # build is a prerequisite rather than a convenience. `tests/smoke/harness`
+      # refuses to run against `next dev` for the reason recorded there: an
+      # uncompiled route reads as an un-hydrated page and reports working
+      # controls as dead.
+      - name: Production build
+        run: npm run build
+
+      # The harness locates Chrome itself and throws with the paths it tried if
+      # it cannot — it never skips. Asserting the binary here turns "no browser
+      # on the runner" into a named step rather than a stack trace inside a test.
+      - name: Verify Chrome is available
+        run: google-chrome --version
+
+      - name: Browser smoke tests
+        run: npm run test:smoke
