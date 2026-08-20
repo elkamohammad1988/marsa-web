@@ -31,8 +31,22 @@ import { cn } from "@/lib/utils";
 
 type Variant = "field" | "chip";
 
+/**
+ * `h-full` is a target-size fix, not a cosmetic one.
+ *
+ * The shell is `h-11` (44px) or `h-9` (36px), but an unstretched `<select>` is
+ * only as tall as its own line box — 20–23px measured across the five
+ * viewports in the responsive sweep. The shell's remaining height *looks* like
+ * part of the control and is not: clicking the top or bottom few pixels of a
+ * currency picker did nothing. That is a pointer target under the 24×24 CSS px
+ * floor in WCAG 2.2 AA 2.5.8, on the site's most-used control — the same rule
+ * `FxCalculator`'s range input already cites for its own `h-6`.
+ *
+ * Stretching the select to the shell makes the whole visual control the hit
+ * area, which is what a reader assumes it already was.
+ */
 const base =
-  "peer w-full appearance-none bg-transparent font-medium text-ink outline-none " +
+  "peer h-full w-full appearance-none bg-transparent font-medium text-ink outline-none " +
   "transition-colors duration-200 " +
   // The native popup inherits the OS surface, not ours; give the options a
   // readable pair explicitly for the browsers that do honour it.
