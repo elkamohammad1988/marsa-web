@@ -1670,9 +1670,45 @@ git's index. Zero mismatches.
 
 ### Left for a human
 
-`H3` unchanged and now more pointed: the migrations are still **not applied to
-the live Supabase project**, and that set now includes `005`. Until it is
-applied, anybody holding the project's public anon key can reach a
-definer-rights delete. Applying it means acting inside Supabase.
-
 `H12` unchanged: the retention period for `submissions`.
+
+### Correction, 2026-08-21 — there is no Supabase production project
+
+The paragraph that stood here, and every earlier use of the phrase in this log
+— the 2026-08-19 entry above and the `H21` note before it — described `H3` as
+migrations "not applied to the **live** Supabase project". Those entries are
+left as written, because a dated log is a record and not a draft; read the word
+"live" in any of them as this correction overriding it. The paragraph that
+stood here went further still and called it a standing exposure: *anybody holding
+the project's public anon key can reach a definer-rights delete*. Corrected on
+the record rather than quietly rewritten, because getting a security claim
+wrong in the alarming direction is still getting it wrong.
+
+**Marsa is not connected to a Supabase production project, and the deployment
+never was.** Verified against the running site rather than inferred:
+
+```
+$ curl -s https://marsa-web.vercel.app/api/health
+status: degraded
+  storage:       ok=false configured=false
+  database:      ok=true  configured=false
+  admin:         ok=true  configured=false
+  notifications: ok=true  configured=false
+  fx:            ok=true  configured=true      <- key-less ECB, the only one
+```
+
+The live demo needs no Supabase URL, no anon key and no service-role key, which
+is exactly what the README's "Working / Deliberately closed" table has always
+said. `degraded` is that fact being reported, not a fault.
+
+So there is no anon key in circulation, no definer-rights function reachable,
+and nothing to remediate. Everything under `db/migrations/` — `005` included —
+is **prepared infrastructure: written, unit-tested against a stub, applied
+nowhere**. `005` is a **release gate for the day a project is first connected**,
+not a live vulnerability, and `PROJECT-PLAN.md` H3 now leads with that in a
+status banner and is re-filed from *Now* to *deploy-time*.
+
+The distinction worth keeping: *a prepared migration exists in the repository*
+and *the project uses Supabase in production* are different states, and only
+the first is true. Nothing was applied, connected or configured to reach this
+conclusion — the correction is to the description, not to the system.

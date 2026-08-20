@@ -658,8 +658,9 @@ marketing forms themselves are untouched and
 `tests/forms-collect-nothing.test.ts` passes unchanged.
 
 **Inert until [H21](#h21--switch-customer-accounts-on).** Nothing was applied
-to the live Supabase project — migration 004 is written and tested but not run,
-per the standing rule that changes inside Supabase are yours to make.
+to any Supabase project — there is none behind the deployment, and migration
+004 is written and tested but not run, per the standing rule that changes
+inside Supabase are yours to make.
 
 ---
 
@@ -679,7 +680,7 @@ to launch — they are not blockers for any batch.
 |---|---|---|---|
 | ~~H1~~ | ~~Authenticate the GitHub CLI~~ | — | **RESOLVED** |
 | [H2](#h2--rotate-the-supabase-secret-key) | Rotate the Supabase secret key | security hygiene | Now |
-| [H3](#h3--apply-the-database-migrations--not-yet-done) | **Apply the database migrations** (verified: 0 of 3 applied) | storage, shared rate limiting, funnel & admin aggregation | **Now** |
+| [H3](#h3--apply-the-database-migrations--not-yet-done) | **Apply the database migrations** — only when a Supabase project is actually connected; none is | storage, shared rate limiting, funnel & admin aggregation | **deploy-time** |
 | ~~H4~~ | ~~Apply pending migrations once Batch 9 lands~~ — folded into H3, which now covers all three files | — | **RESOLVED** |
 | [H5](#h5--enable-point-in-time-recovery-and-test-one-restore-p4) | Enable PITR and test one restore | P4 | Before launch |
 | [H6](#h6--point-an-uptime-monitor-at-apihealth-p3) | Uptime monitor on `/api/health` | P3 | **deploy-time** |
@@ -744,10 +745,24 @@ Verify: `npm run dev`, then open `http://localhost:3000/api/health` — the
 <a id="h3--apply-the-database-migrations--not-yet-done"></a>
 ### H3 — Apply the database migrations · **not yet done**
 
-Re-verified 2026-08-17 by querying the project directly. The state has moved
-since this section was first written, and it has moved *partway*, which is the
-awkward case: an early form of the schema was applied by hand, and nothing
-since.
+> **Status: FUTURE — NOT CURRENTLY DEPLOYED.** Marsa is not connected to a
+> Supabase production project. The live deployment runs with no database at
+> all: `/api/health` reports `storage`, `database`, `admin` and
+> `notifications` as `configured: false`, and only the key-less FX source as
+> configured. Nothing in this section is an active production issue, because
+> there is no production database for it to be an issue *in*. It is the
+> prerequisite list to work through **when** a project is first connected, and
+> the verification to run **at that point**.
+
+Everything under `db/migrations/` is therefore **prepared infrastructure**:
+written, unit-tested against a stub, and applied nowhere. Do not read the
+table below as a description of a running system.
+
+The table records what a one-off inspection on 2026-08-17 found in a
+development project that a local `.env.local` pointed at. It is kept because
+it is the only evidence on file about how an unmanaged database drifts from
+its migration files — an early form of the schema had been applied by hand and
+nothing since — not because it describes anything currently serving traffic.
 
 | Object | Migration | Present |
 |---|---|---|
@@ -758,12 +773,18 @@ since.
 | `profiles` and its policies | 004 | no |
 | the EXECUTE revokes | 005 | no |
 
-What that costs today, in order of weight:
+What that would cost **once a project is connected**, in order of weight — none
+of it applies to the current deployment, which has no database:
 
-- **005 has not been applied, so the four definer-rights functions are still
-  callable by the anon key.** That is the one item here with a security
-  consequence rather than a performance one; `db/migrations/005_rpc_execute_privileges.sql`
-  sets out exactly what it opens.
+- **005 is the one with a security consequence rather than a performance one,
+  and so the one to verify first.** Until it runs, the four definer-rights
+  functions 001-003 create are callable by the anon key — which matters the
+  moment a project exists and `SUPABASE_ANON_KEY` is configured for the account
+  area, and not before.
+  `db/migrations/005_rpc_execute_privileges.sql` sets out exactly what it opens.
+  Treat it as a **release gate on first connecting Supabase**: apply it in the
+  same sitting as 001-004, then confirm with the `locked_down` query below
+  rather than assuming.
 - Every render of `/admin` and `/admin/funnel` logs a `storage.stats.degraded`
   or `analytics.funnel.degraded` warning and falls back to four HEAD counts or
   a truncated row scan. The pages work; they are doing avoidable work and
@@ -1130,7 +1151,8 @@ before choosing A, that is the reasonable route.
 
 The authentication milestone is built, tested and merged. It is also, by
 design, **completely inert** until you do the four things below — none of which
-can be done from code, and all of which touch your live Supabase project.
+can be done from code, and all of which touch a Supabase project you would
+first have to create. There is none connected today.
 
 Until then every auth page renders a panel naming exactly what is missing, the
 account area stays closed, and nothing at all is stored. That is a supported

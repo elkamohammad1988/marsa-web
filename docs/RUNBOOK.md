@@ -3,6 +3,14 @@
 **For whoever is on the other end of an alert.** Every procedure below assumes
 you have the hosting dashboard and the Supabase project, and nothing else.
 
+> **Written ahead of the deployment it describes.** The current public
+> deployment is credential-free: no Supabase, no admin password, no email
+> provider — `/api/health` reports those as `configured: false` and answers
+> `503 degraded` by design. Any procedure below that names a database, an admin
+> session or an email provider is therefore **prospective**: correct for a
+> configured deployment, and not something to go looking for today. The only
+> dependency the live site actually has is the key-less ECB rate source.
+
 This file answers three questions: *what is broken*, *what does that break for
 a visitor*, and *what do I do now*. It does not explain the architecture — that
 is [`README.md`](../README.md) and [`AUTHENTICATION.md`](../AUTHENTICATION.md).

@@ -8,6 +8,19 @@ does the storing.
 Written for two readers: the operator answering a subject access or erasure
 request, and anyone auditing whether the site's privacy copy is true.
 
+> **What the live deployment holds today: nothing.** It runs with no storage
+> configured (`/api/health` → `storage: configured: false`), the public
+> marketing forms deliberately transmit and store nothing at all
+> ([`tests/forms-collect-nothing.test.ts`](../tests/forms-collect-nothing.test.ts)),
+> and `createStore()` refuses to build a file store under `NODE_ENV=production`
+> rather than quietly keeping records. There is no Supabase project behind the
+> deployment, so none of the tables named below exist anywhere that is serving
+> traffic.
+>
+> This page describes what a **configured** deployment can hold, and is the
+> answer to "what would we be holding, and how would we remove it" — written
+> before it is needed rather than during the first request.
+
 ---
 
 ## What is collected
