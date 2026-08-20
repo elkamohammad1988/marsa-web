@@ -12,6 +12,7 @@ PostgreSQL 14+ behind PostgREST. Supabase works out of the box.
 | `002_rate_limit_window_index.sql` | Index on `rate_limit_hits(window_start)`; splits the purge into `purge_rate_limit_hits()` and takes it off the hot path (audit B7) |
 | `003_aggregate_functions.sql` | `demo_funnel()` and `submission_stats()` — aggregation in Postgres rather than in Node over rows pulled across HTTP (audit B3, B4) |
 | `004_auth_profiles.sql` | `profiles` keyed to `auth.users`, the sign-up / email-sync / `updated_at` triggers, `is_admin()`, the first RLS **policies** in this schema, and the privileges that make `role` unwritable from a browser session |
+| `005_rpc_execute_privileges.sql` | Revokes the default `PUBLIC`/`anon`/`authenticated` EXECUTE grant on the four definer-rights functions 001-003 added, and grants it back to `service_role` alone |
 
 Before this existed there was one apply-once file with no record of what had
 been applied where (audit P4). Every `create table if not exists` is safe to
@@ -100,6 +101,30 @@ select grantee, privilege_type
 from information_schema.column_privileges
 where table_schema = 'public' and table_name = 'profiles' and column_name = 'role';
 ```
+
+**Definer-rights functions** — `check_rate_limit()`, `purge_rate_limit_hits()`,
+`demo_funnel()`, `submission_stats()`, `is_admin()`. RLS on a table is only as
+good as the list of functions that can read it *as the owner*, and PostgreSQL
+grants EXECUTE on a new function to `PUBLIC` — Supabase additionally grants it
+to `anon` and `authenticated` by default privilege. Migration 005 closes the
+four that 001-003 left open; 004 had already closed `is_admin()`.
+
+This should list `service_role` and nothing else for the first four, and
+`authenticated` for `is_admin()`:
+
+```sql
+select p.proname, r.grantee, r.privilege_type
+from information_schema.routine_privileges r
+join pg_proc p on p.oid = r.specific_name::regprocedure
+where r.routine_schema = 'public'
+  and p.proname in ('check_rate_limit', 'purge_rate_limit_hits',
+                    'demo_funnel', 'submission_stats', 'is_admin')
+order by p.proname, r.grantee;
+```
+
+A row naming `PUBLIC`, `anon` or `authenticated` on any of the first four means
+the anon key — which is public by design — can call a function that bypasses
+every policy above it.
 
 `tests/migrations.test.ts` asserts all of the above against the SQL itself, so
 a migration that weakened it would fail the build rather than the audit.

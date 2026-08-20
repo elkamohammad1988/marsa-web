@@ -150,6 +150,61 @@ describe("the security model survives every migration", () => {
     expect(definers).toBeGreaterThan(0);
     expect(pinned).toBe(definers);
   });
+
+  /**
+   * The companion to the rule above, and the one that was missing.
+   *
+   * Pinning `search_path` stops a definer-rights function being *subverted*. It
+   * does nothing about who may *call* it — and PostgreSQL grants EXECUTE on a
+   * new function to PUBLIC, with Supabase additionally granting it to `anon`
+   * and `authenticated` by default privilege. A definer-rights function runs as
+   * its owner, so an open EXECUTE grant is a hole straight through the "RLS on,
+   * no policies" model every table here relies on.
+   *
+   * 004 spotted this for `is_admin()` and revoked it. 001-003 did not, which
+   * left `submission_stats()`, `demo_funnel()`, `check_rate_limit()` and
+   * `purge_rate_limit_hits()` callable by anyone holding the project's anon key
+   * — a key that is public by design. 005 closes them; this is what stops the
+   * next definer-rights function being added without one.
+   *
+   * Trigger functions are exempt because they are not reachable: PostgreSQL
+   * refuses to call a function returning `trigger` directly, so PostgREST
+   * cannot expose one as an RPC.
+   */
+  describe("every callable security definer function has its EXECUTE closed", () => {
+    const all = files.map(read).join("\n").toLowerCase();
+
+    /** `create or replace function public.foo(...) … $$;` → one entry per function. */
+    const definerRpcs = all
+      .split("create or replace function ")
+      .slice(1)
+      .map((chunk) => ({
+        name: chunk.match(/^public\.(\w+)/)?.[1] ?? "",
+        body: chunk.slice(0, chunk.indexOf("$$;") + 1),
+      }))
+      .filter((fn) => fn.name && fn.body.includes("security definer"))
+      // Not callable over PostgREST — Postgres rejects a direct call.
+      .filter((fn) => !/returns\s+trigger/.test(fn.body))
+      .map((fn) => fn.name);
+
+    /** Every function named in a revoke, however that revoke is spelled. */
+    const revoked = new Set(
+      [
+        // `revoke execute on function public.is_admin() from public`
+        ...all.matchAll(/revoke\s+(?:execute|all)\s+on\s+function\s+public\.(\w+)/g),
+        // 005 builds its revokes with format(), so the signature is the literal.
+        ...all.matchAll(/'public\.(\w+)\s*\(/g),
+      ].map((m) => m[1]),
+    );
+
+    it("finds the functions to check", () => {
+      expect(definerRpcs.length).toBeGreaterThan(0);
+    });
+
+    it.each(definerRpcs)("%s is revoked from public", (name) => {
+      expect(revoked.has(name), `${name} keeps PostgreSQL's default grant to PUBLIC`).toBe(true);
+    });
+  });
 });
 
 describe("001 still defines the original schema", () => {

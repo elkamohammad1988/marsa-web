@@ -28,8 +28,15 @@ next-env.d.ts.bak
 # ---------------------------------------------------------------------------
 # Local form-submission storage (FileSubmissionStore fallback).
 # Contains personal data from real submissions. Must never leave the machine.
+#
+# `.data/*` rather than `.data/`: an ignored *directory* is one git never
+# descends into, so a negation inside it can never match. Written this way so
+# that README.md can be the one tracked file — the warning about what the
+# directory holds belongs next to the data, where somebody about to copy the
+# folder will see it, not only in this file.
 # ---------------------------------------------------------------------------
-.data/
+.data/*
+!.data/README.md
 
 # ---------------------------------------------------------------------------
 # Vercel — links this checkout to a Vercel account. Machine-local, not shared.
