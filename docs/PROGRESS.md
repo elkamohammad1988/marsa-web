@@ -1590,3 +1590,89 @@ means acting inside Supabase, which is not an automatic remedy.
 
 `H12` unchanged: the retention period for `submissions`. The mechanism is ready
 and the number is not ours to write.
+
+---
+
+## Publication — making the repository, the deployment and the images agree · 2026-08-20
+
+No new product work. This pass existed because six artefacts describing one
+project had drifted apart, and the drift was invisible from inside any one of
+them.
+
+### What was actually wrong
+
+**`origin/main` was 23 commits behind.** Everything since the Liquid Gold
+rebrand — the rebrand itself, customer accounts, the elevation ladder, admin
+erasure and session revocation, ESLint 9, the browser suite — sat on a branch
+called `wip/rebrand-backup` and had never been pushed. `main` was still at the
+plan rewrite from 27 July.
+
+**So the live deployment was serving the palette before last.** Vercel builds
+`main`, and `main` was pre-rebrand, so `marsa-web.vercel.app` shipped
+`--brand: 204 31 134` — Black Rose magenta — while the repository, the README
+and every portfolio screenshot showed `#D4AF37` gold on slate. The site was not
+broken: every route answered, `/api/health` reported `degraded` honestly, the
+closed areas were closed. It was a different-looking product than the one the
+listing pointed at, which for a portfolio piece is the worse failure of the two.
+It also meant the live cookie policy still promised a consent banner that has
+never existed on this site.
+
+Diagnosis was one comparison worth writing down: fetch the deployed stylesheet
+and read `--brand` out of it. A rendered page can be argued about; the token
+value cannot.
+
+**The capture script would photograph a loading spinner.** Regenerating the set
+against a freshly started server produced an `02-live-rates.png` showing
+"Loading rate…" over an empty chart, under a README caption reading *"the
+converter and its 30-day history, on real European Central Bank data"*. `goto`
+waits for `networkidle2`, and the rate is fetched after hydration — so the
+network is idle precisely because the fetch has not started. Nothing objected:
+`frame` found the card and `shot` wrote the file. Not a rare window either. The
+upstream is key-less and fair-use and the server cache starts empty, so every
+capture run pays the cold path: 4.2s through `/api/rates` against 2.7s at the
+provider. `requireLiveRate` now polls for the rate the panel renders and throws
+otherwise, on `requireDisclosure`'s reasoning — a wrong portfolio image is worse
+than no portfolio image, because only one of the two gets published without
+anybody noticing.
+
+**A day-old `next start` was still holding port 3000.** Worth recording because
+it nearly produced exactly the failure this pass was cleaning up: captures taken
+against yesterday's build while believing they came from today's.
+
+### The batch-13 claim that had gone stale in the other direction
+
+`PROJECT-PLAN.md` still listed end-to-end smoke tests as `TODO` and said in
+prose that committing them was "what has not been done". The suite exists: 50
+checks, a real Chrome, a production build, a second required CI job. The plan
+was describing the repository as it had been two commits earlier. Closed, with
+the rows reworded from Playwright to what shipped, and the reasoning recorded
+for why the lead and CSV rows became route-and-control coverage instead.
+
+### Verification, and one thing measured rather than asserted
+
+`npm run verify:all` green end to end: typecheck, lint, **1,832** checks across
+53 files, production build, then **50** browser checks. `npm audit` on the whole
+tree: 0. CI green on both jobs on Linux — the first time the two-job workflow
+had ever run, since it was added on the unpushed branch.
+
+The browser suite was run **26 times** before publishing, because two anomalies
+appeared early: one worker crash during import, and one run of 49/50. Neither
+reproduced in the 24 consecutive green runs that followed, and neither was ever
+identified, so nothing was "fixed" for them. What is known and worth stating
+plainly: two of the fifty checks drive the FX tools against the live upstream,
+and a suite with a third party in it is not fully deterministic. That is a
+deliberate trade — the tests assert the tools fetch a *real* rate — and the
+honest description of the gate, not a silent one.
+
+Also checked, since Linux is where CI runs and Windows is where this was
+written: all 764 relative and aliased imports resolve with exact case against
+git's index. Zero mismatches.
+
+### Left for a human
+
+`H3` unchanged and now more pointed: the migrations are still **not applied to
+the live Supabase project**, and that set now includes `005`. Until it is
+applied, anybody holding the project's public anon key can reach a
+definer-rights delete. Applying it means acting inside Supabase.
+
+`H12` unchanged: the retention period for `submissions`.
