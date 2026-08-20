@@ -193,10 +193,65 @@ async function requireDisclosure(page) {
 }
 
 /**
+ * Refuse to photograph a rate panel that has not got its rate yet.
+ *
+ * `goto` waits for `networkidle2`, which is the wrong signal for this: the FX
+ * request is made by a client component *after* hydration, so the network can
+ * be idle because the fetch has not started. The converter then renders
+ * "Loading rate…" over an empty chart, and nothing in this script objected —
+ * it framed the card and wrote the file.
+ *
+ * That is how `02-live-rates.png` was written as a loading state while the
+ * README caption under it read "the converter and its 30-day history, on real
+ * European Central Bank data". The image contradicted the sentence describing
+ * it, in the one direction this repository is least willing to be wrong in.
+ *
+ * The upstream is a key-less fair-use API and the server cache starts empty, so
+ * the first call of a capture run is the slow one — measured at 4.2s against
+ * 2.7s at the provider. This polls for the rate the panel actually renders and
+ * throws with what it saw if it never arrives, on the same reasoning as
+ * `requireDisclosure`: a wrong portfolio image is worse than no portfolio
+ * image, because only one of the two gets published without anybody noticing.
+ */
+async function requireLiveRate(page, where, budgetMs = 30000) {
+  const deadline = Date.now() + budgetMs;
+  let seen = "";
+
+  while (Date.now() < deadline) {
+    const state = await page.evaluate(() => {
+      const text = (document.body.innerText || "").replace(/\s+/g, " ").trim();
+      return {
+        loading: /Loading (live )?rate/i.test(text),
+        failed: /rate unavailable/i.test(text),
+        // "1 USD = 0.8617 EUR" — the rendered rate, in both places that show one.
+        rate: /1 [A-Z]{3} = \d+\.\d+ [A-Z]{3}/.test(text),
+      };
+    });
+
+    if (state.failed) {
+      throw new Error(
+        `The live rate failed to load on ${where}: the panel reads "Rate ` +
+          `unavailable". The upstream (api.frankfurter.dev) is key-less and ` +
+          `fair-use, so this is usually transient — re-run the capture rather ` +
+          `than shipping the error state.`,
+      );
+    }
+    if (state.rate && !state.loading) return;
+    seen = state.loading ? "still loading" : "no rate rendered";
+    await new Promise((r) => setTimeout(r, 250));
+  }
+
+  throw new Error(
+    `The live rate never arrived on ${where} within ${budgetMs}ms (${seen}). ` +
+      `Refusing to write a portfolio image of a loading state.`,
+  );
+}
+
+/**
  * Write the shot, then re-encode it.
  *
  * Chrome's PNG encoder optimises for speed, not size, and these frames are
- * mostly large smooth magenta gradients — the worst case for it. The first
+ * mostly large smooth gold-on-slate gradients — the worst case for it. The first
  * eight came to 6.2 MB, of which the hero alone was 2.0 MB and the 3x mobile
  * shot 1.8 MB. That matters in two places: the README embeds the hero at the
  * top, so every visitor to the repository downloads it before reading a word,
@@ -512,7 +567,10 @@ async function main() {
     await goto(page, "/tools/currency-converter");
     // The amount field is inside the converter card, so framing on its section
     // puts the working widget — and the live rate it just fetched — in shot,
-    // rather than the explainer copy further down the page.
+    // rather than the explainer copy further down the page. "just fetched" is
+    // asserted rather than assumed: this is the first FX call of the run and so
+    // the one that pays for the cold server cache.
+    await requireLiveRate(page, "/tools/currency-converter");
     await frame(page, "#fx-amount", 260);
     await shot(page, "02-live-rates");
 
@@ -532,6 +590,7 @@ async function main() {
     // The convert step loads a live ECB rate on entry; give it room, then
     // capture the state where the rate and the converted amount are both shown.
     await clickLabel(page, /→ EUR/, 1800);
+    await requireLiveRate(page, "the demo convert step");
     await settle(page);
     await frame(page, "ol[aria-label='Demo progress']");
     await shot(page, "04-feature-convert");
