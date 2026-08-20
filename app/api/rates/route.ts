@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getLatestRate, FxError } from "@/lib/fx";
+import { getLatestRate, fxFailure } from "@/lib/fx";
+import { captureException } from "@/lib/observability";
 import { rateLimitShared, clientKey } from "@/lib/rate-limit";
 import { RATES_RATE_LIMIT, tooManyRequests } from "@/lib/api-rate-limit";
 
@@ -26,8 +27,15 @@ export async function GET(request: Request) {
       },
     );
   } catch (err) {
-    const status = err instanceof FxError ? err.status : 502;
-    const message = err instanceof Error ? err.message : "Could not load exchange rate.";
-    return NextResponse.json({ error: message }, { status });
+    // Only the sentences `lib/fx.ts` marks exposable reach the caller; the rest
+    // — the provider's identity and status, a timeout, a DNS failure — are
+    // withheld and recorded instead. This response is rendered verbatim in the
+    // converter panel, and the endpoint is unauthenticated.
+    const { status, error, withheld } = fxFailure(
+      err,
+      "Could not load the exchange rate just now. Please try again shortly.",
+    );
+    if (withheld) captureException(err, { event: "rates.latest", severity: "warning" });
+    return NextResponse.json({ error }, { status, headers: { "cache-control": "no-store" } });
   }
 }

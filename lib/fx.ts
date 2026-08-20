@@ -174,21 +174,74 @@ async function fxFetch(path: string): Promise<Response> {
   });
 }
 
+/**
+ * A failed rate lookup.
+ *
+ * `expose` marks a message as written *for the visitor* — a closed set of
+ * sentences authored here, each of which describes something the caller asked
+ * for rather than something about our infrastructure. It defaults to false, so
+ * a message added later is private until somebody decides otherwise.
+ *
+ * The distinction is not decorative. Both FX endpoints are unauthenticated and
+ * their error text is rendered verbatim in the converter panel, so relaying
+ * every message meant an anonymous caller — and any visitor whose lookup
+ * happened to fail — was shown things like `FX provider returned 429`,
+ * `The operation was aborted due to timeout`, or, on a DNS failure,
+ * `fetch failed: getaddrinfo ENOTFOUND api.frankfurter.dev`: the upstream
+ * provider's identity, its HTTP status and our own transport internals.
+ *
+ * That is the same disclosure audit S2 removed from `/api/health`, which
+ * deliberately reports two booleans and puts the FX provider's status in the
+ * captured event instead. These two routes were the surface it did not reach.
+ */
 export class FxError extends Error {
   constructor(
     message: string,
     readonly status = 502,
+    /** True when `message` is safe to show to an anonymous caller. */
+    readonly expose = false,
   ) {
     super(message);
     this.name = "FxError";
   }
 }
 
+/**
+ * What an anonymous caller is told about a failed lookup, and whether the real
+ * detail still needs recording.
+ *
+ * Both FX endpoints relayed `err.message` verbatim, so the sentences above
+ * were never the only thing a visitor could be shown. The others reached the
+ * converter panel too — the upstream provider's identity and HTTP status from
+ * `FX provider returned 429`, our transport internals from a timeout, and its
+ * hostname from `getaddrinfo ENOTFOUND api.frankfurter.dev` on a DNS failure.
+ *
+ * Lives here, next to the class, because "which of these messages is for the
+ * visitor" is a fact about the errors and not about either route. Both routes
+ * ask the same question and there is no version of this worth answering twice.
+ * It returns plain data rather than a `NextResponse` so this module stays free
+ * of the framework and the rule can be tested without building a request.
+ *
+ * A withheld message always answers **502**, never the status the FxError
+ * carried. Anything we decline to describe is by definition a fault on our
+ * side of the exchange, so that is the honest code — and it keeps the response
+ * from distinguishing failures a caller is not being told apart anyway.
+ */
+export function fxFailure(
+  err: unknown,
+  fallback: string,
+): { status: number; error: string; withheld: boolean } {
+  if (err instanceof FxError && err.expose) {
+    return { status: err.status, error: err.message, withheld: false };
+  }
+  return { status: 502, error: fallback, withheld: true };
+}
+
 export async function getLatestRate(from: string, to: string): Promise<{ rate: number; date: string }> {
   const f = from.toUpperCase();
   const t = to.toUpperCase();
   if (!isSupportedCurrency(f) || !isSupportedCurrency(t))
-    throw new FxError("Unsupported currency.", 400);
+    throw new FxError("Unsupported currency.", 400, true);
 
   const today = isoDate(new Date());
   if (f === t) return { rate: 1, date: today };
@@ -197,7 +250,7 @@ export async function getLatestRate(from: string, to: string): Promise<{ rate: n
   if (!res.ok) throw new FxError(`FX provider returned ${res.status}`);
   const json = (await res.json()) as { date?: string; rates?: Record<string, number> };
   const rate = json.rates?.[t];
-  if (typeof rate !== "number") throw new FxError("Rate unavailable for this pair.");
+  if (typeof rate !== "number") throw new FxError("Rate unavailable for this pair.", 502, true);
   return { rate, date: json.date ?? today };
 }
 
@@ -237,8 +290,8 @@ export async function getSeries(from: string, to: string, range: RangeId): Promi
   const f = from.toUpperCase();
   const t = to.toUpperCase();
   if (!isSupportedCurrency(f) || !isSupportedCurrency(t))
-    throw new FxError("Unsupported currency.", 400);
-  if (!isRangeId(range)) throw new FxError("Unsupported range.", 400);
+    throw new FxError("Unsupported currency.", 400, true);
+  if (!isRangeId(range)) throw new FxError("Unsupported range.", 400, true);
 
   const now = new Date();
   const today = isoDate(now);
@@ -263,7 +316,7 @@ export async function getSeries(from: string, to: string, range: RangeId): Promi
     .map((date) => ({ date, value: rates[date]?.[t] }))
     .filter((r): r is { date: string; value: number } => typeof r.value === "number");
 
-  if (!rows.length) throw new FxError("No historical data for this pair.");
+  if (!rows.length) throw new FxError("No historical data for this pair.", 502, true);
 
   const sampled = downsample(rows, 70);
   const points: FxPoint[] = sampled.map((r) => ({ x: labelFor(r.date, range), y: r.value }));

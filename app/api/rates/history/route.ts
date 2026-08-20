@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getSeries, isRangeId, FxError, type RangeId } from "@/lib/fx";
+import { getSeries, isRangeId, fxFailure, type RangeId } from "@/lib/fx";
+import { captureException } from "@/lib/observability";
 import { rateLimitShared, clientKey } from "@/lib/rate-limit";
 import { RATES_RATE_LIMIT, tooManyRequests } from "@/lib/api-rate-limit";
 
@@ -25,8 +26,13 @@ export async function GET(request: Request) {
       },
     });
   } catch (err) {
-    const status = err instanceof FxError ? err.status : 502;
-    const message = err instanceof Error ? err.message : "Could not load rate history.";
-    return NextResponse.json({ error: message }, { status });
+    // Same rule as /api/rates, asked once in `fxFailure` so the two endpoints
+    // cannot answer this differently.
+    const { status, error, withheld } = fxFailure(
+      err,
+      "Could not load the rate history just now. Please try again shortly.",
+    );
+    if (withheld) captureException(err, { event: "rates.history", severity: "warning" });
+    return NextResponse.json({ error }, { status, headers: { "cache-control": "no-store" } });
   }
 }

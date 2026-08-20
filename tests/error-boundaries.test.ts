@@ -105,3 +105,61 @@ describe("error.tsx", () => {
     expect(src).toMatch(/captureException/);
   });
 });
+
+/**
+ * A known misconfiguration must not be served as an unknown error.
+ *
+ * `/admin` called `getStore()` outside its try block. In production, with no
+ * database configured, that throws `StorageConfigError` — by design, because
+ * silently degrading to the file store is how leads went missing (audit B1) —
+ * and the throw took the whole page with it. The operator, who had signed in
+ * correctly, got the root error boundary: "We hit an unexpected error", "trying
+ * again usually resolves it", and a reference number.
+ *
+ * All three statements were false. The condition is expected and is named in
+ * `MISSING_DB_CONFIG_MESSAGE`; retrying cannot fix it; and the reference points
+ * at a log line that says exactly what the page could have said itself. The
+ * error boundary is for failures nobody anticipated, and using it for one that
+ * has a written remedy wastes the remedy.
+ *
+ * Asserted from source because the repository has no renderer for a server
+ * component. The property is structural and legible either way: the call that
+ * can throw is inside a `try`, and the message the operator needs is reachable
+ * from the page.
+ */
+describe("/admin explains a missing database rather than crashing", () => {
+  const source = read("app/admin/page.tsx");
+
+  it("shows the message that names the variables to set", () => {
+    expect(source).toMatch(/MISSING_DB_CONFIG_MESSAGE/);
+  });
+
+  it("builds the store inside a try, not at the top level of the render", () => {
+    // The failing shape was `const store = getStore();` as a bare statement.
+    expect(source).not.toMatch(/^\s*const store = getStore\(\);/m);
+    const guarded = source.slice(source.indexOf("try {"), source.indexOf("} catch"));
+    expect(guarded).toMatch(/getStore\(\)/);
+  });
+
+  it("records the misconfiguration as well as showing it", () => {
+    expect(source).toMatch(/admin\.storage\.unconfigured/);
+  });
+
+  it("types the store as nullable, so the compiler enforces every guard", () => {
+    // Deliberately not a regex hunting for unguarded dereferences. `store` is
+    // declared `SubmissionStore | null`, so `tsc --noEmit` — a hard gate in CI
+    // — refuses any read that has not been narrowed. Re-deriving that from the
+    // text would be redundant, and worse: a read inside `if (store)` and one
+    // inside a ternary are correctly narrowed and would fail a naive scan.
+    //
+    // What a test can add is that the declaration stays nullable. Widen it back
+    // to `SubmissionStore` and the compiler stops asking the question at all.
+    expect(source).toMatch(/let store: SubmissionStore \| null = null;/);
+  });
+
+  it("reads the provider name without assuming there is one", () => {
+    // The one read outside any narrowing block: the header renders above the
+    // error and must say something honest when there is no store.
+    expect(source).toMatch(/store\?\.provider/);
+  });
+});
