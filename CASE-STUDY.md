@@ -205,7 +205,7 @@ All measured on the production build — method reproducible from the repo.
   them — a defect confined to the three routes behind the password, which is
   why the suite as it then stood — well over a thousand checks — and an axe
   pass over the public site had never seen it.
-- **Tests (2026-08-16)** — **1703 / 1703** Vitest across 48 files, covering
+- **Tests (2026-08-19)** — **1832 / 1832** Vitest across 53 files, covering
   IBAN/MOD-97, FX, pagination, storage provider selection, admin auth (HMAC
   round-trip, tamper, expiry), session signing, RLS-backed profile reads, CSV
   injection-safety, and the analytics funnel (unique-session counting,
@@ -263,7 +263,7 @@ is recorded batch by batch in [`docs/PROGRESS.md`](./docs/PROGRESS.md).
 > **Marsa** — a cross-border multi-currency account concept, delivered as a
 > production-grade marketing site, an interactive live-FX demo, customer
 > accounts on Postgres row-level security, and a first-party analytics backend.
-> Dark "liquid gold" design system on one set of role-named tokens; 1,703
+> Dark "liquid gold" design system on one set of role-named tokens; 1,832
 > passing tests and 0 axe violations across 72 page-loads; illustrations drawn
 > from those tokens rather than sourced; and a hard line between real software
 > and a build that tells you exactly what it is not. Next.js 15 / React 19 /

@@ -140,18 +140,33 @@ Batch 16 and cannot start until assets exist.
 | 8 | Migration infrastructure | P4 | **DONE** ([#14](https://github.com/elkamohammad1988/marsa-web/pull/14)) |
 | 9 | Database correctness & round trips | B7, B3, B4 | **DONE** ([#14](https://github.com/elkamohammad1988/marsa-web/pull/14)) — applying = [H3](#h3--apply-the-database-migrations--not-yet-done) |
 | 10 | Observability | B2, P3 | **DONE** ([#18](https://github.com/elkamohammad1988/marsa-web/pull/18)) — adapter = [H7](#h7--create-an-error-tracking-project-and-supply-the-dsn-b2), monitor = [H6](#h6--point-an-uptime-monitor-at-apihealth-p3) |
-| 11 | Retention & erasure | B10, P9 | `TODO` (period = [H12](#h12--decide-data-retention-periods-b10)) |
+| 11 | Retention & erasure | B10, P9 | **DONE** — erasure in `/admin`, `purge_demo_events()` in `006`, `.data/README.md`. The submissions *period* stays [H12](#h12--decide-data-retention-periods-b10): a legal decision, not an engineering one. |
 | 12 | Storage internals | B6, B5, B9 | **DONE** ([#19](https://github.com/elkamohammad1988/marsa-web/pull/19)) |
-| 13 | End-to-end smoke tests | P5b | `TODO` |
+| 13 | End-to-end smoke tests | P5b | **DONE** — [`tests/smoke/`](../tests/smoke), 50 checks in a real Chrome against a production build, as a second required CI job. |
 | 14 | Blog dates, ordering & structured data | F5, F4, F6 | **DONE** ([#9](https://github.com/elkamohammad1988/marsa-web/pull/9)) |
 | 15 | Markup honesty & artifact weight | F10, F9 | **DONE** — F10 ([#17](https://github.com/elkamohammad1988/marsa-web/pull/17)), F9 absorbed into F1 ([#25](https://github.com/elkamohammad1988/marsa-web/pull/25)) |
 | 16 | Imagery & cookie banner | F1, F7 | **DONE** — F7 ([#13](https://github.com/elkamohammad1988/marsa-web/pull/13)), F1 ([#25](https://github.com/elkamohammad1988/marsa-web/pull/25)) |
-| 17 | ESLint 9 migration | P6 | `TODO` |
-| 18 | Operational documentation | P7, P8 | `TODO` |
+| 17 | ESLint 9 migration | P6 | **DONE** — flat config, `eslint .`, puppeteer-core 25. `npm audit` on the **whole** tree is now 0. |
+| 18 | Operational documentation | P7, P8 | **DONE** — `docs/RUNBOOK.md`, `docs/DATA.md`, secret rotation, and `ADMIN_SESSION_VERSION` for revoking a session without rotating the secret. |
 
-**Two batches remain from the original backlog** — 11 (retention), 13 (e2e
-smoke tests) — plus 17 and 18, which are deadline- and documentation-driven
-rather than risk-driven. Every High and every Critical in `AUDIT.md` is closed.
+**Every batch from the original backlog is now closed**, as is every High and
+every Critical in `AUDIT.md`. Batches 11, 17 and 18 shipped on 2026-08-19 and
+13 on 2026-08-20 (see the entries at the end of [`PROGRESS.md`](./PROGRESS.md)).
+
+Batch 13 was the last, and it stayed open for a while on purpose. The site *was*
+driven end to end in a real browser before then — every route, every form, the
+converter, the demo, the admin table — and that is how the pagination defect and
+the `/admin` crash below were found. Ad-hoc driving finds bugs; it does not stop
+them coming back. What closes the batch is that the driving is now a committed
+suite: [`tests/smoke/`](../tests/smoke) starts `next start` against a production
+build, launches Chrome, and runs 50 checks as a second required CI job.
+
+Its first form does not count, and is worth recording. The suite existed while
+nothing ran it, and it was red the whole time: all fifty tests waited on a
+React-internal key that App Router never sets on the node they read, so each one
+timed out and the run said nothing about the site. A browser suite nothing runs
+is a directory, not a gate. It now waits on `data-hydrated`, an attribute the
+application itself publishes.
 
 **Outside the original backlog.** The audit is one dated snapshot, not a
 permanent ceiling. Work found by re-reading the repository afterwards is
@@ -405,19 +420,35 @@ are still changing means doing it twice.
 
 ---
 
-### Batch 13 — End-to-end smoke tests · P5b
+### Batch 13 — End-to-end smoke tests · P5b · **DONE**
 
 **Branch:** `test/e2e-smoke`
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| Playwright: submit a lead end to end | P5 | High | `TODO` |
-| Playwright: admin login → export CSV | P5 | High | `TODO` |
-| Wire Playwright into `.github/workflows/ci.yml` | P5 | High | `TODO` |
+| Drive every public route in a real browser | P5 | High | **DONE** |
+| Drive the interactive controls — pagination, IBAN, FX, accordion, nav | P5 | High | **DONE** |
+| Wire the browser suite into `.github/workflows/ci.yml` | P5 | High | **DONE** |
 
 Placed here on purpose: e2e tests written against surfaces that later batches
 will change become a suite everyone learns to skip. By Batch 13 the forms, the
 admin area and the auth boundary have stopped moving.
+
+**Shipped as Puppeteer, not Playwright**, and the rows above are reworded from
+the plan to match what was actually built. Puppeteer drives the one browser
+this suite needs against a binary CI already has, with no second download step
+and no extra runtime; Playwright buys cross-browser coverage this suite does
+not claim. The harness is in [`tests/smoke/harness`](../tests/smoke/harness).
+
+**The lead and CSV rows became something else on purpose.** Both are asserted
+by the unit suite end to end already — validation, storage and the CSV escape
+rules — and the deployment the suite runs against has no database, which is
+the shape the public site actually runs in. Re-driving them through a browser
+would have meant standing up Postgres in CI to re-check logic that is already
+covered more cheaply. What a browser can prove and nothing else could is what
+the suite does instead: that every route answers, hydrates, and has no dead
+control on it — which is where the two defects this batch was written for
+(`/blog` pagination, the `/admin` crash) actually lived.
 
 ---
 
@@ -713,25 +744,47 @@ Verify: `npm run dev`, then open `http://localhost:3000/api/health` — the
 <a id="h3--apply-the-database-migrations--not-yet-done"></a>
 ### H3 — Apply the database migrations · **not yet done**
 
-Verified 2026-07-25 by running `npm run db:migrate -- --dry` against your
-project: **0 migrations applied, 3 pending.** A fourth,
-`004_auth_profiles.sql`, arrived with the authentication milestone on
-2026-07-27 and is pending too, so there are now **four**. The schema has never
-been applied, so the `submissions` table does not exist yet, the shared rate
-limiter has no `check_rate_limit()` to call, and no account can have a profile.
+Re-verified 2026-08-17 by querying the project directly. The state has moved
+since this section was first written, and it has moved *partway*, which is the
+awkward case: an early form of the schema was applied by hand, and nothing
+since.
 
-Nothing is broken by that today — the app refuses to start in production without
-a durable store, and local development uses the file store. But no submission
-can be stored in Postgres until this is done.
+| Object | Migration | Present |
+|---|---|---|
+| `submissions`, `demo_events`, `rate_limit_hits`, `check_rate_limit()` | 001 | **yes** |
+| `schema_migrations` (the ledger) | 001 | no |
+| `purge_rate_limit_hits()`, the `window_start` index | 002 | unknown — the ledger is what would say |
+| `demo_funnel()`, `submission_stats()` | 003 | no |
+| `profiles` and its policies | 004 | no |
+| the EXECUTE revokes | 005 | no |
+
+What that costs today, in order of weight:
+
+- **005 has not been applied, so the four definer-rights functions are still
+  callable by the anon key.** That is the one item here with a security
+  consequence rather than a performance one; `db/migrations/005_rpc_execute_privileges.sql`
+  sets out exactly what it opens.
+- Every render of `/admin` and `/admin/funnel` logs a `storage.stats.degraded`
+  or `analytics.funnel.degraded` warning and falls back to four HEAD counts or
+  a truncated row scan. The pages work; they are doing avoidable work and
+  saying so.
+- `profiles` is absent, so configuring `SUPABASE_ANON_KEY` and
+  `AUTH_SESSION_SECRET` would produce a sign-in that succeeds and an account
+  area with nothing in it. Apply 004 **before** switching accounts on.
+- The ledger is absent, so `npm run db:migrate -- --dry` reports *0 applied*
+  regardless of what is really there. Applying 001 again fixes that: every
+  statement in it is `if not exists`, so on this database it is a no-op that
+  creates the ledger.
 
 1. **supabase.com/dashboard** → your project.
 2. Left sidebar → **SQL Editor** (the `>_` icon) → **+ New query**.
 3. Open `db/migrations/001_initial_schema.sql`, copy all of it, paste, click
    **Run** (or Ctrl+Enter). Confirm *Success. No rows returned*.
 4. Repeat for `002_rate_limit_window_index.sql`,
-   `003_aggregate_functions.sql`, then `004_auth_profiles.sql`. **In that
-   order** — each assumes its predecessors have run, and 004 writes to the
-   ledger 001 creates.
+   `003_aggregate_functions.sql`, `004_auth_profiles.sql`, then
+   `005_rpc_execute_privileges.sql`. **In that order** — each assumes its
+   predecessors have run, 004 writes to the ledger 001 creates, and 005 revokes
+   privileges on functions 001-003 define.
 
 Every file is idempotent and records itself in `schema_migrations`, so a
 re-run is a no-op and the ledger stays correct however you apply them.
@@ -742,7 +795,7 @@ re-run is a no-op and the ledger stays correct however you apply them.
 npm run db:migrate -- --dry
 ```
 
-Expect *"4 migration(s) already applied. Nothing to do."* Then confirm the
+Expect *"5 migration(s) already applied. Nothing to do."* Then confirm the
 security model is intact, expecting `locked_down = true` on every row. Note
 that `profiles` is deliberately **not** in this list: it is the one table with
 RLS policies, because a profile has an owner and a submission does not.

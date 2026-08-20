@@ -1421,3 +1421,172 @@ largest piece of work in the repository is still the one a visitor cannot see.
 
 Account deletion is now named as missing on `/legal/privacy`, which makes
 building it the next honest step rather than an optional one.
+
+---
+
+## Batches 11, 17 and 18 — erasure, the toolchain, and the operations record · 2026-08-19
+
+A full production audit, run from scratch rather than from the backlog: read the
+repository, then drive the built site in a real browser and see what breaks. The
+backlog work that fell out of it — retention and erasure, ESLint 9, operational
+documentation — closed the last three batches that were not blocked on a person.
+
+### Two defects the whole test suite could not see
+
+Both were found by *driving* the site, not by reading it. Both were green under
+typecheck, ESLint, 1,763 tests and a production build.
+
+**`/blog` pagination was a link to nowhere.** Previous and Next rendered as
+`<Link href="#" aria-disabled className="pointer-events-none">` on the pages
+where they had no destination. That is disabled for exactly one input device:
+`pointer-events-none` stops a mouse, `opacity-50` is a suggestion to the eye,
+and `aria-disabled` announces a state without removing anything. What puts an
+anchor in the tab order is the `href` — so a keyboard reader on page 1 reached
+"Previous", pressed Enter, and navigated to `#`, losing their place in the list
+with nothing on screen to say why. `/admin`'s pagination never had the bug: it
+renders the control only when there is somewhere to go.
+
+Fixed by making the disabled state a `<span>` — not a link at all — and guarded
+by `tests/disabled-controls.test.ts`, which fails on any anchor carrying
+`href="#"`, `aria-disabled`, or `pointer-events-none`. The lint strips comments
+before matching, so a file may document the mistake it fixed without failing the
+check that describes it.
+
+**`/admin` crashed instead of explaining.** `getStore()` throws
+`StorageConfigError` in production when no database is configured — deliberately,
+because degrading silently to the file store is how leads went missing (B1) — and
+the call sat outside the page's try block. So an operator who had signed in
+correctly, on a deployment without `SUPABASE_URL`, got the root error boundary:
+*"We hit an unexpected error"*, *"trying again usually resolves it"*, and a
+reference number. All three statements were false. The condition is expected, it
+has a written remedy in `MISSING_DB_CONFIG_MESSAGE` naming the two variables to
+set, and retrying can never fix it — and the operator was the one person who
+would never see that message. Verified against a real build before and after:
+200-with-a-blank-page, then the heading, `Storage: none · not configured`, and
+the remedy.
+
+### Erasure · B10
+
+A GDPR Article 17 request previously meant opening the Supabase SQL editor and
+writing the `DELETE` by hand — database credentials and an unfiltered statement
+typed from memory against production, for a routine and legally time-bound task.
+
+- `SubmissionStore.delete(id)` on both providers, returning **whether a row was
+  actually removed**. That boolean is the contract: a mistyped id, an
+  already-deleted row and a permission refusal all complete without error, and
+  "the delete did not throw" does not support the claim an erasure request needs.
+- `POST /api/admin/submissions/delete` behind four gates — same-origin, admin
+  session, its own rate-limit tier, and an id validated before it reaches a
+  query. It answers 404 rather than redirecting when it removed nothing.
+- A Delete control per row in `/admin`, as a form rather than a link, because a
+  GET that deletes is one prefetch away from erasing what it pointed at. The
+  return path is rebuilt from a closed set of parameters, not echoed.
+- `deleteRows()` in the PostgREST client **refuses an unfiltered query**:
+  PostgREST reads `DELETE /table` as "every row", so an optional filter would
+  make a forgotten argument mean the table.
+- `JsonlStore.removeWhere()` reads the file *whole*, unlike every other read
+  here, which is bounded (B5). Rewriting from a bounded window would delete
+  everything outside it as a side effect of deleting one row — an erasure
+  request that quietly erases the archive. Write-to-temp-then-rename, and a
+  line it cannot parse is preserved rather than destroyed.
+
+23 tests, including that deleting row 25 of 50 leaves rows 0 and 49 alone.
+
+### Retention · B10, P9
+
+`006` adds `purge_demo_events(interval default '90 days')`, mirroring
+`purge_rate_limit_hits` so an operator who has scheduled one knows how to
+schedule the other, and returning a row count so a run that did nothing is
+distinguishable from a run that never happened. Its EXECUTE grants are closed to
+`anon` and `authenticated` on the reasoning `005` established.
+
+`submissions` gets **no** period, and `tests/data-retention.test.ts` asserts that
+nobody has quietly invented one. How long an operator may keep a name and an
+address someone sent expecting a reply is a legal question; whoever writes that
+number has to be entitled to choose it. `demo_events` needs no such permission —
+it holds a per-visit random id and a step name, so 90 days is garbage collection,
+not privacy policy.
+
+`.data/README.md` is now the one tracked file in that directory, which required
+`.data/*` plus a negation rather than `.data/` — an ignored *directory* is one
+git never descends into, so a negation inside it can never match. The test asks
+`git check-ignore` itself rather than reading the rules and reasoning about them,
+because reasoning about them is exactly how this goes wrong.
+
+### The toolchain · P6
+
+`next lint` was deprecated and is removed in Next 16. Migrated to ESLint 9 flat
+config with `eslint .`, which lints files `next lint` never looked at — and
+immediately found a real warning in `postcss.config.mjs`, invisible for the life
+of the project. Bumped `puppeteer-core` to 25 for the `extract-zip` symlink
+advisory, after checking every API `scripts/` uses still exists.
+
+`npm audit` on the **whole** tree is now **0 vulnerabilities**, down from 13
+high. CI's audit step therefore drops `--omit=dev`: the exemption existed only
+to excuse the ESLint 8 chain, and has nothing left to excuse.
+
+### Revoking an admin session without a redeploy · P7
+
+The only way to end a live admin session early was to rotate
+`ADMIN_SESSION_SECRET` and redeploy — a heavy answer that conflates two
+different events. Rotating the secret asserts the signing key may have leaked;
+revoking a session usually asserts nothing of the kind.
+
+`ADMIN_SESSION_VERSION` is now part of the **signed** payload and compared on
+every verification, so it cannot be edited in the cookie. Bumping it invalidates
+every session at the next request. Verified against two real servers: the same
+cookie gives `/admin` 200 on version 1 and a redirect to the login page on
+version 2, with export and erasure both 401.
+
+Tokens minted before this carry a bare expiry and no version, and are refused.
+Treating them as version 1 would mean the tokens predating the feature are
+exactly the ones it cannot revoke — one sign-in for one operator is the better
+trade.
+
+### The operations record · P8
+
+`docs/RUNBOOK.md` — how to read `/api/health`'s two-booleans-per-check answer,
+which log `event` to search for each failing dependency, a playbook per failure,
+how to recover submissions from `[submission:<kind>]` log lines when a write was
+refused, migrations, rollback, scheduled jobs, and secret rotation with the cost
+of rotating each of the five.
+
+`docs/DATA.md` — every piece of personal data the application can hold, the code
+that writes it, who can read it and by what mechanism, how long it is kept, and
+the procedure for an erasure, access or rectification request. Including what is
+deliberately *not* stored: no IP addresses (the limiter keeps a hash), no
+passwords, no third-party analytics, and a newsletter that validates an address
+and discards it.
+
+### Verification
+
+`npm run typecheck` · `npm run lint` · `npm test` · `npm run build`, all clean.
+**1827 tests across 53 files**, up from 1763 across 49. `npm audit` — full tree —
+0 vulnerabilities.
+
+Then the built site driven in a real browser, which is what this pass was for:
+36 routes loaded with zero console errors and zero unlabelled controls, the IBAN
+checker accepting and rejecting, the converter and FX calculator making the
+right `/api/rates` calls and reacting to input, the FAQ accordion toggling by
+mouse and keyboard, the navbar dropdown opening and closing on Escape, the
+contact form refusing an empty submit with three field-level alerts and no
+network request, the demo walking to its end state, and the erasure control
+keyboard-focusable with an accessible name naming the record it removes.
+
+The honesty test caught its own author mid-edit: updating the test count in
+`README.md` and `DEPLOYMENT.md` and not in `CASE-STUDY.md`,
+`docs/UPWORK-LISTING.md` and `scripts/record-demo.mjs` failed the build, which is
+precisely the job it was written to do.
+
+### Left for a human
+
+`H3` — the migrations are **not applied to the live Supabase project**. The
+server logs `PGRST202 … function public.submission_stats … not found` against it,
+which means `003` never ran there, and by extension neither did `005` or `006`.
+The dashboard still renders because `stats()` falls back to four counts, so this
+degrades rather than breaks — but until `005` is applied, anyone holding the
+project's public anon key can call a definer-rights delete. Applying migrations
+means acting inside Supabase, which is not an automatic remedy.
+
+`H12` unchanged: the retention period for `submissions`. The mechanism is ready
+and the number is not ours to write.

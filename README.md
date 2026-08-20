@@ -49,8 +49,10 @@ pretend.
   confirmation, sign-in, password reset, and sessions that renew silently in the
   background. Permissions are enforced by Postgres Row Level Security, so one
   customer cannot read another's record even if application code asks it to.
-- **An operator dashboard.** Form submissions, search, CSV export, and a
-  first-party analytics funnel — no cookies, no third-party trackers.
+- **An operator dashboard.** Form submissions, search, CSV export, single-record
+  erasure for a GDPR Article 17 request, and a first-party analytics funnel —
+  no cookies, no third-party trackers. An admin session can be revoked by
+  bumping one environment variable, without rotating the signing secret.
 - **Live financial data.** The converter and the demo's conversion step run on
   real European Central Bank reference rates, cached server-side, degrading
   gracefully when the source is unreachable. No invented numbers.
@@ -97,7 +99,7 @@ view carries the same message and is anonymous by construction.
 | Charts | Recharts |
 | Email | Resend REST API (no SDK) |
 | FX data | ECB reference rates via Frankfurter (key-less) |
-| Tests | Vitest · GitHub Actions |
+| Tests | Vitest (unit) · Puppeteer + Chrome (browser smoke) · GitHub Actions |
 
 **Four runtime dependencies:** `next`, `react`, `react-dom`, `recharts`.
 Postgres and Supabase Auth are both spoken over HTTP and session cookies are
@@ -173,19 +175,21 @@ Full setup and threat reasoning: [`AUTHENTICATION.md`](AUTHENTICATION.md).
 
 ## Testing and quality
 
-`npm run verify` runs the gate in order, and the same four steps are the CI job,
-so the badge above is the live answer rather than a claim in prose.
+`npm run verify` runs the gate in order, and CI runs the same work as two
+required jobs — those four steps plus `npm audit --audit-level=high`, and the
+browser suite below as a second job — so the badge above is the live answer
+rather than a claim in prose.
 
 ```bash
 npm install
 npm run dev            # http://localhost:3000
 
 npm run verify         # typecheck → lint → tests → production build
-npm audit --omit=dev   # 0 vulnerabilities in the shipped tree
+npm audit              # 0 vulnerabilities, dev tree included
 ```
 
-**What the suite covers.** 1,703 automated checks across 48 files, all running
-in Node:
+**What the suite covers.** 1,832 automated checks across 53 files, all running
+in Node — plus 50 browser checks in a separate suite, below:
 
 - **Unit tests for business logic and security boundaries** — IBAN MOD-97, FX
   conversion, storage provider selection, admin auth (HMAC round-trip, tamper,
@@ -201,12 +205,33 @@ in Node:
   `<title>`, every page carrying exactly one top-level heading, no font size
   smuggled into `<Heading>` through `className` — a real defect that had every
   auth page rendering its `<h1>` *larger* on a phone than on a desktop — and
-  the honesty rules on the screenshots.
+  the honesty rules on the screenshots. Two of them ask git itself rather than
+  reading a config file: whether every `.data/*.jsonl` store is ignored, since
+  the repository is public and a negation inside an ignored *directory*
+  silently does nothing.
 
-**What it does not cover, stated plainly:** there is **no browser or
-end-to-end suite**. Nothing here renders a component in a DOM or drives a form
-in a real browser. Playwright smoke tests are tracked in
-[`docs/PROJECT-PLAN.md`](docs/PROJECT-PLAN.md) and are not written yet.
+**A browser suite, separately.** [`tests/smoke/`](tests/smoke/) drives a real
+Chrome against a production build — 50 checks over every public route: each one
+answers 200 with exactly one `<h1>` and no console error, failed request or
+uncaught exception; nothing clickable is a dead `href="#"`; every form control
+has a label; blog pagination walks forward and back by keyboard; the IBAN
+checker accepts and rejects on the checksum; the FX tools fetch a live rate on
+mount and again when the pair changes; the FAQ accordion and the navbar
+dropdown work by mouse *and* by key; the mobile menu opens at 390px without the
+page scrolling sideways; and a missing URL is a real 404 with a way home.
+
+It is a **second CI job**, not a step in `npm run verify`, because the unit gate
+is fast precisely by building nothing and starting nothing. Two commands:
+
+```bash
+npm run build && npm run test:smoke    # needs Chrome; the harness never skips
+npm run verify:all                     # verify, then the browser suite
+```
+
+**What it does not cover, stated plainly:** there is no component-level DOM
+suite — nothing renders a single component in isolation and asserts its
+markup. The browser suite covers whole pages, and the unit suite covers logic;
+the layer between them is not tested.
 
 **Accessibility.** Skip link, landmarks, visible focus, decorative art marked
 `aria-hidden`, and every foreground/background pair verified against WCAG AA by
@@ -306,8 +331,9 @@ Each needs a regulated entity behind it that does not exist, and a half-built
 ledger would be worse than none.
 
 Smaller follow-ups tracked in [`docs/PROJECT-PLAN.md`](docs/PROJECT-PLAN.md):
-Playwright smoke tests in CI, error tracking and product analytics, data
-retention and erasure tooling, ESLint 9, and i18n.
+an error-tracking adapter, product analytics, a component-level DOM suite, a
+retention period for form submissions — a legal decision rather than an
+engineering one — and i18n.
 
 ---
 
