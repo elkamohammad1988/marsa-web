@@ -24,24 +24,22 @@ export default function CookiesPage() {
           ],
         },
         {
-          heading: "Categories of cookies we use",
-          bullets: [
-            "Strictly necessary — required for the site to work, including security and remembering your cookie choices. These cannot be switched off.",
-            "Preferences — remember settings such as your selected currency or language.",
-            "Analytics — help us understand aggregate usage so we can improve the site. Set only with your consent.",
-            "Marketing — measure the effectiveness of campaigns. Set only with your consent.",
+          heading: "Cookies this site sets",
+          paragraphs: [
+            "Two, both strictly necessary, and neither is set for an ordinary visit. One holds an administrator's session after signing in to the admin area; the other holds a customer's session after signing in to an account. Both are HttpOnly, so no script can read them, restricted to this site with SameSite=Lax, and sent only over HTTPS. Signing out removes them, and they expire on their own.",
+            "There are no preference, analytics or marketing cookies, and no third party sets a cookie through this site.",
           ],
         },
         {
-          heading: "Managing your preferences",
+          heading: "The demonstration walkthrough",
           paragraphs: [
-            "When you first visit, our cookie banner lets you accept or reject non-essential cookies. You can change your choice at any time using the “Cookie settings” link in the footer, or by clearing cookies and reloading the site. You can also control cookies through your browser settings.",
+            "The interactive demo records which steps are reached, so the flow can be improved. It does so without a cookie and without local storage: the identifier it sends is random, created fresh each time the page loads, and gone when the tab closes — it cannot be linked to you, to a previous visit, or to anything else you do here. The demo also honours the browser's Do Not Track setting and sends nothing when it is on.",
           ],
         },
         {
-          heading: "Consent",
+          heading: "Managing cookies",
           paragraphs: [
-            "We only set non-essential cookies after you have given consent. Withdrawing consent will not affect the lawfulness of processing carried out before withdrawal.",
+            "There is no cookie banner on this site, because there is nothing non-essential to consent to — the two cookies above are what makes signing in work, and a site cannot function without them once you have signed in. If you would rather not have them, signing out removes them, and every browser also lets you block or delete cookies for a site from its own settings.",
           ],
         },
       ]}
