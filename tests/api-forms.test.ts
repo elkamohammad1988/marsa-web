@@ -253,6 +253,7 @@ describe("submission where the database write throws", () => {
         byKind: { lead: 0, contact: 0, subscribe: 0 },
         last7Days: 0,
       }),
+      delete: async () => false,
       health: async () => ({ ok: true }),
     };
   }
@@ -333,6 +334,7 @@ describe("submission where the write succeeds but the notification fails", () =>
         byKind: { lead: 0, contact: 0, subscribe: 0 },
         last7Days: 0,
       }),
+      delete: async () => false,
       health: async () => ({ ok: true }),
     });
     // The real notifier swallows its own failures; this asserts the pipeline
@@ -361,6 +363,7 @@ describe("submission where the write succeeds but the notification fails", () =>
         byKind: { lead: 0, contact: 0, subscribe: 0 },
         last7Days: 0,
       }),
+      delete: async () => false,
       health: async () => ({ ok: true }),
     });
     vi.spyOn(notify, "notifySubmission").mockImplementation(async () => {
@@ -389,6 +392,7 @@ describe("happy path", () => {
         byKind: { lead: 0, contact: 0, subscribe: 0 },
         last7Days: 0,
       }),
+      delete: async () => false,
       health: async () => ({ ok: true }),
     });
     vi.spyOn(notify, "notifySubmission").mockResolvedValue({ sent: true });

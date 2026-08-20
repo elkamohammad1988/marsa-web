@@ -57,11 +57,38 @@ export const ADMIN_LOGIN_GLOBAL = {
   windowMs: 15 * 60_000,
 } as const;
 
-/* ------------------------------------------------- customer authentication */
+/* --------------------------------------------------------------- erasure */
 
 export type RateLimitTier = { scope: string; limit: number; windowMs: number };
 
 export type GlobalCeiling = { key: string; limit: number; windowMs: number };
+
+/**
+ * Deletion of stored submissions, by an authenticated operator.
+ *
+ * A limit on an already-authenticated endpoint looks redundant and is not. The
+ * admin session is a single shared password, so "authenticated" here means
+ * "whoever holds that password" — and this is the only endpoint in the
+ * application that destroys data. If that credential ever leaks, the difference
+ * between a limited and an unlimited delete is the difference between losing
+ * some records and losing the table before anyone notices.
+ *
+ * Sized for the work it exists to do. An erasure request concerns one person,
+ * and clearing a spam run by hand is tens of rows, not thousands: 30 in a
+ * minute is faster than anyone clicks, and the hourly tier means that a script
+ * running flat out costs 200 rows rather than everything.
+ *
+ * Keyed per caller rather than globally, unlike `ADMIN_LOGIN_GLOBAL`. The
+ * reasoning there was that one shared ceiling is safe on a door with exactly
+ * one user; here the same argument runs the other way — an operator locked out
+ * of deletion cannot answer an erasure request within its statutory month.
+ */
+export const ADMIN_DELETE_TIERS: readonly RateLimitTier[] = [
+  { scope: "admin-delete", limit: 30, windowMs: 60_000 },
+  { scope: "admin-delete-hour", limit: 200, windowMs: 60 * 60_000 },
+];
+
+/* ------------------------------------------------- customer authentication */
 
 /**
  * Sign-in attempts from one address, in the same escalating shape as the admin

@@ -7,6 +7,7 @@ import {
   sessionCookieOptions,
 } from "@/lib/admin-auth";
 import { clientKey } from "@/lib/rate-limit";
+import { isCrossSite } from "@/lib/same-origin";
 import {
   ADMIN_LOGIN_TIERS,
   ADMIN_LOGIN_GLOBAL,
@@ -33,6 +34,29 @@ export const runtime = "nodejs";
  * instances, not 5/min.
  */
 export async function POST(request: Request) {
+  /*
+   * Same-origin only, as on every other endpoint that changes state —
+   * `/api/admin/logout` (audit S9) and all four customer authentication routes
+   * already do this, and the omission here was an inconsistency rather than a
+   * decision.
+   *
+   * The attack it closes is not session fixation: there is one shared password,
+   * so anybody able to force a session already holds the credential. It is
+   * *credential guessing through other people's browsers*. The tiers below key
+   * on the caller's address, and a malicious page turns every visitor it
+   * reaches into a distinct address — so a per-IP ceiling of five sees five
+   * different attackers rather than one. `ADMIN_LOGIN_GLOBAL` is what caught
+   * that before, and a single global bucket is a blunt instrument to be
+   * relying on alone.
+   *
+   * Costs nothing legitimate: the login form posts from `/admin/login` on this
+   * origin, and a client that sends neither header — curl, a probe, a test —
+   * is allowed through, because rejecting on absence stops no attacker.
+   */
+  if (isCrossSite(request)) {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
+
   const ip = clientKey(request.headers, "");
 
   // Every tier on every attempt, plus a global ceiling for attempts spread

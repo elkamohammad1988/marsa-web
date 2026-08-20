@@ -29,7 +29,21 @@
  * whose name looks personal or secret, whatever the caller passes.
  */
 
-export type Severity = "error" | "warning";
+/**
+ * `info` is not a quieter error — it is a different kind of record.
+ *
+ * `error` and `warning` both mean something went wrong and differ in whether
+ * anyone must act. `info` marks a thing that went *right* and is worth being
+ * able to prove later: so far, that an operator erased a submission. A
+ * deletion made in response to a GDPR Article 17 request is one the operator
+ * may have to evidence, and "no log line" is not evidence.
+ *
+ * It is kept in the same stream rather than given one of its own, because the
+ * property that matters — `redact()` runs over the context, so nothing
+ * personal leaves the process — is a property of this module and should not
+ * have to be re-established somewhere else.
+ */
+export type Severity = "error" | "warning" | "info";
 
 /** Structured, non-personal detail attached to an event. */
 export type EventContext = Record<string, unknown>;
@@ -128,6 +142,36 @@ export function captureException(
     });
   } catch {
     // The reporter itself failed. There is nowhere left to report that to.
+  }
+}
+
+/**
+ * Record something that happened, where nothing went wrong.
+ *
+ * `captureException` takes a thrown value and describes it; the only way to
+ * record a *successful* action through it is to construct an `Error` that was
+ * never thrown, which puts a fabricated stack trace into the log and makes
+ * every such entry read as a failure to anyone searching later. This takes a
+ * sentence instead, because that is what the caller actually has.
+ *
+ * Same reporter, same redaction, same never-throws guarantee: an audit line
+ * that can break the request it is recording is worse than none.
+ */
+export function captureEvent(
+  message: string,
+  options: { event: string; severity?: Severity; context?: EventContext } & EventContext,
+): void {
+  const { event, severity = "info", context, ...rest } = options;
+  try {
+    reporter({
+      event,
+      severity,
+      message,
+      context: redact({ ...rest, ...context }),
+      timestamp: new Date().toISOString(),
+    });
+  } catch {
+    // As above: there is nowhere left to report a failed reporter to.
   }
 }
 

@@ -145,6 +145,36 @@ export async function updateRow<T>(
   return rows[0] ?? null;
 }
 
+/**
+ * Delete the rows a filter selects. Returns how many were actually removed.
+ *
+ * The count is the point, and it is why this asks for a representation it then
+ * only measures. A `DELETE` matching nothing is a 200 with an empty body —
+ * indistinguishable, without the count, from one that removed the row. The two
+ * outcomes must not be conflated here: an erasure request answered "done" when
+ * nothing was deleted is the failure mode that matters, and under Row Level
+ * Security or a mistyped id it is the likely one.
+ *
+ * A `query` is required rather than defaulted. PostgREST executes an unfiltered
+ * `DELETE /table` as "delete every row", so an optional filter would make a
+ * forgotten argument silently mean the whole table. Callers pass a filter or do
+ * not call this.
+ */
+export async function deleteRows(
+  cfg: PostgrestConfig,
+  table: string,
+  query: string,
+): Promise<number> {
+  if (!query) throw new PostgrestError(`refusing an unfiltered DELETE on ${table}`);
+
+  const res = await request(cfg, `/${table}?${query}`, {
+    method: "DELETE",
+    headers: { Prefer: "return=representation" },
+  });
+  const rows = (await res.json().catch(() => [])) as unknown[];
+  return Array.isArray(rows) ? rows.length : 0;
+}
+
 /** `Content-Range: 0-24/1337` → 1337 */
 function totalFromContentRange(header: string | null): number {
   const total = header?.split("/")[1];

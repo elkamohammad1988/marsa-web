@@ -2,6 +2,7 @@ import { promises as fs } from "node:fs";
 import { randomUUID } from "node:crypto";
 import {
   countRows,
+  deleteRows,
   escapeLike,
   getPostgrestConfig,
   insertRow,
@@ -113,6 +114,23 @@ export interface SubmissionStore {
   save(submission: StoredSubmission): Promise<void>;
   list(query?: SubmissionQuery): Promise<SubmissionPage>;
   stats(): Promise<SubmissionStats>;
+  /**
+   * Erase one submission. Resolves true when a record was removed, false when
+   * the id matched nothing.
+   *
+   * The boolean is the contract, and it exists because this is the erasure
+   * path. Under GDPR Article 17 the operator has to be able to say a record is
+   * gone; "the delete did not error" does not support that claim, because a
+   * mistyped id, an already-deleted row and a permission refusal all complete
+   * without error. False means *nothing was removed* and the caller must not
+   * report success.
+   *
+   * Hard deletion, not a soft-delete flag. A `deleted_at` column keeps the
+   * personal data in the table and moves the question to whether every future
+   * query remembers to filter — which is the wrong default for the one
+   * operation whose entire purpose is that the data stops existing.
+   */
+  delete(id: string): Promise<boolean>;
   /** Cheap reachability probe for the health endpoint. */
   health(): Promise<{ ok: boolean; detail?: string }>;
 }
@@ -229,6 +247,22 @@ export class FileSubmissionStore implements SubmissionStore {
       if (withinLastDays(item.createdAt, 7)) last7Days += 1;
     }
     return { total: items.length, byKind, last7Days };
+  }
+
+  /**
+   * Every kind is searched, because an id does not say which file holds it.
+   *
+   * Sequential rather than `Promise.all`: each `removeWhere` rewrites its file,
+   * and the id is unique, so the moment one reports a removal there is nothing
+   * left to look for. Running three concurrent rewrites to save a few
+   * milliseconds on a development-only store is the wrong trade.
+   */
+  async delete(id: string): Promise<boolean> {
+    for (const kind of SUBMISSION_KINDS) {
+      const removed = await this.files[kind].removeWhere((record) => record.id !== id);
+      if (removed > 0) return true;
+    }
+    return false;
   }
 
   async health(): Promise<{ ok: boolean; detail?: string }> {
@@ -378,6 +412,20 @@ export class PostgresSubmissionStore implements SubmissionStore {
       byKind: { lead, contact, subscribe },
       last7Days,
     };
+  }
+
+  /**
+   * `id=eq.<id>` and nothing else, so the filter can select at most one row.
+   *
+   * The id is interpolated into a PostgREST filter, so it is encoded here
+   * rather than trusted to be URL-safe. It arrives from an admin's browser and
+   * a value like `*` or `neq.x` in an unencoded filter is the difference
+   * between deleting one record and deleting the table — `deleteRows` refuses
+   * an empty query for the same reason, and this is the other half of it.
+   */
+  async delete(id: string): Promise<boolean> {
+    const removed = await deleteRows(this.cfg, TABLE, `id=eq.${encodeURIComponent(id)}`);
+    return removed > 0;
   }
 
   async health(): Promise<{ ok: boolean; detail?: string }> {

@@ -82,25 +82,89 @@ export function getAdminConfig(
   return { password, secret };
 }
 
-/** Build a signed session token valid for the next 8 hours. */
+/**
+ * The generation a session belongs to (audit P7).
+ *
+ * Until this existed there was exactly one way to end an admin session early —
+ * rotate `ADMIN_SESSION_SECRET` and redeploy. That is a heavy, slow answer to a
+ * routine question ("the laptop with that session on it was stolen"), and
+ * because it is heavy it is the kind of thing an operator puts off. It also
+ * conflates two different actions: rotating the secret means the signing key
+ * may have leaked, while revoking a session usually means nothing about the key
+ * at all.
+ *
+ * So the version is *in the signed payload* and compared on every verification.
+ * Incrementing `ADMIN_SESSION_VERSION` invalidates every existing session at
+ * the next request and needs no new secret — one environment variable, one
+ * restart, and the operator signs in again.
+ *
+ * It is inside the signature rather than beside it: an unsigned version in the
+ * cookie is one an attacker edits to whatever the server currently expects.
+ *
+ * Default `"1"` so an unset variable is a valid, stable configuration rather
+ * than a reason to refuse. Compared as a string, not a number, because the
+ * value is only ever tested for equality — a date, a word, or a random
+ * identifier all work, and parsing would reject them for no benefit.
+ */
+export const DEFAULT_SESSION_VERSION = "1";
+
+export function sessionVersion(
+  env: Record<string, string | undefined> = process.env,
+): string {
+  const value = env.ADMIN_SESSION_VERSION?.trim();
+  return value ? value : DEFAULT_SESSION_VERSION;
+}
+
+/**
+ * Build a signed session token valid for the next 8 hours.
+ *
+ * The payload is `<expiry>.<version>`. `verifyPayload` splits on the *last*
+ * separator to find the signature, which is what makes a multi-part payload
+ * safe here — that behaviour was already documented in `lib/signed-cookie.ts`
+ * as a stated property rather than an accident, and this is the first caller
+ * to rely on it.
+ *
+ * Tokens minted before this change carry a bare expiry and no version. They do
+ * not verify any more, so every admin session in existence ends once at deploy
+ * time. That is one sign-in for one operator, and the alternative — treating a
+ * versionless token as belonging to version 1 — would mean the very tokens
+ * predating the feature are the ones it cannot revoke.
+ */
 export async function createSessionToken(
   secret: string,
   now = Date.now(),
+  version = sessionVersion(),
 ): Promise<{ token: string; maxAge: number }> {
   const expiresAt = Math.floor(now / 1000) + SESSION_TTL_SECONDS;
-  return { token: await signPayload(String(expiresAt), secret), maxAge: SESSION_TTL_SECONDS };
+  return {
+    token: await signPayload(`${expiresAt}.${version}`, secret),
+    maxAge: SESSION_TTL_SECONDS,
+  };
 }
 
 export async function verifySessionToken(
   token: string | undefined,
   secret: string,
   now = Date.now(),
+  version = sessionVersion(),
 ): Promise<boolean> {
   const payload = await verifyPayload(token, secret);
   if (payload === null) return false;
 
-  const expiry = Number(payload);
-  return Number.isFinite(expiry) && expiry * 1000 > now;
+  // Split on the first separator: the expiry never contains one, so everything
+  // after it is the version — including a version that itself has dots, like a
+  // date. A token with no separator at all is pre-versioning and is refused.
+  const separator = payload.indexOf(".");
+  if (separator <= 0) return false;
+
+  const expiry = Number(payload.slice(0, separator));
+  if (!Number.isFinite(expiry) || expiry * 1000 <= now) return false;
+
+  // `safeEqual` rather than `===`. The version is not a secret, so this is not
+  // strictly required — but it costs nothing, and a comparison against a value
+  // from a cookie is exactly the shape that should never be the one place in
+  // this file that leaks timing.
+  return safeEqual(payload.slice(separator + 1), version);
 }
 
 /** Verify the password from a login attempt. */

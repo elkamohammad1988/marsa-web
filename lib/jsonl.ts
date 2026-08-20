@@ -117,4 +117,71 @@ export class JsonlStore<T> {
 
     return { records, truncated };
   }
+
+  /**
+   * Remove every record the predicate rejects, and report how many went.
+   *
+   * Erasure is the one operation that cannot use the bounded read. `read()`
+   * looks at the trailing `tailBytes` and says so when it did not reach the
+   * start of the file; rewriting the file from *that* would delete everything
+   * outside the window as a side effect of deleting one record — turning an
+   * erasure request into unbounded data loss. So this reads the file whole,
+   * accepting the cost, because the alternative is not "slower" but "wrong".
+   *
+   * Write-to-temp-then-rename, so an interruption leaves the original intact.
+   * A crash between the two steps costs a stray `.tmp` file; the shape that
+   * truncates the real file and then fails is not reachable from here.
+   *
+   * A missing file removes nothing and is not an error, for the same reason
+   * `read()` treats it that way: nothing written yet is a normal state.
+   */
+  async removeWhere(keep: (record: T) => boolean): Promise<number> {
+    let text: string;
+    try {
+      text = await fs.readFile(this.filePath, "utf8");
+    } catch {
+      return 0;
+    }
+
+    const lines = text.split("\n").filter(Boolean);
+    const kept: string[] = [];
+    let removed = 0;
+
+    for (const line of lines) {
+      let record: T;
+      try {
+        record = JSON.parse(line) as T;
+      } catch {
+        // A corrupt line is kept, deliberately. `read()` skips one so a
+        // partial write cannot take a page down; dropping it *here* would
+        // quietly destroy it, and a line nobody can parse is exactly the kind
+        // that should be preserved for someone to look at.
+        kept.push(line);
+        continue;
+      }
+      if (keep(record)) kept.push(line);
+      else removed += 1;
+    }
+
+    if (removed === 0) return 0;
+
+    /*
+     * Unique per call, not just per process. `process.pid` alone means two
+     * concurrent removals on the same file write to the same temporary path and
+     * one truncates the other's half-written copy — and what `rename` then
+     * publishes is a file neither call intended.
+     *
+     * This does not make concurrent removals *correct*: they are still a
+     * read-modify-write race, and the second rename wins, so one deletion can
+     * be lost. That is accepted rather than solved with a lock, because this
+     * store is refused in production and the only caller is a rate-limited
+     * endpoint behind a single operator's password. Losing a deletion means the
+     * record is still there to delete again; a corrupt file would mean losing
+     * every other record in it, and those two are not the same risk.
+     */
+    const temp = `${this.filePath}.${process.pid}.${Math.random().toString(36).slice(2, 10)}.tmp`;
+    await fs.writeFile(temp, kept.length ? `${kept.join("\n")}\n` : "", "utf8");
+    await fs.rename(temp, this.filePath);
+    return removed;
+  }
 }

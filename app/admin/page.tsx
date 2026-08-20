@@ -8,10 +8,13 @@ import { isAdminRequest } from "@/lib/admin-auth";
 import {
   getStore,
   isSubmissionKind,
+  MISSING_DB_CONFIG_MESSAGE,
   SUBMISSION_KINDS,
   type StoredSubmission,
   type SubmissionKind,
+  type SubmissionStore,
 } from "@/lib/storage";
+import { captureException } from "@/lib/observability";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -71,23 +74,76 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
   const q = firstValue(params.q).trim();
   const page = Math.max(1, Number(firstValue(params.page)) || 1);
 
-  const store = getStore();
-
   let items: StoredSubmission[] = [];
   let total = 0;
   let stats = { total: 0, byKind: { lead: 0, contact: 0, subscribe: 0 }, last7Days: 0 };
   let error: string | null = null;
 
+  /*
+   * `getStore()` throws `StorageConfigError` in production when no database is
+   * configured, and this call used to sit outside the try below — so on a
+   * deployment without `SUPABASE_URL` the whole page threw. What the operator
+   * actually got was the root error boundary: "We hit an unexpected error …
+   * trying again usually resolves it", over a reference number. Every part of
+   * that is wrong here. It is not unexpected — it is the one misconfiguration
+   * the store is written to refuse loudly — and trying again will never
+   * resolve it. Worse, `MISSING_DB_CONFIG_MESSAGE` already says exactly which
+   * two variables to set, and the operator was the one person who would never
+   * see it.
+   *
+   * Showing configuration detail here is the opposite call from the one
+   * `AuthUnavailableNotice` makes, and deliberately so. That panel is on a
+   * public sign-in page where the reader cannot act on a variable name; this
+   * page is behind the admin password, where the reader is the only person who
+   * can. Naming variables is not a leak — it names no value, and the shape of
+   * the environment is already in `.env.example` in a public repository.
+   */
+  let store: SubmissionStore | null = null;
   try {
-    const [page1, statistics] = await Promise.all([
-      store.list({ kind, q: q || undefined, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
-      store.stats(),
-    ]);
-    items = page1.items;
-    total = page1.total;
-    stats = statistics;
+    store = getStore();
   } catch (err) {
-    error = err instanceof Error ? err.message : "Could not read submissions.";
+    captureException(err, { event: "admin.storage.unconfigured" });
+    error = MISSING_DB_CONFIG_MESSAGE;
+  }
+
+  // Only when there is a store to query. `error` already holds the reason if
+  // there is not, and it is a better one than any failed query would produce.
+  if (store) {
+    try {
+      const [page1, statistics] = await Promise.all([
+        store.list({ kind, q: q || undefined, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
+        store.stats(),
+      ]);
+      items = page1.items;
+      total = page1.total;
+      stats = statistics;
+    } catch (err) {
+      /*
+       * The only page in the application that reads the submissions table, and
+       * until now the only failure that went nowhere: the message was rendered
+       * and never recorded. So a database outage showed the operator a red line
+       * on a page they had to be looking at to see it, and left no trace an
+       * uptime monitor or a log search could find. `/api/health` reports storage
+       * separately, but it probes reachability — it does not run this query, and
+       * a working connection with a broken query is exactly the state this
+       * catch exists for.
+       *
+       * The rendered text is a fixed sentence rather than `err.message`. The
+       * page is behind admin authentication, so this is not the disclosure the
+       * FX routes had, but the upstream message is PostgREST's — a schema hint,
+       * a column name, a URL — and relaying it teaches the operator to read
+       * transport detail off a dashboard instead of the captured event, which is
+       * where the whole of it is.
+       */
+      captureException(err, {
+        event: "admin.submissions.unreadable",
+        kind: kind ?? "all",
+        searched: q ? "yes" : "no",
+      });
+      error =
+        "Submissions could not be read. The failure has been recorded — check the " +
+        "server logs, and /api/health for whether the database is reachable at all.";
+    }
   }
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -102,8 +158,12 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           </Heading>
           <p className="mt-1 text-sm text-ink-muted">
             Storage:{" "}
-            <span className="font-medium text-ink">{store.provider}</span>
-            {store.durable ? (
+            <span className="font-medium text-ink">{store?.provider ?? "none"}</span>
+            {!store ? (
+              <span className="ml-2 rounded-full bg-danger/[0.12] px-2 py-0.5 text-xs font-medium text-danger">
+                not configured
+              </span>
+            ) : store.durable ? (
               <span className="ml-2 rounded-full bg-success/[0.12] px-2 py-0.5 text-xs font-medium text-success">
                 durable
               </span>
@@ -205,6 +265,15 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                 <th scope="col" className="px-4 py-3 font-medium">Kind</th>
                 <th scope="col" className="px-4 py-3 font-medium">Who</th>
                 <th scope="col" className="px-4 py-3 font-medium">Details</th>
+                {/*
+                  A header for the actions column rather than an empty `<th>`:
+                  a screen reader announces the column header with every cell
+                  in it, and "blank" is a worse answer than "Erase" for the
+                  column holding the destructive control.
+                */}
+                <th scope="col" className="px-4 py-3 text-right font-medium">
+                  Erase
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -233,6 +302,45 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                           {JSON.stringify(item.data, null, 2)}
                         </pre>
                       </details>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {/*
+                        Erasure, which every operator of a form that collects
+                        personal data needs and this one did not have: the only
+                        way to honour a deletion request was hand-written SQL
+                        against production (audit B10).
+
+                        A form, not a link. The action destroys a record, and a
+                        GET that deletes is one prefetch or one crawler away
+                        from erasing whatever it pointed at. The hidden
+                        `returnTo` carries the operator back to the filter and
+                        page they were on, rebuilt from a closed set of
+                        parameters at the other end rather than trusted.
+
+                        There is no confirmation step and that is deliberate:
+                        a `confirm()` needs client JavaScript, which this area
+                        does not use, and a modal would be the only thing on
+                        the page that stops working when a script fails. The
+                        protection that does not depend on the browser is the
+                        one that matters — this deletes exactly one row, named
+                        by id, and the endpoint reports honestly when it
+                        removed nothing.
+                      */}
+                      <form action="/api/admin/submissions/delete" method="post">
+                        <input type="hidden" name="id" value={item.id} />
+                        <input
+                          type="hidden"
+                          name="returnTo"
+                          value={`/admin${buildQuery({ kind, q, page: page > 1 ? page : undefined })}`}
+                        />
+                        <button
+                          type="submit"
+                          className="rounded-full border border-line px-3 py-1 text-xs text-ink-muted transition hover:border-danger hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                        >
+                          Delete
+                          <span className="sr-only"> the {item.kind} submission from {title}</span>
+                        </button>
+                      </form>
                     </td>
                   </tr>
                 );
