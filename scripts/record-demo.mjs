@@ -98,13 +98,13 @@ const FACTS = {
   tests: TEST_COUNT,
   chips: [
     [TEST_COUNT, "unit tests, green"],
-    ["0", "axe violations, 72 page-loads"],
-    ["100", "Lighthouse accessibility"],
-    ["0", "production vulnerabilities"],
+    ["50", "browser checks, real Chrome"],
+    ["0", "vulnerabilities, whole tree"],
+    ["AA", "contrast, recomputed each run"],
     ["strict", "TypeScript, zero any"],
-    ["RLS", "Postgres row-level security"],
-    ["ECB", "live reference rates"],
-    ["CI", "gate on every push"],
+    ["ECB", "reference rates, fetched live"],
+    ["CI", "two gates on every push"],
+    ["MIT", "public repository"],
   ],
 };
 
@@ -439,17 +439,41 @@ async function waitForLabel(page, re, timeout = 20000) {
   throw new Error(`timed out waiting for an enabled control matching ${re}`);
 }
 
-/** Move to a point, pause a beat as a person would, then click it. */
-async function clickAt(page, point, { travel = 620, settle = 260 } = {}) {
+/**
+ * Move to a point, pause a beat as a person would, then click it.
+ *
+ * `remeasure` exists because the box is measured *before* the cursor starts
+ * travelling, and the cursor takes half a second to get there. On a page whose
+ * reveal transitions are still running, the control moves during that half
+ * second, and the click lands where the button used to be.
+ *
+ * A missed click is silent - nothing throws, the page simply does not advance -
+ * so the run fails much later and somewhere else, timing out on a control that
+ * the missed click would have produced. That is exactly how shortening the
+ * scene holds broke this: less settle time before the click, same stale
+ * coordinates, and the failure surfaced two steps downstream in the sandbox.
+ * Re-measuring costs nothing when nothing moved.
+ */
+async function clickAt(page, point, { travel = 620, settle = 260, remeasure = null } = {}) {
   await moveTo(page, point.x, point.y, travel);
   await wait(settle);
+
+  if (remeasure) {
+    const now = await remeasure();
+    if (Math.hypot(now.x - point.x, now.y - point.y) > 3) {
+      await moveTo(page, now.x, now.y, 150);
+      point = now;
+    }
+  }
+
   await page.evaluate((a, b) => window.__mv.ping(a, b), point.x, point.y);
   await page.mouse.click(point.x, point.y);
 }
 
 async function clickLabel(page, re, opts) {
   await waitForLabel(page, re);
-  await clickAt(page, await centreOfLabel(page, re), opts);
+  const point = await centreOfLabel(page, re);
+  await clickAt(page, point, { ...opts, remeasure: () => centreOfLabel(page, re) });
 }
 
 const caption = (page, text) => page.evaluate((t) => window.__mv.caption(t), text);
@@ -481,17 +505,131 @@ async function requireDisclosure(page) {
 }
 
 /**
+ * Resolve once React has taken over the document.
+ *
+ * Set from an effect in the root layout by
+ * `components/layout/HydrationSignal.tsx`, so it goes true when the client
+ * bundle has run. `tests/smoke/harness/browser.ts` waits on the same attribute.
+ *
+ * Paired with `load` rather than used alone, and the pairing is the point. On
+ * its own after `domcontentloaded` it is not enough: the root layout can commit
+ * while a nested client component is still attaching handlers, and a click then
+ * lands on markup with no listener - silently, so the run dies much later
+ * waiting for a control the missed click would have produced. `load` waits for
+ * the bundles themselves, after which hydration follows in 17-250ms measured
+ * across these three routes, and this closes the remainder.
+ */
+async function waitForHydration(page, timeout = 30000) {
+  await page.waitForFunction(
+    () => document.documentElement.dataset.hydrated === "true",
+    { timeout, polling: 25 },
+  );
+}
+
+/**
+ * Refuse to record a rate panel that has not finished loading.
+ *
+ * `sceneLiveFx` used to navigate and then wait fixed intervals. That is the
+ * same mistake `scripts/capture.mjs` made and for the same reason: `navigate`
+ * settles on `networkidle2`, and the rate is fetched by a client component
+ * *after* hydration, so the network can be idle precisely because the fetch has
+ * not started. The recorder would then film "Loading rate..." over an empty
+ * chart and report success, under a caption about live European Central Bank
+ * data. Every run starts on a cold server cache, and the first call of a
+ * session is the slow one - measured at 4.2s against 2.7s at the provider - so
+ * this was not a narrow window.
+ *
+ * The five conditions below are the panel's *completed* state, checked
+ * together rather than inferred from any one of them:
+ *
+ *   1. no "Loading rate" anywhere on the page
+ *   2. a rendered rate line, "1 EUR = 1.1681 USD"
+ *   3. a converted amount in the output field
+ *   4. a chart path with real geometry in it, not an empty axis frame
+ *   5. no "Rate unavailable" error state
+ *
+ * A video is a standalone artefact - it gets posted where there is no
+ * repository around it to correct the impression - so this throws rather than
+ * degrades, on the same reasoning as `requireDisclosure`. Failing the run costs
+ * one re-record; shipping the spinner costs the claim the scene exists to make.
+ */
+async function requireFxReady(page, where, budgetMs = 30000) {
+  const deadline = Date.now() + budgetMs;
+  let seen = "no reading taken";
+
+  while (Date.now() < deadline) {
+    const state = await page.evaluate(() => {
+      const text = (document.body.innerText || "").replace(/\s+/g, " ").trim();
+      const out = document.querySelector("output");
+      const chart = document.querySelector(".recharts-wrapper");
+      // A drawn series, not an axis: an empty Recharts frame still emits short
+      // grid paths, so the length of `d` is what separates data from furniture.
+      const charted = chart
+        ? Array.from(chart.querySelectorAll("path[d]")).some(
+            (p) => (p.getAttribute("d") || "").length > 120,
+          )
+        : false;
+      return {
+        loading: /Loading (live )?rate/i.test(text),
+        failed: /rate unavailable/i.test(text),
+        rate: /1 [A-Z]{3} = \d+\.\d+ [A-Z]{3}/.test(text),
+        converted: !!out && /\d/.test(out.textContent || ""),
+        charted,
+      };
+    });
+
+    if (state.failed) {
+      throw new Error(
+        "The exchange rate failed to load on " + where + ': the panel reads "Rate ' +
+          'unavailable". api.frankfurter.dev is key-less and fair-use, so this is ' +
+          "usually transient - re-run the recording rather than shipping the error state.",
+      );
+    }
+
+    if (!state.loading && state.rate && state.converted && state.charted) return;
+
+    const missing = [];
+    if (state.loading) missing.push("still loading");
+    if (!state.rate) missing.push("no rate line");
+    if (!state.converted) missing.push("no converted amount");
+    if (!state.charted) missing.push("chart has no drawn series");
+    seen = missing.join(", ");
+
+    await new Promise((r) => setTimeout(r, 250));
+  }
+
+  throw new Error(
+    "The exchange rate panel never reached its completed state on " + where +
+      " within " + budgetMs + "ms (" + seen + "). Refusing to record a loading, " +
+      "empty or broken frame.",
+  );
+}
+
+/**
  * Navigate under the veil, so a page swap is a cross-fade and not a white flash.
  *
  * The veil is raised here, carried across the navigation in `sessionStorage`,
  * and lowered by the caller once the new page has been scrolled and settled —
  * which is what makes the arrival feel composed rather than abrupt.
  */
-async function navigate(page, path, { fade = 320 } = {}) {
+async function navigate(page, path, { fade = 220 } = {}) {
   await page.evaluate(() => window.__mv.caption(null));
   await page.evaluate(() => window.__mv.veil(true));
   await wait(fade);
-  await page.goto(`${ORIGIN}${path}`, { waitUntil: "networkidle2", timeout: 60000 });
+  // `load`, not `networkidle2`. Network-idle is a proxy for readiness and an
+  // expensive one against a deployed origin: it waits out RSC prefetches and
+  // anything else still in flight after the page is interactive, measured at
+  // 1.9-5.2s per navigation and the largest single cost in the take. `load`
+  // plus the hydration signal is the direct question, measured at 0.6-1.1s for
+  // the same three routes.
+  //
+  // `domcontentloaded` plus the same signal was tried first and is not safe:
+  // it returns before the bundles are in, the root layout can commit while a
+  // nested component is still attaching handlers, and the demo's first click
+  // then landed on dead markup. `load` waits for the bundles, which is what
+  // closed that gap.
+  await page.goto(`${ORIGIN}${path}`, { waitUntil: "load", timeout: 60000 });
+  await waitForHydration(page);
   await settle(page);
 }
 
@@ -574,8 +712,8 @@ const closingCard = () => `
   <div class="inner">
     <div class="mark">${MARK}</div>
     <h2>Marsa — concept fintech product</h2>
-    <p class="sub">Next.js 15 · React 19 · TypeScript · Supabase Postgres with row-level
-      security · live ECB rates · ${FACTS.tests} tests</p>
+    <p class="sub">Next.js 15 · React 19 · TypeScript · ECB reference rates ·
+      ${FACTS.tests} tests</p>
     <p class="disclosure"><span class="dot"></span>No real money. No customers. No financial licence.</p>
   </div>`;
 
@@ -603,11 +741,11 @@ async function assertClosingDisclosure(page) {
 async function sceneHero(page) {
   await settle(page);
   await scrollTo(page, 0, 0);
-  await reveal(page, 520);
+  await reveal(page, 420);
   await caption(page, "Marsa — a concept multi-currency account, built end to end");
-  await wait(2100);
-  await scrollTo(page, 560, 2200);
-  await wait(900);
+  await wait(1750);
+  await scrollTo(page, 560, 1750);
+  await wait(800);
 }
 
 /** Scene 2 — the converter, running on live European Central Bank rates. */
@@ -617,6 +755,10 @@ async function sceneLiveFx(page) {
   await reveal(page, 420);
   await caption(page, "Live FX — European Central Bank reference rates, not invented numbers");
 
+  // Before a single frame of this scene is worth keeping, the panel has to be
+  // finished. Checked, not waited out - see requireFxReady.
+  await requireFxReady(page, "/tools/currency-converter");
+
   const field = await centreOf(page, "#fx-amount");
   await clickAt(page, field, { travel: 620 });
   // Select the existing value rather than appending to it: the field opens
@@ -624,14 +766,18 @@ async function sceneLiveFx(page) {
   await page.keyboard.down("Control");
   await page.keyboard.press("KeyA");
   await page.keyboard.up("Control");
-  await page.keyboard.type("4820", { delay: 100 });
-  await wait(1250);
+  await page.keyboard.type("4820", { delay: 80 });
+
+  // The new amount re-derives the conversion, so the completed state is
+  // asserted again rather than assumed to have survived the edit.
+  await requireFxReady(page, "/tools/currency-converter after re-entering the amount");
+  await wait(620);
 
   // Rest on the target-currency chip. The rate line and the 30-day ECB chart
   // are what the scene is about, and they sit directly under the pointer here.
   const to = await centreOf(page, "#fx-to");
   await moveTo(page, to.x, to.y, 520);
-  await wait(1500);
+  await wait(1350);
 }
 
 /** Scene 3 — IBAN validation: ISO 13616 structure plus the MOD-97 checksum. */
@@ -646,10 +792,10 @@ async function sceneIban(page) {
 
   const field = await centreOf(page, "#iban-input");
   await clickAt(page, field, { travel: 600 });
-  await page.keyboard.type("DE89 3704 0044 0532 0130 00", { delay: 46 });
-  await wait(420);
+  await page.keyboard.type("DE89 3704 0044 0532 0130 00", { delay: 38 });
+  await wait(360);
   await clickLabel(page, /check iban/, { travel: 520 });
-  await wait(2600);
+  await wait(2200);
 }
 
 /**
@@ -665,23 +811,23 @@ async function sceneIban(page) {
 async function sceneSandbox(page) {
   await navigate(page, "/demo");
   await frameOn(page, "ol[aria-label='Demo progress']", 168);
-  await reveal(page, 460);
+  await reveal(page, 440);
   await caption(page, "Interactive sandbox — sample data, clearly labelled, no real money");
 
-  await clickLabel(page, /start the demo/, { travel: 600 });
-  await wait(750);
+  await clickLabel(page, /start the demo/, { travel: 580 });
+  await wait(680);
   // Account type and country are already sensible defaults; moving on keeps the
   // pace up. The identity step gates Continue until its check completes.
   await clickLabel(page, /continue/, { travel: 400, settle: 190 });
   await caption(page, "Onboarding, and a simulated KYC check");
-  await wait(1850);
+  await wait(1550);
   await clickLabel(page, /continue/, { travel: 360, settle: 190 });
   await caption(page, "A European IBAN — structurally valid, not a live account");
-  await wait(2100);
+  await wait(1850);
   await clickLabel(page, /continue/, { travel: 360, settle: 190 });
   await caption(page, "Money arrives from abroad");
   await clickLabel(page, /receive \$/, { travel: 480 });
-  await wait(1900);
+  await wait(1650);
 }
 
 /** Scene 5 — the conversion, using the rate the app just fetched from the ECB. */
@@ -690,20 +836,20 @@ async function sceneConvert(page) {
   await caption(page, "Convert at the live interbank rate — fetched, not faked");
   // The step fetches the rate on entry; the button stays disabled until it lands.
   await waitForLabel(page, /convert \$/);
-  await wait(1150);
-  await clickLabel(page, /convert \$/, { travel: 520 });
-  await wait(2400);
+  await wait(1050);
+  await clickLabel(page, /convert \$/, { travel: 500 });
+  await wait(2050);
 }
 
 /** Scene 6 — the SEPA payout, and the account state it leaves behind. */
 async function sceneSepa(page) {
   await clickLabel(page, /continue/, { travel: 400, settle: 190 });
   await caption(page, "Pay out over SEPA");
-  await clickLabel(page, /send .*sepa/i, { travel: 500 });
-  await wait(1800);
+  await clickLabel(page, /send .*sepa/i, { travel: 490 });
+  await wait(1450);
   await clickLabel(page, /continue/, { travel: 400, settle: 190 });
   await caption(page, "Received, converted, sent — the whole loop, and the activity to match");
-  await wait(2500);
+  await wait(2150);
 }
 
 /** Scene 7 — the engineering behind it, in numbers that can be checked. */
@@ -711,17 +857,17 @@ async function sceneCredibility(page) {
   await caption(page, null);
   await showCursor(page, false);
   await page.evaluate((html) => window.__mv.card(html), credibilityCard());
-  await wait(560);
+  await wait(520);
   await page.evaluate(() => window.__mv.chipsIn(65));
-  await wait(4200);
+  await wait(3900);
 }
 
 /** Scene 8 — the brand, and the disclosure, held long enough to read. */
 async function sceneClosing(page) {
   await page.evaluate((html) => window.__mv.card(html), closingCard());
-  await wait(240);
+  await wait(200);
   await assertClosingDisclosure(page);
-  await wait(4300);
+  await wait(4100);
 }
 
 /* ------------------------------------------------------------------ *
@@ -877,7 +1023,22 @@ async function main() {
     // Land on the origin once before recording starts, so the first frame of
     // the take is a warm page rather than a cold compile — and raise the veil
     // first, so the recording opens on brand black rather than mid-layout.
-    await page.goto(`${ORIGIN}/`, { waitUntil: "networkidle2", timeout: 60000 });
+    await page.goto(`${ORIGIN}/`, { waitUntil: "load", timeout: 60000 });
+    await waitForHydration(page);
+
+    // Warm the FX path before a single frame is captured. The rate is fetched
+    // live either way - this changes nothing about what is on screen - but the
+    // first call of a session pays for a cold server cache, measured at 4.2s,
+    // and `requireFxReady` would honestly wait it out on camera. Paying it here
+    // buys that time back without shortening anything the viewer sees.
+    await page.evaluate(async () => {
+      await Promise.all([
+        fetch("/api/rates?from=EUR&to=USD", { cache: "no-store" }).catch(() => {}),
+        fetch("/api/rates/history?from=EUR&to=USD&range=1M", { cache: "no-store" }).catch(() => {}),
+        fetch("/api/rates?from=USD&to=EUR", { cache: "no-store" }).catch(() => {}),
+      ]);
+    });
+
     await page.evaluate(() => window.__mv.veil(true));
     await wait(300);
 
