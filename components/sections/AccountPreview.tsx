@@ -50,12 +50,6 @@ export function AccountPreview({ className }: { className?: string }) {
         payout, currency conversion and outgoing SEPA transfer.
       </span>
 
-      {/* Ambient light behind the panel */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-10 rounded-[48px] bg-brand/25 blur-[70px]"
-      />
-
       <div
         aria-hidden
         className="gradient-ring relative overflow-hidden rounded-[28px] border border-line/60 bg-card p-5 shadow-e3 sm:p-6"

@@ -66,7 +66,7 @@ export default async function BlogPostPage({
               href="/blog"
               className="inline-flex min-h-[24px] items-center hover:text-brand-strong"
             >
-              ← Back To Articles
+              Back To Articles
             </Link>
           </div>
           <Heading level="h1" className="mt-6 max-w-4xl">

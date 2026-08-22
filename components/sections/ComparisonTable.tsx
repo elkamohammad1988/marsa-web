@@ -47,10 +47,7 @@ export function ComparisonTable({ eyebrow, title, rows }: ComparisonTableProps) 
           <div className="relative grid grid-cols-3 bg-surface-deep text-xs font-semibold text-white sm:text-sm">
             <div className="px-3 py-3 sm:px-5 sm:py-4">Feature</div>
             <div className="relative z-20 px-3 py-3 text-center sm:px-5 sm:py-4">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-brand-strong shadow-glow-sm" />
-                Marsa
-              </span>
+              Marsa
             </div>
             <div className="px-3 py-3 text-center text-white/70 sm:px-5 sm:py-4">Traditional</div>
           </div>

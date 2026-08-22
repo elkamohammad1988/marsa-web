@@ -104,18 +104,6 @@ export function CurrencyConverter({
 
   return (
     <section className="relative isolate overflow-hidden bg-surface-alt pb-12 pt-10 md:pb-16 md:pt-14">
-      {/* The panel is the product on this page, so it gets a light source of
-          its own rather than sitting on the flat section colour: warm in
-          front, the cool `--halo` behind and offset, same two-light rule the
-          hero and the process band are built on. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-24 top-0 -z-10 h-[26rem] w-[26rem] rounded-full bg-brand/10 blur-[120px]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-32 bottom-0 -z-10 h-[22rem] w-[22rem] animate-drift rounded-full bg-halo/10 blur-[130px]"
-      />
       <Container>
         {/*
           The panel column is now the wider of the two (was 1.05fr copy /
@@ -137,9 +125,8 @@ export function CurrencyConverter({
               {["ECB reference rates", "30 currencies", "No account needed"].map((l) => (
                 <li
                   key={l}
-                  className="inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-xs font-medium shadow-card ring-1 ring-line transition-all duration-200 hover:-translate-y-px hover:ring-brand-strong/40"
+                  className="inline-flex items-center rounded-full bg-card px-3.5 py-1.5 text-xs font-medium shadow-card ring-1 ring-line transition-all duration-200 hover:-translate-y-px hover:ring-brand-strong/40"
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-brand-gradient shadow-glow-sm" />
                   {l}
                 </li>
               ))}
@@ -319,7 +306,7 @@ export function CurrencyConverter({
                   className={cn(
                     "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
                     range === r.id
-                      ? "bg-cta-gradient text-on-brand shadow-glow-sm"
+                      ? "bg-cta-gradient text-on-brand"
                       : "text-ink-muted hover:bg-ink/5 hover:text-ink",
                   )}
                 >

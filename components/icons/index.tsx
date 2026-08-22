@@ -127,16 +127,6 @@ export function IconYouTube(p: IconProps) {
   );
 }
 
-export function IconUserCircle(p: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" {...base} {...p}>
-      <circle cx="12" cy="12" r="9" />
-      <circle cx="12" cy="10" r="3" />
-      <path d="M5 19c1.5-3 4-4.5 7-4.5s5.5 1.5 7 4.5" />
-    </svg>
-  );
-}
-
 export function IconChart(p: IconProps) {
   return (
     <svg viewBox="0 0 24 24" {...base} {...p}>

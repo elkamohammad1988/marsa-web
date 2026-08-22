@@ -204,7 +204,7 @@ export function ConceptBadge() {
           onClick={() => setOpen(false)}
           className="mt-4 inline-flex text-xs font-medium text-brand-strong underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
         >
-          See the interactive demo →
+          See the interactive demo
         </Link>
       </div>
     </>

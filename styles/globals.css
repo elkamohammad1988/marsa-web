@@ -407,52 +407,20 @@
    */
   .text-gradient-hero {
     color: rgb(var(--ink));
-    /*
-     * Two layers, clipped to the glyphs: a diagonal highlight on top of the
-     * base vertical gradient. Only the highlight is wider than the element, so
-     * animating `background-position` moves it and leaves the base alone — one
-     * slow pass of light across the headline every seven seconds.
-     *
-     * The highlight carries *two* glints rather than one: a narrow warm one
-     * (`--gold-highlight`) leading a wider cool one. A single white band moving
-     * left to right is the stock CSS shine, and it reads as a sweep applied to
-     * the text. Two bands of different width, colour and spacing crossing the
-     * glyphs read as one light refracted by a surface between the reader and
-     * the letters — which is the effect this palette is for.
-     */
-    background-image:
-      linear-gradient(
-        100deg,
-        transparent 30%,
-        rgba(255, 241, 168, 0.5) 37%,
-        transparent 43%,
-        rgba(255, 255, 255, 0.85) 54%,
-        transparent 62%
-      ),
-      linear-gradient(180deg, #ffffff 0%, #e9f1f4 52%, #f5d76e 100%);
-    background-size: 220% 100%, 100% 100%;
+    /* One layer, clipped to the glyphs. A second, wider layer used to ride on
+       top of it and animate its `background-position` — a band of light
+       crossing the headline every seven seconds. A headline that shines on a
+       loop is the single most recognisable ornament of a generated landing
+       page, and it was the only thing on the site moving with nothing to say.
+       The descent it was drawn over is the actual idea, and it is static. */
+    background-image: linear-gradient(180deg, #ffffff 0%, #e9f1f4 52%, #f5d76e 100%);
     background-repeat: no-repeat;
-    /* The resting position is the animation's end frame — off the left edge —
-       so a reduced-motion reader, whose animation is cut to 0.001ms, lands on
-       a headline with no highlight rather than one frozen mid-sweep. */
-    background-position: -120% 0, 0 0;
     -webkit-background-clip: text;
     background-clip: text;
-    animation: headline-sheen 7s ease-in-out 0.9s infinite;
   }
   @supports ((-webkit-background-clip: text) or (background-clip: text)) {
     .text-gradient-hero {
       color: transparent;
-    }
-  }
-  @keyframes headline-sheen {
-    0% {
-      background-position: 220% 0, 0 0;
-    }
-    /* Both ends sit off the glyphs, so the loop's jump back is unseeable. */
-    38%,
-    100% {
-      background-position: -120% 0, 0 0;
     }
   }
 
@@ -743,41 +711,28 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
-   * The water reflection — `.liquid-gold` and `.gold-veil`
+   * The lit gold face — `.liquid-gold`
    * ═══════════════════════════════════════════════════════════════════════
    *
-   * The identity in one mechanism: light moving through a thin layer of water
-   * over a gold surface. Two classes, one vocabulary, no library.
+   * The identity in one mechanism: light falling through water onto a gold
+   * surface. One class, no library.
    *
-   * ## Why it is not a shine
-   *
-   * The stock CSS "premium" effect is a white band translated left to right at
-   * one speed. It fails at this because a single band moving in a straight line
-   * at a constant rate is the one thing light on water never does. What the eye
-   * actually reads as caustics is *interference*: several light structures of
-   * different shape and frequency crossing each other, so brightness appears
-   * and disappears at points that never travel in a straight line.
-   *
-   * So each of these paints three layers of light on top of the gold —
+   * Three layers of light on top of the gold —
    *
    *   1. a broad soft hotspot (the pool of light),
-   *   2. a smaller, dimmer hotspot travelling the *other* way,
+   *   2. a smaller, dimmer one offset from it,
    *   3. a wide diagonal ripple comb at 104°, well off the axis of either,
    *
-   * — and drives them with two animations of different length running on
-   * different properties:
-   *
-   *   • `liquid-drift` (4.5s) moves each layer a different distance, in a
-   *     different direction. Nothing is phase-locked to anything.
-   *   • `liquid-swell` (3.5s) resizes them, and does so unevenly: layer 1
-   *     grows while layer 2 shrinks. A gradient that changes size while it
-   *     moves is what supplies the *distortion* — the highlight stretches and
-   *     compresses as it crosses, the way a reflection does when the surface
-   *     above it is not flat.
-   *
-   * The two are `alternate`, so their real periods are 9s and 7s, and their
-   * combined pattern does not repeat for 63 seconds. That is the point of the
-   * mismatch: at 4.5s alone the eye finds the loop in about three passes.
+   * — composed so the face has depth in it without moving. The three used to
+   * be driven by two infinite loops of mismatched period, plus a section-scale
+   * sibling (`.gold-veil`) doing the same thing behind the closing panel. What
+   * that produced was a button, a logo tile and a panel that never stopped
+   * breathing: the reader's eye was pulled to a control by movement that meant
+   * nothing, on every page, for as long as the page was open. The composition
+   * was always meant to stand as a still — the resting frame was designed, and
+   * a reduced-motion reader only ever saw that one — so it now always is one.
+   * The only light that still moves is `.sheen`, and only on hover, where a
+   * pointer has asked for it.
    *
    * ## Why the light is in the background rather than in an overlay
    *
@@ -823,116 +778,13 @@
      */
     background-size: 190% 190%, 150% 150%, 260% 260%, 100% 100%;
     /*
-     * The resting frame, and it is a designed one rather than an accident of
-     * where the keyframes happen to start: both hotspots are on the face and
-     * offset from each other, so a visitor who never sees the animation — the
-     * reduced-motion reader below, or anyone looking at a screenshot — still
-     * gets a lit gold surface with depth in it.
+     * Both hotspots are on the face and offset from each other, so the surface
+     * has depth in it standing still. This used to be one frame of a pair of
+     * infinite loops, kept designed so that a reduced-motion reader or a
+     * screenshot still got a lit face; it is now the only frame there is. A
+     * button whose fill never stops moving is not a premium button.
      */
     background-position: 18% 26%, 78% 72%, 12% 0%, 0 0;
-    animation:
-      liquid-drift 4.5s ease-in-out infinite alternate,
-      liquid-swell 3.5s ease-in-out infinite alternate;
-  }
-  @keyframes liquid-drift {
-    from {
-      background-position: 8% 18%, 88% 80%, 0% 0%, 0 0;
-    }
-    to {
-      background-position: 34% 40%, 62% 56%, 34% 0%, 0 0;
-    }
-  }
-  @keyframes liquid-swell {
-    from {
-      background-size: 178% 178%, 158% 158%, 250% 250%, 100% 100%;
-    }
-    to {
-      background-size: 214% 214%, 138% 138%, 285% 285%, 100% 100%;
-    }
-  }
-
-  /**
-   * The same light, at section scale: a decorative layer for the one or two
-   * premium areas on a page that want gold moving somewhere behind the copy.
-   *
-   * Applied to its own absolutely-positioned `aria-hidden` div, the way
-   * `.atmosphere-layer` and `bg-mesh-deep` already are — not as a pseudo
-   * element — because at this size it has to sit at a specific depth in the
-   * stack, and because `::before` and `::after` are already spoken for by
-   * `.gradient-ring` and `.spotlight` on exactly the panels that want this.
-   *
-   * Two differences from `.liquid-gold`, both forced by the area:
-   *
-   *   • It animates `transform` and `opacity`, not `background-position`.
-   *     Those two are the properties a compositor can run without repainting;
-   *     over a full-width section the background-position build would repaint
-   *     the band on every frame.
-   *   • The alphas are a third of the button's and the travel is ±4%. The brief
-   *     for a background is "almost imperceptible", and the knob for that is
-   *     amplitude, not duration — a slow animation you can see is still an
-   *     animation you can see. Kept at 4.8s/3.6s it stays in the same rhythm as
-   *     everything else here, and you have to look for it to find it.
-   */
-  .gold-veil {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
-  .gold-veil::after {
-    content: "";
-    position: absolute;
-    /* Oversized so the drift never brings the layer's own edge into view. */
-    inset: -40%;
-    background-image:
-      radial-gradient(30% 34% at 30% 28%, rgb(var(--brand) / 0.11) 0%, transparent 64%),
-      radial-gradient(26% 30% at 72% 62%, rgb(var(--halo) / 0.16) 0%, transparent 66%),
-      repeating-linear-gradient(
-        100deg,
-        transparent 0 9%,
-        rgb(var(--gold-highlight) / 0.035) 12%,
-        transparent 15% 30%
-      );
-    filter: blur(18px);
-    transform: translate3d(-3%, -2%, 0) scale(1.05);
-    opacity: 0.75;
-    animation:
-      veil-drift 4.8s ease-in-out infinite alternate,
-      veil-breathe 3.6s ease-in-out infinite;
-  }
-  @keyframes veil-drift {
-    from {
-      transform: translate3d(-4%, -3%, 0) scale(1.03);
-    }
-    to {
-      transform: translate3d(4%, 3%, 0) scale(1.09);
-    }
-  }
-  @keyframes veil-breathe {
-    0%,
-    100% {
-      opacity: 0.58;
-    }
-    50% {
-      opacity: 0.92;
-    }
-  }
-
-  /**
-   * Reduced motion keeps the gold and loses the water.
-   *
-   * The blanket rule in the base layer would already land both of these on
-   * their declared frames, since neither fills. This says so out loud, because
-   * "the static state is a design" is a property of these two rules that a
-   * later edit could break without any test noticing — move the resting
-   * `background-position` into the `from` keyframe and a reduced-motion reader
-   * gets a flat gold rectangle.
-   */
-  @media (prefers-reduced-motion: reduce) {
-    .liquid-gold,
-    .gold-veil::after {
-      animation: none;
-    }
   }
 
   /**
@@ -1040,13 +892,6 @@
    * now leads and the gold is the smaller, warmer light inside it — which is
    * also the right way round for what this backdrop is supposed to depict.
    */
-  .lightfield {
-    background-image:
-      radial-gradient(48% 52% at 18% 0%, rgb(var(--brand) / 0.07) 0%, transparent 62%),
-      radial-gradient(42% 46% at 82% 12%, rgb(var(--halo) / 0.22) 0%, transparent 64%),
-      radial-gradient(70% 60% at 50% 108%, rgb(var(--halo) / 0.14) 0%, transparent 62%);
-  }
-
   /**
    * Underline that grows from the left on hover, instead of appearing all at
    * once. Uses a background layer rather than `text-decoration` so the growth
@@ -1272,36 +1117,6 @@
     }
   }
 
-  /**
-   * A rule that draws itself left-to-right as its group arrives — the connector
-   * between the numbered steps, which is a line describing a sequence and so
-   * should be seen to run in the direction the sequence runs.
-   *
-   * Scoped to `.is-visible` the same way `.rise` is, so it inherits whichever
-   * observer already covers the block it sits in.
-   */
-  .draw-x {
-    transform-origin: left center;
-  }
-
-  @media (scripting: enabled) {
-    .draw-x {
-      transform: scaleX(0);
-      transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
-      animation: draw-x-fallback 0.9s cubic-bezier(0.16, 1, 0.3, 1) 4s forwards;
-    }
-    .is-visible .draw-x {
-      transform: scaleX(1);
-      animation: none;
-    }
-  }
-
-  @keyframes draw-x-fallback {
-    to {
-      transform: scaleX(1);
-    }
-  }
-
   /* Last, so it wins over the scripting block whatever order the cascade
      resolves those two media queries in. `.reveal` is written on its own line
      rather than folded into the group above it because the guard in
@@ -1315,9 +1130,6 @@
       translate: none;
       clip-path: none;
       animation: none;
-    }
-    .draw-x {
-      transform: none;
     }
     .reveal {
       opacity: 1;

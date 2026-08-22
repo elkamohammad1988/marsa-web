@@ -37,11 +37,8 @@ export function DemoSubmissionNotice({
       role="status"
       className="gradient-ring relative overflow-hidden rounded-card-lg border border-line bg-card p-6 shadow-e2 md:p-8"
     >
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-radial-glow" />
-
       <div className="relative">
-        <span className="inline-flex items-center gap-2 rounded-full border border-line bg-canvas/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-strong">
-          <span className="h-1.5 w-1.5 rounded-full bg-brand-strong shadow-glow-sm" />
+        <span className="inline-flex items-center rounded-full border border-line bg-canvas/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-strong">
           Concept build
         </span>
 

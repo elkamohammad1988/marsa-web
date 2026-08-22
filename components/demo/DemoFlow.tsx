@@ -348,10 +348,7 @@ export function DemoFlow() {
       {/* Sandbox disclosure — honesty first: nothing here is a real account,
           and we say plainly what anonymous telemetry we collect. */}
       <p className="glass-panel mb-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-2xl border border-line-dark px-4 py-2.5 text-center text-xs text-ink-muted">
-        <span className="inline-flex items-center gap-1.5 font-semibold text-ink">
-          <span className="h-1.5 w-1.5 rounded-full bg-brand-strong shadow-glow-sm" /> Interactive
-          sandbox
-        </span>
+        <span className="font-semibold text-ink">Interactive sandbox</span>
         Sample data, no real money — the exchange rate is live from the ECB. We log
         anonymous step progress (no cookies, no personal data) to improve the demo.
       </p>
@@ -689,7 +686,7 @@ export function DemoFlow() {
                       />
                     </div>
                     <p className="mt-2 text-xs text-ink-subtle" aria-live="polite">
-                      {kyc < 100 ? "Checking document and sanctions lists…" : "Identity verified ✓"}
+                      {kyc < 100 ? "Checking document and sanctions lists…" : "Identity verified"}
                     </p>
                   </div>
                 </div>
@@ -797,9 +794,9 @@ export function DemoFlow() {
                     Marsa replaces three banking apps for.
                   </p>
                   <ul className="space-y-1.5 text-sm text-ink-muted">
-                    <li>✓ European multi-currency IBAN in your name</li>
-                    <li>✓ Real interbank FX — the rate you saw was live</li>
-                    <li>✓ Free SEPA out, same day</li>
+                    <li>European multi-currency IBAN in your name</li>
+                    <li>Real interbank FX — the rate you saw was live</li>
+                    <li>Free SEPA out, same day</li>
                   </ul>
                 </div>
               )}
@@ -811,7 +808,7 @@ export function DemoFlow() {
             <div className="flex flex-wrap items-center gap-3">
               {previous && (
                 <Button type="button" variant="outline" onClick={() => go(previous)}>
-                  ← Back
+                  Back
                 </Button>
               )}
 

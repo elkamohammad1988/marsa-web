@@ -13,15 +13,15 @@ type Tone = "brand" | "alt" | "deep" | "card";
  * is what the brief means by tonal variation rather than one flat gold. It is
  * the same light every other gold surface is under, and it costs one gradient.
  *
- * No reflection animation here, deliberately. A feature grid is six to nine of
- * these at once, several times down a page; the moment they all breathe, the
- * effect stops being a property of the *important* thing and becomes wallpaper.
- * The moving light stays on the surfaces there is only ever one of — the
- * primary button, the corridor mark, the closing panel.
+ * Nothing here moves and nothing here glows, for the same reason. A feature
+ * grid is six to nine of these at once, several times down a page: a bloom
+ * behind each one turns gold from an emphasis into wallpaper, and a tile that
+ * lifts and grows on hover is answering a hover the card underneath it is
+ * already answering.
  */
 const tones: Record<Tone, string> = {
   brand:
-    "bg-gradient-to-br from-gold-light/22 via-gold/12 to-halo/18 text-brand-strong ring-1 ring-inset ring-brand-strong/25 shadow-glow-sm",
+    "bg-gradient-to-br from-gold-light/22 via-gold/12 to-halo/18 text-brand-strong ring-1 ring-inset ring-brand-strong/25",
   alt: "bg-surface-alt text-ink",
   deep: "bg-surface-deep text-white",
   card: "bg-card text-brand-strong border border-line",
@@ -48,10 +48,7 @@ export function FeatureIcon({
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center rounded-2xl transition-transform duration-300",
-        // Driven by `group-hover` on the card that contains it, so the icon
-        // answers a hover anywhere on the card rather than only on itself.
-        "group-hover:-translate-y-0.5 group-hover:scale-105",
+        "inline-flex items-center justify-center rounded-2xl",
         tones[tone],
         sizes[size],
         className,

@@ -38,12 +38,6 @@ export function PricingPlanCard({ plan }: { plan: Plan }) {
         featured ? "gradient-ring-strong shadow-e3" : "gradient-ring shadow-e1",
       )}
     >
-      {featured && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand/15 blur-[100px]"
-        />
-      )}
       <div>
         {/* Gold, not white. This badge and the bright rim are the two things
             marking the recommended plan, and a white pill was the only white

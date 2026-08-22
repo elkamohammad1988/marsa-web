@@ -35,7 +35,7 @@ export default async function AdminFunnelPage() {
           Demo funnel
         </Heading>
         <Button href="/admin" variant="outline" size="sm">
-          ← Submissions
+          Submissions
         </Button>
       </div>
       {error ? (

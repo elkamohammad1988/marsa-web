@@ -232,37 +232,14 @@ const config: Config = {
           "0%": { opacity: "0", transform: "scale(0.96)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-10px)" },
-        },
-        "glow-pulse": {
-          "0%, 100%": { opacity: "0.55" },
-          "50%": { opacity: "1" },
-        },
         marquee: {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
-        },
-        // Slow, non-repeating-looking drift for the hero light sources.
-        "aurora-a": {
-          "0%, 100%": { transform: "translate3d(0,0,0) scale(1)" },
-          "33%": { transform: "translate3d(6%, -8%, 0) scale(1.12)" },
-          "66%": { transform: "translate3d(-5%, 6%, 0) scale(0.94)" },
-        },
-        "aurora-b": {
-          "0%, 100%": { transform: "translate3d(0,0,0) scale(1.05)" },
-          "40%": { transform: "translate3d(-8%, 5%, 0) scale(0.92)" },
-          "70%": { transform: "translate3d(7%, 9%, 0) scale(1.14)" },
         },
         /* Dash offset animation for the money-route arcs. */
         "dash-flow": {
           "0%": { strokeDashoffset: "220" },
           "100%": { strokeDashoffset: "0" },
-        },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
         },
         // Gentle glow breathing for the active progress-rail segment.
         "rail-pulse": {
@@ -284,58 +261,16 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(-6px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
-        /**
-         * A decorative satellite travelling around the hero panel. Applied to a
-         * wrapper centred on the panel, with the dot pushed out along one axis,
-         * so a plain rotation reads as an orbit.
-         */
-        orbit: {
-          "0%": { transform: "rotate(0deg)" },
-          "100%": { transform: "rotate(360deg)" },
-        },
-        /** Counter-rotation, so an orbiting label stays upright. */
-        "orbit-reverse": {
-          "0%": { transform: "rotate(0deg)" },
-          "100%": { transform: "rotate(-360deg)" },
-        },
-        /** Slower, larger drift than `float` — for elements far behind glass. */
-        drift: {
-          "0%, 100%": { transform: "translate3d(0, 0, 0)" },
-          "50%": { transform: "translate3d(0, -18px, 0)" },
-        },
-        /**
-         * The scroll cue: a dot falling down a short track, on a loop.
-         *
-         * Keyed `0%, 100%` rather than `0%`→`100%` because it is an infinite
-         * decorative cycle that must return to where it started — the same
-         * shape as `glow-pulse` and `float`. The one-way `fill-mode: both`
-         * animations are the ones that must end visible; this never fills, and
-         * the track it runs in is drawn unconditionally.
-         */
-        "scroll-hint": {
-          "0%, 100%": { opacity: "0", transform: "translateY(-4px)" },
-          "30%": { opacity: "1", transform: "translateY(0)" },
-          "70%": { opacity: "0", transform: "translateY(10px)" },
-        },
       },
       animation: {
         "fade-up": "fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
         "fade-in": "fade-in 0.5s ease both",
         "scale-in": "scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
-        float: "float 6s ease-in-out infinite",
-        "glow-pulse": "glow-pulse 3.5s ease-in-out infinite",
         "rail-pulse": "rail-pulse 2.4s ease-in-out infinite",
         marquee: "marquee 38s linear infinite",
-        "aurora-a": "aurora-a 22s ease-in-out infinite",
-        "aurora-b": "aurora-b 28s ease-in-out infinite",
         "dash-flow": "dash-flow 3.2s linear infinite",
-        shimmer: "shimmer 2.4s linear infinite",
         "step-in": "step-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both",
         "row-in": "row-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both",
-        orbit: "orbit 26s linear infinite",
-        "orbit-reverse": "orbit-reverse 26s linear infinite",
-        drift: "drift 11s ease-in-out infinite",
-        "scroll-hint": "scroll-hint 2.6s ease-in-out infinite",
       },
     },
   },

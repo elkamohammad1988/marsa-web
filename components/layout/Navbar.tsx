@@ -8,7 +8,7 @@ import { siteConfig } from "@/lib/site";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/icons/Logo";
 import { ConceptBadge } from "@/components/layout/ConceptBadge";
-import { IconMenu, IconClose, IconChevronDown, IconUserCircle } from "@/components/icons";
+import { IconMenu, IconClose, IconChevronDown } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 /**
@@ -66,26 +66,22 @@ export function Navbar() {
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
 
   /**
-   * Scroll state, split deliberately in two.
+   * Whether the page has scrolled at all — the bar tightens and lifts off the
+   * page once it has. A boolean that flips at most twice per journey, so it
+   * can be React state; the read is still coalesced to one frame because a
+   * scroll handler fires far faster than the display refreshes.
    *
-   * `scrolled` is a boolean that flips at most twice per journey, so it can be
-   * React state: the bar lifting off the page is worth a render. Progress is
-   * not — it changes on every frame of every scroll, and putting it in state
-   * would re-render the entire navigation tree sixty times a second to move a
-   * 2px rail. It is written straight to the node's transform instead.
+   * It used to also compute a 0–1 ratio for a gradient reading-progress rail
+   * drawn along the bottom of the pill. The rail said nothing the scrollbar
+   * beside it was not already saying, so both it and the measurement are gone.
    */
   const [scrolled, setScrolled] = useState(false);
-  const progressRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     let frame = 0;
     const measure = () => {
       frame = 0;
-      const y = window.scrollY;
-      setScrolled(y > 8);
-      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
-      const ratio = scrollable > 0 ? Math.min(1, Math.max(0, y / scrollable)) : 0;
-      if (progressRef.current) progressRef.current.style.transform = `scaleX(${ratio})`;
+      setScrolled(window.scrollY > 8);
     };
     const onScroll = () => {
       if (frame) return;
@@ -131,19 +127,6 @@ export function Navbar() {
               : "border-line/70 py-2 shadow-nav",
           )}
         >
-          {/* Reading progress, clipped to the pill so it follows its radius.
-              Decorative: the same information is in the scrollbar, and a
-              scaled 2px rail has nothing to announce. */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"
-          >
-            <span
-              ref={progressRef}
-              style={{ transform: "scaleX(0)" }}
-              className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-gradient-to-r from-brand via-brand-strong to-halo"
-            />
-          </span>
           {/*
             Logo and concept marker travel together, and this wrapper is
             deliberately *not* `relative`: the disclosure panel inside
@@ -303,11 +286,10 @@ export function Navbar() {
             <Link
               href={siteConfig.appUrl}
               className={cn(
-                "inline-flex flex-none items-center gap-2 whitespace-nowrap rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink/5",
+                "inline-flex flex-none items-center whitespace-nowrap rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink/5",
                 FOCUS_RING,
               )}
             >
-              <IconUserCircle aria-hidden className="h-4 w-4" />
               Log In
             </Link>
             <Button href="/get-started" size="md" variant="primary">
@@ -441,12 +423,12 @@ export function Navbar() {
               <Link
                 href={siteConfig.appUrl}
                 className={cn(
-                  "inline-flex items-center justify-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink/5",
+                  "inline-flex items-center justify-center rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink/5",
                   FOCUS_RING,
                 )}
                 onClick={() => setMobileOpen(false)}
               >
-                <IconUserCircle aria-hidden className="h-4 w-4" /> Log In
+                Log In
               </Link>
               <Button
                 href="/get-started"

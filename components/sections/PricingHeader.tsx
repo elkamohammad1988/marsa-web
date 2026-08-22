@@ -14,7 +14,6 @@ export function PricingHeader() {
 
   return (
     <section className="relative isolate overflow-hidden bg-surface-alt pb-12 pt-10 md:pb-16 md:pt-14">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 lightfield opacity-70" />
       <Container>
         <div className="flex flex-col items-center gap-6 text-center">
           {/*

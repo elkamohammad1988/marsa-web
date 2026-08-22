@@ -33,31 +33,10 @@ export function CTACard({
             where the emphasis earns its keep — a page where every panel is
             edge-lit has nothing left to emphasise. */}
         <Reveal className="gradient-ring-strong isolate overflow-hidden rounded-card-lg bg-surface-deep text-white shadow-e3">
-          {/*
-            Ambient light: warm from the top, cool from the right — and here,
-            on the one panel that is the whole page's ask, moving. This is the
-            `.gold-veil` half of the water language (globals.css): the same two
-            lights the static `bg-radial-glow` it replaces was drawing, drifting
-            ±4% against each other so the panel reads as lit through something
-            rather than lit flatly. Layer count is unchanged; it is the same
-            light, alive. Freezes to a composed still under reduced motion.
-          */}
-          <div aria-hidden className="gold-veil" />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-16 -top-20 h-72 w-72 rounded-full bg-brand-soft/20 blur-[110px]"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-24 -left-10 h-72 w-72 animate-drift rounded-full bg-halo/20 blur-[120px]"
-          />
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid opacity-60" />
-
           <div className="relative grid grid-cols-1 items-center gap-6 px-6 py-9 md:grid-cols-[1.2fr_1fr] md:gap-10 md:px-10 md:py-11 lg:px-14">
             <div>
               {eyebrow && (
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/80">
-                  <span className="h-1.5 w-1.5 rounded-full bg-brand-soft shadow-glow-sm" />
+                <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/80">
                   {eyebrow}
                 </span>
               )}
@@ -84,10 +63,6 @@ export function CTACard({
             </div>
 
             <div className="relative mx-auto aspect-[5/4] w-full max-w-sm">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-6 rounded-full bg-radial-glow blur-2xl"
-              />
               {/* `bare`: this slot already sits inside the CTA's own dark panel,
                   so the art must not paint a second backdrop over it. */}
               <BrandArt name={art} surface="bare" className="relative" />

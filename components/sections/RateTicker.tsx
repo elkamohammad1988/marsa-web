@@ -56,10 +56,7 @@ export async function RateTicker() {
       <Container>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
           <p className="flex shrink-0 items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-ink-subtle">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-glow-pulse rounded-full bg-brand opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
-            </span>
+            <span aria-hidden className="h-2 w-2 flex-none rounded-full bg-brand" />
             ECB rates · {published}
           </p>
 

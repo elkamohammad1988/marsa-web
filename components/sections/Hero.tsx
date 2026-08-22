@@ -77,60 +77,16 @@ export function Hero({
         className,
       )}
     >
-      {/* Ambient decoration, in depth order: mesh furthest back, then the three
-          drifting lights, then the grid, then grain over everything. `halo` is
-          the water — cool, low, and behind the warm pair, which is what stops
-          the backdrop reading as one flat gold wash. */}
-      {/*
-        Every light below is sized in absolute units chosen against a 1440px
-        canvas, where they read as the depth the comment above describes. On a
-        390px phone the first orb alone is 480px across — wider than the
-        screen — so all three plus `mesh-deep` and `lightfield` overlap across
-        the entire viewport and resolve to exactly the one flat wash the halo
-        exists to prevent. It was the strongest "cheap gradient" signal left in
-        the product, on the viewport most visitors will actually use.
-
-        Each light is therefore scaled and dimmed below `sm` only; from `sm`
-        upward the geometry is byte-for-byte what it was, so the desktop
-        composition these were tuned for is untouched.
-
-        What did change with the palette is the *balance* between the three.
-        The warm pair used to lead (`brand-soft/25` + `accent/15`) because
-        magenta at those alphas was still a dark light. Gold is not: the second
-        orb at `accent/15` is a 26rem disc of bright gold, and at that size it
-        stops being a light and becomes the background colour. So the gold
-        halved and the water doubled — which is the correct order for a hero
-        that is supposed to depict the second one containing the first.
-
-        No `.gold-veil` here on purpose. Three of these already drift on
-        `aurora-a`/`aurora-b`/`drift`; a fourth moving layer would not add
-        depth, it would add traffic.
-      */}
+      {/* The dark hero's own surface, with nothing layered on top of it.
+          It used to carry five more layers: a lightfield wash, three blurred
+          discs each drifting on its own keyframes, a grid and a film grain.
+          None of them said anything. They were there to make the section look
+          expensive, which is the only thing they actually communicated. */}
       {tone === "spotlight" && (
-        <>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-mesh-deep opacity-55 sm:opacity-100"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 lightfield opacity-70 sm:opacity-100"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -left-24 -top-32 h-[16rem] w-[16rem] animate-aurora-a rounded-full bg-brand/[0.09] blur-[110px] sm:h-[30rem] sm:w-[30rem]"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-20 top-10 h-[14rem] w-[14rem] animate-aurora-b rounded-full bg-brand/[0.08] blur-[120px] sm:h-[26rem] sm:w-[26rem]"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-40 left-1/3 h-[13rem] w-[18rem] animate-drift rounded-full bg-halo/30 blur-[130px] sm:h-[24rem] sm:w-[34rem]"
-          />
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid opacity-60" />
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-noise" />
-        </>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-mesh-deep opacity-55 sm:opacity-100"
+        />
       )}
 
       <Container className="relative">
@@ -152,18 +108,12 @@ export function Hero({
             {eyebrow && (
               <span
                 className={cn(
-                  "sheen relative mb-5 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]",
+                  "mb-5 inline-flex items-center rounded-full px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]",
                   isDark
                     ? "border border-white/15 bg-white/[0.04] text-brand-strong backdrop-blur"
                     : "border border-line bg-card text-brand-strong shadow-card",
                 )}
               >
-                {/* A dot with a ring pulsing out of it, rather than a dot that
-                    dims and brightens in place. */}
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-glow-pulse rounded-full bg-brand-strong opacity-70" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-strong shadow-glow-sm" />
-                </span>
                 {eyebrow}
               </span>
             )}
@@ -195,7 +145,6 @@ export function Hero({
                         : "bg-card text-ink shadow-card ring-1 ring-line hover:ring-brand-strong/40",
                     )}
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-brand-gradient shadow-glow-sm" />
                     {c.label}
                     {c.value && (
                       <span className={isDark ? "text-white/60" : "text-ink-muted"}>{c.value}</span>
@@ -232,28 +181,10 @@ export function Hero({
           </div>
 
           {visual ? (
-            <div className="relative animate-scale-in [animation-delay:120ms]">
-              {/* Two lights revolving behind the panel, one warm and one cool,
-                  half a turn apart. Slow enough (26s) that it registers as the
-                  panel being lit rather than as something moving. */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 -z-10 grid place-items-center"
-              >
-                <div className="relative h-[108%] w-[108%] animate-orbit rounded-full">
-                  <span className="absolute left-1/2 top-0 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/45 blur-3xl" />
-                  <span className="absolute bottom-0 left-1/2 h-24 w-24 -translate-x-1/2 translate-y-1/2 rounded-full bg-halo/40 blur-3xl" />
-                </div>
-              </div>
-              {visual}
-            </div>
+            <div className="relative animate-scale-in [animation-delay:120ms]">{visual}</div>
           ) : (
             art && (
               <div className="relative animate-scale-in [animation-delay:120ms]">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -inset-6 rounded-[40px] bg-radial-glow blur-2xl"
-                />
                 <div
                   className={cn(
                     "relative aspect-[4/3] w-full overflow-hidden rounded-[28px] shadow-elevated",
@@ -267,10 +198,7 @@ export function Hero({
 
                 {/* Truthful live-data badge (the tools use real ECB rates). */}
                 <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-full border border-line glass px-3.5 py-2 text-xs font-medium text-ink shadow-elevated md:left-6">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-glow-pulse rounded-full bg-brand-soft opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
-                  </span>
+                  <span aria-hidden className="h-2 w-2 flex-none rounded-full bg-brand" />
                   Live ECB rates
                 </div>
               </div>
@@ -322,16 +250,6 @@ export function Hero({
           </PointerGlow>
         )}
 
-        {/* Only where the page continues into a long scroll, and only as a
-            hint: the track is drawn unconditionally, and the dot inside it is
-            the only part that moves. */}
-        {tone === "spotlight" && (
-          <div aria-hidden className="mt-10 flex justify-center md:mt-12">
-            <span className="flex h-9 w-[22px] items-start justify-center rounded-full border border-white/20 pt-1.5">
-              <span className="h-1.5 w-1.5 animate-scroll-hint rounded-full bg-brand-strong" />
-            </span>
-          </div>
-        )}
       </Container>
     </section>
   );

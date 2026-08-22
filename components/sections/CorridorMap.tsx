@@ -40,7 +40,6 @@ export function CorridorMap() {
   return (
     <section className="relative isolate overflow-hidden bg-surface-deep py-14 md:py-20 lg:py-24">
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-mesh-deep opacity-90" />
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-noise" />
 
       <Container className="relative">
         <Reveal className="mx-auto max-w-2xl text-center">
@@ -122,10 +121,6 @@ export function CorridorMap() {
 
             <Reveal delay={120} className="flex justify-center">
               <div className="relative grid h-32 w-32 place-items-center">
-                <span
-                  aria-hidden
-                  className="absolute inset-0 animate-glow-pulse rounded-full bg-brand-soft/25 blur-2xl"
-                />
                 <span className="logo-tile liquid-gold relative grid h-20 w-20 place-items-center overflow-hidden rounded-[26px] shadow-glow ring-1 ring-inset ring-gold-highlight/30">
                   <MarsaMark className="h-11 w-11" />
                 </span>

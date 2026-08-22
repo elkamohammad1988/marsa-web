@@ -54,7 +54,9 @@ export function FxCalculator() {
 
   return (
     <div className="rounded-card-lg border border-line bg-card p-6 shadow-card md:p-8">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
+      {/* Two equal columns. The middle track used to hold a bare `→` glyph
+          between them; with the glyph gone the two fields share the row. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-end">
         <div>
           <label htmlFor="calc-amount" className="mb-1.5 block text-sm font-medium text-ink">
             Amount to convert
@@ -85,10 +87,6 @@ export function FxCalculator() {
               ))}
             </Select>
           </div>
-        </div>
-
-        <div className="hidden pb-3 text-center text-ink-subtle sm:block" aria-hidden>
-          →
         </div>
 
         <div>
