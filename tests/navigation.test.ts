@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { mainNav, footerColumns } from "@/lib/nav";
 
@@ -108,5 +108,140 @@ describe("navigation links are honest about where they go", () => {
         `"${group.label}" links nowhere and opens nothing`,
       ).toBe(true);
     }
+  });
+
+  it("never offers the same destination twice in the main navigation", () => {
+    // "FAQ" was both a top-level item and the last entry under Resources, so
+    // the desktop bar offered one page under two controls — in the band where
+    // the comments in `Navbar.tsx` record the row running out of width.
+    const hrefs = mainNav.flatMap((g) => [g.href, ...(g.children ?? []).map((c) => c.href)]);
+    const present = hrefs.filter((h): h is string => typeof h === "string");
+    const duplicates = present.filter((h, i) => present.indexOf(h) !== i);
+    expect(duplicates, `${duplicates.join(", ")} appears twice in mainNav`).toEqual([]);
+  });
+});
+
+/**
+ * No call to action may point at the page it is rendered on.
+ *
+ * `/pricing` ended its own page with a "See Pricing" button. Nothing was
+ * broken in the sense a type or a link checker understands — the href resolved,
+ * the page answered 200 — and that is exactly why it survived: the only way to
+ * see it is to be on the page and read the button. A reader who presses it
+ * watches the page reload into itself, which is the plainest kind of
+ * unfinished.
+ *
+ * Routes are derived from the filesystem rather than listed, so a page added
+ * later is covered by existing. Dynamic segments are skipped: `[slug]` has no
+ * single route to compare against.
+ */
+describe("no page links to itself", () => {
+  const pages = (function walk(dir: string): string[] {
+    const out: string[] = [];
+    for (const entry of readdirSync(path.join(ROOT, dir))) {
+      const rel = path.posix.join(dir, entry);
+      if (statSync(path.join(ROOT, rel)).isDirectory()) out.push(...walk(rel));
+      else if (entry === "page.tsx") out.push(rel);
+    }
+    return out;
+  })("app");
+
+  /** `app/(auth)/login/page.tsx` → `/login`; `null` for a dynamic route. */
+  function routeOf(file: string): string | null {
+    const segments = file
+      .slice("app/".length, -"/page.tsx".length)
+      .split("/")
+      .filter((s) => s && !/^\(.*\)$/.test(s));
+    if (segments.some((s) => s.startsWith("["))) return null;
+    return `/${segments.join("/")}`;
+  }
+
+  const routed = pages
+    .map((file) => [file, routeOf(file)] as const)
+    .filter((pair): pair is readonly [string, string] => pair[1] !== null);
+
+  it("finds the pages to check", () => {
+    expect(routed.length).toBeGreaterThan(20);
+  });
+
+  it.each(routed)("%s offers no link back to %s", (file, route) => {
+    const source = code(file.split("/"));
+    // Query strings are allowed: `/get-started?type=business` from
+    // `/get-started` is a genuinely different destination.
+    const selfLink = new RegExp(`href:\\s*"${route}"|href="${route}"`);
+    expect(source, `${file} links to itself (${route})`).not.toMatch(selfLink);
+  });
+});
+
+/**
+ * On a `force-dynamic` page, a control that changes only the query string must
+ * be a plain anchor, never `<Link>`.
+ *
+ * This is a fix for a defect that every other gate was blind to. `/admin`'s
+ * kind filters and its Previous/Next pagination were `<Link>`s pointing at
+ * `/admin?kind=…` and `/admin?page=…` — the same route, a different query.
+ * Clicking one made the App Router fetch the new RSC payload (the request goes
+ * out, the server answers 200 with a correct document) and then never commit
+ * it: the URL did not change and the table did not move. From the operator's
+ * side, the filters and the pagination were dead controls.
+ *
+ * Everything about that was invisible from the outside. The href resolved, the
+ * page it named rendered perfectly on a direct visit, the markup was valid, and
+ * the server did exactly the right thing. Only a browser that clicked the link
+ * and then asked where it had ended up could see it — which is what
+ * `tests/smoke/admin-dashboard.smoke.ts` now does, and this is the cheap
+ * static rule that stops the pattern being reintroduced somewhere the browser
+ * suite does not reach.
+ *
+ * A plain `<a>` is also the right control for this area on its own merits:
+ * `/admin` deliberately ships no client JavaScript, and its search box is
+ * already a native `<form method="get">`. Full navigation is what the other two
+ * thirds of the toolbar were already doing.
+ */
+describe("query-only navigation on a dynamic page is a full navigation", () => {
+  const dynamicPages = (function walk(dir: string): string[] {
+    const out: string[] = [];
+    for (const entry of readdirSync(path.join(ROOT, dir))) {
+      const rel = path.posix.join(dir, entry);
+      if (statSync(path.join(ROOT, rel)).isDirectory()) out.push(...walk(rel));
+      else if (entry === "page.tsx") out.push(rel);
+    }
+    return out;
+  })("app").filter((file) => /dynamic\s*=\s*"force-dynamic"/.test(code(file.split("/"))));
+
+  it("finds the force-dynamic pages", () => {
+    expect(dynamicPages.length).toBeGreaterThan(0);
+  });
+
+  it.each(dynamicPages)("%s uses no <Link> to its own query string", (file) => {
+    const source = code(file.split("/"));
+    const route = `/${file
+      .slice("app/".length, -"/page.tsx".length)
+      .split("/")
+      .filter((segment) => segment && !/^\(.*\)$/.test(segment))
+      .join("/")}`;
+
+    /*
+     * Every `<Link …>` element in the file, with the whole opening tag, so an
+     * href written across several lines is still seen. Then: does its href
+     * begin with this page's own route and continue into a query?
+     *
+     * `buildQuery(...)` is matched as well as a literal, because that is how
+     * the admin page composes them — `href={`/admin${buildQuery({ kind: k })}`}`
+     * is exactly the shape that broke.
+     */
+    const links = source.match(/<Link[\s\S]*?>/g) ?? [];
+    const offenders = links.filter((tag) => {
+      const href = tag.match(/href=\{?[`"]([^`"]*)[`"]?/)?.[1] ?? "";
+      if (!href.startsWith(route)) return false;
+      const rest = href.slice(route.length);
+      return rest.startsWith("?") || rest.startsWith("${buildQuery");
+    });
+
+    expect(
+      offenders,
+      `${file}: <Link> to its own query string does not navigate on a ` +
+        `force-dynamic route — use a plain <a>`,
+    ).toEqual([]);
   });
 });

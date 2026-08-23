@@ -1,5 +1,10 @@
 import { existsSync } from "node:fs";
-import puppeteer, { type Browser, type Page, type HTTPResponse } from "puppeteer-core";
+import puppeteer, {
+  type Browser,
+  type BrowserContext,
+  type Page,
+  type HTTPResponse,
+} from "puppeteer-core";
 
 /**
  * Browser plumbing for the smoke suite.
@@ -92,7 +97,20 @@ export type Instrumented = { page: Page; problems: PageProblems };
  * component makes on mount, and the resulting "makes no API call" reading sent
  * an earlier pass chasing a bug that did not exist.
  */
-export async function newPage(browser: Browser, width = 1280, height = 900): Promise<Instrumented> {
+export async function newPage(
+  /*
+   * A `BrowserContext` is accepted as well as the `Browser` itself, and the
+   * admin suite needs it: pages opened from the same browser share one cookie
+   * jar, so a test that signs an operator in leaves every later "unauthenticated
+   * visitor" test signed in too. That does not fail loudly — `/admin/login`
+   * redirects a signed-in caller to `/admin`, the password field is not there
+   * to type into, and what the run reports is a destroyed execution context.
+   * An incognito context per test is the isolation those assertions need.
+   */
+  browser: Browser | BrowserContext,
+  width = 1280,
+  height = 900,
+): Promise<Instrumented> {
   const page = await browser.newPage();
   await page.setViewport({ width, height });
 
@@ -211,6 +229,57 @@ export async function waitFor(
     await new Promise((resolve) => setTimeout(resolve, polling));
   }
   throw new Error(`${message} (waited ${timeout}ms)`);
+}
+
+/**
+ * Resolve once the page has stopped moving.
+ *
+ * This exists because an accessibility scan that runs mid-animation reports
+ * defects the page does not have. `.stagger` reveals its children one at a
+ * time by transitioning opacity from 0, and axe folds an ancestor's opacity
+ * into its contrast calculation — so a scan that arrives 200ms into that
+ * transition reads half-faded question text as a serious colour-contrast
+ * failure on rows 2 and 3 of the FAQ, and reads nothing on rows 0 and 1 that
+ * happened to have finished. The violation was real on screen for a third of a
+ * second and is not a property of the design.
+ *
+ * The fix is a condition rather than a longer wait, and it is two conditions:
+ *
+ * 1. **Scroll the whole document, then return to the top.** Those reveals are
+ *    driven by `IntersectionObserver` (`useInView`), so anything below the
+ *    fold has not started animating and never will while the page sits still —
+ *    it would be scanned at `opacity: 0`, or caught mid-transition by the
+ *    4-second no-observer fallback. The hook latches on first intersection, so
+ *    one pass down and back is enough to put every reveal into its final state.
+ *
+ * 2. **Wait for every finite animation to finish.** `getAnimations()` covers
+ *    CSS transitions as well as keyframes, so this is the whole of what can
+ *    still be moving. Animations that loop forever — the demo's progress rail,
+ *    the rate ticker — are excluded by their iteration count rather than by
+ *    name, because a list of exemptions is a list that goes stale.
+ */
+export async function settleAnimations(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    const step = window.innerHeight;
+    const end = document.documentElement.scrollHeight;
+    for (let y = 0; y < end; y += step) {
+      window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+      // One frame per step, so the observer has a chance to fire before the
+      // next jump. Two rAFs is "after the next paint" rather than a guess.
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    }
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  });
+
+  await page.waitForFunction(
+    () =>
+      document.getAnimations().every((animation) => {
+        const timing = animation.effect?.getComputedTiming();
+        if (timing && timing.iterations === Infinity) return true;
+        return animation.playState === "finished" || animation.playState === "idle";
+      }),
+    { timeout: 20_000, polling: 100 },
+  );
 }
 
 /** Text of the whole page, whitespace-collapsed, for readable assertions. */

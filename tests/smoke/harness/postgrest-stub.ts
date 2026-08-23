@@ -109,7 +109,16 @@ export async function startPostgrestStub(): Promise<PostgrestStub> {
     // passing by accident.
     if (!req.headers.apikey) return send(401, { message: "no apikey" });
 
-    const [route] = path.split("?");
+    /*
+     * `getPostgrestConfig` builds its endpoint as `${SUPABASE_URL}/rest/v1`,
+     * so every request arrives under that prefix. Matching bare `/submissions`
+     * answered 404 to all of them — which nothing noticed, because until this
+     * file had a caller the mismatch was unreachable. Stripping the prefix
+     * here rather than mounting the routes under it keeps the route table
+     * readable and keeps the assertion surface (`calls()`) showing the paths
+     * the application really asked for.
+     */
+    const [route] = path.replace(/^\/rest\/v1/, "").split("?");
 
     /* ------------------------------------------------------------ RPCs -- */
 

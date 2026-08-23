@@ -189,13 +189,46 @@ describe("deleting says honestly what it did", () => {
   });
 });
 
+/**
+ * The `Location` is a **relative path**, and these assertions read it as one.
+ *
+ * They used to parse it with `new URL(...)` and compare against
+ * `${ORIGIN}/admin`, which only worked because the route built an absolute URL
+ * out of `new URL(request.url).origin`. That reconstruction is what broke the
+ * button in a real browser: when the server's idea of its own origin differs
+ * from the document's — a proxy, a host alias, `localhost` answering a request
+ * made to `127.0.0.1` — the redirect is cross-origin, `form-action 'self'`
+ * blocks the navigation, and the operator watches a Delete that erased the
+ * record report nothing at all. `lib/same-origin.ts#seeOther` has the whole
+ * account.
+ *
+ * A relative Location is *also* the stronger property to assert here. The old
+ * expectation could have been satisfied by an absolute URL on a host the tests
+ * happened to supply; this one says the response cannot name a host at all,
+ * which is the actual defence against an open redirect.
+ */
 describe("the return path cannot be turned into an open redirect", () => {
   async function locationFor(returnTo: string): Promise<string> {
     const store = new FileSubmissionStore();
     const id = `r${Math.abs(returnTo.length)}`;
     await store.save(submission(id));
     const res = await deleteSubmission(deleteRequest(id, { returnTo }));
-    return new URL(res.headers.get("location")!).toString();
+    const location = res.headers.get("location")!;
+
+    // Same-origin by construction: a path, never a URL, and never one a
+    // browser would resolve against a different host.
+    expect(location.startsWith("/"), `"${location}" is not a site-relative path`).toBe(true);
+    expect(location.startsWith("//"), `"${location}" is protocol-relative`).toBe(false);
+    // Resolving it against any origin must land back on that same origin.
+    expect(new URL(location, "https://elsewhere.example").origin).toBe("https://elsewhere.example");
+
+    // The confirmation flag is the route's own, and is asserted separately
+    // below; these cases are about the *return path* it is appended to.
+    const url = new URL(location, "http://localhost");
+    expect(url.searchParams.get("erased")).toBe("1");
+    url.searchParams.delete("erased");
+    const query = url.searchParams.toString();
+    return query ? `${url.pathname}?${query}` : url.pathname;
   }
 
   it.each([
@@ -203,17 +236,42 @@ describe("the return path cannot be turned into an open redirect", () => {
     ["a protocol-relative URL", "//evil.example"],
     ["a path outside the admin area", "/account"],
   ])("ignores %s and returns to /admin", async (_label, returnTo) => {
-    expect(await locationFor(returnTo)).toBe(`${ORIGIN}/admin`);
+    expect(await locationFor(returnTo)).toBe("/admin");
   });
 
   it("keeps the filters the operator was actually looking at", async () => {
     expect(await locationFor("/admin?kind=contact&q=ada&page=3")).toBe(
-      `${ORIGIN}/admin?kind=contact&q=ada&page=3`,
+      "/admin?kind=contact&q=ada&page=3",
     );
   });
 
   it("drops a filter value the admin page does not understand", async () => {
-    expect(await locationFor("/admin?kind=not-a-kind&evil=1")).toBe(`${ORIGIN}/admin`);
+    expect(await locationFor("/admin?kind=not-a-kind&evil=1")).toBe("/admin");
+  });
+
+  /**
+   * The confirmation the list renders is the route's own claim, not the
+   * caller's. `returnTo` is rebuilt from a closed set of parameters, so a link
+   * carrying `erased=1` cannot survive into the redirect and make the page
+   * report a deletion that never happened.
+   */
+  it("adds its own confirmation flag and refuses to echo a forged one", async () => {
+    const store = new FileSubmissionStore();
+    await store.save(submission("real-one"));
+
+    const res = await deleteSubmission(
+      deleteRequest("real-one", { returnTo: "/admin?erased=1&kind=contact" }),
+    );
+    const location = res.headers.get("location")!;
+    // Exactly one, and it is there because a row was actually removed.
+    expect([...new URL(location, "http://localhost").searchParams.getAll("erased")]).toEqual(["1"]);
+    expect(location).toBe("/admin?kind=contact&erased=1");
+  });
+
+  it("never claims a deletion when there was nothing to delete", async () => {
+    const res = await deleteSubmission(deleteRequest("no-such-row", { returnTo: "/admin?erased=1" }));
+    expect(res.status).toBe(404);
+    expect(res.headers.get("location")).toBeNull();
   });
 });
 

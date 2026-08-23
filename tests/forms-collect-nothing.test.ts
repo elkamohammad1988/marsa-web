@@ -99,6 +99,41 @@ describe("no form promises a reply", () => {
     expect(notice).toMatch(/nothing was (sent|stored)/i);
     expect(notice).toMatch(/nobody will contact you/i);
   });
+
+  /**
+   * The page around the form counts too.
+   *
+   * The scan above covered the three form components and nothing else, so
+   * `/contact` kept a highlight reading *"Fast replies — We answer every
+   * enquiry within one business day"* — the same sentence this file deletes
+   * from the lead form, sitting six inches above a form that discards what you
+   * type. The component was clean and the page was not, and no gate looked at
+   * the page.
+   *
+   * The host set is derived rather than listed: any file that renders one of
+   * the three forms. A fourth page that adds a form inherits the rule by
+   * existing, which is the only version of this that stays true.
+   */
+  const FORM_COMPONENTS = ["GetStartedForm", "ContactForm", "NewsletterForm"];
+
+  const hosts = [...sourceFiles("app"), ...sourceFiles("components")].filter((f) => {
+    if (FORMS.includes(f.replaceAll("\\", "/"))) return false;
+    const source = code(f);
+    return FORM_COMPONENTS.some((name) => new RegExp(`<${name}[\\s/>]`).test(source));
+  });
+
+  it("finds the pages that host a form", () => {
+    // A derived list that quietly matched nothing would pass every assertion
+    // below without checking anything.
+    expect(hosts.length).toBeGreaterThan(0);
+  });
+
+  it.each(hosts)("%s makes no undeliverable promise either", (file) => {
+    const source = code(file);
+    for (const promise of PROMISES) {
+      expect(source, `${file} still says ${promise}`).not.toMatch(promise);
+    }
+  });
 });
 
 describe("the rules a visitor sees are the real ones", () => {
