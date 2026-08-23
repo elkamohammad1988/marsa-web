@@ -128,6 +128,16 @@ more precisely: no policy grants anything to `anon` or `public`, and every
 policy is constrained by the caller's identity. `tests/migrations.test.ts`
 asserts exactly that.
 
+**What this section is, and is not.** Everything above describes how migration
+`004` is *written* to behave, verified by reading the SQL and by unit tests that
+run `lib/profiles.ts` against a stubbed PostgREST. It is **not** a result
+measured against a running Postgres: no Supabase project is connected to this
+build, which is why `/api/health` reports `database: configured:false` and why
+the deployed demo has no clickable sign-in. The policies are prepared
+infrastructure — reviewed and tested, applied nowhere. Read the reasoning above
+as a design under test, and re-verify it against a live database before relying
+on it in a product that holds real user records.
+
 ---
 
 ## The flows

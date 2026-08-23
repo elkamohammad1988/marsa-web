@@ -26,9 +26,20 @@ description says what Marsa is in its second sentence rather than in a footnote.
 
 **https://marsa-web.vercel.app**
 
-Deployed from `feat/auth-foundation` with **no credentials configured at all** —
-the production environment holds exactly one variable, `NEXT_PUBLIC_SITE_URL`.
-That is a deliberate choice, and it decides what a visitor can and cannot reach.
+Deployed from `main` with **no credentials configured at all** — the production
+environment holds exactly one variable, `NEXT_PUBLIC_SITE_URL`. That is a
+deliberate choice, and it decides what a visitor can and cannot reach.
+
+Two checks, both re-run 2026-08-22, that the deployment is the build in this
+repository rather than an older one. A rendered page can be argued about; a
+token value cannot:
+
+```
+$ curl -s https://marsa-web.vercel.app/_next/static/css/*.css | grep -o -- "--brand:[^;]*"
+--brand:212 175 55                       # #D4AF37, the palette in styles/globals.css
+$ curl -s https://marsa-web.vercel.app/api/health
+{"status":"degraded", … storage/database/admin/notifications: configured:false, fx: configured:true}
+```
 
 **Live and working:** the whole marketing site, the `/demo` sandbox end to end,
 live ECB rates in the converter and the demo's conversion step, ISO 13616 IBAN
@@ -43,8 +54,10 @@ is unconfigured, and the app refuses the file-store fallback in production
 instead of pretending a lead was saved.
 
 **If a buyer asks why auth is not clickable:** the code, the row-level-security
-migration and 1,832 automated checks are all in the public repository and run
-from a clean clone. What is missing from the demo is a database, not a feature. Standing up a
+migration and 1,885 automated checks are all in the repository and run from a
+clean clone. **This answer only holds once the repository is public — it is 404
+to a signed-out visitor today, and giving it before then hands the buyer a link
+that proves nothing (§9).** What is missing from the demo is a database, not a feature. Standing up a
 live account system for a concept nobody can sign up to would mean holding real
 email addresses for a product that does not exist.
 
@@ -85,8 +98,12 @@ Upwork prefixes the title with "I will" and caps it at 80 characters.
 | build a secure full stack web application with tests, CI and documentation | 73 | Engineering rigour |
 
 Why the primary wins: it names the stack a buyer searches for, claims
-"production ready" — which the CI badge and test count substantiate — and avoids
-every word that could read as a financial service.
+"production ready", and avoids every word that could read as a financial
+service. Note what currently substantiates that claim and what does not: the
+test count and the production build are real and re-measurable from a clone, but
+**the CI badge proves nothing to a buyer while the repository is private** — it
+renders broken, not green. Until the repository is public, the phrase rests on
+the test suite alone.
 
 ---
 
@@ -99,6 +116,13 @@ every word that could read as a financial service.
 ---
 
 ## 4. Full description
+
+> ⚠ **Do not publish this section yet.** Its second paragraph tells the buyer
+> the reference project is **public** and invites them to read every line. That
+> is the offer's central proof and it is **false today** — re-verified
+> 2026-08-22, a signed-out request to the repository returns 404. Flip the
+> repository to public first; publishing before that turns the strongest
+> sentence in the listing into the one a buyer can most easily disprove.
 
 > **Most "full stack" deliveries are a front end with a database bolted on.**
 >
@@ -119,8 +143,10 @@ every word that could read as a financial service.
 >   and roles enforced in the database by row-level security — not by an `if`
 >   statement in a route handler that the next developer forgets to copy. In the
 >   reference build, the admin's "list all accounts" query has no role filter in
->   it at all and still returns exactly one row to everyone else, because the
->   database is what decides.
+>   it at all, because the database is what decides. Stated precisely: those
+>   policies are written and unit-tested against a stubbed Postgres, and have not
+>   been applied to a live database — the reference demo deliberately runs
+>   without one, and I would rather tell you that than let a screenshot imply it.
 > - **A backend that does not lose things.** Validation shared between client and
 >   server, rate limiting that works across instances, durable storage, email
 >   notification as a side effect that can never block an intake, a health
@@ -135,12 +161,16 @@ every word that could read as a financial service.
 >   app reads real ones, server-cached and degrading gracefully, instead of
 >   invented figures that date the moment they ship.
 > - **A test suite and a CI gate.** Typecheck, lint, unit tests and a production
->   build on every push. The reference build runs 1,832 automated checks —
+>   build on every push. The reference build runs **1,885 automated checks** —
 >   unit tests for business logic and security boundaries, property tests that
 >   recompute accessibility contrast from the design tokens, and
 >   repository-integrity checks — and ships with zero `any` in strict
->   TypeScript. There is no browser or end-to-end suite in it, and I will say so
->   before you ask.
+>   TypeScript. A **second suite of 139 checks drives a real Chrome against a
+>   production build**: every public route, the sign-in and erasure flows in the
+>   operator dashboard, keyboard operation of the menus and the accordion, the
+>   phone layout at 320px, and an axe-core pass over 74 page states. Both run as
+>   required CI jobs. What it does not have is a component-level DOM suite, and
+>   I will say so before you ask.
 > - **Documentation written for the developer after me.** How to run it, how to
 >   deploy it, what every environment variable turns on, and comments that record
 >   *why* rather than *what*.
@@ -171,9 +201,11 @@ every word that could read as a financial service.
 These are the three tiers a buyer purchases: **development work, priced in
 dollars, delivered as source code.** They are not connected to — and must never
 be confused with — the euro subscription tiers on the concept product's own
-`/pricing` page, which is fiction inside a demo and appears in image 8. If a
-single line of this listing could be misread as a financial product's price
-list, it is that image, which is why its caption names what it is.
+`/pricing` page, which is fiction inside a demo. That page is deliberately
+**not** in the gallery: `08-pricing.png` was dropped for exactly this reason
+(§6), because a thumbnail reading "€4.99 a month" is the single image in this
+listing that could be misread as a financial product's price list. The only
+prices a buyer should encounter here are the dollar figures below.
 
 | | **Starter** | **Professional** | **Premium** |
 |---|---|---|---|
@@ -181,18 +213,35 @@ list, it is that image, which is why its caption names what it is.
 | **Delivery** | **7 days** | **14 days** | **30 days** |
 | **Revisions** | **1** | **2** | **3** |
 | Scope | Marketing site or single-purpose app, up to 5 pages | Full application, up to 12 screens | Full application, unlimited core screens |
-| Design system | Tokenised, one theme | Tokenised, one theme | Tokenised, light + dark |
+| Design system | Tokenised, one theme | Tokenised, one theme | Tokenised, light + dark † |
 | Authentication | — | ✔ Email/password, sessions, password reset | ✔ + roles and row-level security |
 | Database | — | ✔ Schema, migrations, one provider | ✔ + row-level security policies and seed data |
 | Admin dashboard | — | ✔ Basic operator view | ✔ + CSV export and funnel analytics |
 | Forms & backend | Contact form, validated | + durable storage and email notification | + rate limiting, health endpoint, error reporting |
-| Live API integration | — | ✔ One source, server-cached | ✔ Multiple sources, cached, degrading |
+| Live API integration | — | ✔ One source, server-cached | ✔ Multiple sources, cached, degrading † |
 | Accessibility | WCAG AA, axe report | WCAG AA, axe report | WCAG AA, axe report + keyboard walkthrough |
 | SEO | Meta, OG, sitemap | + JSON-LD structured data | + per-page OG images |
 | Tests | Build gate | Unit tests + CI pipeline | Unit tests + CI + integration tests |
 | Documentation | README | README + deployment guide | Full docs + architecture notes |
 | Deployment | Guide | Deployed for you | Deployed + handover call |
 | Source code | ✔ Full ownership | ✔ Full ownership | ✔ Full ownership |
+
+† **The two rows the reference build does not demonstrate.** Everything else in
+the Premium column exists in this repository and can be checked before you buy.
+These two are scope, not evidence, and the difference is worth stating exactly:
+
+- **Light + dark.** Marsa is deliberately dark-only. `styles/globals.css` holds
+  one palette; the `.dark` block that used to mirror it was deleted because it
+  could only ever set a colour to the value it already had, and
+  `tests/contrast.test.ts` now forbids `dark:` variants outright. What is proven
+  here is the *tokenised* half — every colour is a role-named custom property,
+  which is the substrate a second palette is written against. The second palette
+  itself would be written for you; it is not sitting in this repo waiting.
+- **Multiple FX sources.** `lib/fx.ts` reads exactly one provider (Frankfurter,
+  serving ECB reference rates). The *cached* and *degrading* halves are real and
+  visible in the demo — an hour-long fetch cache, and a converter that reports a
+  stale rate rather than leaking an upstream error string. A second provider
+  with failover between them is not written.
 
 **Deliverables, stated plainly (all tiers):** a private Git repository you own
 from commit one, the full source, a README that runs the project from a clean
@@ -213,8 +262,21 @@ work is worth.
 ## 6. Images
 
 Seven, in this order, with the video first if the listing type accepts one. All
-are regenerated from a production build by `npm run capture`, so they cannot
-drift from the application they show.
+are photographed from a production build by `npm run capture` rather than mocked
+up — but they are only as current as the last run, and treating that as "cannot
+drift" is how this set went stale once already: the UI cleanup of 2026-08-22
+removed decoration that images taken two days earlier still showed, including
+the thumbnail. **Re-run `npm run capture` immediately before uploading**, and
+compare image 1 against the live site with your own eyes.
+
+Images 1, 2, 3, 4, 6 and 7 were regenerated 2026-08-22 and match the current
+build. `05-analytics.png` is the exception and is still the 2026-08-20 capture:
+re-shooting it without a database renders the funnel from the local JSONL
+fallback, whose sessions produce a `Verified (KYC) · 116.7%` row — a real number
+from scratch data that reads as a broken dashboard. It differs from the current
+build by one `←` glyph on a button. Do not hand-edit the data file to make it
+look better; capture it against a database with coherent demo traffic, or leave
+it as it is.
 
 **Every image carries the "Concept build — what's real?" marker.** That is not
 decoration and it is not optional: the capture script throws rather than write an
@@ -298,6 +360,8 @@ failure, not a certified audit.
 **How do I know the code is actually good?**
 Read it. The reference project is public, including its test suite and the
 scripts that produce its measurements. Clone it and run `npm run verify`.
+*(Gated on the same blocker as §4 — do not publish this answer while the
+repository still answers 404 to a signed-out visitor. See §9.)*
 
 **Can you work with my existing brand or Figma files?**
 Yes, either. If your brand colours conflict with accessibility requirements I
@@ -335,8 +399,42 @@ discover it in week three.
       gallery size
 - [ ] Title under 80 characters and free of superlatives Upwork rejects
 - [ ] No claim of client work, delivery volume, or reviews anywhere in the copy
-- [ ] Repository link included and public, `npm run verify` green on `main`
+- [x] **The repository is public.** `https://github.com/elkamohammad1988/marsa-web`
+      answers 200 to a signed-out request. This is the listing's central claim —
+      *read every line, run the test suite, and re-measure every number I quote*
+      — and it does not work at all while the repo is private, which it was
+      until 2026-08-23. Secret hygiene was checked before publishing and is
+      clean: `.env.local` is ignored, no `.data/*.jsonl` is tracked, and the
+      only env file in git is `.env.example`.
+- [x] `npm run verify` green on `main` **from the commit that is actually
+      pushed**. The working tree used to run ahead of `main` by a large margin,
+      which made every number below unverifiable by the one route a buyer takes
+      — cloning `main` — and closing that gap was the point of the 2026-08-24
+      pass.
 - [x] **A live demo URL** — https://marsa-web.vercel.app, deployed with zero
       credentials in the production environment. See §0 for exactly what is
       reachable and what is deliberately closed
-- [ ] Every number in the description re-measured within the last week
+- [x] Every number in the description re-measured. **Measured 2026-08-24 on the
+      commit that is pushed**:
+      - `npm test` — **1,885 passing across 53 files**, green. The docs carried
+        1,886, which was correct when taken and drifted by one when an unused
+        icon export was removed along with the invented company page that was
+        its last caller. Every claim site now reads 1,885, and
+        `tests/portfolio-honesty.test.ts` fails if they ever disagree again.
+      - `npm run test:smoke` — **139 checks across 3 files, 139 passed**, green.
+        Two failures were found and fixed rather than re-run until green. The
+        axe pass was reporting a colour-contrast violation on the FAQ triggers,
+        which was the scan landing mid-reveal — the rows transition opacity from
+        zero and axe folds an ancestor's opacity into its contrast maths; the
+        harness now waits for every finite animation to finish before it
+        measures. The admin empty-state assertion was reading `innerText` while
+        `app/admin/loading.tsx` was still on screen; it now waits for the
+        heading, which the fallback does not render. Both were races in the
+        harness rather than defects in the site, and both are now conditions
+        rather than hopes.
+      - `tests/smoke/accessibility.smoke.ts` is **tracked**, which it was not
+        before: it ran for months as a gitignored script at the repository root,
+        so the one figure this listing offers for checking was the one figure a
+        reader could not check. **74 scans, 0 violations** — every public route
+        at 390px and 1280px, six interactive states, and the operator dashboard
+        at both widths.

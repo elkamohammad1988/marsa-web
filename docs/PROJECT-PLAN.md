@@ -12,9 +12,11 @@ production `npm audit` on every push to `main` and every pull request.
 Everything else in the audit — **S1–S10, B1–B10, F1–F10, P3–P9** — is tracked
 below. 37 findings, 19 batches.
 
-Last updated: 2026-07-27. **25 PRs merged.** Baseline on `main`: 655 tests
-across 34 files, 55 routes, typecheck and lint clean. See
-[`PROGRESS.md`](./PROGRESS.md).
+Last updated: 2026-08-23. Baseline on `main`: `npm run verify` green —
+typecheck, lint, the full unit suite and a production build. The counts that
+used to sit on this line went stale between edits, which is the exact failure
+this project keeps finding in its own copy; run the command for the current
+figures rather than trusting a number written down once.
 
 **The audit is no longer the whole plan.** It was a snapshot of code quality,
 and it was right about the code. What it did not ask is whether the site's
@@ -151,7 +153,7 @@ Batch 16 and cannot start until assets exist.
 
 **Every batch from the original backlog is now closed**, as is every High and
 every Critical in `AUDIT.md`. Batches 11, 17 and 18 shipped on 2026-08-19 and
-13 on 2026-08-20 (see the entries at the end of [`PROGRESS.md`](./PROGRESS.md)).
+13 on 2026-08-20.
 
 Batch 13 was the last, and it stayed open for a while on purpose. The site *was*
 driven end to end in a real browser before then — every route, every form, the
@@ -170,8 +172,8 @@ application itself publishes.
 
 **Outside the original backlog.** The audit is one dated snapshot, not a
 permanent ceiling. Work found by re-reading the repository afterwards is
-tracked the same way and recorded in [`PROGRESS.md`](./PROGRESS.md) with the
-evidence that motivated it.
+tracked the same way, with the evidence that motivated it recorded in the
+commit that closes it.
 
 | # | Batch | Scope | Status |
 |---|---|---|---|
@@ -181,9 +183,9 @@ evidence that motivated it.
 | F | Structured data & sitemap honesty | Eighteen pages rendered a breadcrumb and one emitted `BreadcrumbList`; the sitemap stamped every entry with build time, telling each crawl that all 32 pages had just changed | **DONE** ([#20](https://github.com/elkamohammad1988/marsa-web/pull/20)) |
 | G | The demo, as an interaction | Four defects and three gaps found by walking the flow as a reader rather than reading it as a diff | **DONE** ([#21](https://github.com/elkamohammad1988/marsa-web/pull/21)) |
 
-(Batches D and E in `PROGRESS.md` are the audit's Batch 10 and Batch 12; they
-were written up under letters before the boards were reconciled. The PR numbers
-are the reliable identifier — #18 and #19.)
+(Batches D and E are the audit's Batch 10 and Batch 12; they were written up
+under letters before the boards were reconciled. The PR numbers are the
+reliable identifier — #18 and #19.)
 
 ---
 
@@ -204,7 +206,6 @@ logged server-side only. Local gate before merge: typecheck exit 0, lint clean,
 117 tests across 11 files (baseline 94/10), build 50 routes.
 
 Also closes the production-throw half of **B8**; the rest of B8 remains in Batch 7.
-Full detail in [`PROGRESS.md`](./PROGRESS.md#batch-0--submissions-are-never-silently-lost--merged).
 
 ---
 
@@ -468,8 +469,7 @@ F5 strictly precedes F4: the dates are unparseable display strings until F5.
 
 ### Batch 15 — Markup honesty & artifact weight · F10, F9 · **F10 DONE**
 
-**F10 shipped as Batch C**, which grew past the audit's description — see
-[`PROGRESS.md`](./PROGRESS.md#batch-c--navigation-aria-honesty-focus-and-link-hygiene--merged).
+**F10 shipped as Batch C**, which grew past the audit's description.
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
@@ -605,6 +605,7 @@ instance:
 | The sentences that follow the disclosure in `Footer.tsx` and `/legal/terms` — *"Marsa provides multi-currency accounts, SEPA & SWIFT transfers, and FX services…"* — assert operation immediately after a disclosure that denies it. | **BLOCKED-ON-ME** ([H19](#h19--approve-the-regulatory-disclosure-wording)) |
 | `siteConfig.legalName` is `"Marsa Money Ltd."` — a suffix that asserts an incorporated entity. | **BLOCKED-ON-ME** ([H19](#h19--approve-the-regulatory-disclosure-wording)) |
 | Nobody has looked at the new artwork rendered in a browser. It builds, it carries the right labels, and it fits its slots by construction — but that is not the same as looking right. | **BLOCKED-ON-ME** ([H20](#h20--look-at-the-new-artwork)) |
+| `components/admin/FunnelView.tsx` — a funnel step can render **above 100%** of the start step and nothing stops it. `width` at line 94 clamps only the *lower* bound (`Math.max(…, 2)`); there is no upper clamp, so the bar overflows its track and the label prints the raw figure. Found on 2026-08-22 while re-capturing `05-analytics.png` against the local JSONL fallback, which yielded `Verified (KYC) · 116.7%` — sessions whose `start` beacon never arrived while their later steps did. The arithmetic is correct and the input is legitimately skewed; what is missing is the presentation guard, so a real dashboard reads as a broken one. It is why image 5 was left as the 2026-08-20 capture rather than re-shot. | **OPEN** — a display defect, not a data defect; do not fix it by editing the data file |
 
 ---
 

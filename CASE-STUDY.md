@@ -179,8 +179,8 @@ All measured on the production build — method reproducible from the repo.
 > 367, and an earlier draft of *this file* claimed 655 when the real figure had
 > passed 1,000. That is the most expensive kind of error for a project whose
 > whole argument is that its claims are checkable, and it is why the numbers
-> here are now re-measured rather than carried forward. The current baseline is
-> always in [`docs/PROGRESS.md`](./docs/PROGRESS.md).
+> here are now re-measured rather than carried forward, and each one is dated
+> where it appears.
 
 - **axe-core (2026-07-28)** — WCAG 2.0, 2.1 **and 2.2**, A + AA, plus the
   best-practice ruleset, injected into a real Chrome over CDP and run on **36
@@ -205,7 +205,7 @@ All measured on the production build — method reproducible from the repo.
   them — a defect confined to the three routes behind the password, which is
   why the suite as it then stood — well over a thousand checks — and an axe
   pass over the public site had never seen it.
-- **Tests (2026-08-19)** — **1832 / 1832** Vitest across 53 files, covering
+- **Tests (2026-08-24)** — **1885 / 1885** Vitest across 53 files, covering
   IBAN/MOD-97, FX, pagination, storage provider selection, admin auth (HMAC
   round-trip, tamper, expiry), session signing, RLS-backed profile reads, CSV
   injection-safety, and the analytics funnel (unique-session counting,
@@ -254,7 +254,7 @@ behind it. Everything that previously implied otherwise (a regulatory claim,
 nine testimonials, five job openings, three contact addresses at a domain
 nobody owns) was found by auditing the site against its own claims and removed.
 That programme is the more interesting half of this project's history, and it
-is recorded batch by batch in [`docs/PROGRESS.md`](./docs/PROGRESS.md).
+is visible commit by commit in the git log.
 
 ---
 
@@ -262,9 +262,11 @@ is recorded batch by batch in [`docs/PROGRESS.md`](./docs/PROGRESS.md).
 
 > **Marsa** — a cross-border multi-currency account concept, delivered as a
 > production-grade marketing site, an interactive live-FX demo, customer
-> accounts on Postgres row-level security, and a first-party analytics backend.
-> Dark "liquid gold" design system on one set of role-named tokens; 1,832
-> passing tests and 0 axe violations across 72 page-loads; illustrations drawn
+> accounts built on Postgres row-level security — policies written and tested,
+> deliberately not wired to a live database — and a first-party analytics
+> backend.
+> Dark "liquid gold" design system on one set of role-named tokens; 1,885
+> passing tests and 0 axe violations across 74 scans; illustrations drawn
 > from those tokens rather than sourced; and a hard line between real software
 > and a build that tells you exactly what it is not. Next.js 15 / React 19 /
 > TypeScript, four runtime dependencies.

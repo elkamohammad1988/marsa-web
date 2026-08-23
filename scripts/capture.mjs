@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Capture the eight portfolio screenshots, reproducibly.
+ * Capture the seven portfolio screenshots, reproducibly.
  *
  * The previous version of this file swept every marketing route and wrote one
  * PNG per `<section>`, which produced 118 images across ten directories. That
@@ -282,6 +282,23 @@ async function shot(page, name) {
 const NAV_BAND = 104;
 
 /**
+ * How far above the progress rail the demo's composition actually starts.
+ *
+ * The rail is the obvious anchor for 03, 04 and 07 and it is the wrong one:
+ * the sandbox banner — *"Interactive sandbox · Sample data, no real money"* —
+ * sits above it, and framing from the rail put that banner half behind the
+ * floating navbar on the 390px shot. What shipped was the word "sandbox"
+ * sliced through the middle with navigation drawn over the rest of the
+ * sentence, which in a still reads as a rendering fault, and it removed the
+ * one disclosure in the frame.
+ *
+ * The banner plus its margin measures 74px at 1440 and 92px at 390 — close
+ * enough that one number covers both, and the scorer searches either side of
+ * whatever it is given anyway.
+ */
+const DEMO_BANNER = 74;
+
+/**
  * Put the interesting element in the frame, at a scroll position that cuts
  * nothing.
  *
@@ -483,6 +500,36 @@ async function frame(page, selector, offset = NAV_BAND) {
   await new Promise((r) => setTimeout(r, 450));
 }
 
+/**
+ * Frame a page at its own top, having checked that the subject fits there.
+ *
+ * The check is the point. "Scroll to zero" on its own is the assumption that
+ * bit the previous version of this script in the other direction — a fixed
+ * position that was right when it was written and silently wrong after the
+ * page grew. This asserts the property that makes scroll zero correct, and
+ * throws with the measurement when it stops holding, in the same spirit as
+ * `requireDisclosure` and `requireLiveRate`: refuse to write a bad image
+ * rather than write one and hope somebody looks.
+ */
+async function topOfPage(page, subject) {
+  const fit = await page.evaluate((sel) => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    const el = document.querySelector(sel);
+    if (!el) return { found: false };
+    const rect = el.getBoundingClientRect();
+    return { found: true, bottom: Math.round(rect.bottom), viewport: window.innerHeight };
+  }, subject);
+
+  if (!fit.found) throw new Error(`nothing matched ${subject}`);
+  if (fit.bottom > fit.viewport) {
+    throw new Error(
+      `${subject} ends ${fit.bottom - fit.viewport}px below the fold at scroll 0; ` +
+        "this page can no longer be framed from its top.",
+    );
+  }
+  await new Promise((r) => setTimeout(r, 450));
+}
+
 async function goto(page, url, viewport = DESKTOP) {
   await page.setViewport(viewport);
   await page.goto(`${ORIGIN}${url}`, { waitUntil: "networkidle2", timeout: 60000 });
@@ -584,7 +631,7 @@ async function main() {
     await advance(page, 4);
     await clickLabel(page, /receive|payout/);
     await settle(page);
-    await frame(page, "ol[aria-label='Demo progress']");
+    await frame(page, "ol[aria-label='Demo progress']", NAV_BAND + DEMO_BANNER);
     await shot(page, "03-feature-account");
     await advance(page, 1);
     // The convert step loads a live ECB rate on entry; give it room, then
@@ -592,7 +639,7 @@ async function main() {
     await clickLabel(page, /→ EUR/, 1800);
     await requireLiveRate(page, "the demo convert step");
     await settle(page);
-    await frame(page, "ol[aria-label='Demo progress']");
+    await frame(page, "ol[aria-label='Demo progress']", NAV_BAND + DEMO_BANNER);
     await shot(page, "04-feature-convert");
     // Finish the run. The funnel captured below counts real sessions, so
     // leaving every capture abandoned at "convert" would show a 0% completion
@@ -616,10 +663,19 @@ async function main() {
     // Submit it. An untouched form shows the feature exists; the result panel
     // shows it works, which is the only reason this shot is in the set.
     await clickLabel(page, /check iban/, 900);
-    // 150px puts the card just clear of the sticky navbar. Framing tighter
-    // slices the page's own <h1> in half behind it, which looks like a
-    // rendering fault rather than a crop.
-    await frame(page, "#iban-input, input", 150);
+    // No `frame()` here, and that is the fix rather than a shortcut.
+    //
+    // This page's subject is already above the fold: the heading, the intro,
+    // the field and the result panel it has just produced all fit inside the
+    // first viewport. Every scrolled candidate is strictly worse, and the
+    // framer's own scorer says so — it rates scroll 0 at a cut score of zero
+    // and the position it chose at six. What outvoted it was the distance
+    // term, which exists to stop a shot wandering off its subject and here
+    // walked it *away* from one, into a frame whose top edge sliced "Validate
+    // any international bank account number in seconds" in half behind the
+    // navbar. When the subject starts at the top of the page, the top of the
+    // page is the frame.
+    await topOfPage(page, "#iban-result, [role='status']");
     await shot(page, "06-iban-validation");
 
     console.log("07 mobile demo");
@@ -634,7 +690,7 @@ async function main() {
     await advance(page, 1);
     await clickLabel(page, /→ EUR/, 1800);
     await settle(page);
-    await frame(page, "ol[aria-label='Demo progress']", 84);
+    await frame(page, "ol[aria-label='Demo progress']", NAV_BAND + DEMO_BANNER);
     await shot(page, "07-mobile");
 
     const password = adminPassword();

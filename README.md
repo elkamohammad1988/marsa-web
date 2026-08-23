@@ -47,8 +47,11 @@ pretend.
 
 - **Customer accounts with real data isolation.** Registration, email
   confirmation, sign-in, password reset, and sessions that renew silently in the
-  background. Permissions are enforced by Postgres Row Level Security, so one
-  customer cannot read another's record even if application code asks it to.
+  background. Permissions are defined in Postgres Row Level Security (migration
+  `004`) rather than in a route handler, so one customer cannot read another's
+  record even if application code asks it to. Written and unit-tested against a
+  stubbed PostgREST — no Supabase project is connected, so the policies have not
+  yet run against a live database.
 - **An operator dashboard.** Form submissions, search, CSV export, single-record
   erasure for a GDPR Article 17 request, and a first-party analytics funnel —
   no cookies, no third-party trackers. An admin session can be revoked by
@@ -68,10 +71,15 @@ pretend.
 
 ## Screenshots
 
-All regenerated from a production build by `npm run capture`, so they cannot
-drift from the application they show. **Every one carries the concept-build
-disclosure**, because the site does — the capture script throws rather than
-write an unmarked image, and [`tests/portfolio-honesty.test.ts`](tests/portfolio-honesty.test.ts)
+All are photographed from a production build by `npm run capture` rather than
+mocked up, and they are only ever as current as the last run — which is a
+weaker guarantee than "cannot drift", the claim that stood here until it turned
+out to be false. The set went a commit stale when a UI cleanup removed
+decoration the images still showed, so **re-run the capture before publishing
+them anywhere**. Regenerated 2026-08-22, `05-analytics.png` excepted — see
+below. **Every one carries the concept-build disclosure**, because the site
+does — the capture script throws rather than write an unmarked image, and
+[`tests/portfolio-honesty.test.ts`](tests/portfolio-honesty.test.ts)
 fails if that rule is ever softened.
 
 | | |
@@ -84,6 +92,18 @@ fails if that rule is ever softened.
 submissions, which on any machine that has used the contact form means a real
 name and email address in an image intended for a public listing. The funnel
 view carries the same message and is anonymous by construction.
+
+`05-analytics.png` is the one image in the set still dated 2026-08-20, and the
+reason is worth recording. Re-shooting it against the local JSONL fallback
+produced a funnel reading **`Verified (KYC) · 116.7%`** — more sessions at the
+second step than the first, because that dev file holds sessions whose `start`
+beacon never arrived while their later steps did. The number is real, the data
+behind it is local scratch, and the page has no guard against a step exceeding
+the one above it. Rather than publish a dashboard that looks broken or
+hand-edit a data file until it flattered the product, the previous capture
+stands; it differs from the current build by one `←` glyph on a button. The
+missing guard is filed as a real defect, not a screenshot problem — see *Still
+open* in [`docs/PROJECT-PLAN.md`](docs/PROJECT-PLAN.md#still-open).
 
 ---
 
@@ -150,12 +170,12 @@ guarding a person's own data. They share the cookie-signing primitive and
 nothing else, because merging them would let the operator password read
 customer rows.
 
-- **The database decides who reads what.** The administrator's account list is
-  written as *"select every profile"* with no role filter, and returns exactly
-  one row to everybody else. `profiles.role` is unwritable from a browser
-  session — the `authenticated` database role holds no privilege on that column,
-  so an attempt to change it fails at Postgres rather than at a check in
-  application code.
+- **The database is what decides who reads what.** The administrator's account
+  list is written as *"select every profile"* with no role filter; migration
+  `004`'s policies are what hold it to one row for everybody else, rather than a
+  filter a future route handler could forget. `profiles.role` is granted away
+  from the `authenticated` database role, so an attempt to change it from a
+  browser session fails at Postgres rather than at a check in application code.
 - **Sessions.** An HMAC-signed `httpOnly` envelope, renewed silently in
   middleware before the access token expires, with an absolute 30-day ceiling
   that a refresh cannot extend.
@@ -168,6 +188,14 @@ customer rows.
   account — including when the upstream call fails.
 - **Headers.** A real Content-Security-Policy, HSTS with preload,
   `frame-ancestors 'none'`, and `Cross-Origin-Opener-Policy: same-origin`.
+
+**What that status is, exactly.** Everything under `db/migrations/` — the
+row-level-security policies included — is **prepared infrastructure: written,
+unit-tested against a stubbed PostgREST, and applied nowhere.** No Supabase
+project is connected to this build, which `/api/health` reports as
+`database: configured:false`. The reasoning above describes how the schema is
+written to behave, not a result measured against a running Postgres, and it is
+worth reading with that distinction in mind.
 
 Full setup and threat reasoning: [`AUTHENTICATION.md`](AUTHENTICATION.md).
 
@@ -188,8 +216,8 @@ npm run verify         # typecheck → lint → tests → production build
 npm audit              # 0 vulnerabilities, dev tree included
 ```
 
-**What the suite covers.** 1,832 automated checks across 53 files, all running
-in Node — plus 50 browser checks in a separate suite, below:
+**What the suite covers.** 1,885 automated checks across 53 files, all running
+in Node — plus 139 browser checks in a separate suite, below:
 
 - **Unit tests for business logic and security boundaries** — IBAN MOD-97, FX
   conversion, storage provider selection, admin auth (HMAC round-trip, tamper,
@@ -211,14 +239,44 @@ in Node — plus 50 browser checks in a separate suite, below:
   silently does nothing.
 
 **A browser suite, separately.** [`tests/smoke/`](tests/smoke/) drives a real
-Chrome against a production build — 50 checks over every public route: each one
-answers 200 with exactly one `<h1>` and no console error, failed request or
-uncaught exception; nothing clickable is a dead `href="#"`; every form control
-has a label; blog pagination walks forward and back by keyboard; the IBAN
+Chrome against a production build — 139 checks in three files.
+
+[`public-site.smoke.ts`](tests/smoke/public-site.smoke.ts) covers every public
+route: each one answers 200 with exactly one `<h1>` and no console error, failed
+request or uncaught exception; nothing clickable is a dead `href="#"`; every form
+control has a label; blog pagination walks forward and back by keyboard; the IBAN
 checker accepts and rejects on the checksum; the FX tools fetch a live rate on
-mount and again when the pair changes; the FAQ accordion and the navbar
-dropdown work by mouse *and* by key; the mobile menu opens at 390px without the
-page scrolling sideways; and a missing URL is a real 404 with a way home.
+mount and again when the pair changes; the FAQ accordion and the navbar dropdown
+work by mouse *and* by key; the mobile menu opens at 390px without the page
+scrolling sideways; and a missing URL is a real 404 with a way home.
+
+[`admin-dashboard.smoke.ts`](tests/smoke/admin-dashboard.smoke.ts) signs an
+operator in behind the real password — against an in-process PostgREST stand-in,
+so `lib/postgrest.ts` is genuinely exercised and no database is required — then
+searches, filters, pages forward and back, exports the CSV, erases a record
+through its confirmation step and signs out. **It exists because two of those
+buttons did nothing in a browser while every other gate was green**: the erasure
+and sign-out endpoints answered with an absolute redirect rebuilt from
+`request.url`, which `form-action 'self'` blocks whenever the server's idea of
+its own host differs from the document's — so the record was erased, the session
+was destroyed, and the operator was shown neither. The filters and the pagination
+were dead for a different reason, in the same place: on a `force-dynamic` route,
+a `<Link>` that changes only the query string fetches its payload and never
+commits it.
+
+[`accessibility.smoke.ts`](tests/smoke/accessibility.smoke.ts) runs axe-core
+over every public route at 390px and 1280px, over the six states a page load
+never reaches — the mobile menu open, the concept disclosure open, a navbar
+dropdown open, the FAQ accordion expanded, a form showing its validation errors,
+and the demo driven to its final step — and over the operator dashboard behind
+its cookie, at both widths. **74 scans, 0 violations.**
+
+It waits for the page to stop moving before it measures, which is the whole
+difference between a scan and a guess: the reveal animations transition opacity
+from zero, axe folds an ancestor's opacity into its contrast calculation, and a
+scan that lands mid-transition reports half-faded text as a serious
+colour-contrast failure that existed for a third of a second. Zero violations
+here means no machine-detectable failure on those states, not a certified audit.
 
 It is a **second CI job**, not a step in `npm run verify`, because the unit gate
 is fast precisely by building nothing and starting nothing. Two commands:
@@ -247,11 +305,12 @@ computation on every test run:
 | `#D4AF37` on `#1A2A31` | 7.0:1 | large key numbers |
 | `#E88A8A` on `#16242A` | 6.4:1 | form errors |
 
-An earlier point-in-time audit of the previous palette (Lighthouse, axe-core
-across 36 routes at two viewports) is recorded with its method and its limits in
-[`CASE-STUDY.md`](CASE-STUDY.md). Those figures describe the build they were
-taken on and have not been re-run against this palette — the contrast table
-above has, on every test run.
+The axe-core pass is no longer a point-in-time audit. It used to be an untracked
+script at the repository root — so the one number this README offered for
+checking was the one a reader could not check — and its last recorded run had
+crashed on a streamed form. It is now [`accessibility.smoke.ts`](tests/smoke/accessibility.smoke.ts),
+committed, reproducible, and runnable from a clean clone. The Lighthouse figures
+in [`CASE-STUDY.md`](CASE-STUDY.md) are still point-in-time and say so.
 
 ---
 
@@ -264,9 +323,12 @@ Honesty matters more than looking finished.
 - ECB FX rates — live, server-cached, driving the converter and the demo conversion.
 - IBAN validation (ISO 13616 / MOD-97) and the demo's checksum-valid sample IBAN.
 - **Customer accounts** — registration, confirmation, sign-in, password reset,
-  session persistence with silent renewal, and a role model enforced by Row Level
-  Security. Creating an account stores your email address and, if you give one,
-  your name. It opens a profile page and nothing else, because there is no money
+  session persistence with silent renewal, and a role model written against Row
+  Level Security. Real code, unit-tested against a stubbed Supabase, and **not
+  yet run against a live one**: no project is connected, so this is the one
+  capability in this list that has never been exercised end to end. Wired up,
+  creating an account would store your email address and, if you give one, your
+  name, and would open a profile page and nothing else — there is no money
   anywhere in this project.
 - Form intake → validation → durable storage → optional email; admin auth; CSV
   export; rate limiting; health checks; demo funnel analytics.

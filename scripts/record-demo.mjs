@@ -86,7 +86,7 @@ const FPS = 30;
  * claim to go stale in a frame of video, which is the hardest place to notice
  * it and the hardest to correct after the fact.
  */
-const TEST_COUNT = "1,832";
+const TEST_COUNT = "1,885";
 
 /**
  * The engineering claims shown on the credibility card.
