@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/AuthShell";
-import { AuthUnavailableNotice } from "@/components/auth/AuthUnavailableNotice";
+import {
+  AuthUnavailableNotice,
+  authOffTitle,
+  authOffDescription,
+} from "@/components/auth/AuthUnavailableNotice";
 import { SignInForm } from "@/components/auth/SignInForm";
 import { isAuthConfigured } from "@/lib/auth-config";
 import { noticeFor, safeRedirect } from "@/lib/auth-routes";
@@ -32,24 +36,27 @@ export default async function LoginPage({
   // set rather than rendered from the query string.
   const next = safeRedirect(params.next, "");
   const notice = noticeFor(params.error);
+  const authOn = isAuthConfigured();
 
   return (
     <AuthShell
-      title="Sign in"
-      description="Welcome back."
+      title={authOn ? "Sign in" : authOffTitle}
+      description={authOn ? "Welcome back." : authOffDescription}
       footer={
-        <>
-          No account yet?{" "}
-          <Link
-            href="/register"
-            className="font-medium text-brand-strong underline-offset-4 hover:underline"
-          >
-            Create one
-          </Link>
-        </>
+        authOn ? (
+          <>
+            No account yet?{" "}
+            <Link
+              href="/register"
+              className="font-medium text-brand-strong underline decoration-brand-strong/40 underline-offset-4 hover:decoration-brand-strong"
+            >
+              Create one
+            </Link>
+          </>
+        ) : undefined
       }
     >
-      {isAuthConfigured() ? (
+      {authOn ? (
         <SignInForm next={next || undefined} notice={notice ?? undefined} />
       ) : (
         <AuthUnavailableNotice />

@@ -13,7 +13,7 @@ import { IconBank, IconExchange, IconLightning } from "@/components/icons";
 export const metadata: Metadata = buildMetadata({
   title: "Open an EU business account for non-residents",
   description:
-    "Open an EU business account with a real IBAN as a non-resident. Marsa onboards non-EU companies online in 24–48h — SEPA payments, 15+ currencies, bulk payouts.",
+    "Open an EU business account with a real IBAN as a non-resident. Marsa onboards non-EU companies online in 24-48h. SEPA payments, 30+ currencies, bulk payouts.",
   path: "/business/eu-business-account",
 });
 
@@ -46,7 +46,7 @@ export default function Page() {
             icon: <IconExchange />,
             title: "Multi-Currency Vaults",
             description:
-              "Hold and convert 15+ currencies at interbank rates — settle in EUR, USD, GBP and more.",
+              "Hold and convert 30+ currencies at interbank rates, settle in EUR, USD, GBP and more.",
           },
           {
             icon: <IconLightning />,
@@ -66,7 +66,7 @@ export default function Page() {
             number: "01",
             title: "Submit Application",
             description:
-              "Tell us about your company in under 8 minutes — directors, KYC, and use-case.",
+              "Tell us about your company in under 8 minutes: directors, KYC, and use-case.",
           },
           {
             number: "02",
@@ -89,7 +89,7 @@ export default function Page() {
         rows={[
           { label: "Account Opening", marsa: "Fully Online", traditional: "In-person, 2-6 weeks" },
           { label: "EU IBAN", marsa: "Yes", traditional: "Often denied to non-residents" },
-          { label: "Multi-Currency", marsa: "15+ currencies", traditional: "Limited" },
+          { label: "Multi-Currency", marsa: "30+ currencies", traditional: "Limited" },
           { label: "Bulk Payments", marsa: "Native + API", traditional: "Manual" },
           { label: "SWIFT Fees", marsa: "Low flat fee", traditional: "€20-40 per transfer" },
           { label: "Support", marsa: "Dedicated Manager", traditional: "Generic call center" },

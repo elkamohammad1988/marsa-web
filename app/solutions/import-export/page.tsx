@@ -26,9 +26,9 @@ export default function Page() {
           { label: "Import & Export" },
         ]}
         title="Multi-currency accounts for import & export businesses"
-        description="Pay overseas suppliers and collect from international buyers in one account — at real exchange rates, with fast SEPA and SWIFT settlement."
+        description="Pay overseas suppliers and collect from international buyers in one account, at real exchange rates, with fast SEPA and SWIFT settlement."
         chips={[
-          { label: "40+ currencies" },
+          { label: "30+ currencies" },
           { label: "SEPA + SWIFT" },
           { label: "Interbank FX" },
         ]}
@@ -69,7 +69,7 @@ export default function Page() {
             number: "01",
             title: "Open Marsa Business",
             description:
-              "Apply online and clear compliance in as little as 48 hours — no branch visit required.",
+              "Apply online and clear compliance in as little as 48 hours, no branch visit required.",
           },
           {
             number: "02",
@@ -111,12 +111,12 @@ export default function Page() {
           {
             question: "Which currencies can I hold?",
             answer:
-              "You can hold and convert 40+ currencies, including EUR, USD, GBP, CNY, JPY and CHF, all inside a single business account.",
+              "You can hold and convert 30+ currencies, including EUR, USD, GBP, CNY, JPY and CHF, all inside a single business account.",
           },
           {
             question: "How are your exchange rates set?",
             answer:
-              "Conversions use the live interbank mid-market rate with a small, transparent margin — never a hidden spread baked into the price.",
+              "Conversions use the live interbank mid-market rate with a small, transparent margin, never a hidden spread baked into the price.",
           },
           {
             question: "Do incoming payments carry hidden fees?",

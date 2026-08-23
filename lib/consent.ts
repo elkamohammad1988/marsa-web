@@ -1,15 +1,24 @@
 /**
  * The visitor's cookie-consent decision.
  *
- * Shared deliberately by the banner that records the decision and every
- * surface that has to honour it. Audit finding S7: the banner wrote the
- * decision to localStorage and broadcast a `marsa:cookie-consent` event that
- * nothing anywhere listened for, so "Reject non-essential" changed nothing and
- * the demo funnel kept tracking visitors who had explicitly refused.
+ * Audit finding S7: a banner wrote the decision to localStorage and broadcast a
+ * `marsa:cookie-consent` event that nothing anywhere listened for, so "Reject
+ * non-essential" changed nothing and the demo funnel kept tracking visitors who
+ * had explicitly refused. This module was written to be the one place both
+ * sides of that agreed on.
  *
- * Keeping the key and the reading of it in one module is what stops the two
- * sides drifting apart again — a duplicated string literal is exactly how the
- * original mismatch would come back.
+ * **The banner has since been removed, and nothing in this repository writes
+ * the key.** That is not an oversight and this module is not dead: the site
+ * carries nothing non-essential to consent to — `/legal/cookies` says so, and
+ * the only cookies are the ones that make signing in work — so a banner would
+ * have been a consent theatre for a decision there is nothing to decide. What
+ * stays is the *reading*, in `components/demo/DemoFlow.tsx`, because a stored
+ * refusal must be honoured wherever it came from: a decision recorded by an
+ * earlier build, or by a banner a later one adds, suppresses the funnel event
+ * without anybody having to remember to re-wire it.
+ *
+ * Anything other than the two known values is read as "not decided" rather
+ * than trusted, so a stale or hand-edited entry can never be read as consent.
  */
 
 export const CONSENT_STORAGE_KEY = "marsa-cookie-consent";

@@ -27,7 +27,7 @@ export default function Page() {
           { label: "Company Formation" },
         ]}
         title="Form your EU company and bank in one place"
-        description="Incorporate in the EU and open a multi-currency business account with a real IBAN — ready before your first invoice goes out."
+        description="Incorporate in the EU and open a multi-currency business account with a real IBAN, ready before your first invoice goes out."
         chips={[
           { label: "EU IBAN" },
           { label: "Cards from day one" },
@@ -45,7 +45,7 @@ export default function Page() {
             icon: <IconBank />,
             title: "A real EU IBAN",
             description:
-              "Receive your dedicated business IBAN as soon as the company is registered — no waiting weeks for a high-street bank.",
+              "Receive your dedicated business IBAN as soon as the company is registered, no waiting weeks for a high-street bank.",
           },
           {
             icon: <IconCard />,

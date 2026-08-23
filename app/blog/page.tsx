@@ -13,7 +13,7 @@ import { clampPage, pageCount, paginate } from "@/lib/pagination";
 export const metadata: Metadata = buildMetadata({
   title: "Blog",
   description:
-    "Clear insights on global finance, payments, and business growth — by the Marsa team.",
+    "Clear insights on global finance, payments, and business growth, by the Marsa team.",
   path: "/blog",
 });
 
@@ -38,8 +38,8 @@ export default async function BlogListPage({
             Blog
           </Heading>
           <p className="mt-4 max-w-3xl text-base text-ink-muted md:text-lg">
-            Explore clear insights on global finance, payments, and business growth — helping you
-            understand complex topics and make smarter financial and strategic decisions.
+            Notes on cross-border payments: how the rails actually work, what the fees are for,
+            and where the money goes while you wait for it.
           </p>
 
           {page === 1 && (

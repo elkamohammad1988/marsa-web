@@ -31,7 +31,7 @@ function storageErrorMessage(reference: string): string {
 
   return siteConfig.email.support
     ? opening +
-        `Please try again in a moment — or email ${siteConfig.email.support}, ` +
+        `Please try again in a moment, or email ${siteConfig.email.support}, ` +
         `quoting reference ${reference}, and we will pick it up from there.`
     : opening + `Please try again in a moment, quoting reference ${reference}.`;
 }

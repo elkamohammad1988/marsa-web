@@ -16,16 +16,16 @@ export default function PrivacyPage() {
       crumb="Privacy Policy"
       title="Privacy Policy"
       updated="July 2026"
-      intro={`This Privacy Policy explains how ${siteConfig.legalName} ("Marsa", "we", "us") collects, uses, shares, and safeguards your personal data when you use our website and services. We act as a data controller under the EU General Data Protection Regulation (GDPR) and the UK GDPR.`}
+      intro={`${siteConfig.name} is a concept build, so this policy describes a product rather than an operating controller: its marketing forms check what you type against the real validation rules and then discard it. What follows is what the product this site depicts would have to publish under the EU General Data Protection Regulation (GDPR) and the UK GDPR.`}
       sections={[
         {
           heading: "Data we collect",
           paragraphs: ["Depending on how you interact with us, we may collect:"],
           bullets: [
-            "Identity and contact data — name, email address, country of residence, and, for businesses, company details you provide when opening an account or contacting us.",
-            "Verification data — identity documents and information required to meet our Know-Your-Customer (KYC) and anti-money-laundering (AML) obligations.",
-            "Usage and device data — pages viewed, approximate location derived from IP address, browser type, and interactions, collected via cookies and similar technologies.",
-            "Communications — the content of messages you send us through forms, email, or support channels.",
+            "Identity and contact data: name, email address, country of residence, and, for businesses, company details you provide when opening an account or contacting us.",
+            "Verification data: identity documents and information required to meet our Know-Your-Customer (KYC) and anti-money-laundering (AML) obligations.",
+            "Usage and device data: pages viewed, approximate location derived from IP address, browser type, and interactions, collected via cookies and similar technologies.",
+            "Communications: the content of messages you send us through forms, email, or support channels.",
           ],
         },
         {
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
         {
           heading: "Sharing your data",
           paragraphs: [
-            "We share personal data only where necessary: with regulated banking and payment partners who safeguard funds and process transactions; with identity-verification, fraud, and analytics providers acting as our processors; and with authorities where required by law. We never sell your personal data.",
+            "Personal data would be shared only where necessary: with the licensed banking and payment partners safeguarding funds and processing transactions; with identity-verification, fraud, and analytics providers acting as processors; and with authorities where required by law. It would never be sold.",
           ],
         },
         {

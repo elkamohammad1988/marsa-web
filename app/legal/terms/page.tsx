@@ -17,12 +17,12 @@ export default function TermsPage() {
       crumb="Terms of Service"
       title="Terms of Service"
       updated="July 2026"
-      intro={`These Terms of Service govern your access to and use of the ${siteConfig.legalName} website and services. By using our website or opening an account, you agree to these terms. Please read them carefully.`}
+      intro={`${siteConfig.name} is a concept build, so there is no service to contract with and nothing below is in force. These are the terms a product of this kind would have to publish, written out in full because deciding what they would have to say is part of designing it.`}
       sections={[
         {
           heading: "About us",
           paragraphs: [
-            `${regulatoryDisclosure()} We provide multi-currency accounts, SEPA and SWIFT transfers, and foreign-exchange services.`,
+            regulatoryDisclosure(),
           ],
         },
         {
@@ -54,7 +54,7 @@ export default function TermsPage() {
         {
           heading: "Safeguarding of funds",
           paragraphs: [
-            "Customer funds are safeguarded in segregated accounts at regulated partner institutions in accordance with applicable safeguarding requirements. Electronic money is not a deposit and is not covered by deposit-guarantee schemes.",
+            "Customer funds would be safeguarded in segregated accounts at licensed partner institutions, in accordance with applicable safeguarding requirements. Electronic money is not a deposit and is not covered by deposit-guarantee schemes — a distinction any product making this comparison should state rather than imply away.",
           ],
         },
         {

@@ -38,19 +38,33 @@ import { IconClose } from "@/components/icons";
  */
 
 const REAL = [
-  "Live European Central Bank rates, cached hourly — every number in the converter and the demo",
+  "Live European Central Bank rates, cached hourly, behind every number in the converter and the demo",
   "IBAN validation to ISO 13616 / MOD-97, fully offline",
   "A complete form-intake pipeline, admin dashboard and analytics funnel, unit-tested",
-  "Sign-up, email confirmation, sign-in, password reset and roles, on Supabase Auth — creating an account stores your email address and, if you give one, your name",
 ];
+
+/**
+ * The one bullet whose truth depends on the environment.
+ *
+ * The panel used to state flatly that you can create a real account. On the
+ * published deployment you cannot — it runs with no credentials at all — so
+ * the sentence that exists to establish this project's honesty was the one
+ * sentence on the site a visitor could disprove in two clicks. The flag comes
+ * from the server, so each deployment describes itself.
+ */
+function authBullet(authConfigured: boolean): string {
+  return authConfigured
+    ? "Sign-up, email confirmation, sign-in, password reset and roles, on Supabase Auth. Creating an account here stores your email address and, if you give one, your name"
+    : "Sign-up, email confirmation, sign-in, password reset and roles, on Supabase Auth, written and tested in the repository but switched off in this deployment";
+}
 
 const NOT_REAL = [
   "No company, no licence, no regulator, no partner institutions",
-  "No balances, no money, no payments — the demo is a labelled sandbox",
-  "The marketing forms still validate your input and then discard it — nothing there is stored or sent",
+  "No balances, no money, no payments, and the demo is a labelled sandbox",
+  "The marketing forms still validate your input and then discard it, so nothing there is stored or sent",
 ];
 
-export function ConceptBadge() {
+export function ConceptBadge({ authConfigured }: { authConfigured: boolean }) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -119,7 +133,7 @@ export function ConceptBadge() {
             1024px and 1280px the five nav groups, Log In and the CTA already
             have the width spoken for. */}
         <span className="hidden font-normal normal-case tracking-normal text-ink-subtle xl:inline">
-          {open ? "— close" : "— what's real?"}
+          {open ? "close" : "what's real?"}
         </span>
       </button>
 
@@ -170,16 +184,15 @@ export function ConceptBadge() {
         </div>
 
         <p className="mt-2 text-xs leading-relaxed text-ink-muted">
-          A portfolio piece exploring what a cross-border money product could look like. It is not
-          a financial service and holds no money. You can create a real account — it is an email
-          address and a password, and it opens a profile page, nothing more.
+          A portfolio piece exploring what a cross-border money product could look like. It is
+          not a financial service, there is no company behind it, and it holds no money.
         </p>
 
         <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
           Real software
         </p>
         <ul className="mt-2 space-y-1.5">
-          {REAL.map((item) => (
+          {[...REAL, authBullet(authConfigured)].map((item) => (
             <li key={item} className="flex gap-2 text-xs leading-relaxed text-ink-muted">
               <span aria-hidden className="mt-1.5 h-1 w-1 flex-none rounded-full bg-success" />
               {item}

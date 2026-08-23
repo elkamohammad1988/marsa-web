@@ -9,7 +9,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "SEPA vs SWIFT — Which Transfer Rail Should You Use?",
+  title: "SEPA vs SWIFT. Which Transfer Rail Should You Use?",
   description:
     "SEPA vs SWIFT explained: speed, cost, currencies, and reach. A clear side-by-side comparison to help you choose the right rail for every payment.",
   path: "/tools/sepa-vs-swift",
@@ -20,9 +20,9 @@ type Row = { feature: string; sepa: string; swift: string };
 const rows: Row[] = [
   { feature: "Coverage", sepa: "36 SEPA countries", swift: "200+ countries worldwide" },
   { feature: "Currency", sepa: "Euro only", swift: "Any currency" },
-  { feature: "Speed", sepa: "Seconds (SEPA Instant) to 1 day", swift: "1–5 business days" },
-  { feature: "Cost", sepa: "Free or very low", swift: "€15–40+ plus FX markup" },
-  { feature: "Intermediary banks", sepa: "None", swift: "Often 1–3 (lifting fees)" },
+  { feature: "Speed", sepa: "Seconds (SEPA Instant) to 1 day", swift: "1-5 business days" },
+  { feature: "Cost", sepa: "Free or very low", swift: "€15-40+ plus FX markup" },
+  { feature: "Intermediary banks", sepa: "None", swift: "Often 1-3 (lifting fees)" },
   { feature: "Best for", sepa: "Euro payments within Europe", swift: "Cross-border, non-euro payments" },
 ];
 
@@ -38,7 +38,7 @@ export default function Page() {
           <div className="max-w-3xl">
             <Heading level="display">SEPA vs SWIFT</Heading>
             <p className="mt-4 text-base text-ink-muted md:text-lg">
-              Two networks move most of the world&apos;s bank payments — but they work very
+              Two networks move most of the world&apos;s bank payments, but they work very
               differently. Here&apos;s how SEPA and SWIFT compare on speed, cost, and reach, so you
               can pick the right rail every time.
             </p>
@@ -87,7 +87,7 @@ export default function Page() {
               <p className="mt-4 text-base text-ink-muted">
                 SWIFT is a global messaging network that connects banks in more than 200 countries
                 and supports any currency. Because a payment may hop through several correspondent
-                banks, each taking a fee, SWIFT transfers are slower and more expensive — but
+                banks, each taking a fee, SWIFT transfers are slower and more expensive, but
                 they&apos;re essential for payments outside the eurozone.
               </p>
             </div>
@@ -100,7 +100,7 @@ export default function Page() {
           {
             question: "Is SEPA cheaper than SWIFT?",
             answer:
-              "Almost always. SEPA transfers are free or near-free with no intermediary fees, while SWIFT transfers typically cost €15–40 plus an FX markup and possible lifting fees from correspondent banks.",
+              "Almost always. SEPA transfers are free or near-free with no intermediary fees, while SWIFT transfers typically cost €15-40 plus an FX markup and possible lifting fees from correspondent banks.",
           },
           {
             question: "Can I send US dollars over SEPA?",
@@ -110,7 +110,7 @@ export default function Page() {
           {
             question: "How long does each take?",
             answer:
-              "SEPA Instant settles in seconds; standard SEPA within one business day. SWIFT usually takes 1–5 business days depending on the route and countries involved.",
+              "SEPA Instant settles in seconds; standard SEPA within one business day. SWIFT usually takes 1-5 business days depending on the route and countries involved.",
           },
           {
             question: "Which should I use?",

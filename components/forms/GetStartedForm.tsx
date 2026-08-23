@@ -49,7 +49,7 @@ export function GetStartedForm({ defaultType = "personal", defaultPlan }: Props)
           },
           {
             label: "Store durably, then notify",
-            detail: "Written to Postgres before anyone is emailed — never the other way round.",
+            detail: "Written to Postgres before anyone is emailed, never the other way round.",
           },
           {
             label: "Begin identity verification",
@@ -68,6 +68,21 @@ export function GetStartedForm({ defaultType = "personal", defaultPlan }: Props)
       noValidate
       className="relative rounded-card-lg border border-line bg-card p-6 shadow-card md:p-8"
     >
+      {/*
+        Above the first field, not under the button.
+
+        This used to sit at the foot of the form, which meant a reader met it
+        after deciding to press a control labelled "Create my account" — a
+        promise the form cannot keep, retracted in the smallest type on the
+        page. The button now names the action it performs and the caveat
+        arrives before the first keystroke.
+      */}
+      <p className="mb-6 rounded-xl border border-line bg-canvas/50 px-4 py-3 text-sm leading-relaxed text-ink-muted">
+        <span className="font-medium text-ink">This form keeps nothing.</span> It checks your
+        details against the real validation rules and then discards them. There is no account at
+        the end of it, and nobody will reply.
+      </p>
+
       <fieldset className="mb-5">
         <legend className="mb-1.5 block text-sm font-medium text-ink">Account type</legend>
         <div className="inline-flex w-full rounded-xl border border-line p-1 sm:w-auto">
@@ -151,11 +166,11 @@ export function GetStartedForm({ defaultType = "personal", defaultPlan }: Props)
           label={
             <>
               I agree to Marsa&apos;s{" "}
-              <Link href="/legal/terms" className="font-medium text-brand-strong hover:underline">
+              <Link href="/legal/terms" className="font-medium text-brand-strong underline decoration-brand-strong/40 underline-offset-4 hover:decoration-brand-strong">
                 Terms of Service
               </Link>{" "}
               and{" "}
-              <Link href="/legal/privacy" className="font-medium text-brand-strong hover:underline">
+              <Link href="/legal/privacy" className="font-medium text-brand-strong underline decoration-brand-strong/40 underline-offset-4 hover:decoration-brand-strong">
                 Privacy Policy
               </Link>
               .
@@ -167,12 +182,8 @@ export function GetStartedForm({ defaultType = "personal", defaultPlan }: Props)
       <Honeypot value={hp} onChange={setHp} />
 
       <Button type="submit" variant="primary" size="lg" className="mt-6 w-full">
-        Create my account
+        Check my details
       </Button>
-
-      <p className="mt-4 text-center text-xs text-ink-subtle">
-        Opening an account is free and takes about 5 minutes. No credit check.
-      </p>
     </form>
   );
 }

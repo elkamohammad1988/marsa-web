@@ -24,7 +24,7 @@ const accounts = [
   {
     question: "How long does it take to open an account?",
     answer:
-      "Personal accounts are typically ready in about 5 minutes, with identity checks completing within a few hours. Business applications are usually approved within 24–48 hours.",
+      "Personal accounts are typically ready in about 5 minutes, with identity checks completing within a few hours. Business applications are usually approved within 24-48 hours.",
   },
   {
     question: "Do I need to be an EU resident?",
@@ -41,7 +41,7 @@ const payments = [
   {
     question: "Are SEPA transfers really free?",
     answer:
-      "Yes — standard SEPA transfers are free on every plan, with no monthly cap. SEPA Instant settles in under 10 seconds.",
+      "Yes. Standard SEPA transfers are free on every plan, with no monthly cap. SEPA Instant settles in under 10 seconds.",
   },
   {
     question: "Can I send SWIFT payments?",
@@ -59,17 +59,17 @@ const feesSecurity = [
   {
     question: "How much does Marsa cost?",
     answer:
-      "The Classic and Business Starter plans are free. Paid plans add higher limits and premium features — see the Pricing page for a full breakdown.",
+      "The Classic and Business Starter plans are free. Paid plans add higher limits and premium features. See the Pricing page for a full breakdown.",
   },
   {
     question: "Is my money safe?",
     answer:
-      "Marsa is a concept build — it holds no money and has no customers. In the product it describes, funds would be safeguarded in segregated accounts at regulated partner institutions, separate from the operator's own funds.",
+      "Marsa is a concept build. It holds no money and has no customers. In the product it describes, funds would be safeguarded in segregated accounts at regulated partner institutions, separate from the operator's own funds.",
   },
   {
     question: "How is my account protected?",
     answer:
-      "We use end-to-end encryption, biometric login, and 24/7 fraud monitoring. You can freeze your card instantly from the app at any time.",
+      "Marsa is a concept build: there is no card to freeze and nobody is monitoring anything. What this build does implement is real and checkable in the source: signed, expiring session cookies that renew in the background, rate-limited sign-in, and a strict Content-Security-Policy. Biometric login and 24/7 fraud monitoring belong to the product this describes, not to what is running here.",
   },
 ];
 

@@ -51,7 +51,7 @@ export function CorridorMap() {
           </Heading>
           <p className="mt-4 text-white/70">
             Money from marketplaces, platforms and clients abroad lands in your own European IBAN.
-            From there you convert at interbank rates and pay out on local rails — without a second
+            From there you convert at interbank rates and pay out on local rails, without a second
             bank in the middle.
           </p>
         </Reveal>

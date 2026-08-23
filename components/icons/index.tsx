@@ -60,17 +60,6 @@ export function IconCard(p: IconProps) {
   );
 }
 
-export function IconUsers(p: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" {...base} {...p}>
-      <circle cx="9" cy="8" r="3.5" />
-      <path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6" />
-      <circle cx="17" cy="9" r="2.5" />
-      <path d="M16 14c3 0 6 1.8 6 5" />
-    </svg>
-  );
-}
-
 export function IconBank(p: IconProps) {
   return (
     <svg viewBox="0 0 24 24" {...base} {...p}>

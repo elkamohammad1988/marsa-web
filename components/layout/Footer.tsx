@@ -60,7 +60,7 @@ export function Footer() {
               <Logo />
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-ink-muted">
-              One account for every currency you get paid in — receive, hold, convert and pay out
+              One account for every currency you get paid in: receive, hold, convert and pay out
               from a single European IBAN.
             </p>
           </div>
@@ -116,21 +116,28 @@ export function Footer() {
         </div>
 
         <p className="mt-14 max-w-4xl border-t border-line pt-8 text-xs leading-relaxed text-ink-subtle">
-          {regulatoryDisclosure()} Marsa provides multi-currency accounts, SEPA &amp; SWIFT
-          transfers, and FX services to individuals and businesses across the EU and beyond.
+          {regulatoryDisclosure()}
         </p>
 
         <div className="mt-8 flex flex-col-reverse items-start gap-5 border-t border-line py-8 md:flex-row md:items-center md:justify-between">
           <p className="text-xs text-ink-subtle">
-            © {new Date().getFullYear()} {siteConfig.legalName} All rights reserved.
+            © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
           </p>
           <ul className="flex flex-wrap items-center gap-x-2 gap-y-2">
             {footerBadges.map((b) => (
-              <li
-                key={b}
-                className="rounded-full bg-card px-2.5 py-1 text-[11px] text-ink-subtle ring-1 ring-line"
-              >
-                {b}
+              <li key={b.label}>
+                {b.href ? (
+                  <a
+                    href={b.href}
+                    className="inline-block rounded-full bg-card px-2.5 py-1 text-[11px] text-ink-muted ring-1 ring-line transition-colors hover:text-ink hover:ring-line-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong"
+                  >
+                    {b.label}
+                  </a>
+                ) : (
+                  <span className="inline-block rounded-full bg-card px-2.5 py-1 text-[11px] text-ink-subtle ring-1 ring-line">
+                    {b.label}
+                  </span>
+                )}
               </li>
             ))}
           </ul>

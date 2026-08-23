@@ -78,8 +78,7 @@ export function AuthShell({
         </ul>
 
         <p className="mt-10 max-w-md border-t border-line pt-6 text-xs leading-relaxed text-ink-subtle">
-          Marsa Money Ltd. is not a bank. Accounts, IBANs, payments and currency exchange are
-          provided by licensed partner institutions.
+          Marsa is a concept build. It is not a bank, holds no licence and holds no money.
         </p>
       </aside>
 

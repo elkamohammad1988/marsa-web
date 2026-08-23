@@ -349,7 +349,7 @@ export function DemoFlow() {
           and we say plainly what anonymous telemetry we collect. */}
       <p className="glass-panel mb-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-2xl border border-line-dark px-4 py-2.5 text-center text-xs text-ink-muted">
         <span className="font-semibold text-ink">Interactive sandbox</span>
-        Sample data, no real money — the exchange rate is live from the ECB. We log
+        Sample data, no real money. The exchange rate is live from the ECB. We log
         anonymous step progress (no cookies, no personal data) to improve the demo.
       </p>
 
@@ -487,7 +487,7 @@ export function DemoFlow() {
                   <IconClock className="h-4 w-4 text-ink-subtle" />
                 </span>
                 <p className="max-w-[22ch] text-xs leading-relaxed text-ink-subtle">
-                  No activity yet — money you receive and send will appear here.
+                  No activity yet. Money you receive and send will appear here.
                 </p>
               </div>
             ) : (
@@ -589,10 +589,9 @@ export function DemoFlow() {
               {step === "welcome" && (
                 <>
                   <p>
-                    Walk through the real Marsa journey in about a minute: open an account, get a
-                    European IBAN, receive a payout from abroad, convert it at the live interbank
-                    rate, and send it out over SEPA — the exact loop a cross-border seller runs
-                    every week.
+                    Six steps, about a minute, and no sign-up. This is the loop a cross-border
+                    seller runs every week, and each stop below is running the real thing rather
+                    than playing an animation of it.
                   </p>
                   {/*
                     The panel reserves 320px so the controls below it do not jump
@@ -607,17 +606,25 @@ export function DemoFlow() {
                     drift from the steps the demo actually runs. `slice(1, -1)`
                     drops `Start` and `Done`, which are this screen and its end,
                     not stops along the way.
+
+                    Each row carries what the step demonstrates, not just its
+                    label. Repeating the rail's six words directly under the
+                    rail was duplication; naming what each one proves is the
+                    reason to look at the list at all.
                   */}
                   <ol className="mt-5 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2">
                     {DEMO_STEPS.slice(1, -1).map((s, i) => (
-                      <li key={s.id} className="flex items-center gap-3">
+                      <li key={s.id} className="flex items-start gap-3">
                         <span
                           aria-hidden
-                          className="grid h-6 w-6 flex-none place-items-center rounded-full border border-line bg-surface-tint text-[11px] font-semibold tabular-nums text-ink-subtle"
+                          className="mt-0.5 grid h-6 w-6 flex-none place-items-center rounded-full border border-line bg-surface-tint text-[11px] font-semibold tabular-nums text-ink-subtle"
                         >
                           {i + 1}
                         </span>
-                        <span className="text-ink-muted">{s.label}</span>
+                        <span className="min-w-0">
+                          <span className="block font-medium text-ink">{s.label}</span>
+                          <span className="block text-xs text-ink-subtle">{s.demonstrates}</span>
+                        </span>
                       </li>
                     ))}
                   </ol>
@@ -666,7 +673,7 @@ export function DemoFlow() {
                       ))}
                     </Select>
                     <p className="mt-2 text-xs text-ink-subtle">
-                      Marsa onboards from 180+ countries — this list is just a sample.
+                      Marsa onboards from 180+ countries. This list is just a sample.
                     </p>
                   </div>
                 </div>
@@ -675,7 +682,7 @@ export function DemoFlow() {
               {step === "identity" && (
                 <div className="space-y-4">
                   <p>
-                    In the real product this is a secure digital KYC check — ID document plus a
+                    In the real product this is a secure digital KYC check: ID document plus a
                     liveness selfie, run through our verification partner. Here it is simulated.
                   </p>
                   <div>
@@ -706,7 +713,7 @@ export function DemoFlow() {
                       {formatIbanBlocks(iban)}
                     </p>
                     <p className="mt-1 text-xs text-ink-subtle">
-                      Sample IBAN — structurally valid, not a live account.
+                      Sample IBAN. Structurally valid, not a live account.
                     </p>
                   </div>
                 </div>
@@ -716,7 +723,7 @@ export function DemoFlow() {
                 <div className="space-y-4">
                   <p>
                     A client abroad pays a {money(DEMO_SCRIPT.payoutUsd, "USD")} invoice into your
-                    USD balance — no intermediary bank, no lost days. Tap to receive it.
+                    USD balance, no intermediary bank, no lost days. Tap to receive it.
                   </p>
                   <StepAction
                     done={balances.USD > 0}
@@ -731,7 +738,7 @@ export function DemoFlow() {
                 <div className="space-y-4">
                   <p>
                     Move {money(DEMO_SCRIPT.convertUsd, "USD")} into euros at the real mid-market
-                    rate — the same number banks quote each other, with no hidden spread.
+                    rate, the same number banks quote each other, with no hidden spread.
                   </p>
                   <div className="rounded-xl border border-line bg-surface-tint-2 p-4 text-sm">
                     {rateState === "loading" && <span className="text-ink-subtle">Loading live rate…</span>}
@@ -773,7 +780,7 @@ export function DemoFlow() {
               {step === "send" && (
                 <div className="space-y-4">
                   <p>
-                    Pay a supplier {money(DEMO_SCRIPT.sendEur, "EUR")} over SEPA — free, and it
+                    Pay a supplier {money(DEMO_SCRIPT.sendEur, "EUR")} over SEPA for free, and it
                     lands the same day across 36 countries.
                   </p>
                   <StepAction
@@ -790,12 +797,12 @@ export function DemoFlow() {
                 <div className="space-y-4">
                   <p>
                     You just received from abroad, converted at the interbank rate, and paid out
-                    over SEPA — all from one European account. That is the entire cross-border loop
+                    over SEPA, all from one European account. That is the entire cross-border loop
                     Marsa replaces three banking apps for.
                   </p>
                   <ul className="space-y-1.5 text-sm text-ink-muted">
                     <li>European multi-currency IBAN in your name</li>
-                    <li>Real interbank FX — the rate you saw was live</li>
+                    <li>Real interbank FX, the rate you saw was live</li>
                     <li>Free SEPA out, same day</li>
                   </ul>
                 </div>

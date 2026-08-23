@@ -12,7 +12,7 @@ import { IconChart, IconGlobe, IconExchange } from "@/components/icons";
 export const metadata: Metadata = buildMetadata({
   title: "EU business account for e-commerce sellers",
   description:
-    "An EU business account for e-commerce sellers. Get an IBAN accepted by Amazon, Shopify and Stripe — receive payouts locally and convert at real interbank rates.",
+    "An EU business account for e-commerce sellers. Get an IBAN accepted by Amazon, Shopify and Stripe. Receive payouts locally and convert at real interbank rates.",
   path: "/business/e-commerce-sellers",
 });
 
@@ -45,7 +45,7 @@ export default function Page() {
             icon: <IconGlobe />,
             title: "Local Receiving Worldwide",
             description:
-              "Receive in EUR, USD, GBP locally — no SWIFT routing, no lifting fees.",
+              "Receive in EUR, USD, GBP locally, no SWIFT routing, no lifting fees.",
           },
           {
             icon: <IconExchange />,
@@ -63,7 +63,7 @@ export default function Page() {
           {
             number: "01",
             title: "Open Marsa Business",
-            description: "Apply online — our compliance team approves within 48h.",
+            description: "Apply online and our compliance team approves within 48h.",
           },
           {
             number: "02",
@@ -73,7 +73,7 @@ export default function Page() {
           {
             number: "03",
             title: "Settle in your currency",
-            description: "Convert payouts to your home currency at interbank rates — instantly.",
+            description: "Convert payouts to your home currency at interbank rates, instantly.",
           },
         ]}
       />
@@ -82,7 +82,7 @@ export default function Page() {
         eyebrow="Marsa Vs Generic EMIs"
         title="Why Sellers Choose Marsa"
         rows={[
-          { label: "Amazon Acceptance", marsa: "Yes — EU IBAN", traditional: "Limited" },
+          { label: "Amazon Acceptance", marsa: "Yes, EU IBAN", traditional: "Limited" },
           { label: "Stripe Acceptance", marsa: "Yes", traditional: "Often rejected" },
           { label: "FX Markup", marsa: "0% up to €10k", traditional: "1-3%" },
           { label: "USD Receiving", marsa: "Local ACH", traditional: "SWIFT only" },

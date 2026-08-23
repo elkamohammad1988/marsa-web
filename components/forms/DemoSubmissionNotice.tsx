@@ -47,7 +47,7 @@ export function DemoSubmissionNotice({
         <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-muted">
           Your details were checked in the browser and then{" "}
           <span className="font-medium text-ink">discarded</span>. Nothing was sent, nothing was
-          stored, and nobody will contact you — this is a portfolio piece, not a financial service.
+          stored, and nobody will contact you. This is a portfolio piece, not a financial service.
         </p>
 
         <div className="mt-6 rounded-card border border-line bg-canvas/50 p-5">
@@ -68,8 +68,8 @@ export function DemoSubmissionNotice({
             ))}
           </ol>
           <p className="mt-4 border-t border-line pt-3 text-xs text-ink-subtle">
-            That pipeline is real code in this repository —{" "}
-            <span className="font-mono text-[11px] text-ink-muted">{endpoint}</span> — with
+            That pipeline is real code in this repository at{" "}
+            <span className="font-mono text-[11px] text-ink-muted">{endpoint}</span>, with
             server-side re-validation, rate limiting, a durable write contract and unit tests. It
             is simply not wired to this form.
           </p>

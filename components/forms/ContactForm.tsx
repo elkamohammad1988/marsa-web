@@ -125,6 +125,14 @@ export function ContactForm({ defaultTopic = "general" }: { defaultTopic?: Conta
       <Button type="submit" variant="primary" size="lg" className="mt-6 w-full sm:w-auto">
         Send message
       </Button>
+
+      {/* Before the reader types, not only after they submit — the same rule
+          the newsletter form has always followed. See the note in
+          `GetStartedForm.tsx`. */}
+      <p className="mt-4 text-xs text-ink-subtle">
+        Checked against the real validation rules, then{" "}
+        <span className="font-medium text-ink-muted">discarded</span>.
+      </p>
     </form>
   );
 }

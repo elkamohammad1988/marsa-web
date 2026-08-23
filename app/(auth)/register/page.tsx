@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/AuthShell";
-import { AuthUnavailableNotice } from "@/components/auth/AuthUnavailableNotice";
+import {
+  AuthUnavailableNotice,
+  authOffTitle,
+  authOffDescription,
+} from "@/components/auth/AuthUnavailableNotice";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { isAuthConfigured } from "@/lib/auth-config";
 import { buildMetadata } from "@/lib/seo";
@@ -15,35 +19,43 @@ export const metadata = buildMetadata({
 });
 
 export default function RegisterPage() {
+  const authOn = isAuthConfigured();
+
   return (
     <AuthShell
-      title="Create an account"
+      title={authOn ? "Create an account" : authOffTitle}
       description={
-        <>
-          This creates a real account: an email address and, if you give one, a name, stored in
-          Supabase. It is not a bank account and there is no money — see{" "}
-          <Link
-            href="/demo"
-            className="font-medium text-brand-strong underline-offset-4 hover:underline"
-          >
-            the demo
-          </Link>{" "}
-          for what the product would do.
-        </>
+        authOn ? (
+          <>
+            This creates a real account. It stores an email address and, if you give one, a name.
+            It is not a bank account and there is no money in it. See{" "}
+            <Link
+              href="/demo"
+              className="font-medium text-brand-strong underline decoration-brand-strong/40 underline-offset-4 hover:decoration-brand-strong"
+            >
+              the demo
+            </Link>{" "}
+            for what the product would do.
+          </>
+        ) : (
+          authOffDescription
+        )
       }
       footer={
-        <>
-          Already registered?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-brand-strong underline-offset-4 hover:underline"
-          >
-            Sign in
-          </Link>
-        </>
+        authOn ? (
+          <>
+            Already registered?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-brand-strong underline decoration-brand-strong/40 underline-offset-4 hover:decoration-brand-strong"
+            >
+              Sign in
+            </Link>
+          </>
+        ) : undefined
       }
     >
-      {isAuthConfigured() ? <RegisterForm /> : <AuthUnavailableNotice />}
+      {authOn ? <RegisterForm /> : <AuthUnavailableNotice />}
     </AuthShell>
   );
 }

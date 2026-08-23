@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server";
+
 /**
  * Is this state-changing request coming from our own pages?
  *
@@ -34,4 +36,45 @@ export function isCrossSite(request: Request): boolean {
     // An Origin header that is not a URL is not something a browser produces.
     return true;
   }
+}
+
+/**
+ * The 303 that sends a form POST back to a page on this site.
+ *
+ * **Relative, deliberately, and this is a fix rather than a preference.** All
+ * three form endpoints — admin sign-out, admin erasure, customer sign-out —
+ * used to answer `NextResponse.redirect(new URL(path, new URL(request.url).origin))`.
+ * `request.url` is reconstructed by the server, not read off the document, so
+ * its origin is whatever host the *server* believes it is on. The browser's
+ * origin is whatever the reader typed. The two agree right up until they do
+ * not: a reverse proxy, an `X-Forwarded-Host` that never arrives, a host alias,
+ * an apex reached as `www`, or — the case this was caught on — a server bound
+ * to `localhost` answering a request made to `127.0.0.1`.
+ *
+ * When they disagree the redirect is cross-origin, and every page on this site
+ * is served with `form-action 'self'`. Chrome enforces that directive **on the
+ * redirect as well as on the submission**, so the browser blocks the
+ * navigation — silently, from the reader's point of view. What the operator
+ * sees is a Delete button that erases nothing and a Sign out button that does
+ * not sign them out. What actually happened is that both worked: the record
+ * was gone and the session was destroyed before the response was even written.
+ * A destructive control that reports failure while succeeding is the worst
+ * shape this bug could take, and nothing in the type system, the unit suite or
+ * a page-load smoke check could see it — only a real browser pressing the
+ * button.
+ *
+ * A relative `Location` cannot have this failure. RFC 7231 §7.1.2 has the
+ * browser resolve it against the request URL, which *is* the document's
+ * origin, so the result is same-origin by construction on every host, proxy
+ * and alias. `NextResponse.redirect()` cannot express it — it requires an
+ * absolute URL — so the response is constructed directly.
+ *
+ * `path` must already be a site-relative path that the caller has validated;
+ * this does not sanitise. `safeAdminReturn` in the erasure route is what does
+ * that, by rebuilding the path from a closed set of parameters.
+ */
+export function seeOther(path: string, init: { headers?: HeadersInit } = {}): NextResponse {
+  const headers = new Headers(init.headers);
+  headers.set("location", path);
+  return new NextResponse(null, { status: 303, headers });
 }

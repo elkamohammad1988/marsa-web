@@ -10,7 +10,7 @@ import { CTACard } from "@/components/sections/CTACard";
 export const metadata: Metadata = buildMetadata({
   title: "How to open EU bank account online",
   description:
-    "Open an EU account online with Marsa: sign up in minutes from any country, verify your ID, and get a multi-currency IBAN — no EU residency needed.",
+    "Open an EU account online with Marsa: sign up in minutes from any country, verify your ID, and get a multi-currency IBAN, no EU residency needed.",
   path: "/personal/how-it-works",
 });
 
@@ -34,7 +34,7 @@ export default function Page() {
       <ProcessSteps
         eyebrow="3 Simple Steps"
         title="Even Simpler Than Most Personal Banks"
-        description="Everything you need to open a Marsa Personal Account online — no branch, no paperwork."
+        description="Everything you need to open a Marsa Personal Account online, no branch, no paperwork."
         steps={[
           {
             number: "01",
@@ -63,7 +63,7 @@ export default function Page() {
         rows={[
           { label: "Account Opening", marsa: "Online, 5 min", traditional: "Branch visit, 1-3 weeks" },
           { label: "Residency Required", marsa: "No", traditional: "Yes" },
-          { label: "Multi-Currency", marsa: "15+ currencies", traditional: "EUR only" },
+          { label: "Multi-Currency", marsa: "30+ currencies", traditional: "EUR only" },
           { label: "FX Fees", marsa: "Interbank rate", traditional: "2-4% markup" },
           { label: "SWIFT Fees", marsa: "Low flat fee", traditional: "€20-40 per transfer" },
           { label: "Mobile App", marsa: "Award-winning", traditional: "Limited features" },
@@ -87,7 +87,7 @@ export default function Page() {
           {
             question: "Can I get a physical card?",
             answer:
-              "Yes — physical Marsa cards are shipped within 5-7 business days to all EU/UK addresses.",
+              "Yes. Physical Marsa cards are shipped within 5-7 business days to all EU/UK addresses.",
           },
           {
             question: "Is there a minimum deposit?",

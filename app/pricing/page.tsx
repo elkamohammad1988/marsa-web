@@ -7,7 +7,7 @@ import { FAQ } from "@/components/sections/FAQ";
 export const metadata: Metadata = buildMetadata({
   title: "Pricing",
   description:
-    "Compare Marsa accounts and cards. Find the plan that fits your needs — Classic, Plus, or Premium.",
+    "Compare Marsa accounts and cards. Find the plan that fits your needs: Classic, Plus, or Premium.",
   path: "/pricing",
 });
 
@@ -28,7 +28,7 @@ export default function PricingPage() {
           {
             question: "Which countries are supported?",
             answer:
-              "Marsa supports residents of 30+ EU/EEA countries and the UK. Card delivery is available across the same region.",
+              "Marsa issues European multi-currency IBANs to residents of 180+ countries. Physical cards ship to EU and UK addresses.",
           },
           {
             question: "Can I switch between plans later?",
@@ -46,11 +46,13 @@ export default function PricingPage() {
       <CTACard
         eyebrow="For individuals"
         title="Your Money, Accessible Everywhere You Go"
-        description="Up to 2% FX fees, free SEPA transfers, and support in 180+ countries."
+        description="Interbank FX rates, free SEPA transfers, and support across 180+ countries."
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
-        secondaryCta={{ label: "See Pricing", href: "/pricing" }}
+        // Not "See Pricing": this is the pricing page, and a call to action
+        // that reloads the page it sits on is a dead control.
+        secondaryCta={{ label: "Try the demo", href: "/demo" }}
         art="coin"
-        footnote="Physical cards available for Europe and UK customers only. All other features — IBAN, SEPA, SWIFT, FX conversion — are available worldwide."
+        footnote="Physical cards available for Europe and UK customers only. All other features (IBAN, SEPA, SWIFT, FX conversion) are available worldwide."
       />
     </>
   );

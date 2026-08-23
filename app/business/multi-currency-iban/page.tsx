@@ -13,7 +13,7 @@ import { IconGlobe, IconExchange, IconBank } from "@/components/icons";
 export const metadata: Metadata = buildMetadata({
   title: "Multi-Currency IBAN Business Account",
   description:
-    "Open a European multi-currency business IBAN with Marsa. Hold, convert, and pay in 15+ currencies at interbank rates — no EU residency needed.",
+    "Open a European multi-currency business IBAN with Marsa. Hold, convert, and pay in 30+ currencies at interbank rates, no EU residency needed.",
   path: "/business/multi-currency-iban",
 });
 
@@ -26,8 +26,8 @@ export default function Page() {
           { label: "Business" },
           { label: "Multi-Currency IBAN" },
         ]}
-        title="Multi-Currency IBAN Business Account — No EU Residency Needed"
-        description="European multi-currency business IBAN. Hold, convert, and pay in 15+ currencies — all from a single account."
+        title="Multi-Currency IBAN Business Account. No EU Residency Needed"
+        description="European multi-currency business IBAN. Hold, convert, and pay in 30+ currencies, all from a single account."
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="card-stack"
@@ -38,9 +38,9 @@ export default function Page() {
         items={[
           {
             icon: <IconGlobe />,
-            title: "15+ Currencies, 1 IBAN",
+            title: "30+ Currencies, 1 IBAN",
             description:
-              "Hold EUR, USD, GBP, CHF, JPY, AUD and more — settle in your home currency anytime.",
+              "Hold EUR, USD, GBP, CHF, JPY, AUD and more. Settle in your home currency anytime.",
           },
           {
             icon: <IconExchange />,
@@ -52,7 +52,7 @@ export default function Page() {
             icon: <IconBank />,
             title: "Local Receiving Details",
             description:
-              "UK Sort Code, EU IBAN, US ACH and more — receive like a local everywhere.",
+              "UK Sort Code, EU IBAN, US ACH and more. Receive like a local everywhere.",
           },
         ]}
       />
@@ -63,7 +63,7 @@ export default function Page() {
         steps={[
           { number: "01", title: "Open Marsa Business", description: "Submit your company documents online." },
           { number: "02", title: "Verify Company", description: "Our team approves within 24-48h." },
-          { number: "03", title: "Start Transacting", description: "Receive, hold, and convert across 15+ currencies." },
+          { number: "03", title: "Start Transacting", description: "Receive, hold, and convert across 30+ currencies." },
         ]}
       />
 
@@ -71,7 +71,7 @@ export default function Page() {
         eyebrow="Marsa Vs Traditional Banks"
         title="Built for cross-border operations"
         rows={[
-          { label: "Currencies Supported", marsa: "15+", traditional: "1-3" },
+          { label: "Currencies Supported", marsa: "30+", traditional: "1-3" },
           { label: "FX Markup", marsa: "0% (up to €10k)", traditional: "2-4%" },
           { label: "Local Receiving", marsa: "EU + UK + US", traditional: "Home country only" },
           { label: "Bulk Payments", marsa: "Native + API", traditional: "Manual" },
@@ -118,7 +118,7 @@ export default function Page() {
           {
             question: "Does Marsa support FX hedging?",
             answer:
-              "Yes — forward FX and limit orders are available on Growth and Enterprise plans.",
+              "Yes. Forward FX and limit orders are available on Growth and Enterprise plans.",
           },
         ]}
       />

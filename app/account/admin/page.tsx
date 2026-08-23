@@ -103,7 +103,7 @@ export default async function AccountDirectoryPage() {
                     <th scope="row" className="px-5 py-3 font-medium text-ink">
                       {profile.email}
                     </th>
-                    <td className="px-5 py-3 text-ink-muted">{profile.fullName ?? "—"}</td>
+                    <td className="px-5 py-3 text-ink-muted">{profile.fullName ?? ""}</td>
                     <td className="px-5 py-3 text-ink-muted">{ROLE_LABELS[profile.role]}</td>
                     <td className="px-5 py-3 tabular-nums text-ink-muted">
                       {formatDay(profile.createdAt)}

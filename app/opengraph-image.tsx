@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { siteConfig } from "@/lib/site";
 
-export const alt = "Marsa — multi-currency accounts for cross-border business";
+export const alt = "Marsa multi-currency accounts for cross-border business";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -82,7 +82,7 @@ export default function OpengraphImage() {
               maxWidth: 860,
             }}
           >
-            Multi-currency IBAN accounts, free SEPA transfers, and interbank FX — for people and
+            Multi-currency IBAN accounts, free SEPA transfers, and interbank FX for people and
             businesses moving money across borders.
           </div>
         </div>
@@ -97,7 +97,7 @@ export default function OpengraphImage() {
           }}
         >
           <div style={{ display: "flex", gap: 24 }}>
-            <span>Safeguarded funds</span>
+            <span>Concept build</span>
             <span>·</span>
             <span>30+ currencies</span>
             <span>·</span>

@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/AuthShell";
-import { AuthUnavailableNotice } from "@/components/auth/AuthUnavailableNotice";
+import {
+  AuthUnavailableNotice,
+  authOffTitle,
+  authOffDescription,
+} from "@/components/auth/AuthUnavailableNotice";
 import { EmailOnlyForm } from "@/components/auth/EmailOnlyForm";
 import { isAuthConfigured } from "@/lib/auth-config";
 import { isEmail } from "@/lib/validation";
@@ -33,11 +37,16 @@ export default async function VerifyEmailPage({
   // field cannot be seeded with arbitrary text from a link someone was sent.
   const candidate = typeof params.email === "string" ? params.email : "";
   const defaultEmail = isEmail(candidate) ? candidate : "";
+  const authOn = isAuthConfigured();
 
   return (
     <AuthShell
-      title="Confirm your email"
-      description="We send a confirmation link when an account is created. Following it signs you in and finishes setting the account up."
+      title={authOn ? "Confirm your email" : authOffTitle}
+      description={
+        authOn
+          ? "We send a confirmation link when an account is created. Following it signs you in and finishes setting the account up."
+          : authOffDescription
+      }
       footer={
         <Link
           href="/login"
@@ -49,7 +58,7 @@ export default async function VerifyEmailPage({
         </Link>
       }
     >
-      {isAuthConfigured() ? (
+      {authOn ? (
         <div className="flex flex-col gap-5">
           <p className="text-sm leading-relaxed text-ink-muted">
             Not arrived? It can take a minute, and it is worth checking your spam folder. You can

@@ -45,7 +45,7 @@ export function RegisterForm() {
         value={fullName}
         onChange={(e) => setFullName(e.target.value)}
         error={errors.fullName}
-        hint="Optional — it is what the account area calls you."
+        hint="Optional. It is what the account area calls you."
       />
 
       <TextField
@@ -75,11 +75,11 @@ export function RegisterForm() {
 
       <p className="text-center text-xs leading-relaxed text-ink-subtle">
         By creating an account you agree to our{" "}
-        <Link href="/legal/terms" className="text-brand-strong underline-offset-4 hover:underline">
+        <Link href="/legal/terms" className="text-brand-strong underline decoration-brand-strong/40 underline-offset-4 hover:decoration-brand-strong">
           Terms of Service
         </Link>{" "}
         and{" "}
-        <Link href="/legal/privacy" className="text-brand-strong underline-offset-4 hover:underline">
+        <Link href="/legal/privacy" className="text-brand-strong underline decoration-brand-strong/40 underline-offset-4 hover:decoration-brand-strong">
           Privacy Policy
         </Link>
         .

@@ -8,7 +8,7 @@ import { CTACard } from "@/components/sections/CTACard";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "FX rate calculator — see the real cost of a transfer",
+  title: "FX rate calculator. See the real cost of a transfer",
   description:
     "Calculate the all-in cost of an international transfer. Compare the live mid-market rate against a typical bank markup and see how much you save with Marsa.",
   path: "/tools/fx-calculator",
@@ -23,7 +23,7 @@ export default function Page() {
             <Heading level="display">FX Rate Calculator</Heading>
             <p className="mt-4 text-base text-ink-muted md:text-lg">
               See what an international transfer really costs. Compare the live mid-market rate with
-              a typical bank markup — and how much you keep with Marsa.
+              a typical bank markup, and how much you keep with Marsa.
             </p>
           </div>
           <div className="mx-auto mt-10 max-w-2xl">
@@ -38,7 +38,7 @@ export default function Page() {
           <p className="mt-4 max-w-3xl text-base text-ink-muted">
             The advertised “no fee” transfer is rarely free. Most providers bake their profit into
             the exchange rate as a markup on top of the mid-market rate. On a €5,000 transfer, a 3%
-            markup quietly costs €150 — every single time.
+            markup quietly costs €150, every single time.
           </p>
         </Container>
       </Section>
@@ -48,7 +48,7 @@ export default function Page() {
           {
             question: "What is the mid-market rate?",
             answer:
-              "It's the midpoint between the buy and sell price of two currencies — the rate banks use between themselves, before any markup. We source it from European Central Bank reference rates.",
+              "It's the midpoint between the buy and sell price of two currencies, the rate banks use between themselves, before any markup. We source it from European Central Bank reference rates.",
           },
           {
             question: "How does Marsa keep costs low?",

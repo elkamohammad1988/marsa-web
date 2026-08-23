@@ -48,7 +48,7 @@ const allPosts: BlogPost[] = [
     slug: "why-non-eu-companies-struggle-with-european-payments",
     seoTitle: "Why non-EU companies need an EU IBAN",
     title:
-      "Why non-EU companies struggle to receive payments from European clients — and how an EU IBAN solves the problem",
+      "Why non-EU companies struggle to receive payments from European clients, and how an EU IBAN solves the problem",
     excerpt:
       "Why European clients hesitate to pay non-EU accounts, and how a local IBAN removes the friction, delays, and lost margin.",
     date: "2025-03-30",
@@ -57,7 +57,7 @@ const allPosts: BlogPost[] = [
     body: [
       {
         paragraphs: [
-          "For non-EU businesses, receiving payments from European clients has become a major bottleneck. Many operators — from Amazon sellers to Shopify brands, SaaS companies, and freelancers — struggle with delays, lost funds, and rejected transactions.",
+          "For non-EU businesses, receiving payments from European clients has become a major bottleneck. Many operators, from Amazon sellers to Shopify brands, SaaS companies, and freelancers, struggle with delays, lost funds, and rejected transactions.",
           "At the core of the issue is a simple reason: European companies often prefer not to send money outside the EU or SEPA. Combined with the rise of open banking, IBAN checks, and fraud prevention, a foreign bank account without a local IBAN has become an operational risk for European buyers.",
         ],
       },
@@ -72,7 +72,7 @@ const allPosts: BlogPost[] = [
         heading: "Why a European IBAN changes the equation",
         paragraphs: [
           "With a European multi-currency IBAN, settlements happen inside the eurozone rails. Funds move in minutes instead of days, fees drop by an order of magnitude, and compliance reviews are far less aggressive because counterparties see a trusted local IBAN.",
-          "This is the mechanism that lets non-EU operators establish a foothold in Europe without incorporating locally — a genuine advantage for growth-stage companies.",
+          "This is the mechanism that lets non-EU operators establish a foothold in Europe without incorporating locally, a genuine advantage for growth-stage companies.",
         ],
       },
       {
@@ -88,7 +88,7 @@ const allPosts: BlogPost[] = [
     seoTitle: "FX savings playbook for import-export",
     title: "The FX savings playbook for import-export businesses in 2026",
     excerpt:
-      "How to cut foreign-exchange costs on every international payment — practical strategies and tools for 2026.",
+      "How to cut foreign-exchange costs on every international payment. Practical strategies and tools for 2026.",
     date: "2026-02-20",
     category: "Business",
     cover: "spread",
@@ -96,27 +96,27 @@ const allPosts: BlogPost[] = [
       {
         paragraphs: [
           "Import-export margins are often thinner than the headline numbers suggest. A business can win on sourcing and logistics and still hand a meaningful slice of every deal to its bank in foreign-exchange costs. The good news is that FX is one of the most controllable line items in the whole operation.",
-          "This playbook lays out how importers and exporters can stop overpaying on currency conversion — without hiring a treasury team or taking on speculative risk.",
+          "This playbook lays out how importers and exporters can stop overpaying on currency conversion, without hiring a treasury team or taking on speculative risk.",
         ],
       },
       {
         heading: "Where the money actually leaks",
         paragraphs: [
-          "Most FX costs are invisible because they are baked into the exchange rate rather than charged as a fee. A provider quotes a rate that already includes a markup — the spread between the real mid-market rate and the rate you actually receive. On a large supplier payment, even a two or three percent spread adds up quickly: on a €50,000 invoice, a 3% spread is €1,500 that never appears on a statement as a fee.",
+          "Most FX costs are invisible because they are baked into the exchange rate rather than charged as a fee. A provider quotes a rate that already includes a markup, the spread between the real mid-market rate and the rate you actually receive. On a large supplier payment, even a two or three percent spread adds up quickly: on a €50,000 invoice, a 3% spread is €1,500 that never appears on a statement as a fee.",
           "Add flat SWIFT charges, intermediary-bank lifting fees, and padding on weekends and holidays, and the true all-in cost of a transfer is often several times the advertised fee.",
         ],
       },
       {
         heading: "Rule 1: Anchor every deal to the mid-market rate",
         paragraphs: [
-          "The mid-market rate is the midpoint between the buy and sell price of a currency pair — the rate banks use between themselves. Before you accept any quote, compare it to the live mid-market rate. If the gap is more than a fraction of a percent, you are paying a markup you can negotiate away or route around.",
+          "The mid-market rate is the midpoint between the buy and sell price of a currency pair, the rate banks use between themselves. Before you accept any quote, compare it to the live mid-market rate. If the gap is more than a fraction of a percent, you are paying a markup you can negotiate away or route around.",
           "Pricing your own invoices against the mid-market rate, rather than an inflated one, also protects your margin on the receiving side.",
         ],
       },
       {
         heading: "Rule 2: Hold currencies, don't convert on every invoice",
         paragraphs: [
-          "If you both pay and receive in the same currency, converting each transaction back to your home currency is pure leakage. A multi-currency account lets you hold EUR, USD, GBP and others, and settle like for like — you only convert the true surplus, and only when the rate suits you.",
+          "If you both pay and receive in the same currency, converting each transaction back to your home currency is pure leakage. A multi-currency account lets you hold EUR, USD, GBP and others, and settle like for like. You only convert the true surplus, and only when the rate suits you.",
           "For many businesses this single change removes the majority of their conversion volume.",
         ],
       },
@@ -124,7 +124,7 @@ const allPosts: BlogPost[] = [
         heading: "Rule 3: Batch and time your conversions",
         paragraphs: [
           "Dozens of small conversions cost more than a few larger ones, because each carries fixed overhead and a fresh spread. Consolidate conversions where you can, and use rate alerts or limit orders so you convert at a level you have chosen in advance rather than whatever the market happens to be doing on payment day.",
-          "None of this requires speculation. The goal is simply to stop giving away margin by default — and to make FX a deliberate decision instead of an afterthought.",
+          "None of this requires speculation. The goal is simply to stop giving away margin by default, and to make FX a deliberate decision instead of an afterthought.",
         ],
       },
     ],
@@ -133,7 +133,7 @@ const allPosts: BlogPost[] = [
     slug: "how-fx-rates-impact-cross-border-payouts",
     seoTitle: "How FX rates cut into cross-border payouts",
     title:
-      "How FX rates impact cross-border payouts — and how to save up to 87% on every transfer",
+      "How FX rates impact cross-border payouts, and how to save up to 87% on every transfer",
     excerpt:
       "The hidden cost of FX spreads and the simple rule that will save your business thousands.",
     date: "2026-01-16",
@@ -142,27 +142,27 @@ const allPosts: BlogPost[] = [
     body: [
       {
         paragraphs: [
-          "When you send money across borders, two numbers matter: the exchange rate you see quoted in the news, and the rate you actually receive. The gap between them is where most cross-border payout costs hide — and closing that gap is the single biggest lever you have.",
+          "When you send money across borders, two numbers matter: the exchange rate you see quoted in the news, and the rate you actually receive. The gap between them is where most cross-border payout costs hide, and closing that gap is the single biggest lever you have.",
           "Here is how FX rates shape the real cost of a payout, and the simple rule that keeps more of every transfer in your pocket.",
         ],
       },
       {
         heading: "The rate you see versus the rate you get",
         paragraphs: [
-          "The rate quoted by search engines and financial media is the mid-market rate. Most payment providers don't give you that rate. Instead they add a margin on top — often between one and four percent — and present the result as a great rate with no fees. The fee is real; it is just embedded in the exchange rate.",
+          "The rate quoted by search engines and financial media is the mid-market rate. Most payment providers don't give you that rate. Instead they add a margin on top, often between one and four percent, and present the result as a great rate with no fees. The fee is real; it is just embedded in the exchange rate.",
         ],
       },
       {
         heading: "Anatomy of a marked-up transfer",
         paragraphs: [
-          "Imagine sending the equivalent of €10,000 to a supplier. At the true mid-market rate you would convert the full amount. With a 3% marked-up rate, roughly €300 of value quietly disappears into the spread. Add a flat SWIFT fee and a possible intermediary-bank charge, and the same transfer can cost noticeably more than it should — every single time you repeat it.",
+          "Imagine sending the equivalent of €10,000 to a supplier. At the true mid-market rate you would convert the full amount. With a 3% marked-up rate, roughly €300 of value quietly disappears into the spread. Add a flat SWIFT fee and a possible intermediary-bank charge, and the same transfer can cost noticeably more than it should, every single time you repeat it.",
           "For a business making regular payouts, that recurring leakage compounds into a large number over a year.",
         ],
       },
       {
         heading: "The mid-market rule",
         paragraphs: [
-          "The rule is simple: only accept transfers priced at or very close to the mid-market rate, and know the all-in cost before you confirm. When you convert at the interbank rate instead of a padded one, the markup — the largest component of most transfers — collapses toward zero. That is where the dramatic savings on cross-border payouts come from.",
+          "The rule is simple: only accept transfers priced at or very close to the mid-market rate, and know the all-in cost before you confirm. When you convert at the interbank rate instead of a padded one, the markup, the largest component of most transfers, collapses toward zero. That is where the dramatic savings on cross-border payouts come from.",
         ],
       },
       {
@@ -176,7 +176,7 @@ const allPosts: BlogPost[] = [
   {
     slug: "the-rise-of-multi-currency-accounts",
     seoTitle: "Multi-currency accounts for freelancers",
-    title: "The rise of multi-currency accounts for global freelancers — why you need one",
+    title: "The rise of multi-currency accounts for global freelancers, and why you need one",
     excerpt:
       "Freelancers in 100+ countries are switching to multi-currency IBANs. Here's what changed in 2026.",
     date: "2026-04-12",
@@ -192,7 +192,7 @@ const allPosts: BlogPost[] = [
       {
         heading: "Why freelancers outgrow a single-currency account",
         paragraphs: [
-          "When a US dollar payment lands in a euro account, it is converted automatically — usually at a marked-up rate, sometimes with a receiving fee on top. Do that across a dozen invoices a month and the cumulative loss rivals a paid subscription you never signed up for.",
+          "When a US dollar payment lands in a euro account, it is converted automatically, usually at a marked-up rate, sometimes with a receiving fee on top. Do that across a dozen invoices a month and the cumulative loss rivals a paid subscription you never signed up for.",
           "There is also friction: clients may hesitate to send an international wire, payments arrive slowly, and reconciling which invoice matches which deposit becomes a chore.",
         ],
       },
@@ -205,7 +205,7 @@ const allPosts: BlogPost[] = [
       {
         heading: "Getting paid like a local",
         paragraphs: [
-          "The bigger unlock is local receiving details. With a European IBAN, EU clients can pay you as easily as they would pay a domestic supplier — no international-wire hesitation, no lifting fees, faster settlement. Looking like a local counterparty removes a surprising amount of friction from getting hired and getting paid.",
+          "The bigger unlock is local receiving details. With a European IBAN, EU clients can pay you as easily as they would pay a domestic supplier. No international-wire hesitation, no lifting fees, faster settlement. Looking like a local counterparty removes a surprising amount of friction from getting hired and getting paid.",
         ],
       },
       {
@@ -235,7 +235,7 @@ const allPosts: BlogPost[] = [
       {
         heading: "How marketplace payouts work",
         paragraphs: [
-          "Amazon disburses proceeds in the currency of the store you sell in. Sell on Amazon.de and your payouts are in euros; sell on Amazon.co.uk and they are in pounds. If your bank account cannot receive that currency locally, Amazon either converts it — at its own rate — or routes it through slower international rails.",
+          "Amazon disburses proceeds in the currency of the store you sell in. Sell on Amazon.de and your payouts are in euros; sell on Amazon.co.uk and they are in pounds. If your bank account cannot receive that currency locally, Amazon either converts it at its own rate or routes it through slower international rails.",
         ],
       },
       {
@@ -247,13 +247,13 @@ const allPosts: BlogPost[] = [
       {
         heading: "How a European IBAN fixes it",
         paragraphs: [
-          "A European multi-currency IBAN gives you a receiving account that belongs to the same rails your EU payouts travel on. Euro disbursements settle locally, in your name, without forced conversion — faster, cheaper, and far less likely to be held. You can then convert to your home currency on your own terms, at a transparent rate.",
+          "A European multi-currency IBAN gives you a receiving account that belongs to the same rails your EU payouts travel on. Euro disbursements settle locally, in your name, without forced conversion. Faster, cheaper, and far less likely to be held. You can then convert to your home currency on your own terms, at a transparent rate.",
         ],
       },
       {
         heading: "Setting it up",
         paragraphs: [
-          "Open a multi-currency IBAN, verify it, and set it as the disbursement account for each European marketplace you sell on. Keep the seller name and account name consistent to sail through verification. It is a one-time setup that removes a recurring source of payout risk — and stops the marketplace's FX desk from taking a cut of every sale.",
+          "Open a multi-currency IBAN, verify it, and set it as the disbursement account for each European marketplace you sell on. Keep the seller name and account name consistent to sail through verification. It is a one-time setup that removes a recurring source of payout risk, and stops the marketplace's FX desk from taking a cut of every sale.",
         ],
       },
     ],
@@ -270,20 +270,20 @@ const allPosts: BlogPost[] = [
     body: [
       {
         paragraphs: [
-          "Treasury used to be the preserve of large corporates with dedicated teams. For import-export businesses operating across currencies and borders, a lightweight version of the same discipline is now within reach — and it is the difference between margins that hold and margins that quietly erode.",
+          "Treasury used to be the preserve of large corporates with dedicated teams. For import-export businesses operating across currencies and borders, a lightweight version of the same discipline is now within reach, and it is the difference between margins that hold and margins that quietly erode.",
           "Here is a practical, five-step framework for building a modern treasury system without enterprise overhead.",
         ],
       },
       {
         heading: "Step 1: Consolidate your accounts",
         paragraphs: [
-          "Scattered accounts across banks and countries make cash impossible to see clearly. Start by consolidating receiving and paying into as few multi-currency accounts as possible. One place to view balances across currencies turns guesswork into a dashboard, and cuts the number of transfers — and fees — between your own accounts.",
+          "Scattered accounts across banks and countries make cash impossible to see clearly. Start by consolidating receiving and paying into as few multi-currency accounts as possible. One place to view balances across currencies turns guesswork into a dashboard, and cuts the number of transfers (and fees) between your own accounts.",
         ],
       },
       {
         heading: "Step 2: Hold Multiple Currencies",
         paragraphs: [
-          "If you earn in dollars and pay suppliers in dollars, converting to your home currency and back is a self-inflicted cost. Hold the currencies you regularly transact in and settle like for like. Convert only the genuine surplus, and only when it makes sense — not automatically on every invoice.",
+          "If you earn in dollars and pay suppliers in dollars, converting to your home currency and back is a self-inflicted cost. Hold the currencies you regularly transact in and settle like for like. Convert only the genuine surplus, and only when it makes sense, not automatically on every invoice.",
         ],
       },
       {
@@ -301,8 +301,8 @@ const allPosts: BlogPost[] = [
       {
         heading: "Step 5: Build a cash buffer",
         paragraphs: [
-          "Cross-border trade means timing gaps — you pay suppliers before customers pay you. A deliberate cash buffer, sized to your longest payment cycle, keeps those gaps from becoming crises. With consolidated accounts and clean books, sizing that buffer becomes a calculation rather than a guess.",
-          "None of these steps require a treasury department. Together they turn currency and cash from sources of stress into a system you control — and a durable edge over competitors still leaving it to chance.",
+          "Cross-border trade means timing gaps. You pay suppliers before customers pay you. A deliberate cash buffer, sized to your longest payment cycle, keeps those gaps from becoming crises. With consolidated accounts and clean books, sizing that buffer becomes a calculation rather than a guess.",
+          "None of these steps require a treasury department. Together they turn currency and cash from sources of stress into a system you control, and a durable edge over competitors still leaving it to chance.",
         ],
       },
     ],

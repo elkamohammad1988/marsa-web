@@ -25,7 +25,7 @@ export default function Page() {
           { label: "Solutions" },
           { label: "Agencies & Freelancers" },
         ]}
-        title="Get paid by international clients — in their currency"
+        title="Get paid by international clients in their currency"
         description="Invoice in EUR, USD or GBP, receive with local account details, and keep more of every fee with interbank exchange rates."
         chips={[
           { label: "Local EUR, USD, GBP details" },

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "@/styles/globals.css";
 import { Navbar } from "@/components/layout/Navbar";
+import { isAuthConfigured } from "@/lib/auth-config";
 import { Footer } from "@/components/layout/Footer";
 import { HydrationSignal } from "@/components/layout/HydrationSignal";
 import { JsonLd } from "@/components/JsonLd";
@@ -23,7 +24,7 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Marsa — where your money lands",
+    default: "Marsa, where your money lands",
     template: "%s · Marsa",
   },
   description: siteConfig.description,
@@ -76,7 +77,7 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <Navbar />
+        <Navbar authConfigured={isAuthConfigured()} />
         <main id="main-content">{children}</main>
         <Footer />
       </body>

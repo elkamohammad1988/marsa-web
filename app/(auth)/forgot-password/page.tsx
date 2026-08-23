@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/AuthShell";
-import { AuthUnavailableNotice } from "@/components/auth/AuthUnavailableNotice";
+import {
+  AuthUnavailableNotice,
+  authOffTitle,
+  authOffDescription,
+} from "@/components/auth/AuthUnavailableNotice";
 import { EmailOnlyForm } from "@/components/auth/EmailOnlyForm";
 import { isAuthConfigured } from "@/lib/auth-config";
 import { buildMetadata } from "@/lib/seo";
@@ -15,10 +19,16 @@ export const metadata = buildMetadata({
 });
 
 export default function ForgotPasswordPage() {
+  const authOn = isAuthConfigured();
+
   return (
     <AuthShell
-      title="Reset your password"
-      description="Give us the address on the account and we will send a link that lets you set a new password."
+      title={authOn ? "Reset your password" : authOffTitle}
+      description={
+        authOn
+          ? "Give us the address on the account and we will send a link that lets you set a new password."
+          : authOffDescription
+      }
       footer={
         <Link
           href="/login"
@@ -30,7 +40,7 @@ export default function ForgotPasswordPage() {
         </Link>
       }
     >
-      {isAuthConfigured() ? (
+      {authOn ? (
         <EmailOnlyForm
           endpoint="/api/auth/forgot-password"
           submitLabel="Send reset link"
@@ -42,7 +52,7 @@ export default function ForgotPasswordPage() {
             used to find out, and the wording has to hold the same line the
             endpoint does.
           */
-          confirmation="If that address has an account, a reset link is on its way. It expires shortly, so use it soon — and check your spam folder if it does not arrive."
+          confirmation="If that address has an account, a reset link is on its way. It expires shortly, so use it soon, and check your spam folder if it does not arrive."
         />
       ) : (
         <AuthUnavailableNotice />

@@ -7,9 +7,9 @@ import { CTACard } from "@/components/sections/CTACard";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Interactive Demo — See Marsa Work End to End",
+  title: "Interactive Demo. See Marsa Work End to End",
   description:
-    "Try Marsa in your browser: open an account, get a European IBAN, receive a payout, and convert at the live ECB rate. A labelled sandbox — no sign-up.",
+    "Try Marsa in your browser: open an account, get a European IBAN, receive a payout, and convert at the live ECB rate. A labelled sandbox, no sign-up.",
   path: "/demo",
 });
 
@@ -29,8 +29,8 @@ export default function DemoPage() {
               Try Marsa, right here
             </Heading>
             <p className="mt-4 text-white/70">
-              No sign-up, no download. Walk the exact loop a cross-border business runs — get paid
-              from abroad, convert at the real interbank rate, pay out over SEPA — in about a minute.
+              No sign-up, no download. Walk the exact loop a cross-border business runs: get paid
+              from abroad, convert at the real interbank rate, pay out over SEPA, in about a minute.
             </p>
           </div>
         </Container>
@@ -64,7 +64,7 @@ export default function DemoPage() {
       <CTACard
         eyebrow="Concept build"
         title="Everything you just used is real code"
-        description="The rate came from the European Central Bank, the IBAN passes a real ISO 13616 checksum, and every figure was computed by unit-tested arithmetic. The money is the one thing that is not real — there is none here, and no licence to move it."
+        description="The rate came from the European Central Bank, the IBAN passes a real ISO 13616 checksum, and every figure was computed by unit-tested arithmetic. The money is the one thing that is not real. There is none here, and no licence to move it."
         primaryCta={{ label: "What's real, and what isn't", href: "/company/compliance" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"

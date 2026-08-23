@@ -9,7 +9,7 @@ import { IconClock, IconGlobe, IconShield } from "@/components/icons";
 export const metadata: Metadata = buildMetadata({
   title: "Contact Marsa",
   description:
-    "Get in touch with the Marsa team. Talk to sales, reach customer support, or send a compliance or press enquiry.",
+    "Marsa is a concept build with no team behind it. The contact form runs the real validation rules and then keeps nothing, and the page says so before you type.",
   path: "/contact",
 });
 
@@ -19,10 +19,38 @@ const mailboxes = [
   { label: "Support", address: siteConfig.email.support },
 ].filter((m) => m.address);
 
+/**
+ * What this page can honestly say about itself.
+ *
+ * The first of these read "Fast replies — We answer every enquiry within one
+ * business day", which is the same sentence the honesty pass deleted from the
+ * lead form's success screen, still standing on the page that hosts the
+ * contact form. Nobody reads a submission here and nobody replies, so it was a
+ * commitment made to a real person by a build with no operator — and the form
+ * below it discards what you type. `tests/forms-collect-nothing.test.ts` now
+ * scans the pages that host a form as well as the form components, which is
+ * the gap that let it survive.
+ *
+ * The third said "Your details are handled per our Privacy Policy". They are
+ * not handled at all; that is the point, and it is worth more than the
+ * reassurance it replaced.
+ */
 const highlights = [
-  { icon: <IconClock />, title: "Fast replies", text: "We answer every enquiry within one business day." },
-  { icon: <IconGlobe />, title: "Global support", text: "Assistance across EU, UK and 180+ countries." },
-  { icon: <IconShield />, title: "Secure by default", text: "Your details are handled per our Privacy Policy." },
+  {
+    icon: <IconShield />,
+    title: "Nothing kept",
+    text: "What you type never leaves your browser. No inbox, no database row, nothing to erase later.",
+  },
+  {
+    icon: <IconGlobe />,
+    title: "Real validation",
+    text: "The same rules run here and on the server, from one shared module, so the two cannot drift apart.",
+  },
+  {
+    icon: <IconClock />,
+    title: "What a configured build does",
+    text: "Writes to Postgres, rate-limits across instances, then notifies by email — never the other way round.",
+  },
 ];
 
 export default async function ContactPage({
@@ -42,8 +70,8 @@ export default async function ContactPage({
           <div className="lg:pt-4">
             <h1 className="text-display-sm font-bold text-ink">Talk to us</h1>
             <p className="mt-4 max-w-md text-base text-ink-muted">
-              Whether you&apos;re scaling a business or opening your first account, our team is
-              here to help. Send us a message and we&apos;ll get back to you shortly.
+              Marsa is a concept build, so there is no team behind this address and nowhere for
+              the form below to send what you write.
             </p>
 
             <ul className="mt-8 flex flex-col gap-5">
@@ -73,7 +101,7 @@ export default async function ContactPage({
                       href={`mailto:${address}`}
                       className="rounded-sm hover:text-brand-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
                     >
-                      {label} — {address}
+                      {label}: {address}
                     </a>
                   ))}
                 </div>

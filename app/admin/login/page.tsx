@@ -31,7 +31,7 @@ export const dynamic = "force-dynamic";
  * where instructions live — `docs/DEPLOYMENT.md` — and the page states the
  * situation in a sentence a non-technical reader can act on.
  *
- * `tests/admin-config-copy.test.ts` holds the property that replaced the old
+ * `tests/config-copy-leaks.test.ts` holds the property that replaced the old
  * one: no public auth surface names an environment variable.
  */
 export default async function AdminLoginPage() {
@@ -54,7 +54,7 @@ export default async function AdminLoginPage() {
           <div className="mt-6 rounded-xl border border-line bg-surface-alt p-4 text-sm text-ink-muted">
             <p className="font-medium text-ink">The operator area is closed on this build</p>
             <p className="mt-1 leading-relaxed">
-              Marsa is a concept build, and this deployment runs without credentials on purpose —
+              Marsa is a concept build, and this deployment runs without credentials on purpose,
               so the dashboard is shut rather than half-working. It is a real area behind a real
               password: form submissions, CSV export and the demo funnel. Running the project
               yourself opens it; the steps are in the deployment guide.

@@ -32,7 +32,7 @@ export function RegulatedBand() {
       icon: <IconLock />,
       title: "Screened Every Time",
       description:
-        "KYC, sanctions and transaction monitoring on every onboarding and every payment — the part that decides whether a product is shippable.",
+        "KYC, sanctions and transaction monitoring on every onboarding and every payment, the part that decides whether a product is shippable.",
     },
   ];
   return (

@@ -100,7 +100,7 @@ export function FxCalculator() {
           >
             {FX_CURRENCIES.map((c) => (
               <option key={c.code} value={c.code}>
-                {c.flag} {c.code} — {c.label}
+                {c.flag} {c.code} {c.label}
               </option>
             ))}
           </Select>
@@ -128,7 +128,7 @@ export function FxCalculator() {
           className="mt-2 h-6 w-full accent-brand"
         />
         <p className="mt-1 text-xs text-ink-subtle">
-          Most high-street banks add 2–4% on top of the mid-market rate.
+          Most high-street banks add 2-4% on top of the mid-market rate.
         </p>
       </div>
 

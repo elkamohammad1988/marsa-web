@@ -39,7 +39,7 @@ export default function Error({
               claim this project exists to not make — so it says what it can
               actually promise, which is that the failure was in rendering. */}
           <p className="mt-4 text-base text-ink-muted">
-            Sorry about that — the page failed to render. Trying again usually resolves it,
+            Sorry about that. The page failed to render. Trying again usually resolves it,
             and nothing you had already saved is affected.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">

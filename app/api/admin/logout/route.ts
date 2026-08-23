@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { ADMIN_COOKIE, sessionCookieOptions } from "@/lib/admin-auth";
-import { isCrossSite } from "@/lib/same-origin";
-import { absoluteUrl } from "@/lib/site";
+import { isCrossSite, seeOther } from "@/lib/same-origin";
 
 export const runtime = "nodejs";
 
@@ -19,8 +18,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
 
-  const origin = new URL(request.url).origin || absoluteUrl("/");
-  const response = NextResponse.redirect(new URL("/admin/login", origin), { status: 303 });
+  // Relative, so the browser resolves it against the document's own origin.
+  // See `seeOther`: an absolute redirect built from `request.url` is what made
+  // this button appear dead while the session was in fact being destroyed.
+  const response = seeOther("/admin/login");
   response.cookies.set(ADMIN_COOKIE, "", sessionCookieOptions(0));
   return response;
 }

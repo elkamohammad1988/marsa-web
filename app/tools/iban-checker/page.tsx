@@ -8,9 +8,9 @@ import { CTACard } from "@/components/sections/CTACard";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "IBAN checker — validate any IBAN free",
+  title: "IBAN checker. Validate any IBAN free",
   description:
-    "Validate any IBAN instantly. Marsa's free IBAN checker verifies the country, length, and ISO 13616 check digits — entirely in your browser.",
+    "Validate any IBAN instantly. Marsa's free IBAN checker verifies the country, length, and ISO 13616 check digits, entirely in your browser.",
   path: "/tools/iban-checker",
 });
 
@@ -18,7 +18,7 @@ const concepts = [
   { label: "Country code", value: "First 2 letters identify the country (e.g. DE, GB)." },
   { label: "Check digits", value: "2 digits that validate the whole IBAN via MOD-97." },
   { label: "BBAN", value: "The domestic bank and account number that follows." },
-  { label: "Length", value: "Fixed per country — Germany 22, UK 22, France 27." },
+  { label: "Length", value: "Fixed per country: Germany 22, UK 22, France 27." },
 ];
 
 export default function Page() {
@@ -30,7 +30,7 @@ export default function Page() {
             <Heading level="display">IBAN Checker</Heading>
             <p className="mt-4 text-base text-ink-muted md:text-lg">
               Validate any international bank account number in seconds. We check the country,
-              length, and check digits — privately, right in your browser.
+              length, and check digits privately, right in your browser.
             </p>
           </div>
           <div className="mx-auto mt-10 max-w-2xl">
@@ -45,7 +45,7 @@ export default function Page() {
           <p className="mt-4 max-w-3xl text-base text-ink-muted">
             An IBAN (International Bank Account Number) has a strict structure defined by ISO 13616.
             Our checker rearranges the IBAN, converts letters to numbers, and runs the ISO 7064
-            MOD-97 checksum — the same maths banks use to catch typos before a payment is sent.
+            MOD-97 checksum, the same maths banks use to catch typos before a payment is sent.
           </p>
           <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {concepts.map((c) => (
@@ -63,7 +63,7 @@ export default function Page() {
           {
             question: "Does a valid result mean the account exists?",
             answer:
-              "No. The checker confirms the IBAN is correctly formed and the check digits pass. It cannot confirm the account is open or belongs to a particular person — only the bank can do that.",
+              "No. The checker confirms the IBAN is correctly formed and the check digits pass. It cannot confirm the account is open or belongs to a particular person. Only the bank can do that.",
           },
           {
             question: "Is my IBAN sent anywhere?",

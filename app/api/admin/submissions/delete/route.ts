@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/admin-auth";
-import { isCrossSite } from "@/lib/same-origin";
+import { isCrossSite, seeOther } from "@/lib/same-origin";
 import { getStore, isSubmissionKind } from "@/lib/storage";
 import { clientKey } from "@/lib/rate-limit";
 import { ADMIN_DELETE_TIERS, checkTiers, tooManyRequests } from "@/lib/api-rate-limit";
@@ -105,9 +105,16 @@ export async function POST(request: Request) {
    * comes from a form field, and a value copied straight into a `Location`
    * header is an open redirect regardless of who is authenticated.
    */
-  const origin = new URL(request.url).origin;
-  return NextResponse.redirect(new URL(safeAdminReturn(form.get("returnTo")), origin), {
-    status: 303,
+  /*
+   * `erased=1` is what the list renders its confirmation from. It is appended
+   * here, by the route that actually performed the deletion, rather than
+   * carried in `returnTo` — `safeAdminReturn` rebuilds that path from a closed
+   * set of parameters and deliberately drops anything else, so the only way
+   * this flag can reach the page is a real erasure. A link handed to somebody
+   * cannot make the page claim a deletion happened.
+   */
+  const back = safeAdminReturn(form.get("returnTo"));
+  return seeOther(`${back}${back.includes("?") ? "&" : "?"}erased=1`, {
     headers: { "cache-control": "no-store" },
   });
 }

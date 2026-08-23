@@ -39,7 +39,7 @@ export const plans: Plan[] = [
     badge: "Ideal for first steps",
     price: "Free",
     description:
-      "A no-cost account for freelancers starting out — the tools to manage money from day one, without paying a cent.",
+      "A no-cost account for freelancers starting out. The tools to manage money from day one, without paying a cent.",
     features: [
       "Virtual card",
       "Free withdrawals",

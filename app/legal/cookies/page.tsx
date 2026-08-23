@@ -33,13 +33,13 @@ export default function CookiesPage() {
         {
           heading: "The demonstration walkthrough",
           paragraphs: [
-            "The interactive demo records which steps are reached, so the flow can be improved. It does so without a cookie and without local storage: the identifier it sends is random, created fresh each time the page loads, and gone when the tab closes — it cannot be linked to you, to a previous visit, or to anything else you do here. The demo also honours the browser's Do Not Track setting and sends nothing when it is on.",
+            "The interactive demo records which steps are reached, so the flow can be improved. It does so without a cookie and without local storage: the identifier it sends is random, created fresh each time the page loads, and gone when the tab closes. It cannot be linked to you, to a previous visit, or to anything else you do here. The demo also honours the browser's Do Not Track setting and sends nothing when it is on.",
           ],
         },
         {
           heading: "Managing cookies",
           paragraphs: [
-            "There is no cookie banner on this site, because there is nothing non-essential to consent to — the two cookies above are what makes signing in work, and a site cannot function without them once you have signed in. If you would rather not have them, signing out removes them, and every browser also lets you block or delete cookies for a site from its own settings.",
+            "There is no cookie banner on this site, because there is nothing non-essential to consent to. The two cookies above are what makes signing in work, and a site cannot function without them once you have signed in. If you would rather not have them, signing out removes them, and every browser also lets you block or delete cookies for a site from its own settings.",
           ],
         },
       ]}

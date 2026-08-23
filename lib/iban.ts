@@ -70,13 +70,13 @@ export function validateIban(raw: string): IbanResult {
   if (iban.length !== expectedLength)
     return {
       valid: false,
-      reason: `${COUNTRY_NAMES[countryCode] ?? countryCode} IBANs must be ${expectedLength} characters — this one is ${iban.length}.`,
+      reason: `${COUNTRY_NAMES[countryCode] ?? countryCode} IBANs must be ${expectedLength} characters. This one is ${iban.length}.`,
       countryCode,
     };
 
   const rearranged = iban.slice(4) + iban.slice(0, 4);
   if (mod97(rearranged) !== 1)
-    return { valid: false, reason: "The check digits don't match — this IBAN is invalid.", countryCode };
+    return { valid: false, reason: "The check digits don't match. This IBAN is invalid.", countryCode };
 
   return {
     valid: true,

@@ -13,7 +13,7 @@ import { IconLightning, IconShield, IconCoin } from "@/components/icons";
 export const metadata: Metadata = buildMetadata({
   title: "Free SEPA Transfer Personal Account",
   description:
-    "Send free, instant SEPA transfers with a Marsa personal account — across all 36 SEPA countries in under 10 seconds, no EU residency required.",
+    "Send free, instant SEPA transfers with a Marsa personal account, across all 36 SEPA countries in under 10 seconds, no EU residency required.",
   path: "/personal/sepa-transfers",
 });
 
@@ -26,7 +26,7 @@ export default function Page() {
           { label: "Personal" },
           { label: "SEPA Transfers" },
         ]}
-        title="Free SEPA Transfer Personal Account — No EU Residency Required"
+        title="Free SEPA Transfer Personal Account. No EU Residency Required"
         description="European SEPA payments for modern lifestyles. Send money across all 36 SEPA countries for free."
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
@@ -50,9 +50,9 @@ export default function Page() {
           },
           {
             icon: <IconShield />,
-            title: "Bank-Grade Security",
+            title: "Account Security",
             description:
-              "End-to-end encryption, biometric authentication, and 24/7 fraud monitoring.",
+              "Signed, expiring sessions, rate-limited sign-in, and a strict Content-Security-Policy, each one implemented in this build rather than promised.",
           },
         ]}
       />
@@ -69,7 +69,7 @@ export default function Page() {
           {
             number: "02",
             title: "Add Recipient",
-            description: "Enter any European IBAN — we'll verify it in real time.",
+            description: "Enter any European IBAN and we'll verify it in real time.",
           },
           {
             number: "03",
@@ -88,7 +88,7 @@ export default function Page() {
           { label: "Daily Limit", marsa: "€50,000", traditional: "€10,000" },
           { label: "Mobile Support", marsa: "Full-feature", traditional: "Limited" },
           { label: "Cancel in flight", marsa: "Yes (within 5 sec)", traditional: "No" },
-          { label: "Multi-Currency", marsa: "15+ currencies", traditional: "EUR only" },
+          { label: "Multi-Currency", marsa: "30+ currencies", traditional: "EUR only" },
         ]}
       />
 
@@ -115,7 +115,7 @@ export default function Page() {
           {
             question: "Is SEPA really free with Marsa?",
             answer:
-              "Yes — standard SEPA transfers are free on all plans, with no monthly cap.",
+              "Yes. Standard SEPA transfers are free on all plans, with no monthly cap.",
           },
           {
             question: "Which SEPA countries are supported?",

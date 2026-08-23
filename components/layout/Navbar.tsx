@@ -43,7 +43,7 @@ function groupContainsCurrent(pathname: string, group: NavGroup): boolean {
   return (group.children ?? []).some((c) => isCurrent(pathname, c.href));
 }
 
-export function Navbar() {
+export function Navbar({ authConfigured }: { authConfigured: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const pathname = usePathname();
@@ -156,7 +156,7 @@ export function Navbar() {
               */}
               <Logo wordmarkClassName="hidden sm:inline lg:hidden xl:inline" />
             </Link>
-            <ConceptBadge />
+            <ConceptBadge authConfigured={authConfigured} />
           </div>
 
           <ul className="hidden items-center gap-1 lg:flex">

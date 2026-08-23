@@ -12,9 +12,9 @@ import { BrandArt } from "@/components/art/BrandArt";
 import { IconExchange, IconChart, IconLightning } from "@/components/icons";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Instant Currency Converter — Live Exchange Rates",
+  title: "Instant Currency Converter with Live Exchange Rates",
   description:
-    "Convert any currency with Marsa's free converter using real European Central Bank mid-market rates across 30 currencies — the rate banks pay, before any markup.",
+    "Convert any currency with Marsa's free converter using real European Central Bank mid-market rates across 30 currencies, the rate banks pay before any markup.",
   path: "/tools/currency-converter",
 });
 
@@ -56,7 +56,7 @@ export default function Page() {
               <p className="mt-4 text-base text-ink-muted">
                 A currency converter is a tool that calculates how much one currency is worth in
                 another at any given moment. Marsa&apos;s converter uses European Central Bank reference
-                rates — the mid-market rate banks use between themselves — so you always see the
+                rates (the mid-market rate banks use between themselves), so you always see the
                 rate before any markup.
               </p>
               <p className="mt-4 text-base text-ink-muted">
@@ -92,7 +92,7 @@ export default function Page() {
           {
             number: "02",
             title: "Enter the amount",
-            description: "Type the source amount — we recalculate live.",
+            description: "Type the source amount and we recalculate live.",
           },
           {
             number: "03",
@@ -123,7 +123,7 @@ export default function Page() {
           {
             question: "What is the mid-market rate?",
             answer:
-              "The mid-market rate is the midpoint between the buy and sell prices of two currencies — the rate banks use to settle between each other.",
+              "The mid-market rate is the midpoint between the buy and sell prices of two currencies, the rate banks use to settle between each other.",
           },
           {
             question: "Why is your rate different from my bank?",
@@ -133,7 +133,7 @@ export default function Page() {
           {
             question: "Can I use this rate to send money?",
             answer:
-              "Yes — Marsa customers transfer at the mid-market rate up to €10,000/month, then a small 0.4% markup applies.",
+              "Yes. Marsa customers transfer at the mid-market rate up to €10,000/month, then a small 0.4% markup applies.",
           },
           {
             question: "How often are rates updated?",
@@ -146,7 +146,7 @@ export default function Page() {
       <CTACard
         eyebrow="For Individuals"
         title="Your Money, Accessible Everywhere You Go"
-        description="Up to 2% FX fees, free SEPA transfers, and support in 180+ countries."
+        description="Interbank FX rates, free SEPA transfers, and support across 180+ countries."
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"

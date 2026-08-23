@@ -13,7 +13,7 @@ import { IconGlobe, IconExchange, IconShield } from "@/components/icons";
 export const metadata: Metadata = buildMetadata({
   title: "Multi-currency IBAN for expats and non-residents",
   description:
-    "A multi-currency IBAN account for expats and non-residents. Open a European IBAN online and hold, convert, and spend in 15+ currencies at real interbank rates.",
+    "A multi-currency IBAN account for expats and non-residents. Open a European IBAN online and hold, convert, and spend in 30+ currencies at real interbank rates.",
   path: "/personal/multi-currency-iban",
 });
 
@@ -27,7 +27,7 @@ export default function Page() {
           { label: "Multi-Currency IBAN" },
         ]}
         title="Multi-currency IBAN account for expats and non-residents"
-        description="European multi-currency account for modern lifestyles. Hold, convert, and spend in 15+ currencies from a single IBAN."
+        description="European multi-currency account for modern lifestyles. Hold, convert, and spend in 30+ currencies from a single IBAN."
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="phone-home"
@@ -40,19 +40,19 @@ export default function Page() {
             icon: <IconGlobe />,
             title: "Welcome to Marsa",
             description:
-              "Open a European IBAN in minutes — even if you don't live in the EU. Receive SEPA payments instantly.",
+              "Open a European IBAN in minutes, even if you don't live in the EU. Receive SEPA payments instantly.",
           },
           {
             icon: <IconExchange />,
             title: "Free FX Conversion",
             description:
-              "Convert between 15+ currencies at the real interbank rate, with no markup on the first €5,000.",
+              "Convert between 30+ currencies at the real interbank rate, with no markup on the first €5,000.",
           },
           {
             icon: <IconShield />,
             title: "Safeguarded Funds",
             description:
-              "Funds are safeguarded with regulated partner banks across the EU and UK.",
+              "Balances would sit in segregated safeguarding accounts at licensed partner banks, never mixed with the operator's own money.",
           },
         ]}
       />
@@ -66,7 +66,7 @@ export default function Page() {
             number: "01",
             title: "Sign Up",
             description:
-              "Create your Marsa account in under 5 minutes — fully online from any device.",
+              "Create your Marsa account in under 5 minutes, fully online from any device.",
           },
           {
             number: "02",
@@ -89,7 +89,7 @@ export default function Page() {
         rows={[
           { label: "Account Opening", marsa: "Online, 5 min", traditional: "Branch visit, 2-4 weeks" },
           { label: "Verification", marsa: "Fully Digital", traditional: "Paper documentation" },
-          { label: "Multi-Currency", marsa: "15+ currencies", traditional: "Usually EUR only" },
+          { label: "Multi-Currency", marsa: "30+ currencies", traditional: "Usually EUR only" },
           { label: "FX Fees", marsa: "Real interbank rate", traditional: "2-4% markup" },
           { label: "SEPA Transfers", marsa: "Free, instant", traditional: "Free, 1-2 days" },
           { label: "Mobile App", marsa: "Native, full-feature", traditional: "Limited" },
@@ -123,12 +123,12 @@ export default function Page() {
           {
             question: "Is my money safe with Marsa?",
             answer:
-              "Yes. Customer funds are safeguarded in segregated accounts with our regulated partner banks across the EU and UK.",
+              "Marsa is a concept build and holds no money, so there is none of yours here. In the product it describes, balances would sit in segregated safeguarding accounts at licensed partner banks — which is not the same protection as a bank deposit, and a product should say so.",
           },
           {
             question: "Can I receive my salary in my Marsa IBAN?",
             answer:
-              "Yes. Your Marsa IBAN works like any other European bank account for SEPA transfers — including salary payments.",
+              "Yes. Your Marsa IBAN works like any other European bank account for SEPA transfers, including salary payments.",
           },
           {
             question: "Are there any monthly fees?",

@@ -1,3 +1,5 @@
+import { siteConfig } from "@/lib/site";
+
 export type NavLink = { label: string; href: string };
 
 export type NavGroup = {
@@ -42,7 +44,13 @@ export const mainNav: NavGroup[] = [
       { label: "Blog", href: "/blog" },
       { label: "How it works (personal)", href: "/personal/how-it-works" },
       { label: "How it works (business)", href: "/business/how-it-works" },
-      { label: "FAQ", href: "/faq" },
+      // `FAQ` is not repeated here. It was the last entry in this dropdown
+      // *and* the top-level item below it, so the bar offered one page under
+      // two controls — the same defect the footer columns were cleaned of, in
+      // the row where `Navbar.tsx` records running out of width between 1024
+      // and 1280px. The direct link is the one that stays: it is the shortcut
+      // a reader looking for it expects, and the footer's Resources column
+      // still lists the page alongside the blog.
     ],
   },
   { label: "FAQ", href: "/faq" },
@@ -128,10 +136,17 @@ export const footerColumns: Array<{ title: string; links: NavLink[] }> = [
  * "Supabase Auth + row-level security" says who supplies the database, where
  * the reassuring part is that per-row permissions exist at all.
  */
-export const footerBadges = [
-  "Concept build",
-  "Live ECB reference rates",
-  "ISO 13616 IBAN validation",
-  "Row-level database security",
-  "Open source",
+export const footerBadges: { label: string; href?: string }[] = [
+  { label: "Concept build" },
+  { label: "Live ECB reference rates" },
+  { label: "ISO 13616 IBAN validation" },
+  { label: "Row-level database security" },
+  /*
+    The one badge that is a link, and the only one that needs to be. The other
+    four describe the build; this one asserts that the build can be read, and a
+    claim a reader cannot act on is worth less than no claim. It sat here as
+    plain text for as long as the repository was private, which made it the
+    single most checkable false statement on the site.
+  */
+  { label: "Source on GitHub", href: siteConfig.repoUrl },
 ];

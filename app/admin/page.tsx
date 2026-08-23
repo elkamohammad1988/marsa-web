@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
@@ -58,7 +57,7 @@ function formatWhen(iso: string): string {
 function summarise(submission: StoredSubmission): { title: string; detail: string } {
   const data = submission.data as Record<string, unknown>;
   const pick = (key: string) => (typeof data[key] === "string" ? (data[key] as string) : "");
-  const title = pick("name") || pick("company") || pick("email") || "—";
+  const title = pick("name") || pick("company") || pick("email") || "";
   const detail = [pick("email"), pick("topic") || pick("accountType"), pick("country")]
     .filter(Boolean)
     .join(" · ");
@@ -141,13 +140,30 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         searched: q ? "yes" : "no",
       });
       error =
-        "Submissions could not be read. The failure has been recorded — check the " +
+        "Submissions could not be read. The failure has been recorded. Check the " +
         "server logs, and /api/health for whether the database is reachable at all.";
     }
   }
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const exportHref = `/api/admin/export${buildQuery({ kind, q })}`;
+
+  /*
+   * Confirmation that the erasure happened.
+   *
+   * The endpoint redirected back to the list and said nothing, so the whole of
+   * the feedback was a row that is no longer there — which is indistinguishable
+   * from having deleted the wrong one, from a filter having changed, and from
+   * nothing having happened at all on a page that shows 25 rows at a time. An
+   * erasure is a thing an operator may later have to say they did; being shown
+   * that it succeeded is the least the interface owes them.
+   *
+   * The flag is set by the route on its own redirect, never read from
+   * `returnTo` — `safeAdminReturn` rebuilds that path from a closed set of
+   * parameters — so this cannot be made to appear by handing somebody a link.
+   * It is a `role="status"` so a screen reader hears it on arrival.
+   */
+  const erased = firstValue(params.erased) === "1";
 
   return (
     <Container>
@@ -169,12 +185,15 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
               </span>
             ) : (
               <span className="ml-2 rounded-full bg-accent/[0.14] px-2 py-0.5 text-xs font-medium text-ink">
-                local files — set SUPABASE_URL to persist
+                local files, set SUPABASE_URL to persist
               </span>
             )}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        {/* `flex-wrap`: three pill buttons on one line measure ~333px, which
+            is wider than a 320px phone, and this row was the only thing on the
+            operator dashboard that made the page scroll sideways. */}
+        <div className="flex flex-wrap items-center gap-2">
           <Button href="/admin/funnel" variant="outline" size="sm">
             Demo funnel
           </Button>
@@ -203,8 +222,26 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         ))}
       </dl>
 
+      {/*
+        ── Plain anchors, not `<Link>`, and this is a fix ──────────────────
+        Every control in this row and in the pagination below changes only the
+        *query string* of the page it is on. On a `force-dynamic` route the App
+        Router fetches the new RSC payload for such a navigation — the request
+        goes out and answers 200 — and then never commits it: the URL does not
+        change and the table does not move. Verified in a browser rather than
+        reasoned about; a plain anchor to the identical href navigates
+        immediately.
+
+        So an operator clicked "Account leads", or "Next", and nothing at all
+        happened. Search escaped it only because it is a native
+        `<form method="get">`, which is a full navigation — and that is the
+        shape all of these now share, which is the second reason to prefer it
+        here: `/admin` is deliberately an area with no client JavaScript, and a
+        control that depends on the client router to work was the one thing in
+        it that did.
+      */}
       <div className="mt-6 flex flex-wrap items-center gap-2">
-        <Link
+        <a
           href={`/admin${buildQuery({ q })}`}
           className={cn(
             "rounded-full border px-3 py-1.5 text-sm",
@@ -212,9 +249,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           )}
         >
           All
-        </Link>
+        </a>
         {SUBMISSION_KINDS.map((k) => (
-          <Link
+          <a
             key={k}
             href={`/admin${buildQuery({ kind: k, q })}`}
             className={cn(
@@ -226,10 +263,17 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           >
             {KIND_LABELS[k]}
             <span className="ml-1.5 text-xs text-ink-subtle">{stats.byKind[k]}</span>
-          </Link>
+          </a>
         ))}
 
-        <form action="/admin" method="get" className="ml-auto flex items-center gap-2">
+        {/* Full width on a phone, pushed right from `sm` up. A fixed `w-56`
+            field plus its button is 308px, which does not fit the 280px a
+            320px viewport leaves inside the container. */}
+        <form
+          action="/admin"
+          method="get"
+          className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto"
+        >
           {kind && <input type="hidden" name="kind" value={kind} />}
           <input
             type="search"
@@ -237,13 +281,23 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             defaultValue={q}
             placeholder="Search name, email…"
             aria-label="Search submissions"
-            className="h-9 w-56 rounded-full border border-line bg-canvas px-4 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-brand-strong"
+            className="h-9 min-w-0 flex-1 rounded-full border border-line bg-canvas px-4 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-brand-strong sm:w-56 sm:flex-none"
           />
           <Button type="submit" variant="outline" size="sm">
             Search
           </Button>
         </form>
       </div>
+
+      {erased && (
+        <p
+          role="status"
+          className="mt-6 rounded-card border border-success/40 bg-success/[0.08] p-4 text-sm text-success"
+        >
+          Submission erased. The record is gone from the database and the deletion has been
+          recorded in the server log.
+        </p>
+      )}
 
       {error ? (
         <p className="mt-6 rounded-card border border-line bg-card p-5 text-sm text-danger">
@@ -317,30 +371,72 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                         page they were on, rebuilt from a closed set of
                         parameters at the other end rather than trusted.
 
-                        There is no confirmation step and that is deliberate:
-                        a `confirm()` needs client JavaScript, which this area
-                        does not use, and a modal would be the only thing on
-                        the page that stops working when a script fails. The
-                        protection that does not depend on the browser is the
-                        one that matters — this deletes exactly one row, named
-                        by id, and the endpoint reports honestly when it
-                        removed nothing.
+                        ── The confirmation step, and why it is a `<details>` ──
+                        There used to be none, on the reasoning that `confirm()`
+                        needs client JavaScript and this area deliberately has
+                        none, so a modal would be the one control that stops
+                        working when a script fails. That reasoning is right
+                        about modals and wrong about the conclusion it drew:
+                        the choice was never "a JavaScript dialog or nothing".
+
+                        A disclosure is a confirmation step that needs no
+                        script at all. The first press opens the panel and
+                        destroys nothing; the second, on a differently named
+                        button that says what it will do, is the one that
+                        submits. That is one deliberate action away from a row
+                        of twenty-five identical `Delete` buttons in a dense
+                        table — which is exactly the shape of interface a
+                        mis-click erases a stranger's personal data from. It
+                        keeps every property the old note argued for: it works
+                        with scripting off, it is reachable and operable by
+                        keyboard, and the endpoint behind it still deletes
+                        exactly one row named by id.
                       */}
-                      <form action="/api/admin/submissions/delete" method="post">
-                        <input type="hidden" name="id" value={item.id} />
-                        <input
-                          type="hidden"
-                          name="returnTo"
-                          value={`/admin${buildQuery({ kind, q, page: page > 1 ? page : undefined })}`}
-                        />
-                        <button
-                          type="submit"
-                          className="rounded-full border border-line px-3 py-1 text-xs text-ink-muted transition hover:border-danger hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
-                        >
+                      <details
+                        /* A hook for the browser suite. Each row also carries a
+                           "View payload" disclosure, so a positional selector
+                           would drive the wrong one — and an attribute that
+                           exists to be found cannot drift with the styling, the
+                           same reasoning as `data-disclosure` on the concept
+                           badge. */
+                        data-erase=""
+                        className="group/erase"
+                      >
+                        {/* `list-none` covers Chrome and Firefox; the webkit
+                            pseudo-element is what older Safari still draws its
+                            triangle from, and a stray marker inside a pill is
+                            the kind of detail that reads as unfinished. */}
+                        <summary className="inline-flex cursor-pointer list-none items-center rounded-full border border-line px-3 py-1 text-xs text-ink-muted transition hover:border-danger hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger group-open/erase:border-danger group-open/erase:text-danger [&::-webkit-details-marker]:hidden">
                           Delete
-                          <span className="sr-only"> the {item.kind} submission from {title}</span>
-                        </button>
-                      </form>
+                          <span className="sr-only"> the {item.kind} submission{title ? ` from ${title}` : ""}</span>
+                        </summary>
+                        {/* Right-aligned with the column and its "Erase"
+                            header; the copy inside reads left, as copy does. */}
+                        <div className="ml-auto mt-2 w-56 rounded-card border border-danger/40 bg-danger/[0.06] p-3 text-left">
+                          <p className="text-xs leading-relaxed text-ink-muted">
+                            Permanently erase this {item.kind} submission
+                            {title ? ` from ${title}` : ""}? This cannot be undone.
+                          </p>
+                          <form
+                            action="/api/admin/submissions/delete"
+                            method="post"
+                            className="mt-3"
+                          >
+                            <input type="hidden" name="id" value={item.id} />
+                            <input
+                              type="hidden"
+                              name="returnTo"
+                              value={`/admin${buildQuery({ kind, q, page: page > 1 ? page : undefined })}`}
+                            />
+                            <button
+                              type="submit"
+                              className="rounded-full bg-danger/[0.14] px-3 py-1 text-xs font-medium text-danger transition hover:bg-danger/[0.22] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                            >
+                              Erase permanently
+                            </button>
+                          </form>
+                        </div>
+                      </details>
                     </td>
                   </tr>
                 );
@@ -356,21 +452,22 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             Page {page} of {pages} · {total} records
           </span>
           <div className="flex gap-2">
+            {/* Plain anchors, for the reason recorded above the filter row. */}
             {page > 1 && (
-              <Link
+              <a
                 href={`/admin${buildQuery({ kind, q, page: page - 1 })}`}
                 className="rounded-full border border-line px-3 py-1.5 hover:bg-ink/5"
               >
                 Previous
-              </Link>
+              </a>
             )}
             {page < pages && (
-              <Link
+              <a
                 href={`/admin${buildQuery({ kind, q, page: page + 1 })}`}
                 className="rounded-full border border-line px-3 py-1.5 hover:bg-ink/5"
               >
                 Next
-              </Link>
+              </a>
             )}
           </div>
         </nav>

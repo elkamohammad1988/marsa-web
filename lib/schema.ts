@@ -29,7 +29,6 @@ export function organizationSchema() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: siteConfig.name,
-    legalName: siteConfig.legalName,
     url: siteConfig.url,
     logo: absoluteUrl("/icon.svg"),
     description: siteConfig.description,

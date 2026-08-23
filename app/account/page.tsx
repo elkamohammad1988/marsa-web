@@ -148,7 +148,7 @@ export default async function AccountPage() {
             ))}
           </ul>
           <p className="mt-4 text-sm leading-relaxed text-ink-muted">
-            Roles are granted in the database, never from this page — the{" "}
+            Roles are granted in the database, never from this page. The{" "}
             <code className="font-mono text-xs text-ink">authenticated</code> database role holds
             no privilege to update the column, so a request to change it fails at Postgres rather
             than at a check in the application.

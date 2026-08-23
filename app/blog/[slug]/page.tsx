@@ -130,7 +130,7 @@ export default async function BlogPostPage({
       <CTACard
         eyebrow="For individuals"
         title="Your money, accessible everywhere you go"
-        description="Up to 2% FX fees, free SEPA transfers, and support in 180+ countries."
+        description="Interbank FX rates, free SEPA transfers, and support across 180+ countries."
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
         art="coin"

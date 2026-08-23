@@ -60,7 +60,7 @@ export function NewsletterForm() {
         </svg>
         <span>
           <span className="font-medium text-ink">Checked, and discarded.</span> There is no
-          mailing list — this is a concept build, so nothing was stored and no address was
+          mailing list. This is a concept build, so nothing was stored and no address was
           captured.
         </span>
       </div>
@@ -73,7 +73,7 @@ export function NewsletterForm() {
         Newsletter
       </h2>
       <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-        Occasional notes on cross-border payments and FX. No mailing list exists — addresses are
+        Occasional notes on cross-border payments and FX. No mailing list exists. Addresses are
         validated and discarded.
       </p>
       <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">

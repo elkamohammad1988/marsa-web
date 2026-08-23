@@ -1,21 +1,27 @@
 import { siteConfig, hasRegulatorDetails } from "@/lib/site";
 
 /**
- * Single source of truth for how the business describes its regulatory
- * standing.
+ * Single source of truth for how the site describes its regulatory standing.
  *
- * If (and only if) a real authorisation reference is configured we state it.
- * Otherwise we describe the licensed-partner model — which is what is actually
- * true before an authorisation exists. Claiming an authorisation you do not
- * hold is a regulatory offence in every market this site targets, so the copy
- * is derived, never hand-written per page.
+ * Two cases, and only one of them is live. If a real authorisation reference
+ * is configured we state it. Otherwise we say what is actually true of this
+ * build: there is no company, no licence and no partner, and the
+ * licensed-partner arrangement is described in the conditional, as the model
+ * the depicted product *would* need.
+ *
+ * The fallback used to be written in the present indicative — "customer funds
+ * are held in safeguarded accounts at those partners" — which read as a
+ * regulatory disclosure from an operating entity, three lines below a badge
+ * saying there is no entity. Claiming an authorisation, a partner or a
+ * safeguarding arrangement you do not have is a regulatory matter in every
+ * market this site depicts, so the tense here is load-bearing.
  */
 export function regulatoryDisclosure(): string {
-  const { legalName, name, regulator } = siteConfig;
+  const { name, regulator } = siteConfig;
 
   if (hasRegulatorDetails()) {
     return (
-      `${legalName} is authorised and regulated by the ${regulator.authority} ` +
+      `${name} is authorised and regulated by the ${regulator.authority} ` +
       `(reference ${regulator.reference}) for the issuance of electronic money and the ` +
       `provision of payment services. Customer funds are safeguarded in segregated accounts ` +
       `in accordance with applicable safeguarding requirements.`
@@ -23,16 +29,10 @@ export function regulatoryDisclosure(): string {
   }
 
   return (
-    `${legalName} is not a bank. Accounts, IBANs, payments and currency exchange are provided ` +
-    `by licensed partner institutions, and customer funds are held in safeguarded accounts at ` +
-    `those partners, kept separate from ${name}'s own funds. ${name} provides the platform, ` +
-    `onboarding and support layer on top of that regulated infrastructure.`
+    `${name} is a concept build, not a financial service. There is no company behind it, ` +
+    `no licence, no regulator and no partner institution, and it holds no customer money. ` +
+    `The product it depicts would run on the licensed-partner model: accounts, IBANs, ` +
+    `payments and currency exchange provided by authorised institutions, with customer ` +
+    `balances safeguarded at those partners and kept separate from the operator's own funds.`
   );
-}
-
-/** Short one-line version for compact placements (badges, trust bands). */
-export function regulatorySummary(): string {
-  return hasRegulatorDetails()
-    ? `Regulated by the ${siteConfig.regulator.authority} · ${siteConfig.regulator.reference}`
-    : "Funds safeguarded at licensed partner institutions";
 }

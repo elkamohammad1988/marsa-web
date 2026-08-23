@@ -68,14 +68,14 @@ export type DemoStepId =
   | "done";
 
 /** Ordered demo steps with the labels shown in the progress rail. */
-export const DEMO_STEPS: { id: DemoStepId; label: string }[] = [
+export const DEMO_STEPS: { id: DemoStepId; label: string; demonstrates?: string }[] = [
   { id: "welcome", label: "Start" },
-  { id: "profile", label: "Account" },
-  { id: "identity", label: "Verify" },
-  { id: "account", label: "IBAN" },
-  { id: "receive", label: "Get paid" },
-  { id: "convert", label: "Convert" },
-  { id: "send", label: "Send" },
+  { id: "profile", label: "Account", demonstrates: "Form state and validation" },
+  { id: "identity", label: "Verify", demonstrates: "A simulated KYC check" },
+  { id: "account", label: "IBAN", demonstrates: "A checksum-valid NL IBAN" },
+  { id: "receive", label: "Get paid", demonstrates: "Balance and ledger updates" },
+  { id: "convert", label: "Convert", demonstrates: "Arithmetic on the live ECB rate" },
+  { id: "send", label: "Send", demonstrates: "Outgoing SEPA, fees included" },
   { id: "done", label: "Done" },
 ];
 

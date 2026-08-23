@@ -30,7 +30,7 @@ const sections = [
   {
     heading: "How onboarding would work",
     body: [
-      "Before an account could be opened, a real operator would verify identity (Know Your Customer) and, for a business, its ownership structure — then monitor transactions against anti-money-laundering, counter-terrorist-financing and sanctions obligations.",
+      "Before an account could be opened, a real operator would verify identity (Know Your Customer) and, for a business, its ownership structure, then monitor transactions against anti-money-laundering, counter-terrorist-financing and sanctions obligations.",
       "The interactive demo walks through a simulated version of that check so the shape of the flow is visible. It verifies nothing and screens nobody.",
     ],
   },
@@ -64,7 +64,7 @@ export default function Page() {
             </Heading>
             <p className="mt-5 text-base text-white/75 md:text-lg">
               Marsa is a concept build, not an authorised institution. This page describes the
-              regulatory model such a product would have to operate under — because getting that
+              regulatory model such a product would have to operate under, because getting that
               model right is most of the work, and a design that ignores it is a design that could
               never ship.
             </p>
@@ -99,7 +99,7 @@ export default function Page() {
       <CTACard
         eyebrow="Read Further"
         title="The Documents This Model Would Need"
-        description="The privacy policy and terms on this site are written as illustrations of what a real operator would have to publish — not as agreements anybody has entered into."
+        description="The privacy policy and terms on this site are written as illustrations of what a real operator would have to publish, not as agreements anybody has entered into."
         primaryCta={{ label: "Read The Privacy Policy", href: "/legal/privacy" }}
         secondaryCta={{ label: "Read The Terms", href: "/legal/terms" }}
         art="coin"

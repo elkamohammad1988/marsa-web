@@ -10,7 +10,7 @@ import { CTACard } from "@/components/sections/CTACard";
 export const metadata: Metadata = buildMetadata({
   title: "How to open EU business account online",
   description:
-    "Open an EU business account online with Marsa — submit your company documents, get approved in 24–48h, and receive an EU IBAN for SEPA payments.",
+    "Open an EU business account online with Marsa. Submit your company documents, get approved in 24-48h, and receive an EU IBAN for SEPA payments.",
   path: "/business/how-it-works",
 });
 
@@ -34,12 +34,12 @@ export default function Page() {
       <ProcessSteps
         eyebrow="3 Step Onboarding"
         title="Even Faster Than Most EU Business Banks"
-        description="Everything you need to start banking — without going to a branch."
+        description="Everything you need to start banking, without going to a branch."
         steps={[
           {
             number: "01",
             title: "Submit Application",
-            description: "Provide company documents online — incorporation, IDs, beneficial ownership.",
+            description: "Provide company documents online: incorporation, IDs, beneficial ownership.",
           },
           {
             number: "02",

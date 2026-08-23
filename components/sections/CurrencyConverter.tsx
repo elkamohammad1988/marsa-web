@@ -28,7 +28,7 @@ type CurrencyConverterProps = {
 
 export function CurrencyConverter({
   headingLevel = "h1",
-  title = "Instant Currency Converter — Live Exchange Rates",
+  title = "Instant Currency Converter with Live Exchange Rates",
   subtitle = "Check real mid-market reference rates across 30 currencies, published by the European Central Bank. Free, no account required.",
 }: CurrencyConverterProps = {}) {
   const HeadingTag = headingLevel;
@@ -231,9 +231,7 @@ export function CurrencyConverter({
                   >
                     {status === "loading" && converted == null ? (
                       <span className="skeleton inline-block h-7 w-24 rounded" />
-                    ) : status === "error" ? (
-                      <span className="text-base font-medium text-ink-subtle">—</span>
-                    ) : (
+                    ) : status === "error" ? null : (
                       converted
                     )}
                   </output>

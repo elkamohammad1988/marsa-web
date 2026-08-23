@@ -144,7 +144,7 @@ function passwordError(password: unknown, email: string): string | undefined {
   if (password.length < MIN_ACCOUNT_PASSWORD_LENGTH)
     return `Use at least ${MIN_ACCOUNT_PASSWORD_LENGTH} characters.`;
   if (passwordEncoder.encode(password).length > MAX_PASSWORD_BYTES)
-    return `That is too long — ${MAX_PASSWORD_BYTES} bytes is the most that is hashed.`;
+    return `That is too long. ${MAX_PASSWORD_BYTES} bytes is the most that is hashed.`;
   // A password identical to the username is the one guess every attacker makes
   // first, and it is free to rule out.
   if (email && password.toLowerCase() === email.toLowerCase())

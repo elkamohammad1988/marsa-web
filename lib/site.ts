@@ -43,7 +43,12 @@ export function resolveSiteUrl(
 
 export const siteConfig = {
   name: "Marsa",
-  legalName: "Marsa Money Ltd.",
+  /**
+   * The repository this build is published from. It is the one claim on the
+   * site a reader can check for themselves, so it is a link rather than a
+   * badge.
+   */
+  repoUrl: "https://github.com/elkamohammad1988/marsa-web",
   /** Short brand line — a marsa is the harbour a ship comes home to. */
   tagline: "Where your money lands.",
   /** Canonical origin, used for metadata, sitemap, robots, and JSON-LD. */

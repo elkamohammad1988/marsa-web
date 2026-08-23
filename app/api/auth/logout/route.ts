@@ -3,9 +3,8 @@ import { getAuthConfig } from "@/lib/auth-config";
 import { getSession } from "@/lib/auth";
 import { detachSession } from "@/lib/auth-session";
 import { signOut } from "@/lib/gotrue";
-import { isCrossSite } from "@/lib/same-origin";
+import { isCrossSite, seeOther } from "@/lib/same-origin";
 import { captureException } from "@/lib/observability";
-import { absoluteUrl } from "@/lib/site";
 
 export const runtime = "nodejs";
 
@@ -44,8 +43,8 @@ export async function POST(request: Request) {
     }
   }
 
-  const origin = new URL(request.url).origin || absoluteUrl("/");
-  const response = NextResponse.redirect(new URL("/", origin), { status: 303 });
+  // Relative — see `seeOther`.
+  const response = seeOther("/");
   detachSession(response);
   return response;
 }

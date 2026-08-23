@@ -28,7 +28,7 @@ export function FunnelView({ report, provider }: { report: FunnelReport; provide
           { label: "Completion rate", value: `${report.completionRate}%`, lead: true },
           {
             label: "Biggest drop-off",
-            value: report.biggestDrop ? `${report.biggestDrop.pct}%` : "—",
+            value: report.biggestDrop ? `${report.biggestDrop.pct}%` : "",
             hint: report.biggestDrop
               ? `${FUNNEL_LABELS[report.biggestDrop.from]} → ${FUNNEL_LABELS[report.biggestDrop.to]}`
               : undefined,
@@ -91,7 +91,18 @@ export function FunnelView({ report, provider }: { report: FunnelReport; provide
           {report.rows.map((row, i) => {
             const isWorstDrop =
               report.biggestDrop != null && report.biggestDrop.to === row.step && row.dropPct > 0;
-            const width = Math.max(row.pctOfStart, row.sessions > 0 ? 2 : 0);
+            /*
+              Clamped at both ends, not just the bottom.
+
+              `pctOfStart` can legitimately exceed 100: a session whose `start`
+              beacon was lost while its later beacons arrived counts at step two
+              and not at step one. The arithmetic is right and the input is
+              genuinely skewed, but an unclamped bar overflows its own track and
+              the dashboard reads as broken. The *label* still prints the real
+              figure — the reader should see `116.7%` and know the data is odd;
+              what they should not see is a bar running past the end of the row.
+            */
+            const width = Math.min(100, Math.max(row.pctOfStart, row.sessions > 0 ? 2 : 0));
             return (
               <div
                 key={row.step}
