@@ -133,9 +133,9 @@ const allPosts: BlogPost[] = [
     slug: "how-fx-rates-impact-cross-border-payouts",
     seoTitle: "How FX rates cut into cross-border payouts",
     title:
-      "How FX rates impact cross-border payouts, and how to save up to 87% on every transfer",
+      "How FX rates impact cross-border payouts, and where the money actually goes",
     excerpt:
-      "The hidden cost of FX spreads and the simple rule that will save your business thousands.",
+      "Where the cost of a cross-border transfer hides, what a 3% markup takes out of a €10,000 payout, and the rule that keeps it.",
     date: "2026-01-16",
     category: "Treasury",
     cover: "rate-line",
@@ -178,7 +178,7 @@ const allPosts: BlogPost[] = [
     seoTitle: "Multi-currency accounts for freelancers",
     title: "The rise of multi-currency accounts for global freelancers, and why you need one",
     excerpt:
-      "Freelancers in 100+ countries are switching to multi-currency IBANs. Here's what changed in 2026.",
+      "What a multi-currency IBAN changes for someone invoicing abroad, and when holding a balance beats converting on arrival.",
     date: "2026-04-12",
     category: "Freelance",
     cover: "currencies",
