@@ -171,3 +171,28 @@ upwork-catalog/
 # ---------------------------------------------------------------------------
 /.*.mjs
 !/.eslintrc.mjs
+
+# ---------------------------------------------------------------------------
+# Throwaway artefacts — the output side of the same convention.
+#
+# The rule above ignores the scratch *scripts*. It did not ignore what they
+# write, and that gap is the more dangerous half: `.qa-funnel.tmp.png` sat in
+# the root untracked-but-not-ignored, and it is a screenshot of the operator
+# funnel. Every rule this project has about images — never photograph
+# `/admin`'s submissions view, never publish a frame with a real name in it —
+# is enforced in `scripts/`, and none of it reaches a PNG a debugging session
+# dropped in the root. One `git add -A` publishes it to a public repository,
+# permanently.
+#
+# So the convention is extended rather than restated: dot-prefixed in the root
+# means scratch, whatever the extension. Nothing tracked here is a root
+# dot-file of these types — the tracked set is `.env.example`, `.gitignore`,
+# and the `.github/`, `.vscode/`, `.data/` directories, none of which match.
+# ---------------------------------------------------------------------------
+/.*.png
+/.*.jpg
+/.*.jpeg
+/.*.webp
+/.*.mp4
+/.*.json
+!/.eslintrc.json
