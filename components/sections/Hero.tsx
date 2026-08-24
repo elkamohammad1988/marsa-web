@@ -235,7 +235,15 @@ export function Hero({
                         "figure block font-display text-3xl font-bold tabular-nums tracking-tight text-brand-strong md:text-4xl",
                       )}
                     />
+                    {/* The `dt` above already carries this label, and it is
+                        `sr-only` purely so the definition-list pairing reads in
+                        the right order. Rendering the same words again visibly
+                        made a screen reader announce every statistic as
+                        "Currencies in one account, 30+, Currencies in one
+                        account". The label is drawn here and named there, so
+                        this copy is decoration over a name the reader has. */}
                     <span
+                      aria-hidden
                       className={cn(
                         "mt-1.5 block text-xs",
                         isDark ? "text-white/55" : "text-ink-subtle",
