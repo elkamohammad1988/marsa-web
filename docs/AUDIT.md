@@ -1,6 +1,7 @@
 # Production Audit — `marsa-web`
 
-**Scope:** the whole repository at `C:\Users\ASUSZenBook\Desktop\figma`.
+**Scope:** the whole repository — then an un-versioned local working directory
+named `figma`, which is finding P1 below and the reason this audit exists.
 **Date:** 2026-07-25.
 **Mode:** read-only. No file in the project was modified except the creation of this document.
 

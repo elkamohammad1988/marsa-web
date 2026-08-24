@@ -12,11 +12,32 @@ production `npm audit` on every push to `main` and every pull request.
 Everything else in the audit — **S1–S10, B1–B10, F1–F10, P3–P9** — is tracked
 below. 37 findings, 19 batches.
 
-Last updated: 2026-08-23. Baseline on `main`: `npm run verify` green —
+Last updated: 2026-08-24. Baseline on `main`: `npm run verify` green —
 typecheck, lint, the full unit suite and a production build. The counts that
 used to sit on this line went stale between edits, which is the exact failure
 this project keeps finding in its own copy; run the command for the current
 figures rather than trusting a number written down once.
+
+**Reconciled against the code on 2026-08-24, and the gap was large.** The batch
+board below said every batch was closed; the per-batch tables underneath it
+still carried **39 work rows marked `TODO` — "Not started"** (a fortieth
+`TODO` is the status-vocabulary legend) — including four Highs in Batch 6 and
+an F1 row calling itself "the one open High in the whole backlog", plus two
+rows still marked `BLOCKED-ON-ME` on a human action already recorded as
+resolved. Every one was checked against the working tree, not against
+another document: `text-red-600` and `border-red-*` have zero occurrences,
+`components/ThemeToggle.tsx` is gone, the CSP ships on both origins, blog dates
+are ISO 8601 and the index sorts descending, `JsonlStore` is extracted and
+bounded, the flat ESLint config is in place, `RUNBOOK.md` and `DATA.md` exist,
+and there is no `public/` directory for F1 to be blocked on. Thirty-nine rows
+were stale; the fortieth (a middleware request ID) shipped in a different shape
+and now says so.
+
+Two documents disagreeing about whether the work is done is not a formatting
+problem here. This repository is public and the listing invites a buyer to read
+it, so a table of unstarted Highs is read as an unfinished project — which is
+the same class of error as a stale test count, and worse, because it argues
+against the work rather than merely mis-measuring it.
 
 **The audit is no longer the whole plan.** It was a snapshot of code quality,
 and it was right about the code. What it did not ask is whether the site's
@@ -120,10 +141,13 @@ same one-line-per-site change to the same token system.
   it will be after 17 batches is worth writing once, at the end, rather than
   three times.
 
-**F1 (imagery) is started in parallel from day one.** It is the only High that
-is blocked on procurement rather than engineering, and the audit flags exactly
-this. Sourcing is [H9](#h9--source-real-product-imagery-f1); the code change is
-Batch 16 and cannot start until assets exist.
+**F1 (imagery) was started in parallel from day one**, as the only High blocked
+on procurement rather than engineering — sourcing was
+[H9](#h9--source-real-product-imagery-f1) and the code change was Batch 16,
+which could not start until assets existed. That framing turned out to be the
+wrong one: H9 was resolved on 2026-07-27 by deleting the images rather than
+replacing them, which unblocked Batch 16 by removing its dependency instead of
+satisfying it.
 
 ---
 
@@ -209,7 +233,7 @@ Also closes the production-throw half of **B8**; the rest of B8 remains in Batch
 
 ---
 
-### Batch 1 — Test the security boundary · P5a
+### Batch 1 — Test the security boundary · P5a · **DONE**
 
 **Branch:** `test/security-boundary-units`
 
@@ -219,9 +243,9 @@ change** — so it is safe to land first and it makes Batches 2–5 verifiable.
 
 | Item | Finding | Scope | Status |
 |---|---|---|---|
-| Table-driven tests for `lib/validation.ts` | P5 | 254-char email cap, 4000-char message cap, `accountType`-conditional company rule, topic allowlist fallback, three-way consent coercion (`true` / `"true"` / `"on"`) | `TODO` |
-| Tests for `lib/rate-limit.ts` | P5 | window rollover, shared→in-memory degradation, `clientKey` `x-forwarded-for` parsing | `TODO` |
-| Tests for `lib/postgrest.ts` | P5 | `Content-Range` total parsing, error wrapping, `escapeLike` | `TODO` |
+| Table-driven tests for `lib/validation.ts` | P5 | 254-char email cap, 4000-char message cap, `accountType`-conditional company rule, topic allowlist fallback, three-way consent coercion (`true` / `"true"` / `"on"`) | `DONE` |
+| Tests for `lib/rate-limit.ts` | P5 | window rollover, shared→in-memory degradation, `clientKey` `x-forwarded-for` parsing | `DONE` |
+| Tests for `lib/postgrest.ts` | P5 | `Content-Range` total parsing, error wrapping, `escapeLike` | `DONE` |
 
 `lib/api-forms.ts` tests are deliberately **excluded** — Batch 0 already adds
 `tests/api-forms.test.ts` on `fix/storage-silent-failure`. Duplicating that file
@@ -229,7 +253,7 @@ here guarantees a merge conflict for no benefit.
 
 ---
 
-### Batch 2 — Public endpoint exposure & abuse limits · S2, S6, S4
+### Batch 2 — Public endpoint exposure & abuse limits · S2, S6, S4 · **DONE**
 
 **Branch:** `security/public-endpoint-exposure`
 
@@ -238,9 +262,9 @@ public surface discloses, and cap what it costs.
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| `/api/health` returns `{status, checks: {ok, configured}}` to anonymous callers; `detail` strings (absolute `DATA_DIR` path, raw PostgREST error bodies with table/column/constraint names, upstream FX status) gated behind `isAdminRequest()` or a `HEALTH_TOKEN` header | S2 | High | `TODO` |
-| `rateLimitShared` on `/api/rates` and `/api/rates/history` at 60/min per client — 5,400 enumerable cache keys currently force unmetered upstream calls to a key-less fair-use API | S6 | Medium | `TODO` |
-| Rate-limit `/demo/stats`, and exchange the query-string token for an httpOnly cookie on first use so it appears in one log line instead of every one | S4 | Medium | `TODO` |
+| `/api/health` returns `{status, checks: {ok, configured}}` to anonymous callers; `detail` strings (absolute `DATA_DIR` path, raw PostgREST error bodies with table/column/constraint names, upstream FX status) gated behind `isAdminRequest()` or a `HEALTH_TOKEN` header | S2 | High | `DONE` |
+| `rateLimitShared` on `/api/rates` and `/api/rates/history` at 60/min per client — 5,400 enumerable cache keys currently force unmetered upstream calls to a key-less fair-use API | S6 | Medium | `DONE` |
+| Rate-limit `/demo/stats`, and exchange the query-string token for an httpOnly cookie on first use so it appears in one log line instead of every one | S4 | Medium | `DONE` |
 
 **Dependency:** the uptime monitor in [H6](#h6--point-an-uptime-monitor-at-apihealth-p3)
 must be configured with the `HEALTH_TOKEN` this batch introduces, or it will only
@@ -266,15 +290,15 @@ is 32 characters and already compliant.
 
 ---
 
-### Batch 4 — Small security & privacy corrections · S8, S10, S7
+### Batch 4 — Small security & privacy corrections · S8, S10, S7 · **DONE**
 
 **Branch:** `security/small-corrections`
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| `escapeLike` strips PostgREST's `*` wildcard: `/[%_,()*]/g` — admin searching `acme*corp` currently gets a wildcard match, not a literal one | S8 | Low | `TODO` |
-| `newId()` uses `crypto.randomUUID()` instead of `Math.random()` — already used elsewhere in the codebase, zero cost | S10 | Low | `TODO` |
-| `DemoFlow` reads `localStorage.getItem('marsa-cookie-consent')` and skips the funnel POST when it is `"rejected"` — today "Reject non-essential" changes nothing, because the `marsa:cookie-consent` event has no listeners anywhere in the repo | S7 | Medium | `TODO` |
+| `escapeLike` strips PostgREST's `*` wildcard: `/[%_,()*]/g` — admin searching `acme*corp` currently gets a wildcard match, not a literal one | S8 | Low | `DONE` |
+| `newId()` uses `crypto.randomUUID()` instead of `Math.random()` — already used elsewhere in the codebase, zero cost | S10 | Low | `DONE` |
+| `DemoFlow` reads `localStorage.getItem('marsa-cookie-consent')` and skips the funnel POST when it is `"rejected"` — today "Reject non-essential" changes nothing, because the `marsa:cookie-consent` event has no listeners anywhere in the repo | S7 | Medium | `DONE` |
 
 S7's *code* fix is unambiguous and ships here. The separate question of whether
 the banner should exist at all is a product/legal decision — F7, Batch 16,
@@ -282,7 +306,7 @@ the banner should exist at all is a product/legal decision — F7, Batch 16,
 
 ---
 
-### Batch 5 — Content-Security-Policy · S3
+### Batch 5 — Content-Security-Policy · S3 · **DONE**
 
 **Branch:** `security/content-security-policy`
 
@@ -291,13 +315,13 @@ site, so it ships alone where a revert is one clean rollback.
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| Add `default-src 'self'`, `script-src 'self' 'sha256-…'` (the theme script is a compile-time constant, so a static hash covers it), `connect-src 'self'`, `img-src 'self' data:`, `style-src 'self' 'unsafe-inline'`, `font-src 'self'` | S3 | Medium | `TODO` |
-| Verify the JSON-LD blocks still validate — non-executable script types are handled inconsistently across browsers; fall back to a middleware nonce if they trip | S3 | Medium | `TODO` |
-| Align `X-Frame-Options: SAMEORIGIN` to `DENY` to match `frame-ancestors 'none'` | S3 | Medium | `TODO` |
+| Add `default-src 'self'`, `script-src 'self' 'sha256-…'` (the theme script is a compile-time constant, so a static hash covers it), `connect-src 'self'`, `img-src 'self' data:`, `style-src 'self' 'unsafe-inline'`, `font-src 'self'` | S3 | Medium | `DONE` |
+| Verify the JSON-LD blocks still validate — non-executable script types are handled inconsistently across browsers; fall back to a middleware nonce if they trip | S3 | Medium | `DONE` |
+| Align `X-Frame-Options: SAMEORIGIN` to `DENY` to match `frame-ancestors 'none'` | S3 | Medium | `DONE` |
 
 ---
 
-### Batch 6 — Accessible error states · F2, F3, F8
+### Batch 6 — Accessible error states · F2, F3, F8 · **DONE**
 
 **Branch:** `fix/error-state-contrast`
 
@@ -307,10 +331,10 @@ does not use.
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| Replace `text-red-600` (4.04:1 on `--card`, 4.12:1 on `--canvas` — both fail AA for 12–14px text) with `text-danger` (7.84:1 / 7.99:1) at all six sites: `forms/fields.tsx:56,185`, `GetStartedForm.tsx:179`, `ContactForm.tsx:130`, `IbanChecker.tsx:109`, `AdminLoginForm.tsx:60`, `admin/page.tsx:186` | F2 | High | `TODO` |
-| Replace `border-red-400` in `forms/fields.tsx:18` with `border-danger/60` | F2 | High | `TODO` |
-| IBAN checker failure panel: `border-red-200 bg-red-50` (near-white `#FEF2F2` on a `#0C080B` site) → `border-danger/30 bg-danger/[0.06]`, `text-danger` for icon and reason | F3 | High | `TODO` |
-| Delete `components/ThemeToggle.tsx` — imported nowhere, and `.dark` is an exact mirror of `:root` so it could not work if mounted; replace both unreachable `dark:` variants with `text-danger` | F8 | Low | `TODO` |
+| Replace `text-red-600` (4.04:1 on `--card`, 4.12:1 on `--canvas` — both fail AA for 12–14px text) with `text-danger` (7.84:1 / 7.99:1) at all six sites: `forms/fields.tsx:56,185`, `GetStartedForm.tsx:179`, `ContactForm.tsx:130`, `IbanChecker.tsx:109`, `AdminLoginForm.tsx:60`, `admin/page.tsx:186` | F2 | High | `DONE` |
+| Replace `border-red-400` in `forms/fields.tsx:18` with `border-danger/60` | F2 | High | `DONE` |
+| IBAN checker failure panel: `border-red-200 bg-red-50` (near-white `#FEF2F2` on a `#0C080B` site) → `border-danger/30 bg-danger/[0.06]`, `text-danger` for icon and reason | F3 | High | `DONE` |
+| Delete `components/ThemeToggle.tsx` — imported nowhere, and `.dark` is an exact mirror of `:root` so it could not work if mounted; replace both unreachable `dark:` variants with `text-danger` | F8 | Low | `DONE` |
 
 The audit notes why `README.md`'s "0 axe violations across 29 routes" missed all
 of this: error states only render after a failed submit, so a crawl never sees
@@ -319,14 +343,14 @@ test.
 
 ---
 
-### Batch 7 — Fail loudly on misconfiguration · B8
+### Batch 7 — Fail loudly on misconfiguration · B8 · **DONE**
 
 **Branch:** `fix/environment-validation`
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| `lib/env.ts` parses the environment once at module load, validates shapes (URL parses, key length, sender is an email address) and **throws in production** for anything half-configured — a partially-set `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` pair becomes a hard error, not a silent downgrade to the file store | B8 | Medium | `TODO` |
-| Zero-config local development keeps working unchanged — the throw is `NODE_ENV === 'production'` only | B8 | Medium | `TODO` |
+| `lib/env.ts` parses the environment once at module load, validates shapes (URL parses, key length, sender is an email address) and **throws in production** for anything half-configured — a partially-set `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` pair becomes a hard error, not a silent downgrade to the file store | B8 | Medium | `DONE` |
+| Zero-config local development keeps working unchanged — the throw is `NODE_ENV === 'production'` only | B8 | Medium | `DONE` |
 
 This is the structural half of B1: Batch 0 stops lying to the *user* about a lost
 submission; this stops the deploy reaching production in that state at all.
@@ -372,14 +396,14 @@ are. Applying them to the live database is
 
 ---
 
-### Batch 10 — Observability · B2, P3
+### Batch 10 — Observability · B2, P3 · **DONE** (adapter + monitor await the human)
 
 **Branch:** `feat/observability`
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| A provider-agnostic `lib/observability.ts` seam with `captureException`, wired at the four sites the audit names — storage write failure (`storage.ts:108`), DB→file fallback (`storage.ts:217`), email never sent (`notify.ts:86`), rate limiter degraded (`rate-limit.ts:64`) — plus `app/error.tsx` | B2 | High | `TODO` |
-| Request ID generated in middleware and attached to every captured event | B2 | High | `TODO` |
+| A provider-agnostic `lib/observability.ts` seam with `captureException`, wired at the four sites the audit names — storage write failure (`storage.ts:108`), DB→file fallback (`storage.ts:217`), email never sent (`notify.ts:86`), rate limiter degraded (`rate-limit.ts:64`) — plus `app/error.tsx` | B2 | High | `DONE` |
+| Request ID generated in middleware and attached to every captured event | B2 | High | **DONE — differently**, see below |
 | Sentry (or equivalent) adapter behind the seam, active only when a DSN is present | B2 | High | **BLOCKED-ON-ME** ([H7](#h7--create-an-error-tracking-project-and-supply-the-dsn-b2)) |
 | Uptime monitor on `/api/health` | P3 | High | **BLOCKED-ON-ME** ([H6](#h6--point-an-uptime-monitor-at-apihealth-p3)) |
 
@@ -387,34 +411,49 @@ The seam ships whether or not a DSN exists, so this batch is not fully blocked:
 with no DSN it logs structurally, which is still an improvement on ten
 unstructured `console.*` calls. Only the adapter and the monitor wait on the human.
 
+**The correlation id is not a middleware request ID, and that was a choice.** The
+row above asks for one minted in `middleware.ts` and attached to every captured
+event. What shipped is `newReference()` in `lib/observability.ts`: a short
+uppercase code minted at the failure site, written into the captured event *and*
+returned to the visitor in the error message — `lib/api-forms.ts` names it "the
+correlation id B2 asked for" at the point it uses it.
+
+The difference is who can quote it. A middleware request ID correlates log lines
+to each other; nobody outside the server ever sees one, so a visitor reporting
+"the contact form did not work" still hands the operator nothing to search on. A
+reference the visitor is shown resolves an *email* to exactly one log line, which
+is the case that actually arises here — a public form on a site with no support
+tooling. It is deliberately not a general-purpose trace id, and every request
+that succeeds has none.
+
 ---
 
-### Batch 11 — Retention & erasure · B10, P9
+### Batch 11 — Retention & erasure · B10, P9 · **DONE**
 
 **Branch:** `feat/data-retention`
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| Delete action in `/admin` for a single submission — today the only path for a GDPR erasure request is hand-written SQL | B10 | Low | `TODO` |
-| Scheduled purge of `demo_events` older than 90 days — aggregate telemetry, the raw rows have no value once aggregated | B10 | Low | `TODO` |
+| Delete action in `/admin` for a single submission — today the only path for a GDPR erasure request is hand-written SQL | B10 | Low | `DONE` |
+| Scheduled purge of `demo_events` older than 90 days — aggregate telemetry, the raw rows have no value once aggregated | B10 | Low | `DONE` |
 | Retention policy for `submissions` | B10 | Low | **BLOCKED-ON-ME** ([H12](#h12--decide-data-retention-periods-b10)) |
-| `.data/README` noting the directory holds personal data and must never leave the machine; confirm `git status --ignored` shows nothing under `.data/` tracked | P9 | Low | `TODO` |
+| `.data/README` noting the directory holds personal data and must never leave the machine; confirm `git status --ignored` shows nothing under `.data/` tracked | P9 | Low | `DONE` |
 
 The retention *period* is a legal decision, not an engineering one. The mechanism
 ships configurable; the number comes from [H12](#h12--decide-data-retention-periods-b10).
 
 ---
 
-### Batch 12 — Storage internals · B6, B5, B9
+### Batch 12 — Storage internals · B6, B5, B9 · **DONE**
 
 **Branch:** `refactor/storage-internals`
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| Extract `JsonlStore<T>` (path, append, readAll) and `pickProvider(env, makePg, makeFile)` — `lib/analytics.ts` currently duplicates ~60 lines of `lib/storage.ts` verbatim, so every future change must be made twice | B6 | Medium | `TODO` |
-| Bound the file-store reads — read the trailing N bytes rather than parsing and sorting the entire dataset on every request | B5 | Medium | `TODO` |
-| Document in `README.md` that the file store is a development fallback, not a production path | B5 | Medium | `TODO` |
-| Read response bodies inside the guarded scope, or use `AbortSignal.timeout(8000)` — today `finally` clears the timeout when *headers* arrive, so a stalled body can hang well past the intended ceiling (`postgrest.ts:90,110,138`, `fx.ts:194,220,254`) | B9 | Low | `TODO` |
+| Extract `JsonlStore<T>` (path, append, readAll) and `pickProvider(env, makePg, makeFile)` — `lib/analytics.ts` currently duplicates ~60 lines of `lib/storage.ts` verbatim, so every future change must be made twice | B6 | Medium | `DONE` |
+| Bound the file-store reads — read the trailing N bytes rather than parsing and sorting the entire dataset on every request | B5 | Medium | `DONE` |
+| Document in `README.md` that the file store is a development fallback, not a production path | B5 | Medium | `DONE` |
+| Read response bodies inside the guarded scope, or use `AbortSignal.timeout(8000)` — today `finally` clears the timeout when *headers* arrive, so a stalled body can hang well past the intended ceiling (`postgrest.ts:90,110,138`, `fx.ts:194,220,254`) | B9 | Low | `DONE` |
 
 Deliberately after Batch 9: refactoring the storage layer while its query shapes
 are still changing means doing it twice.
@@ -453,52 +492,62 @@ control on it — which is where the two defects this batch was written for
 
 ---
 
-### Batch 14 — Blog dates, ordering & structured data · F5, F4, F6
+### Batch 14 — Blog dates, ordering & structured data · F5, F4, F6 · **DONE**
 
 **Branch:** `fix/blog-dates-and-schema`
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| Store `date: "2025-03-30"` (ISO 8601) and render with `Intl.DateTimeFormat`, matching the pattern already used for FX dates. `blogPostingSchema` currently passes a display string like `"March 30, 2025"` straight through, so Google's Rich Results test rejects it and **none of the six posts is eligible for an article rich result** | F5 | Medium | `TODO` |
-| Sort the blog index descending by date — a one-liner once F5 lands. Today the oldest post leads and the newest is fourth | F4 | Medium | `TODO` |
-| Accordion always renders its panel with a stable `id`, collapsed via `hidden`, with `aria-controls` on the button — fixes both the FAQPage schema asserting answers absent from the DOM *and* the missing `aria-controls` target, in one change | F6 | Medium | `TODO` |
+| Store `date: "2025-03-30"` (ISO 8601) and render with `Intl.DateTimeFormat`, matching the pattern already used for FX dates. `blogPostingSchema` currently passes a display string like `"March 30, 2025"` straight through, so Google's Rich Results test rejects it and **none of the six posts is eligible for an article rich result** | F5 | Medium | `DONE` |
+| Sort the blog index descending by date — a one-liner once F5 lands. Today the oldest post leads and the newest is fourth | F4 | Medium | `DONE` |
+| Accordion always renders its panel with a stable `id`, collapsed via `hidden`, with `aria-controls` on the button — fixes both the FAQPage schema asserting answers absent from the DOM *and* the missing `aria-controls` target, in one change | F6 | Medium | `DONE` |
 
 F5 strictly precedes F4: the dates are unparseable display strings until F5.
 
 ---
 
-### Batch 15 — Markup honesty & artifact weight · F10, F9 · **F10 DONE**
+### Batch 15 — Markup honesty & artifact weight · F10, F9 · **DONE**
 
 **F10 shipped as Batch C**, which grew past the audit's description.
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
 | Drop `role="menu"` / `role="menuitem"` from the navbar dropdown. The ARIA menu pattern commits to arrow keys, Home/End, type-ahead and focus movement; none is implemented, so screen-reader users are told "menu, 6 items" and find the arrow keys do nothing. A button with `aria-expanded` plus a plain `<ul>` of links describes what the component actually does, and tab navigation already works | F10 | Low | **DONE** |
-| Delete `hero-blog-2/3/4/5.png` and `hero-blog-list.png` — referenced nowhere, ~630 KB of artifact weight | F9 | Low | `TODO` |
+| Delete `hero-blog-2/3/4/5.png` and `hero-blog-list.png` — referenced nowhere, ~630 KB of artifact weight | F9 | Low | `DONE` |
 
-F9 must land **after** F1's replacements are chosen, in case a hero-blog file is
-reused as a distinct blog cover rather than deleted. It is the one deletion in
-this programme that is not trivially reversible from the working tree, so it
-waits for [H9](#h9--source-real-product-imagery-f1) rather than being done on
-the grounds that git remembers.
+F9 was sequenced **after** F1, in case a hero-blog file turned out to be worth
+reusing as a distinct blog cover rather than deleting — it is the one deletion
+in this programme that is not trivially reversible from the working tree, so it
+waited for [H9](#h9--source-real-product-imagery-f1) rather than proceeding on
+the grounds that git remembers. H9 then removed every raster asset in the
+repository, which subsumed this row: there was no hero-blog file left to reuse.
 
 ---
 
-### Batch 16 — Imagery & cookie banner · F1, F7 · **F7 DONE · F1 BLOCKED-ON-ME**
+### Batch 16 — Imagery & cookie banner · F1, F7 · **DONE**
 
 **Branch:** `fix/real-imagery` (F1) · F7 shipped in [#13](https://github.com/elkamohammad1988/marsa-web/pull/13)
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| Replace `coin-blue`, `coin-gold`, `card-phone`, `phone-apps`, `phone-home`, `cards-stack` with real product imagery — 17 files currently have 6 unique hashes | F1 | High | **BLOCKED-ON-ME** ([H9](#h9--source-real-product-imagery-f1)) |
-| Give each blog post a distinct cover — `blog-2.png` and `blog-4.png` are the same bytes | F1 | High | **BLOCKED-ON-ME** ([H9](#h9--source-real-product-imagery-f1)) |
-| Correct every `alt` to describe what is actually rendered — `card-phone.png` is served as `alt="Marsa Mastercard and mobile app"` and is a blog photograph. This is a WCAG 1.1.1 failure: a screen-reader user is told something untrue | F1 | High | `TODO` (unblocks with the assets) |
+| Replace `coin-blue`, `coin-gold`, `card-phone`, `phone-apps`, `phone-home`, `cards-stack` with real product imagery — 17 files currently have 6 unique hashes | F1 | High | **DONE** — by deleting them ([H9](#h9--source-real-product-imagery-f1)) |
+| Give each blog post a distinct cover — `blog-2.png` and `blog-4.png` are the same bytes | F1 | High | **DONE** — `components/art/BlogCover.tsx` draws one per post |
+| Correct every `alt` to describe what is actually rendered — `card-phone.png` is served as `alt="Marsa Mastercard and mobile app"` and is a blog photograph. This is a WCAG 1.1.1 failure: a screen-reader user is told something untrue | F1 | High | **DONE** — no raster art left to mis-describe |
 | Cookie banner: removed, because the one cookie the site sets is strictly necessary and exempt | F7 | Medium | **DONE** ([#13](https://github.com/elkamohammad1988/marsa-web/pull/13)) |
 
-F1 needs judgement that cannot be substituted — whether an image looks right —
-so procurement ([H9](#h9--source-real-product-imagery-f1)) is now the single
-open **High** in the whole backlog. Until it lands, `README.md` states the
-placeholder situation plainly rather than leaving a reviewer to find it.
+**F1 did not resolve the way this batch was written.** It was planned as
+procurement — buy or shoot six images, then re-caption them — and it is
+recorded here as blocked on that for months. What actually happened, on
+2026-07-27, is [H9](#h9--source-real-product-imagery-f1): the seventeen files
+were **deleted** and the illustrations redrawn in the browser from the design
+tokens (`components/art/BrandArt.tsx`, `components/art/BlogCover.tsx`). There
+is no `public/` directory in this repository any more.
+
+That closed all three rows at once, and it is worth naming why, because it is
+the method this project keeps arriving at: the alt-text row could not be fixed
+while the images existed — a truthful caption for a file nobody could vouch for
+is still a file nobody can vouch for. Removing the state removed all three
+symptoms, including the trademark on a card for a product with no issuer.
 
 `lib/consent.ts` and the `DemoFlow` consent check survive the banner's removal
 on purpose: nothing writes that value today, but deleting the mechanism while
@@ -507,15 +556,15 @@ review would be the wrong order.
 
 ---
 
-### Batch 17 — ESLint 9 migration · P6
+### Batch 17 — ESLint 9 migration · P6 · **DONE**
 
 **Branch:** `chore/eslint-9`
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| `npx @next/codemod@canary next-lint-to-eslint-cli .` → ESLint 9 flat config. Clears 13 high advisories (all `brace-expansion` GHSA-mh99-v99m-4gvg via the end-of-life ESLint 8 chain) and the `next lint` deprecation in one change | P6 | Medium | `TODO` |
-| Update `.github/workflows/ci.yml` and the `lint` script | P6 | Medium | `TODO` |
-| Quote **both** audit numbers in `README.md` — stating only `--omit=dev`'s 0 is accurate but understates the toolchain's state | P6 | Medium | `TODO` |
+| `npx @next/codemod@canary next-lint-to-eslint-cli .` → ESLint 9 flat config. Clears 13 high advisories (all `brace-expansion` GHSA-mh99-v99m-4gvg via the end-of-life ESLint 8 chain) and the `next lint` deprecation in one change | P6 | Medium | `DONE` |
+| Update `.github/workflows/ci.yml` and the `lint` script | P6 | Medium | `DONE` |
+| Quote **both** audit numbers in `README.md` — stating only `--omit=dev`'s 0 is accurate but understates the toolchain's state | P6 | Medium | `DONE` |
 
 Late because nothing here ships to a user: `npm audit --omit=dev` is 0
 vulnerabilities. It is deadline-driven (Next 16 removes `next lint`), not
@@ -523,16 +572,16 @@ risk-driven.
 
 ---
 
-### Batch 18 — Operational documentation · P7, P8
+### Batch 18 — Operational documentation · P7, P8 · **DONE**
 
 **Branch:** `docs/operations`
 
 | Item | Finding | Severity | Status |
 |---|---|---|---|
-| `docs/RUNBOOK.md` — `/api/health` 503 triage, dependency failure playbooks, rollback, and how to recover leads from logs when `persisted` was false | P8 | Medium | `TODO` |
-| `docs/DATA.md` — what is collected, where it lives, how long, how to delete it, who may access `/admin` | P8 | Medium | `TODO` |
-| Document rotation for all five secrets, and the preview/production separation | P7 | Medium | `TODO` |
-| `token_version` claim compared against an env var (or a `sessions` table) so a single admin session can be revoked without rotating `ADMIN_SESSION_SECRET` and redeploying | P7 | Medium | `TODO` |
+| `docs/RUNBOOK.md` — `/api/health` 503 triage, dependency failure playbooks, rollback, and how to recover leads from logs when `persisted` was false | P8 | Medium | `DONE` |
+| `docs/DATA.md` — what is collected, where it lives, how long, how to delete it, who may access `/admin` | P8 | Medium | `DONE` |
+| Document rotation for all five secrets, and the preview/production separation | P7 | Medium | `DONE` |
+| `token_version` claim compared against an env var (or a `sessions` table) so a single admin session can be revoked without rotating `ADMIN_SESSION_SECRET` and redeploying | P7 | Medium | `DONE` |
 
 Last on purpose: a runbook describing the system after seventeen batches is worth
 writing once, at the end.
@@ -695,7 +744,7 @@ to launch — they are not blockers for any batch.
 | [H6](#h6--point-an-uptime-monitor-at-apihealth-p3) | Uptime monitor on `/api/health` | P3 | **deploy-time** |
 | [H7](#h7--create-an-error-tracking-project-and-supply-the-dsn-b2) | Error-tracking DSN | B2 | Before Batch 10 |
 | [H8](#h8--deploy-time-environment-variables-b1-b8-p7) | Deploy-time environment variables | B1, B8, P7 | **deploy-time** |
-| [H9](#h9--source-real-product-imagery-f1) | **Source real product imagery** | F1, F9 | **The one open High** |
+| ~~H9~~ | ~~Source real product imagery~~ — **resolved by not sourcing any**: the seventeen files were deleted and the art redrawn from design tokens | F1, F9 | **RESOLVED** |
 | ~~H10~~ | ~~Decide the cookie banner's fate~~ — you chose **A**, removed in [#13](https://github.com/elkamohammad1988/marsa-web/pull/13) | F7 | **RESOLVED** |
 | [H11](#h11--enable-branch-protection-on-main) | Branch protection on `main` | process | Now |
 | [H12](#h12--decide-data-retention-periods-b10) | Decide data retention periods | B10 | Before Batch 11 |
