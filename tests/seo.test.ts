@@ -103,6 +103,46 @@ describe("buildMetadata", () => {
     expect(meta.twitter).toMatchObject({ card: "summary_large_image" });
   });
 
+  /**
+   * A `summary_large_image` card with no image is worse than no card at all.
+   *
+   * `images` was left `undefined` whenever a caller passed no path, on the
+   * reasonable-sounding assumption that `app/opengraph-image.tsx` would cover
+   * the rest. It does not: the file convention applies to its own route
+   * segment, so it covered `/` and the blog posts covered themselves — and
+   * every other page, `/demo` and `/pricing` among them, shipped
+   * `twitter:card: summary_large_image` and no `og:image` to go with it. A
+   * shared link rendered as a strip of text on a site whose argument is that
+   * the design is good.
+   *
+   * The card and the image are one decision, so they are asserted together.
+   */
+  it("never declares a large-image card without an image to put in it", () => {
+    const page = buildMetadata({ title: "Interactive demo", description: "…", path: "/demo" });
+
+    expect(page.twitter).toMatchObject({ card: "summary_large_image" });
+    expect(page.openGraph?.images, "/demo ships no og:image").toEqual([
+      { url: absoluteUrl("/opengraph-image") },
+    ]);
+    expect(page.twitter?.images).toEqual([absoluteUrl("/opengraph-image")]);
+  });
+
+  it("lets a caller name its own card, and does not overwrite it", () => {
+    // A blog post generates a per-post image and passes its path. The default
+    // must give way to it rather than replacing every post's card with the
+    // generic one.
+    const post = buildMetadata({
+      title: "A post",
+      description: "…",
+      path: "/blog/a-post",
+      image: "/blog/a-post/opengraph-image",
+      type: "article",
+    });
+    expect(post.openGraph?.images).toEqual([
+      { url: absoluteUrl("/blog/a-post/opengraph-image") },
+    ]);
+  });
+
   it("dates an article and never a marketing page", () => {
     const article = buildMetadata({
       title: "A post",
