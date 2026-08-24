@@ -6,21 +6,24 @@
  * a screen recording of a developer clicking around, and does not read as
  * generated either. Those are two different failure modes and they want
  * opposite fixes: the first is cured by choreography, the second by refusing to
- * invent anything. So every frame in this file is the production build running
- * on localhost, driven through real mouse and keyboard events, and the only
- * things drawn on top are a cursor, a caption and two title cards — all of
- * which use the site's own CSS custom properties and fonts, so the overlay is
- * literally the same design system as the page underneath it.
+ * invent anything. So every frame in this file is the real application, driven
+ * through real mouse and keyboard events, and the only things drawn on top are
+ * a cursor, a caption and two title cards — all of which use the site's own CSS
+ * custom properties and fonts, so the overlay is literally the same design
+ * system as the page underneath it.
  *
- * Nothing here is composited afterwards. It is one continuous take, which is
- * why the scene transitions are veils rather than cuts: a cut would need an
- * editor, and an editor is a step that cannot be re-run by `npm run record`.
+ * Nothing is composited except the joins between takes, and there are exactly
+ * three takes because there have to be: the phone scene is recorded at a real
+ * 390px viewport, and a screencast whose frame size changes halfway through is
+ * not a file anything will play. Within a take the transitions are veils rather
+ * than cuts, and every take opens and closes on black so the joins are fades
+ * too. No step here needs an editor; the whole thing is one `npm run record`.
  *
- *   npm run build && npm start      # in one terminal
- *   npm run record                  # in another
+ *   CAPTURE_ORIGIN=https://marsa-web.vercel.app npm run record   # the deployed site
+ *   npm run build && npm start && npm run record                 # or a local build
  *
  * Output, in `portfolio-video/`:
- *   marsa-demo.mp4    the deliverable — H.264, 1920x1080, ~60s, no audio
+ *   marsa-demo.mp4    the deliverable — H.264, 1920x1080, ~66s, no audio
  *   poster.png        a still for README/LinkedIn embeds that cannot autoplay
  *
  * ## Why the cursor is drawn rather than captured
@@ -53,7 +56,7 @@
 
 import puppeteer from "puppeteer-core";
 import { spawn } from "node:child_process";
-import { mkdirSync, existsSync, rmSync, statSync } from "node:fs";
+import { mkdirSync, existsSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const CHROME =
@@ -72,6 +75,27 @@ const OUT = resolve("portfolio-video");
  * and it is the resolution every destination for this file expects.
  */
 const VIEWPORT = { width: 1920, height: 1080, deviceScaleFactor: 1 };
+
+/**
+ * The narrow take, recorded rather than faked.
+ *
+ * The obvious way to show a phone inside a 1080p frame is an iframe of the site
+ * at 390px, and this site refuses it: `next.config.ts` sends
+ * `frame-ancestors 'none'` with `X-Frame-Options: DENY`, which is a security
+ * decision that outranks a video. Emulating a narrow viewport mid-recording is
+ * the other tempting shortcut and produces a screencast whose frame size
+ * changes halfway through.
+ *
+ * So the phone is its own take, at a real 390px viewport with touch emulation
+ * on, and ffmpeg places it on the brand canvas afterwards. 2x, because it is
+ * scaled *down* into the 1080p frame and downscaling a 780px capture is
+ * sharper than upscaling a 390px one.
+ */
+const MOBILE = { width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
+
+/** The canvas token, for the letterbox behind the phone take. */
+const CANVAS = "0x0B1216";
+
 const FPS = 30;
 
 /**
@@ -98,7 +122,7 @@ const FACTS = {
   tests: TEST_COUNT,
   chips: [
     [TEST_COUNT, "unit tests, green"],
-    ["50", "browser checks, real Chrome"],
+    ["139", "browser checks, real Chrome"],
     ["0", "vulnerabilities, whole tree"],
     ["AA", "contrast, recomputed each run"],
     ["strict", "TypeScript, zero any"],
@@ -277,6 +301,20 @@ function installOverlay() {
       });
     }
 
+    /*
+     * Carry the pointer across a navigation too, for exactly the same reason.
+     *
+     * The cursor is a drawn element, so a navigation destroys it along with the
+     * rest of the overlay — and the `on` class that makes it visible went with
+     * it. Only the opening scene does not navigate, so the pointer was on
+     * screen for the first four seconds and invisible for the remaining sixty:
+     * the amount field filled itself, the IBAN typed itself, and every button
+     * pressed itself, in a video whose whole argument is that a person is
+     * driving a real interface. The veil already had this fix; the cursor was
+     * simply never given it.
+     */
+    if (sessionStorage.getItem("mv-cursor") === "1") cursor.classList.add("on");
+
     const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
     window.__mv = {
@@ -285,6 +323,11 @@ function installOverlay() {
       },
       showCursor(on) {
         cursor.classList.toggle("on", on);
+        try {
+          sessionStorage.setItem("mv-cursor", on ? "1" : "0");
+        } catch {
+          /* Private mode has no session storage; the cursor is not worth throwing over. */
+        }
       },
       ping(x, y) {
         ring.style.setProperty("--mv-ring-pos", `translate3d(${x}px, ${y}px, 0)`);
@@ -468,6 +511,29 @@ async function clickAt(page, point, { travel = 620, settle = 260, remeasure = nu
 
   await page.evaluate((a, b) => window.__mv.ping(a, b), point.x, point.y);
   await page.mouse.click(point.x, point.y);
+}
+
+/**
+ * Activate a control without moving the drawn cursor to it.
+ *
+ * Only ever used while the veil is up. The phone take needs the demo already
+ * funded and converted before the curtain rises, because at 390px those
+ * controls sit below the fold — and a pointer travelling to something off
+ * screen is the one move this recorder cannot make look deliberate. Driving it
+ * in the dark is honest: the same real buttons, the same real state, just not
+ * filmed being pressed a second time after the desktop take has already shown
+ * exactly that.
+ */
+async function pressLabel(page, re, settleMs = 620) {
+  await waitForLabel(page, re);
+  await page.evaluate((source) => {
+    const rx = new RegExp(source, "i");
+    const button = Array.from(document.querySelectorAll("button")).find(
+      (b) => rx.test((b.textContent ?? "").trim()) && !b.disabled,
+    );
+    if (button) button.click();
+  }, re.source);
+  await wait(settleMs);
 }
 
 async function clickLabel(page, re, opts) {
@@ -743,9 +809,9 @@ async function sceneHero(page) {
   await scrollTo(page, 0, 0);
   await reveal(page, 420);
   await caption(page, "Marsa — a concept multi-currency account, built end to end");
-  await wait(1750);
-  await scrollTo(page, 560, 1750);
-  await wait(800);
+  await wait(1400);
+  await scrollTo(page, 560, 1400);
+  await wait(700);
 }
 
 /** Scene 2 — the converter, running on live European Central Bank rates. */
@@ -766,7 +832,7 @@ async function sceneLiveFx(page) {
   await page.keyboard.down("Control");
   await page.keyboard.press("KeyA");
   await page.keyboard.up("Control");
-  await page.keyboard.type("4820", { delay: 80 });
+  await page.keyboard.type("4820", { delay: 60 });
 
   // The new amount re-derives the conversion, so the completed state is
   // asserted again rather than assumed to have survived the edit.
@@ -776,8 +842,8 @@ async function sceneLiveFx(page) {
   // Rest on the target-currency chip. The rate line and the 30-day ECB chart
   // are what the scene is about, and they sit directly under the pointer here.
   const to = await centreOf(page, "#fx-to");
-  await moveTo(page, to.x, to.y, 520);
-  await wait(1350);
+  await moveTo(page, to.x, to.y, 480);
+  await wait(1050);
 }
 
 /** Scene 3 — IBAN validation: ISO 13616 structure plus the MOD-97 checksum. */
@@ -792,10 +858,10 @@ async function sceneIban(page) {
 
   const field = await centreOf(page, "#iban-input");
   await clickAt(page, field, { travel: 600 });
-  await page.keyboard.type("DE89 3704 0044 0532 0130 00", { delay: 38 });
-  await wait(360);
-  await clickLabel(page, /check iban/, { travel: 520 });
-  await wait(2200);
+  await page.keyboard.type("DE89 3704 0044 0532 0130 00", { delay: 30 });
+  await wait(320);
+  await clickLabel(page, /check iban/, { travel: 480 });
+  await wait(1800);
 }
 
 /**
@@ -820,14 +886,14 @@ async function sceneSandbox(page) {
   // pace up. The identity step gates Continue until its check completes.
   await clickLabel(page, /continue/, { travel: 400, settle: 190 });
   await caption(page, "Onboarding, and a simulated KYC check");
-  await wait(1550);
-  await clickLabel(page, /continue/, { travel: 360, settle: 190 });
+  await wait(1150);
+  await clickLabel(page, /continue/, { travel: 330, settle: 170 });
   await caption(page, "A European IBAN — structurally valid, not a live account");
-  await wait(1850);
-  await clickLabel(page, /continue/, { travel: 360, settle: 190 });
+  await wait(1400);
+  await clickLabel(page, /continue/, { travel: 330, settle: 170 });
   await caption(page, "Money arrives from abroad");
-  await clickLabel(page, /receive \$/, { travel: 480 });
-  await wait(1650);
+  await clickLabel(page, /receive \$/, { travel: 440 });
+  await wait(1350);
 }
 
 /** Scene 5 — the conversion, using the rate the app just fetched from the ECB. */
@@ -836,30 +902,105 @@ async function sceneConvert(page) {
   await caption(page, "Convert at the live interbank rate — fetched, not faked");
   // The step fetches the rate on entry; the button stays disabled until it lands.
   await waitForLabel(page, /convert \$/);
-  await wait(1050);
-  await clickLabel(page, /convert \$/, { travel: 500 });
-  await wait(2050);
+  await wait(880);
+  await clickLabel(page, /convert \$/, { travel: 460 });
+  await wait(1700);
 }
 
 /** Scene 6 — the SEPA payout, and the account state it leaves behind. */
 async function sceneSepa(page) {
   await clickLabel(page, /continue/, { travel: 400, settle: 190 });
   await caption(page, "Pay out over SEPA");
-  await clickLabel(page, /send .*sepa/i, { travel: 490 });
-  await wait(1450);
-  await clickLabel(page, /continue/, { travel: 400, settle: 190 });
+  await clickLabel(page, /send .*sepa/i, { travel: 450 });
+  await wait(1200);
+  await clickLabel(page, /continue/, { travel: 360, settle: 170 });
   await caption(page, "Received, converted, sent — the whole loop, and the activity to match");
-  await wait(2150);
+  await wait(1700);
 }
 
-/** Scene 7 — the engineering behind it, in numbers that can be checked. */
+/**
+ * Scene 7 — what the primary call to action actually does.
+ *
+ * The single most important frame in the video for a buyer deciding whether
+ * this developer can be trusted with their product. The site is a concept
+ * build, and the place that is easiest to get wrong is the button: a form
+ * headed "Open a Marsa account" whose control said "Create my account" and
+ * whose small print then admitted nothing was stored would be a trick. It says
+ * **Check my details**, and the notice sits above the first field rather than
+ * under the button, so the caveat arrives before the first keystroke.
+ *
+ * Nothing is typed and nothing is submitted. The scene is the disclosure and
+ * the label, held long enough to read.
+ */
+async function sceneGetStarted(page) {
+  await navigate(page, "/get-started");
+  await frameOn(page, "main form", 210);
+  await reveal(page, 400);
+  await caption(page, "The onboarding flow — and what it says before you type");
+
+  const notice = await centreOf(page, "main form p");
+  await moveTo(page, notice.x, notice.y, 560);
+  await wait(1700);
+
+  await caption(page, "The button names the action it performs");
+  const cta = await centreOfLabel(page, /check my details/);
+  await moveTo(page, cta.x, cta.y, 520);
+  await wait(1700);
+}
+
+/**
+ * Scene 8 — the same product at 390px, recorded at 390px.
+ *
+ * Driven to the converted state under the veil (see `pressLabel`), so what the
+ * curtain rises on is a funded account, a real interbank rate and the sandbox
+ * label, all in one narrow frame. Then one slow scroll, which is the honest way
+ * to show a phone layout: it is the gesture the layout exists to survive.
+ */
+async function prepareMobile(page) {
+  await navigate(page, "/demo");
+  await pressLabel(page, /start the demo/);
+  await pressLabel(page, /^continue$/);
+  await pressLabel(page, /^continue$/, 1500);
+  await pressLabel(page, /^continue$/);
+  await pressLabel(page, /receive \$/);
+  await pressLabel(page, /^continue$/);
+  await pressLabel(page, /convert \$/, 900);
+  await showCursor(page, false);
+}
+
+async function sceneMobile(page) {
+  // `.glass-panel` is the sandbox banner and the only element on this route
+  // carrying that class. 90px below the top edge clears the navigation pill
+  // and leaves the hero paragraph above it out of frame rather than sliced.
+  await frameOn(page, ".glass-panel", 90);
+  await reveal(page, 420);
+  await caption(page, "Responsive by design — the same flow at 390px");
+  await wait(1600);
+  await scrollTo(page, 880, 2600);
+  await wait(1100);
+  await caption(page, null);
+}
+
+/** Scene 9 — back to the product, which is what the closing cards sit on. */
+async function prepareReturn(page) {
+  await showCursor(page, false);
+  await navigate(page, "/");
+}
+
+async function sceneReturn(page) {
+  await scrollTo(page, 0, 0);
+  await reveal(page, 360);
+  await wait(1000);
+}
+
+/** Scene 10 — the engineering behind it, in numbers that can be checked. */
 async function sceneCredibility(page) {
   await caption(page, null);
   await showCursor(page, false);
   await page.evaluate((html) => window.__mv.card(html), credibilityCard());
   await wait(520);
-  await page.evaluate(() => window.__mv.chipsIn(65));
-  await wait(3900);
+  await page.evaluate(() => window.__mv.chipsIn(60));
+  await wait(3100);
 }
 
 /** Scene 8 — the brand, and the disclosure, held long enough to read. */
@@ -867,7 +1008,7 @@ async function sceneClosing(page) {
   await page.evaluate((html) => window.__mv.card(html), closingCard());
   await wait(200);
   await assertClosingDisclosure(page);
-  await wait(4100);
+  await wait(3700);
 }
 
 /* ------------------------------------------------------------------ *
@@ -953,14 +1094,19 @@ async function frameCountOf(file) {
  * throws away the source timestamps and re-stamps each frame by its index, so
  * the output is the take, at the length the take really was, to the frame.
  */
-async function transcode(raw, mp4, takeSeconds) {
+async function transcode(raw, mp4, takeSeconds, { fit = false } = {}) {
   const frames = await frameCountOf(raw);
   const rate = frames / takeSeconds;
   console.log(`  ${frames} frames over ${takeSeconds.toFixed(1)}s → retimed at ${rate.toFixed(2)}fps`);
+  // The phone take is 780x1688 and every other take is 1920x1080. Concatenation
+  // by stream copy needs one geometry, so it is scaled to fit the height and
+  // letterboxed on the canvas token rather than stretched — a phone stretched
+  // to 16:9 is the single most obviously faked thing a product video can do.
+  const fitChain = fit ? `,scale=-2:1000,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${CANVAS}` : "";
   await run("ffmpeg", [
     "-loglevel", "error", "-y",
     "-i", raw,
-    "-vf", `setpts=N/(${rate.toFixed(6)}*TB),fps=${FPS},format=yuv420p`,
+    "-vf", `setpts=N/(${rate.toFixed(6)}*TB),fps=${FPS}${fitChain},format=yuv420p`,
     "-c:v", "libx264",
     "-preset", "slow",
     "-crf", "20",
@@ -974,6 +1120,28 @@ async function transcode(raw, mp4, takeSeconds) {
 }
 
 /**
+ * Join the takes into the deliverable.
+ *
+ * Three takes rather than one because the phone scene has to be recorded at a
+ * real 390px viewport, and a screencast whose frame size changes halfway
+ * through is not a file anything will play. Each take is encoded to the same
+ * geometry, frame rate and pixel format first, so this is a stream copy: no
+ * generation loss, and the joins are black-to-black because every take opens
+ * and closes under the veil.
+ */
+async function concat(parts, mp4) {
+  const list = resolve(OUT, ".takes.txt");
+  writeFileSync(list, parts.map((p) => `file '${p.replace(/\\/g, "/")}'`).join("\n"));
+  await run("ffmpeg", [
+    "-loglevel", "error", "-y",
+    "-f", "concat", "-safe", "0", "-i", list,
+    "-c", "copy", "-movflags", "+faststart",
+    mp4,
+  ]);
+  rmSync(list, { force: true });
+}
+
+/**
  * Pull a still out of the finished video for the places that cannot autoplay.
  *
  * GitHub will not play an MP4 that lives at a repository path, and a LinkedIn
@@ -981,7 +1149,7 @@ async function transcode(raw, mp4, takeSeconds) {
  * the sandbox with an IBAN and a funded balance on screen, which is the frame
  * that says what the product is in one glance, and carries the concept badge.
  */
-async function poster(mp4, at = "40") {
+async function poster(mp4, at = "32") {
   await run("ffmpeg", [
     "-loglevel", "error", "-y",
     "-ss", at, "-i", mp4,
@@ -1015,9 +1183,53 @@ async function main() {
   await page.evaluateOnNewDocument(installOverlay);
 
   const mp4 = resolve(OUT, "marsa-demo.mp4");
-  const raw = resolve(OUT, ".raw-take.webm");
-  let recorder;
-  let takeSeconds = 0;
+
+  /**
+   * The running order, in three takes.
+   *
+   * Split only where it has to be: the phone scene needs its own viewport, and
+   * everything after it is a title card that belongs back at 1080p. Each take
+   * opens and closes with the veil up, so the joins read as deliberate fades
+   * rather than as cuts an editor made.
+   */
+  const takes = [
+    {
+      name: "product",
+      viewport: VIEWPORT,
+      cursor: true,
+      scenes: [
+        ["hero", sceneHero],
+        ["live FX", sceneLiveFx],
+        ["IBAN", sceneIban],
+        ["sandbox", sceneSandbox],
+        ["convert", sceneConvert],
+        ["SEPA", sceneSepa],
+        ["get started", sceneGetStarted],
+      ],
+    },
+    {
+      name: "mobile",
+      viewport: MOBILE,
+      cursor: false,
+      fit: true,
+      prepare: prepareMobile,
+      scenes: [["mobile", sceneMobile]],
+    },
+    {
+      name: "closing",
+      viewport: VIEWPORT,
+      cursor: false,
+      prepare: prepareReturn,
+      scenes: [
+        ["return", sceneReturn],
+        ["credibility", sceneCredibility],
+        ["closing", sceneClosing],
+      ],
+    },
+  ];
+
+  const parts = [];
+  let elapsed = 0;
 
   try {
     // Land on the origin once before recording starts, so the first frame of
@@ -1039,40 +1251,67 @@ async function main() {
       ]);
     });
 
-    await page.evaluate(() => window.__mv.veil(true));
-    await wait(300);
+    for (const take of takes) {
+      await page.setViewport(take.viewport);
 
-    // WebM is what the recorder natively produces; asking for `.mp4` would only
-    // put VP9 in an MP4 box. `transcode()` makes the real deliverable.
-    recorder = await page.screencast({ path: raw, fps: FPS, overwrite: true });
-    const t0 = Date.now();
-    await wait(400);
-    await showCursor(page, true);
+      /*
+       * Everything that has to happen off camera happens here.
+       *
+       * The phone take needs the demo already funded and converted, and
+       * getting there is seven navigations and clicks — eight seconds of black
+       * screen if it runs with the recorder already rolling, which is what the
+       * first cut of this did. Dead air is the one thing a 70-second product
+       * video cannot afford, and it is not a scene, so it does not belong
+       * inside one.
+       */
+      if (take.prepare) await take.prepare(page);
+      // Up before the shutter, not after: a take that starts on the previous
+      // take's last frame reflowed into a new viewport is the one join that
+      // would look like a mistake.
+      await page.evaluate(() => window.__mv.veil(true)).catch(() => {});
+      await wait(300);
 
-    const scenes = [
-      ["hero", sceneHero],
-      ["live FX", sceneLiveFx],
-      ["IBAN", sceneIban],
-      ["sandbox", sceneSandbox],
-      ["convert", sceneConvert],
-      ["SEPA", sceneSepa],
-      ["credibility", sceneCredibility],
-      ["closing", sceneClosing],
-    ];
-    for (const [name, scene] of scenes) {
-      const at = ((Date.now() - t0) / 1000).toFixed(1);
-      console.log(`  ${String(at).padStart(5)}s  ${name}`);
-      await scene(page);
+      // WebM is what the recorder natively produces; asking for `.mp4` would
+      // only put VP9 in an MP4 box. `transcode()` makes the real deliverable.
+      const raw = resolve(OUT, `.raw-${take.name}.webm`);
+      const recorder = await page.screencast({ path: raw, fps: FPS, overwrite: true });
+      const t0 = Date.now();
+      let seconds = 0;
+      await wait(400);
+      await showCursor(page, take.cursor);
+
+      try {
+        for (const [name, scene] of take.scenes) {
+          const at = (elapsed + (Date.now() - t0) / 1000).toFixed(1);
+          console.log(`  ${String(at).padStart(5)}s  ${name}`);
+          await scene(page);
+        }
+        // Close on black, so the next take can open on it.
+        await page.evaluate(() => window.__mv.veil(true));
+        await wait(320);
+      } finally {
+        // Measured *before* the encoder is flushed, and that ordering is
+        // load-bearing: `recorder.stop()` blocks while ffmpeg drains its pipe,
+        // which on this take is tens of seconds. Counting that as part of the
+        // performance told `transcode` to stretch a 55-second take across 86
+        // seconds of timeline, and the whole video came out in slow motion.
+        seconds = (Date.now() - t0) / 1000;
+        await recorder.stop();
+      }
+
+      elapsed += seconds;
+      const part = resolve(OUT, `.take-${take.name}.mp4`);
+      await transcode(raw, part, seconds, { fit: take.fit });
+      rmSync(raw, { force: true });
+      parts.push(part);
     }
-    takeSeconds = (Date.now() - t0) / 1000;
-    console.log(`\n  take length ${takeSeconds.toFixed(1)}s`);
+    console.log(`\n  take length ${elapsed.toFixed(1)}s across ${takes.length} takes`);
   } finally {
-    if (recorder) await recorder.stop();
     await browser.close();
   }
 
-  await transcode(raw, mp4, takeSeconds);
-  rmSync(raw, { force: true });
+  await concat(parts, mp4);
+  for (const part of parts) rmSync(part, { force: true });
   await poster(mp4);
 
   const seconds = await durationOf(mp4);

@@ -16,6 +16,7 @@
     "db:migrate": "node scripts/migrate.mjs",
     "db:verify": "node scripts/verify-db.mjs",
     "capture": "node scripts/capture.mjs",
+    "capture:catalog": "node scripts/capture-catalog.mjs",
     "record": "node scripts/record-demo.mjs"
   },
   "engines": {

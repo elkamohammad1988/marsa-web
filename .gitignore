@@ -144,6 +144,19 @@ portfolio-screenshots/*
 portfolio-video/
 
 # ---------------------------------------------------------------------------
+# The Upwork Project Catalog image set.
+#
+# Same rule, same reasoning. These are eight upload artefacts photographed from
+# the deployed site by `npm run capture:catalog`, and three of them overlap with
+# the README gallery above — committing both sets would put near-duplicate
+# images in the history of a public repository to serve a listing that lives on
+# another site entirely.
+#
+# Regenerate with:  npm run capture:catalog
+# ---------------------------------------------------------------------------
+upwork-catalog/
+
+# ---------------------------------------------------------------------------
 # Throwaway scripts.
 #
 # Puppeteer one-offs written to look at something once — check a nav state,
