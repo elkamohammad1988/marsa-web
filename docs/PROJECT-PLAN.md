@@ -598,14 +598,22 @@ instance:
 
 ### Still open
 
-| Item | Status |
+**Nothing from this list.** It held six items until 2026-08-24 and all six are
+closed. They are recorded here rather than deleted, because a backlog that
+quietly loses its entries is a backlog nobody can audit — and because this
+table was itself the problem for a while: it went on asserting a fake legal
+entity and a broken dashboard in a *public* repository long after both were
+fixed, which is the same class of stale claim the honesty programme exists to
+catch.
+
+| Item | Closed by |
 |---|---|
-| `lib/legal.ts` — the `regulatoryDisclosure()` fallback still describes licensed partner institutions holding customer funds, in the present tense. Under the concept framing it is false. | **BLOCKED-ON-ME** ([H19](#h19--approve-the-regulatory-disclosure-wording)) |
-| `regulatorySummary()` — same file, same problem (*"Funds safeguarded at licensed partner institutions"*), and it currently has **no callers at all**. | **BLOCKED-ON-ME** ([H19](#h19--approve-the-regulatory-disclosure-wording)) |
-| The sentences that follow the disclosure in `Footer.tsx` and `/legal/terms` — *"Marsa provides multi-currency accounts, SEPA & SWIFT transfers, and FX services…"* — assert operation immediately after a disclosure that denies it. | **BLOCKED-ON-ME** ([H19](#h19--approve-the-regulatory-disclosure-wording)) |
-| `siteConfig.legalName` is `"Marsa Money Ltd."` — a suffix that asserts an incorporated entity. | **BLOCKED-ON-ME** ([H19](#h19--approve-the-regulatory-disclosure-wording)) |
-| Nobody has looked at the new artwork rendered in a browser. It builds, it carries the right labels, and it fits its slots by construction — but that is not the same as looking right. | **BLOCKED-ON-ME** ([H20](#h20--look-at-the-new-artwork)) |
-| `components/admin/FunnelView.tsx` — a funnel step can render **above 100%** of the start step and nothing stops it. `width` at line 94 clamps only the *lower* bound (`Math.max(…, 2)`); there is no upper clamp, so the bar overflows its track and the label prints the raw figure. Found on 2026-08-22 while re-capturing `05-analytics.png` against the local JSONL fallback, which yielded `Verified (KYC) · 116.7%` — sessions whose `start` beacon never arrived while their later steps did. The arithmetic is correct and the input is legitimately skewed; what is missing is the presentation guard, so a real dashboard reads as a broken one. It is why image 5 was left as the 2026-08-20 capture rather than re-shot. | **OPEN** — a display defect, not a data defect; do not fix it by editing the data file |
+| `lib/legal.ts` — the `regulatoryDisclosure()` fallback described licensed partner institutions holding customer funds, in the present tense. | Rewritten in the conditional: *"…is a concept build, not a financial service. There is no company behind it, no licence, no regulator and no partner institution… The product it depicts **would** run on the licensed-partner model."* |
+| `regulatorySummary()` — same file, same problem, and no callers at all. | Deleted. `grep` finds no reference in `lib`, `components` or `app`. |
+| The sentences following the disclosure in `Footer.tsx` and `/legal/terms` asserted operation immediately after a paragraph denying it. | Removed. No occurrence of *"provides multi-currency accounts"* remains. |
+| `siteConfig.legalName` was `"Marsa Money Ltd."`, emitted in `Organization.legalName`. | Removed from `lib/site.ts` and `lib/schema.ts`. The live JSON-LD carries no `legalName` and is an `Organization`, not a `FinancialService`. |
+| Nobody had looked at the artwork rendered in a browser. | Looked at, on the deployed site, at 320 / 390 / 1440px, plus all seven captured images. |
+| `components/admin/FunnelView.tsx` — a funnel step could render **above 100%** of the start step. `width` clamped only the lower bound, so the bar overflowed its track. Found while re-capturing `05-analytics.png` against the local JSONL fallback, which yielded `Verified (KYC) · 116.7%`. | Clamped at both ends: `Math.min(100, Math.max(row.pctOfStart, row.sessions > 0 ? 2 : 0))`. The *label* still prints the true figure, so a reader sees `116.7%` and knows the data is odd; what they no longer see is a bar running past the end of the row. |
 
 ---
 
@@ -1048,7 +1056,14 @@ looking at it. See [H20](#h20--look-at-the-new-artwork).
 ---
 
 <a id="h19--approve-the-regulatory-disclosure-wording"></a>
-### H19 — Approve the regulatory disclosure wording · **blocks the last of the honesty programme**
+### H19 — Approve the regulatory disclosure wording · **DONE (2026-08-24)**
+
+> **Resolved.** All four parts shipped. `regulatoryDisclosure()` states the
+> concept framing and puts the licensed-partner arrangement in the conditional;
+> `regulatorySummary()` is deleted; the operating sentences are gone from the
+> footer and from `/legal/terms`; and `legalName` no longer exists in
+> `lib/site.ts` or in the emitted JSON-LD. The description below is kept as the
+> record of what was wrong and why it was decided together.
 
 `lib/legal.ts` holds the one string on this site that is a legal statement
 rather than copy, and it is rendered in the footer of **every page**, on
@@ -1089,7 +1104,11 @@ awaits a yes, a no, or an edit.
 ---
 
 <a id="h20--look-at-the-new-artwork"></a>
-### H20 — Look at the new artwork · F1
+### H20 — Look at the new artwork · **DONE (2026-08-24)**
+
+> **Resolved.** Viewed on the deployed site at 320px, 390px and 1440px, and in
+> the seven captured portfolio images. Nothing clipped, nothing overflowing, no
+> horizontal scroll at any width.
 
 The illustrations shipped in
 [#25](https://github.com/elkamohammad1988/marsa-web/pull/25) are verified

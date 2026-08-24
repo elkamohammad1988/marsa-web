@@ -76,8 +76,8 @@ mocked up, and they are only ever as current as the last run — which is a
 weaker guarantee than "cannot drift", the claim that stood here until it turned
 out to be false. The set went a commit stale when a UI cleanup removed
 decoration the images still showed, so **re-run the capture before publishing
-them anywhere**. Regenerated 2026-08-22, `05-analytics.png` excepted — see
-below. **Every one carries the concept-build disclosure**, because the site
+them anywhere**. All seven regenerated 2026-08-24 against the commit that is
+deployed. **Every one carries the concept-build disclosure**, because the site
 does — the capture script throws rather than write an unmarked image, and
 [`tests/portfolio-honesty.test.ts`](tests/portfolio-honesty.test.ts)
 fails if that rule is ever softened.
@@ -93,17 +93,22 @@ submissions, which on any machine that has used the contact form means a real
 name and email address in an image intended for a public listing. The funnel
 view carries the same message and is anonymous by construction.
 
-`05-analytics.png` is the one image in the set still dated 2026-08-20, and the
-reason is worth recording. Re-shooting it against the local JSONL fallback
-produced a funnel reading **`Verified (KYC) · 116.7%`** — more sessions at the
-second step than the first, because that dev file holds sessions whose `start`
-beacon never arrived while their later steps did. The number is real, the data
-behind it is local scratch, and the page has no guard against a step exceeding
-the one above it. Rather than publish a dashboard that looks broken or
-hand-edit a data file until it flattered the product, the previous capture
-stands; it differs from the current build by one `←` glyph on a button. The
-missing guard is filed as a real defect, not a screenshot problem — see *Still
-open* in [`docs/PROJECT-PLAN.md`](docs/PROJECT-PLAN.md#still-open).
+`05-analytics.png` is shot from a local run against a configured database, and
+that is worth stating rather than leaving to be assumed: the published
+deployment holds **no credentials at all**, so its own funnel view is empty and
+its sign-in cannot succeed. The figures in the image are real demo sessions
+recorded during capture runs — not invented, and not reproducible from a clean
+clone without a database of your own.
+
+Capturing it is how a real defect was found. An earlier attempt against the
+local JSONL fallback rendered **`Verified (KYC) · 116.7%`** — more sessions at
+the second step than at the first, because that file holds sessions whose
+`start` beacon never arrived while their later steps did. The arithmetic was
+right and the input was legitimately skewed; what was missing was the
+presentation guard, so a correct dashboard read as a broken one. Rather than
+hand-edit the data file until it flattered the product, the bar is now clamped
+at both ends and the label still prints the true figure, so a reader sees
+`116.7%` and knows the data is odd without the bar running past its track.
 
 ---
 
