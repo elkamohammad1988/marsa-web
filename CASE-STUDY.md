@@ -205,7 +205,7 @@ All measured on the production build — method reproducible from the repo.
   them — a defect confined to the three routes behind the password, which is
   why the suite as it then stood — well over a thousand checks — and an axe
   pass over the public site had never seen it.
-- **Tests (2026-08-24)** — **1885 / 1885** Vitest across 53 files, covering
+- **Tests (2026-08-24)** — **1891 / 1891** Vitest across 53 files, covering
   IBAN/MOD-97, FX, pagination, storage provider selection, admin auth (HMAC
   round-trip, tamper, expiry), session signing, RLS-backed profile reads, CSV
   injection-safety, and the analytics funnel (unique-session counting,
@@ -265,7 +265,7 @@ is visible commit by commit in the git log.
 > accounts built on Postgres row-level security — policies written and tested,
 > deliberately not wired to a live database — and a first-party analytics
 > backend.
-> Dark "liquid gold" design system on one set of role-named tokens; 1,885
+> Dark "liquid gold" design system on one set of role-named tokens; 1,891
 > passing tests and 0 axe violations across 74 scans; illustrations drawn
 > from those tokens rather than sourced; and a hard line between real software
 > and a build that tells you exactly what it is not. Next.js 15 / React 19 /

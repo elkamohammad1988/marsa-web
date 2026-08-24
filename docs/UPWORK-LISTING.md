@@ -30,16 +30,30 @@ Deployed from `main` with **no credentials configured at all** — the productio
 environment holds exactly one variable, `NEXT_PUBLIC_SITE_URL`. That is a
 deliberate choice, and it decides what a visitor can and cannot reach.
 
-Two checks, both re-run 2026-08-22, that the deployment is the build in this
+Two checks, both re-run 2026-08-24, that the deployment is the build in this
 repository rather than an older one. A rendered page can be argued about; a
 token value cannot:
 
 ```
-$ curl -s https://marsa-web.vercel.app/_next/static/css/*.css | grep -o -- "--brand:[^;]*"
+$ curl -s https://marsa-web.vercel.app/ \
+    | grep -o '/_next/static/css/[^"]*\.css' | sort -u \
+    | xargs -I{} curl -s https://marsa-web.vercel.app{} \
+    | grep -o -- '--brand:[^;]*'
 --brand:212 175 55                       # #D4AF37, the palette in styles/globals.css
+
 $ curl -s https://marsa-web.vercel.app/api/health
 {"status":"degraded", … storage/database/admin/notifications: configured:false, fx: configured:true}
 ```
+
+The first command reads the stylesheet list off the page rather than naming a
+file, and that is not verbosity. The version printed here until 2026-08-24 was
+`curl … /_next/static/css/*.css`, which cannot work: the glob is expanded by
+your shell against your own disk, matches nothing, and is sent to the server as
+a literal `*.css` that answers 404. So the one check this section offered a
+buyer was a command that returned nothing on every machine — worse than no
+check, because it invites them to conclude the claim is false. The build also
+emits **two** stylesheets and the token is only in one of them, so a command
+that names a single file is a coin toss even when the path is right.
 
 **Live and working:** the whole marketing site, the `/demo` sandbox end to end,
 live ECB rates in the converter and the demo's conversion step, ISO 13616 IBAN
@@ -54,12 +68,12 @@ is unconfigured, and the app refuses the file-store fallback in production
 instead of pretending a lead was saved.
 
 **If a buyer asks why auth is not clickable:** the code, the row-level-security
-migration and 1,885 automated checks are all in the repository and run from a
-clean clone. **This answer only holds once the repository is public — it is 404
-to a signed-out visitor today, and giving it before then hands the buyer a link
-that proves nothing (§9).** What is missing from the demo is a database, not a feature. Standing up a
-live account system for a concept nobody can sign up to would mean holding real
-email addresses for a product that does not exist.
+migration and 1,891 automated checks are all in the repository and run from a
+clean clone — `https://github.com/elkamohammad1988/marsa-web`, public and
+answering 200 to a signed-out request, re-verified 2026-08-24. What is missing
+from the demo is a database, not a feature. Standing up a live account system
+for a concept nobody can sign up to would mean holding real email addresses for
+a product that does not exist.
 
 ---
 
@@ -99,11 +113,13 @@ Upwork prefixes the title with "I will" and caps it at 80 characters.
 
 Why the primary wins: it names the stack a buyer searches for, claims
 "production ready", and avoids every word that could read as a financial
-service. Note what currently substantiates that claim and what does not: the
-test count and the production build are real and re-measurable from a clone, but
-**the CI badge proves nothing to a buyer while the repository is private** — it
-renders broken, not green. Until the repository is public, the phrase rests on
-the test suite alone.
+service. What substantiates that claim, all of it re-checked 2026-08-24: the
+test count and the production build are re-measurable from a clone, and the CI
+badge on the README now renders **green** against the commit that is actually
+pushed — `badge.svg` returns `CI - passing`, and the newest run of `ci.yml` is
+`success` on `main`. That badge was worth nothing while the repository was
+private, because it rendered broken rather than green to anyone signed out; the
+repository has been public since 2026-08-23 and it no longer is.
 
 ---
 
@@ -117,12 +133,13 @@ the test suite alone.
 
 ## 4. Full description
 
-> ⚠ **Do not publish this section yet.** Its second paragraph tells the buyer
-> the reference project is **public** and invites them to read every line. That
-> is the offer's central proof and it is **false today** — re-verified
-> 2026-08-22, a signed-out request to the repository returns 404. Flip the
-> repository to public first; publishing before that turns the strongest
-> sentence in the listing into the one a buyer can most easily disprove.
+✅ **Clear to publish.** This section's second paragraph tells the buyer the
+reference project is **public** and invites them to read every line — the
+offer's central proof, and the one sentence a buyer can most easily disprove if
+it is wrong. It held a "do not publish" warning until 2026-08-24 because the
+repository answered 404 to a signed-out visitor. It no longer does:
+`https://github.com/elkamohammad1988/marsa-web` reports `"visibility":
+"public"` and returns 200 signed out, re-verified 2026-08-24.
 
 > **Most "full stack" deliveries are a front end with a database bolted on.**
 >
@@ -161,7 +178,7 @@ the test suite alone.
 >   app reads real ones, server-cached and degrading gracefully, instead of
 >   invented figures that date the moment they ship.
 > - **A test suite and a CI gate.** Typecheck, lint, unit tests and a production
->   build on every push. The reference build runs **1,885 automated checks** —
+>   build on every push. The reference build runs **1,891 automated checks** —
 >   unit tests for business logic and security boundaries, property tests that
 >   recompute accessibility contrast from the design tokens, and
 >   repository-integrity checks — and ships with zero `any` in strict
@@ -261,39 +278,88 @@ work is worth.
 
 ## 6. Images
 
-Seven, in this order, with the video first if the listing type accepts one. All
-are photographed from a production build by `npm run capture` rather than mocked
-up — but they are only as current as the last run, and treating that as "cannot
-drift" is how this set went stale once already: the UI cleanup of 2026-08-22
-removed decoration that images taken two days earlier still showed, including
-the thumbnail. **Re-run `npm run capture` immediately before uploading**, and
-compare image 1 against the live site with your own eyes.
+**Upload the nine files in `upwork-catalog/`, in this order**, with the video
+first if the listing type accepts one. Regenerate them with
+`npm run capture:catalog`.
 
-Images 1, 2, 3, 4, 6 and 7 were regenerated 2026-08-22 and match the current
-build. `05-analytics.png` is the exception and is still the 2026-08-20 capture:
-re-shooting it without a database renders the funnel from the local JSONL
-fallback, whose sessions produce a `Verified (KYC) · 116.7%` row — a real number
-from scratch data that reads as a broken dashboard. It differs from the current
-build by one `←` glyph on a button. Do not hand-edit the data file to make it
-look better; capture it against a database with coherent demo traffic, or leave
-it as it is.
+> **This is not the `portfolio-screenshots/` set, and the difference matters.**
+> That set is the seven images `README.md` embeds, photographed by
+> `npm run capture` for a reader who is already inside the repository. This one
+> is photographed by `npm run capture:catalog` for a buyer who has never seen
+> it, and the two answer different questions — which is why this section listed
+> the wrong files until 2026-08-24 and would have had you upload the README's
+> gallery under captions written for a different set. Do not mix them.
+
+All nine are photographed from a **production build of the pushed commit**
+rather than mocked up — but they are only as current as the last run, and
+treating that as "cannot drift" is how a set went stale once already: the UI
+cleanup of 2026-08-22 removed decoration that images taken two days earlier
+still showed, including the thumbnail. **Re-run `npm run capture:catalog`
+immediately before uploading**, and compare image 1 against the live site with
+your own eyes.
+
+**Where each frame is photographed from.** Eight come from
+**https://marsa-web.vercel.app** itself, deliberately: a listing image that a
+buyer cannot reproduce by visiting the URL in the listing is worth nothing.
+`05-operator-dashboard.png` is the one exception and it is worth stating rather
+than leaving to be assumed — the deployment holds no credentials at all, so its
+operator area is a closed door and its funnel would be empty. That frame is
+captured from a local production build of the same commit, against a configured
+database, which is exactly the disclosure `README.md` already makes about
+`05-analytics.png`. Run it as:
+
+```bash
+npm run build && npx next start -p 3100     # a local build with .env.local
+CATALOG_ADMIN_ORIGIN=http://localhost:3100 npm run capture:catalog
+```
+
+Without that, the frame is **skipped with the reason printed** — never written
+as a photograph of a login box.
 
 **Every image carries the "Concept build — what's real?" marker.** That is not
-decoration and it is not optional: the capture script throws rather than write an
-image without it, and `tests/portfolio-honesty.test.ts` fails if that rule is
-ever softened. Without it, image 1 is a European IBAN, a €12,480.55 balance and
-an "Open An Account" button — which is a listing that looks like it is offering
-banking, and a reviewer is right to stop there.
+decoration and it is not optional: both capture scripts throw rather than write
+an image without it, and `tests/portfolio-honesty.test.ts` fails if that rule is
+ever softened in either of them. Without it, image 1 is a European IBAN, a
+€12,480.55 balance and an "Open An Account" button — which is a listing that
+looks like it is offering banking, and a reviewer is right to stop there.
 
 | # | File | Caption to enter in Upwork |
 |---|---|---|
 | 1 | `01-hero.png` | Custom dark design system — tokenised, every contrast pair verified against WCAG AA. Concept product, labelled as one on every screen |
-| 2 | `02-live-rates.png` | Live third-party API data, server-cached — real European Central Bank rates with 30-day history, not placeholders |
-| 3 | `03-feature-account.png` | Interactive product demo a visitor can complete end to end — clearly labelled as a sandbox |
-| 4 | `04-feature-convert.png` | Real arithmetic on live data — the demo computes, it does not animate |
-| 5 | `05-analytics.png` | Operator dashboard behind authentication — first-party funnel analytics on the demo sandbox, no third-party trackers |
-| 6 | `06-iban-validation.png` | Working business logic, unit-tested — ISO 13616 / MOD-97 validation, fully offline |
-| 7 | `07-mobile.png` | The same flow on a phone — not a reflowed landing page, the demo mid-conversion at 390 px |
+| 2 | `02-interactive-demo.png` | Interactive product demo a visitor can complete end to end — real arithmetic on a live rate, clearly labelled as a sandbox |
+| 3 | `03-currency-converter.png` | Live third-party API data, server-cached — real European Central Bank rates with 30-day history, not placeholders |
+| 4 | `04-iban-checker.png` | Working business logic, unit-tested — ISO 13616 / MOD-97 validation, fully offline |
+| 5 | `05-operator-dashboard.png` | Operator dashboard behind authentication — first-party funnel analytics, no cookies and no third-party trackers |
+| 6 | `06-get-started.png` | Onboarding built against the real validation rules — and honest on screen about what it does with what you type |
+| 7 | `07-about-engineering.png` | Every figure computed from the module that implements it, so the page cannot drift from the code |
+| 8 | `08-mobile.png` | The same flow on a phone — not a reflowed landing page, the demo mid-conversion at 390 px |
+| 9 | `09-contact.png` | Shared client/server validation, and a form that says plainly it keeps nothing |
+
+**Why frame 5 exists, and why the set was wrong without it.** The listing sells
+authentication, a permission model and an operator dashboard as headline
+deliverables in §4, and prices them into Professional and Premium in §5. The
+eight-frame set that preceded this one showed **none of them**: six of its eight
+frames were public marketing pages, and a gallery skimmed in ten seconds was
+arguing for a smaller job than the one being offered — a landing page, which §1
+is explicit about not selling. One frame of the application behind the password
+is what makes the category claim legible.
+
+It is safe to publish for the same reason `README.md` gives: it is the *funnel*
+view, which is anonymous by construction. **`/admin` itself — the submissions
+table — is deliberately never captured on either origin**, because it renders
+whatever the contact form has collected, which on any machine that has used it
+means a real name and a real email address in an image intended for a public
+listing.
+
+`capture-catalog.mjs` also refuses to write frame 5 when the funnel is not
+coherent. Analytics gathered from scratch runs can produce
+`Verified (KYC) · 116.7%` — more sessions at the second step than the first,
+because that store holds sessions whose `start` beacon never arrived while their
+later steps did. The arithmetic is right and the dashboard is right to render it,
+because an operator can see the data is odd. A listing image has no operator and
+no next page, so the same honest row reads as a product that cannot count. Fix
+it by capturing against a database with coherent traffic — **never** by editing
+the store until it flatters the picture.
 
 **Two images were dropped, and the reasoning is worth keeping** in case either is
 ever proposed again.
@@ -307,17 +373,32 @@ negative work in a gallery skimmed in ten seconds.
 
 The old `07-mobile.png` was the landing page at 390 px — image 1, narrower. A
 portfolio slot has to earn its place with information the previous image did not
-carry, and "the hero reflows" is not it.
+carry, and "the hero reflows" is not it. `08-mobile.png` in this set is the demo
+mid-conversion at 390 px for that reason.
 
 **Thumbnail:** `01-hero.png`. It carries the wordmark, the headline, the product
 panel and the concept marker in one frame.
 
 **Video** (`portfolio-video/marsa-demo.mp4`, regenerate with `npm run record`):
-one continuous take of the production build — hero, live ECB rate, the demo end
-to end. Upload it wherever the listing type allows a video, because the strongest
-thing in this project is a *flow*, and a flow is the one thing a still cannot
-carry. It is gitignored: the repository has to carry the PNGs because README.md
-embeds them, and nothing here loads the video.
+a driven walk through the production build — hero, live ECB rate, IBAN check,
+the demo sandbox end to end, onboarding, then the phone. Upload it wherever the
+listing type allows a video, because the strongest thing in this project is a
+*flow*, and a flow is the one thing a still cannot carry.
+
+It is **three takes joined by ffmpeg**, not one continuous recording, and the
+split is forced rather than stylistic: the phone scene is recorded at a real
+390 px viewport, a screencast cannot change frame size partway through, and
+`frame-ancestors 'none'` means the site cannot be put in an iframe of itself to
+fake it. Each take opens and closes on black so the joins read as fades. Say
+"recorded from the running build", not "one continuous take" — the second is the
+kind of small untrue thing this project keeps finding in its own copy.
+
+**Neither `upwork-catalog/` nor `portfolio-video/` is tracked in git**, and that
+is deliberate: both are upload artefacts for a listing that lives on another
+site, and committing them would put near-duplicate images in the history of a
+public repository forever. `README.md` embeds the `portfolio-screenshots/` seven,
+so the repository has to carry *those*. Regenerate before uploading; do not go
+looking for them in a fresh clone.
 
 **Before uploading, check each one for:** a real name or email address (there is
 none in this set — `/admin`'s submissions view is deliberately never captured for
@@ -360,8 +441,6 @@ failure, not a certified audit.
 **How do I know the code is actually good?**
 Read it. The reference project is public, including its test suite and the
 scripts that produce its measurements. Clone it and run `npm run verify`.
-*(Gated on the same blocker as §4 — do not publish this answer while the
-repository still answers 404 to a signed-out visitor. See §9.)*
 
 **Can you work with my existing brand or Figma files?**
 Yes, either. If your brand colours conflict with accessibility requirements I
@@ -392,8 +471,17 @@ discover it in week three.
 
 - [x] Three tier prices and delivery times set
 - [x] Category set to Full Stack Development, **not** any finance category
-- [x] Every image carries the concept marker (enforced by `requireDisclosure()`)
-- [ ] Seven images uploaded in order, each with its caption
+- [x] Every image carries the concept marker (enforced by `requireDisclosure()`
+      in **both** capture scripts, and by `tests/portfolio-honesty.test.ts`,
+      which now runs its assertions against both rather than only `capture.mjs`)
+- [x] **The gallery shows the application, not only the marketing site.**
+      `05-operator-dashboard.png` was added 2026-08-24 because the set before it
+      had six public pages out of eight and no frame of anything behind a
+      password — a gallery arguing for a landing-page job while §4 and §5 sell
+      authentication, a permission model and an operator dashboard
+- [ ] **Nine** images uploaded in order from `upwork-catalog/`, each with its
+      caption from §6 — not the seven in `portfolio-screenshots/`, which are the
+      README's gallery and carry captions written for a different audience
 - [ ] Video uploaded if the listing type accepts one
 - [ ] Thumbnail set to `01-hero.png`, checked for legibility of the marker at
       gallery size
@@ -406,6 +494,12 @@ discover it in week three.
       until 2026-08-23. Secret hygiene was checked before publishing and is
       clean: `.env.local` is ignored, no `.data/*.jsonl` is tracked, and the
       only env file in git is `.env.example`.
+- [x] **The CI badge renders green to a signed-out visitor.** Re-checked
+      2026-08-24: `ci.yml/badge.svg` returns `CI - passing`, and the newest run
+      of the workflow is `success` against the commit at the head of `main`. It
+      is the first thing a buyer who follows the repository link sees, and while
+      the repository was private it rendered *broken* — which reads as a failing
+      build rather than as a permissions error.
 - [x] `npm run verify` green on `main` **from the commit that is actually
       pushed**. The working tree used to run ahead of `main` by a large margin,
       which made every number below unverifiable by the one route a buyer takes
@@ -416,11 +510,24 @@ discover it in week three.
       reachable and what is deliberately closed
 - [x] Every number in the description re-measured. **Measured 2026-08-24 on the
       commit that is pushed**:
-      - `npm test` — **1,885 passing across 53 files**, green. The docs carried
-        1,886, which was correct when taken and drifted by one when an unused
-        icon export was removed along with the invented company page that was
-        its last caller. Every claim site now reads 1,885, and
-        `tests/portfolio-honesty.test.ts` fails if they ever disagree again.
+      - `npm test` — **1,891 passing across 53 files**, green. The figure moved
+        three times and every move is worth recording, because the first is the
+        one the gate cannot see. It read 1,886 until an unused icon export was
+        removed along with the invented company page that was its last caller,
+        which took it to 1,885. It then moved to 1,889 on 2026-08-24 when
+        `tests/portfolio-honesty.test.ts` began running its four disclosure
+        assertions against **both** capture scripts instead of only
+        `capture.mjs` — four more assertions, no change to the site. It moved
+        to 1,891 later the same day with the two `tests/seo.test.ts` cases that
+        pin the default share card (§0), for the same reason: an assertion
+        added, nothing about the product changed. Every claim site was
+        re-measured and updated in the same pass.
+
+        Note what that gate does and does not do: it asserts every artefact
+        quotes the *same* number, not that the number is *right* — a run cannot
+        count itself before it finishes. So all five sites agreeing on a stale
+        figure is green. Re-measure with `npx vitest run` after any change that
+        adds or removes assertions, this file included.
       - `npm run test:smoke` — **139 checks across 3 files, 139 passed**, green.
         Two failures were found and fixed rather than re-run until green. The
         axe pass was reporting a colour-contrast violation on the FAQ triggers,

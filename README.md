@@ -221,7 +221,7 @@ npm run verify         # typecheck → lint → tests → production build
 npm audit              # 0 vulnerabilities, dev tree included
 ```
 
-**What the suite covers.** 1,885 automated checks across 53 files, all running
+**What the suite covers.** 1,891 automated checks across 53 files, all running
 in Node — plus 139 browser checks in a separate suite, below:
 
 - **Unit tests for business logic and security boundaries** — IBAN MOD-97, FX

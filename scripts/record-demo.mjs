@@ -56,7 +56,7 @@
 
 import puppeteer from "puppeteer-core";
 import { spawn } from "node:child_process";
-import { mkdirSync, existsSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { mkdirSync, existsSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const CHROME =
@@ -110,7 +110,7 @@ const FPS = 30;
  * claim to go stale in a frame of video, which is the hardest place to notice
  * it and the hardest to correct after the fact.
  */
-const TEST_COUNT = "1,885";
+const TEST_COUNT = "1,891";
 
 /**
  * The engineering claims shown on the credibility card.
@@ -818,12 +818,21 @@ async function sceneHero(page) {
 async function sceneLiveFx(page) {
   await navigate(page, "/tools/currency-converter");
   await frameOn(page, "#fx-amount", 300);
-  await reveal(page, 420);
-  await caption(page, "Live FX — European Central Bank reference rates, not invented numbers");
 
   // Before a single frame of this scene is worth keeping, the panel has to be
   // finished. Checked, not waited out - see requireFxReady.
+  //
+  // This runs *under the veil*, and the ordering is the whole point. `reveal`
+  // is the line that puts the panel on camera, so a readiness check placed
+  // after it cannot prevent anything - it can only confirm, after the fact,
+  // that the skeleton was already filmed. It was: against the deployed origin
+  // the rate landed ~0.4s after the veil lifted, so the scene opened on an
+  // empty "They get" field and a grey chart placeholder, under a caption about
+  // live European Central Bank data. Assert first, then reveal.
   await requireFxReady(page, "/tools/currency-converter");
+
+  await reveal(page, 420);
+  await caption(page, "Live FX — European Central Bank reference rates, not invented numbers");
 
   const field = await centreOf(page, "#fx-amount");
   await clickAt(page, field, { travel: 620 });
@@ -1142,6 +1151,127 @@ async function concat(parts, mp4) {
 }
 
 /**
+ * How long a transition is allowed to sit on black, and how long the file may
+ * open on it before the first scene arrives.
+ */
+const BEAT = 0.36;
+const OPENING_BEAT = 0.2;
+
+/**
+ * The shortest a transition may be squeezed to before it stops reading as a
+ * fade, and the longest the finished file may run.
+ *
+ * The beat is allowed to move between `MIN_BEAT` and `BEAT` because the raw
+ * take length is not under this script's control: the same choreography
+ * measured 64.1s of scene time against one deployment and 69.0s against the
+ * same deployment twenty minutes later, purely on how fast the origin answered.
+ * A fixed beat therefore lands inside the target or outside it by luck. Letting
+ * the transitions absorb the variance is what makes the deliverable
+ * deterministic, and 0.24s is still four fade frames at either end.
+ */
+const MIN_BEAT = 0.24;
+const MAX_SECONDS = 75;
+
+/** ffmpeg writes its filter reports to stderr and still exits 0, so `run` cannot see them. */
+function ffmpegStderr(args) {
+  return new Promise((done, fail) => {
+    const child = spawn("ffmpeg", args, { stdio: ["ignore", "ignore", "pipe"] });
+    let err = "";
+    child.stderr.on("data", (d) => (err += d.toString()));
+    child.on("error", fail);
+    child.on("close", () => done(err));
+  });
+}
+
+/** Every near-black run in `file`, as `{ start, end }` in seconds. */
+async function darkRuns(file) {
+  const report = await ffmpegStderr([
+    "-v", "info", "-i", file,
+    "-vf", "blackdetect=d=0.10:pix_th=0.10",
+    "-an", "-f", "null", "-",
+  ]);
+  const runs = [];
+  const rx = /black_start:([0-9.]+) black_end:([0-9.]+)/g;
+  let match;
+  while ((match = rx.exec(report)) !== null) {
+    runs.push({ start: Number.parseFloat(match[1]), end: Number.parseFloat(match[2]) });
+  }
+  return runs;
+}
+
+/**
+ * Cut the dark holds between scenes down to a designed beat.
+ *
+ * Every scene change here happens under the veil: the caption clears, the veil
+ * goes up, the next route is fetched, hydrated, scrolled and settled, and only
+ * then does the veil come down. That is what makes an arrival a cross-fade
+ * instead of a flash — but it also means the length of the fade is however long
+ * the network took. Against a local build that is ~0.3s; against the deployed
+ * origin the same three navigations measured 1.3-1.5s each, and the take came
+ * out at 80.5s where the brief asks for 45-75s. A video whose transitions grow
+ * when the CDN is slow does not have transitions, it has symptoms.
+ *
+ * So the beat is imposed here rather than wished for upstream. A near-black run
+ * longer than `BEAT` keeps `BEAT/2` at each end — which is exactly where the
+ * two fade ramps live, measured at ~0.2s each — and the still middle of it,
+ * which is a frame of nothing repeated thirty times a second, is dropped.
+ * `setpts` re-stamps what survives so the gaps close.
+ *
+ * This removes latency, never product: the dropped frames are by construction
+ * the ones whose every pixel is already below the black threshold.
+ */
+async function tighten(mp4) {
+  const before = await durationOf(mp4);
+  const runs = await darkRuns(mp4);
+
+  /** What a given beat would remove, in seconds. */
+  const savedBy = (beat) =>
+    runs.reduce((total, { start, end }) => {
+      const allowed = start <= 0.05 ? Math.min(OPENING_BEAT, beat) : beat;
+      return total + Math.max(0, end - start - allowed);
+    }, 0);
+
+  // Take the longest beat that still lands inside the target, rather than the
+  // shortest that fits — the holds are transitions, and a transition should be
+  // no snappier than it has to be.
+  let beat = BEAT;
+  if (before - savedBy(beat) > MAX_SECONDS) {
+    for (let candidate = BEAT; candidate >= MIN_BEAT - 1e-9; candidate -= 0.01) {
+      beat = Math.max(MIN_BEAT, candidate);
+      if (before - savedBy(beat) <= MAX_SECONDS) break;
+    }
+  }
+
+  const drops = [];
+  for (const { start, end } of runs) {
+    const allowed = start <= 0.05 ? Math.min(OPENING_BEAT, beat) : beat;
+    if (end - start <= allowed) continue;
+    drops.push([start + allowed / 2, end - allowed / 2]);
+  }
+  if (drops.length === 0) return;
+
+  const expr = drops.map(([a, b]) => `between(t,${a.toFixed(3)},${b.toFixed(3)})`).join("+");
+  const tmp = resolve(OUT, ".tightened.mp4");
+  await run("ffmpeg", [
+    "-loglevel", "error", "-y",
+    "-i", mp4,
+    "-vf", `select='not(${expr})',setpts=N/(${FPS}*TB),format=yuv420p`,
+    "-c:v", "libx264",
+    "-preset", "slow",
+    "-crf", "20",
+    "-profile:v", "high",
+    "-level", "4.1",
+    "-movflags", "+faststart",
+    tmp,
+  ]);
+  renameSync(tmp, mp4);
+  const after = await durationOf(mp4);
+  console.log(
+    `  ${drops.length} holds tightened to ${beat.toFixed(2)}s → ${before.toFixed(1)}s became ${after.toFixed(1)}s`,
+  );
+}
+
+/**
  * Pull a still out of the finished video for the places that cannot autoplay.
  *
  * GitHub will not play an MP4 that lives at a repository path, and a LinkedIn
@@ -1312,6 +1442,7 @@ async function main() {
 
   await concat(parts, mp4);
   for (const part of parts) rmSync(part, { force: true });
+  await tighten(mp4);
   await poster(mp4);
 
   const seconds = await durationOf(mp4);

@@ -32,8 +32,22 @@ import path from "node:path";
  */
 
 const ROOT = process.cwd();
-const CAPTURE = path.join(ROOT, "scripts", "capture.mjs");
-const source = readFileSync(CAPTURE, "utf8");
+
+/**
+ * Both capture scripts, not one.
+ *
+ * This guard was written for `capture.mjs` and named it directly, which was
+ * right while that was the only script writing images. `capture-catalog.mjs`
+ * arrived later and photographs a *different* set for the Upwork listing —
+ * and that set is the one this rule matters most for, because a listing
+ * gallery is skimmed with no site around it and no badge to open. It carried
+ * the same two guards by hand and nothing held it to them: the file the
+ * reviewer sees first was the file with no test behind it.
+ *
+ * A rule that names one of the two paths to the same artefact is not a rule,
+ * it is a coincidence. Every assertion below now runs against both.
+ */
+const CAPTURE_SCRIPTS = ["capture.mjs", "capture-catalog.mjs"];
 
 /**
  * Comments in this file quote the rule they exist to prevent, so a naive scan
@@ -44,9 +58,11 @@ function withoutComments(code: string): string {
   return code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 }
 
-const executable = withoutComments(source);
+describe.each(CAPTURE_SCRIPTS)("%s keeps the concept disclosure in frame", (script) => {
+  const executable = withoutComments(
+    readFileSync(path.join(ROOT, "scripts", script), "utf8"),
+  );
 
-describe("capture script keeps the concept disclosure in frame", () => {
   it("injects no rule that hides the disclosure", () => {
     // Any CSS the script injects that both names the disclosure's corner and
     // removes it from the render. Written broadly on purpose: `display: none`,
