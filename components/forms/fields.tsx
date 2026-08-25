@@ -11,7 +11,7 @@ import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
 
 const control =
-  "w-full rounded-xl border bg-canvas px-4 text-sm text-ink placeholder:text-ink-subtle " +
+  "w-full rounded-lg border bg-canvas px-4 text-sm text-ink placeholder:text-ink-subtle " +
   "transition-colors focus:outline-none focus:ring-2 focus:ring-brand-strong/30 focus:border-brand " +
   "disabled:cursor-not-allowed disabled:opacity-60";
 

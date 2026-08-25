@@ -134,7 +134,6 @@
     --brand-soft: 128 96 0; /* = --gold-dark — accent-dim / secondary / in-progress */
     --brand-strong: 232 201 90; /* = --gold-soft — text/links/rings/highlights */
     --accent: 232 201 90; /* #E8C95A */
-    --accent-soft: 128 96 0; /* #806000 */
 
     /* Semantic */
     --success: 127 191 138; /* #7FBF8A — 8.7:1 on the page background */

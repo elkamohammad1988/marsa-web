@@ -83,7 +83,6 @@ const config: Config = {
         },
         accent: {
           DEFAULT: withAlpha("--accent"),
-          soft: withAlpha("--accent-soft"),
         },
         // The cool second light source — see `--halo` in globals.css. Blurred
         // decoration only: it is never a text colour and never a fill behind
@@ -204,8 +203,6 @@ const config: Config = {
          * sites are better off asking for `e1` instead.
          */
         glow: "0 12px 32px -22px rgb(var(--brand) / 0.18)",
-        "glow-sm": "0 6px 18px -14px rgb(var(--brand) / 0.16)",
-        "glow-lg": "0 18px 48px -28px rgb(var(--brand) / 0.16)",
       },
       backgroundImage: {
         // Decorative gradient (tiles, glows, illustration fills). Lit face at
@@ -218,17 +215,6 @@ const config: Config = {
           "linear-gradient(180deg, rgb(var(--cta-from)) 0%, rgb(var(--cta-to)) 100%)",
         "radial-glow":
           "radial-gradient(60% 60% at 50% 0%, rgb(var(--brand) / 0.14) 0%, transparent 72%)",
-        /**
-         * The wash behind hero/headers: deep water first, a gold cast second.
-         *
-         * This was a single magenta-black (#3A0F2B), i.e. the accent darkened.
-         * Under gold that recipe gives an olive-brown fog. The two layers here
-         * are the palette's actual thesis — a cool medium with a warm light
-         * *inside* it — and they are ordered so the gold is the smaller, higher
-         * layer: light entering water, not water tinted gold.
-         */
-        "atmosphere":
-          "radial-gradient(60% 55% at 50% 0%, rgba(9,38,45,0.92) 0%, rgba(9,38,45,0.38) 34%, transparent 68%), radial-gradient(34% 30% at 50% -2%, rgb(var(--brand) / 0.10) 0%, transparent 62%)",
         // Layered light sources for hero / section backdrops. Gold leads, the
         // water halo sits behind and lower, and the floor is deep water.
         "mesh-deep":

@@ -56,16 +56,21 @@ const base =
 const shells: Record<Variant, string> = {
   /** Full-width form control. */
   field:
-    "relative flex h-11 items-center rounded-xl bg-surface-tint px-3.5 ring-1 ring-line " +
+    "relative flex h-11 items-center rounded-lg bg-surface-tint px-3.5 ring-1 ring-line " +
     "transition-[box-shadow,background-color] duration-200 " +
     "hover:bg-surface-tint-2 " +
     "focus-within:ring-2 focus-within:ring-brand-strong",
   /**
-   * Compact pill for sitting *inside* another control's row — the currency
+   * Compact control for sitting *inside* another control's row — the currency
    * picker beside an amount input. Sized to align with a 2xl numeric field.
+   *
+   * `rounded-md` rather than the pill it was: it sits directly inside a
+   * `rounded-lg` field, and a fully-round control nested in a rounded
+   * rectangle is the one pairing that makes both look unconsidered. A smaller
+   * radius than its parent is what nesting should do.
    */
   chip:
-    "relative flex h-9 shrink-0 items-center rounded-full bg-card pl-3 pr-1.5 ring-1 ring-line " +
+    "relative flex h-9 shrink-0 items-center rounded-md bg-card pl-3 pr-1.5 ring-1 ring-line " +
     "transition-[box-shadow,background-color] duration-200 " +
     "hover:bg-surface-tint hover:ring-line-dark " +
     "focus-within:ring-2 focus-within:ring-brand-strong",
