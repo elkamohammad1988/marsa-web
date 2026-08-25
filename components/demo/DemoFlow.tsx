@@ -347,7 +347,7 @@ export function DemoFlow() {
     <div className="mx-auto max-w-5xl">
       {/* Sandbox disclosure — honesty first: nothing here is a real account,
           and we say plainly what anonymous telemetry we collect. */}
-      <p className="glass-panel mb-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-2xl border border-line-dark px-4 py-2.5 text-center text-xs text-ink-muted">
+      <p className="mb-4 bg-surface-tint flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-card border border-line-dark px-4 py-2.5 text-center text-xs text-ink-muted">
         <span className="font-semibold text-ink">Interactive sandbox</span>
         Sample data, no real money. The exchange rate is live from the ECB. We log
         anonymous step progress (no cookies, no personal data) to improve the demo.
@@ -364,7 +364,7 @@ export function DemoFlow() {
                 className={cn(
                   "h-1.5 w-full rounded-full transition-colors",
                   done && "rail-done bg-brand",
-                  active && "animate-rail-pulse bg-brand",
+                  active && "bg-brand",
                   !done && !active && "bg-line",
                 )}
                 aria-hidden
@@ -414,8 +414,30 @@ export function DemoFlow() {
             // is `items-start`, so this panel is the height of its contents —
             // but the rule stays because the list is still the right place for
             // the slack if the layout ever stretches it again.
-            "gradient-ring relative flex flex-col overflow-hidden rounded-card-lg border border-line bg-card p-5 shadow-e2 transition-opacity sm:p-6",
-            accountLive ? "opacity-100" : "opacity-60",
+            // The panel no longer dims itself before the account is live.
+            //
+            // It carried `opacity-60` until `accountLive`, which is a
+            // reasonable-looking way to say "not yet real" and an accessibility
+            // failure: opacity composites *the text too*, so `--ink-subtle`
+            // — a token chosen for ≥7.5:1 on every surface, and 8.14:1 on this
+            // one — rendered at **3.97:1** against its own composited
+            // background. Every label in the card ("IBAN pending…", "Balances",
+            // the Setup badge) failed AA for the whole opening state of the
+            // demo, which is the state most visitors see for longest.
+            //
+            // axe never reported it, and the reason is worth keeping: the panel
+            // also carried `.gradient-ring`, whose `::before` painted a
+            // gradient over the same box. axe cannot resolve a background it
+            // cannot reduce to a colour, so the check came back *incomplete*
+            // rather than failed, and an incomplete is not a violation. Removing
+            // the decoration is what made the contrast measurable — the bug was
+            // there the whole time, hidden behind the effect sitting on top of
+            // it.
+            //
+            // Nothing is lost by dropping it. The pending state is already said
+            // in words in three places, which every reader gets and a dimmed
+            // panel gives only to people who can see it.
+            "relative flex flex-col overflow-hidden rounded-card-lg border border-line bg-card p-5 shadow-e2 sm:p-6",
           )}
         >
           <div className="flex items-center justify-between">
@@ -536,7 +558,7 @@ export function DemoFlow() {
         </div>
 
         {/* Step content */}
-        <div className="gradient-ring rounded-card-lg border border-line bg-card p-6 shadow-e2 sm:p-8">
+        <div className="rounded-card-lg border border-line bg-card p-6 shadow-e2 sm:p-8">
           {/*
             One targeted live region, announcing what actually changed. The
             panel below used to be wrapped in `aria-live="polite"`, so every
