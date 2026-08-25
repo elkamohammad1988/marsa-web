@@ -28,11 +28,8 @@ export default function Page() {
         ]}
         title="Form your EU company and bank in one place"
         description="Incorporate in the EU and open a multi-currency business account with a real IBAN, ready before your first invoice goes out."
-        chips={[
-          { label: "EU IBAN" },
-          { label: "Cards from day one" },
-          { label: "Onboarding under 48h" },
-        ]}
+        // "EU IBAN" is already in the description above; these two are not.
+        chips={[{ label: "Cards from day one" }, { label: "Onboarding under 48h" }]}
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="phone-home"

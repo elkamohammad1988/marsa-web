@@ -127,16 +127,16 @@ export function CurrencyConverter({
               {title}
             </HeadingTag>
             <p className="mt-5 max-w-xl text-base text-ink-muted md:text-lg">{subtitle}</p>
-            <ul className="mt-6 flex flex-wrap items-center gap-2">
-              {["ECB reference rates", "30 currencies", "No account needed"].map((l) => (
-                <li
-                  key={l}
-                  className="inline-flex items-center rounded-full bg-card px-3.5 py-1.5 text-xs font-medium shadow-card ring-1 ring-line transition-all duration-200 hover:-translate-y-px hover:ring-brand-strong/40"
-                >
-                  {l}
-                </li>
-              ))}
-            </ul>
+            {/*
+              Three chips lived here — "ECB reference rates", "30 currencies",
+              "No account needed" — directly under a sentence reading "Check
+              real mid-market reference rates across 30 currencies, published
+              by the European Central Bank. Free, no account required."
+
+              They restated it word for word, in styling that lifted and lit on
+              hover as though each were a control. Nothing was clickable and
+              nothing was said twice worth saying twice.
+            */}
           </div>
 
           <div className="relative rounded-card-lg border border-line bg-card p-5 shadow-e2 md:p-7">
@@ -308,7 +308,7 @@ export function CurrencyConverter({
                   onClick={() => setRange(r.id)}
                   aria-pressed={range === r.id}
                   className={cn(
-                    "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                    "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
                     range === r.id
                       ? "bg-brand text-on-brand"
                       : "text-ink-muted hover:bg-ink/5 hover:text-ink",

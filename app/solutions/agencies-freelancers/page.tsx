@@ -27,11 +27,10 @@ export default function Page() {
         ]}
         title="Get paid by international clients in their currency"
         description="Invoice in EUR, USD or GBP, receive with local account details, and keep more of every fee with interbank exchange rates."
-        chips={[
-          { label: "Local EUR, USD, GBP details" },
-          { label: "Interbank FX" },
-          { label: "Free SEPA payouts" },
-        ]}
+        // Two of the three chips here restated the description verbatim
+        // ("local account details", "interbank exchange rates"). Only the
+        // payout terms are new, so only that one stays.
+        chips={[{ label: "Free SEPA payouts" }]}
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="card-and-phone"

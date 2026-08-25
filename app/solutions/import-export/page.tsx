@@ -27,11 +27,9 @@ export default function Page() {
         ]}
         title="Multi-currency accounts for import & export businesses"
         description="Pay overseas suppliers and collect from international buyers in one account, at real exchange rates, with fast SEPA and SWIFT settlement."
-        chips={[
-          { label: "30+ currencies" },
-          { label: "SEPA + SWIFT" },
-          { label: "Interbank FX" },
-        ]}
+        // "SEPA + SWIFT" and "Interbank FX" both appear in the description
+        // directly above. The currency count does not.
+        chips={[{ label: "30+ currencies" }]}
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
         art="phone-accounts"
