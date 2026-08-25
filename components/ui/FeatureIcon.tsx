@@ -48,7 +48,7 @@ export function FeatureIcon({
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center rounded-2xl",
+        "inline-flex items-center justify-center rounded-card",
         tones[tone],
         sizes[size],
         className,

@@ -121,7 +121,7 @@ export function Navbar({ authConfigured }: { authConfigured: boolean }) {
         <nav
           aria-label="Main"
           className={cn(
-            "relative flex items-center justify-between gap-4 rounded-full border glass px-4 transition-[padding,border-color,box-shadow] duration-300 sm:px-5 lg:px-6",
+            "relative flex items-center justify-between gap-4 rounded-card-lg border bg-card px-4 transition-[padding,border-color,box-shadow] duration-300 sm:px-5 lg:px-6",
             scrolled
               ? "border-brand-strong/25 py-1.5 shadow-e3"
               : "border-line/70 py-2 shadow-nav",
@@ -253,7 +253,7 @@ export function Navbar({ authConfigured }: { authConfigured: boolean }) {
                     that exists, or it names nothing.
                   */}
                   <div id={panelId} hidden={!open} className="absolute left-0 top-full pt-2">
-                    <ul className="min-w-[248px] origin-top animate-scale-in rounded-2xl border border-line glass p-2 shadow-elevated">
+                    <ul className="min-w-[248px] origin-top animate-scale-in rounded-card border border-line bg-card p-2 shadow-e2">
                       {group.children.map((child) => {
                         const current = isCurrent(pathname, child.href);
                         return (
@@ -332,7 +332,7 @@ export function Navbar({ authConfigured }: { authConfigured: boolean }) {
         }}
       >
         <div className="mx-auto max-w-container px-5 pb-4 sm:px-6 lg:px-8">
-          <div className="max-h-[calc(100vh-7rem)] origin-top animate-scale-in overflow-y-auto rounded-2xl border border-line glass p-4 shadow-elevated">
+          <div className="max-h-[calc(100vh-7rem)] origin-top animate-scale-in overflow-y-auto rounded-card border border-line bg-card p-4 shadow-e2">
             <ul className="flex flex-col gap-1">
               {mainNav.map((group) => (
                 <li key={group.label}>

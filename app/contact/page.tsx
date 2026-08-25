@@ -77,7 +77,7 @@ export default async function ContactPage({
             <ul className="mt-8 flex flex-col gap-5">
               {highlights.map((h) => (
                 <li key={h.title} className="flex items-start gap-4">
-                  <span className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-brand/10 text-brand-strong [&_svg]:h-5 [&_svg]:w-5">
+                  <span className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-card bg-brand/10 text-brand-strong [&_svg]:h-5 [&_svg]:w-5">
                     {h.icon}
                   </span>
                   <div>

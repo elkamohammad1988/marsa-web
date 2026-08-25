@@ -233,7 +233,7 @@ export function CheckboxField({ label, error, className, id, ...props }: Checkbo
               // 24×24 CSS px, and a consent checkbox has no inline-in-a-sentence
               // exception to fall back on — it is the control that gates submit.
               "peer h-6 w-6 flex-none cursor-pointer appearance-none rounded-md border bg-canvas transition-colors duration-150",
-              "checked:border-brand checked:bg-cta-gradient",
+              "checked:border-brand checked:bg-brand",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas",
               error ? "border-danger/60" : "border-line hover:border-brand-strong/50",
               className,

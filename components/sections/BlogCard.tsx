@@ -5,7 +5,7 @@ import { formatPostDate, type BlogPost } from "@/lib/blog";
 
 export function BlogCard({ post }: { post: BlogPost }) {
   return (
-    <article className="card-hover flex flex-col overflow-hidden rounded-card border border-line bg-card">
+    <article className="flex flex-col overflow-hidden rounded-card border border-line bg-card">
       <Link
         href={`/blog/${post.slug}`}
         className="relative block aspect-[16/10] overflow-hidden"

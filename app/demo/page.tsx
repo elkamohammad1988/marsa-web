@@ -17,7 +17,6 @@ export default function DemoPage() {
   return (
     <>
       <section className="relative isolate overflow-hidden bg-surface-deep py-14 text-white md:py-16">
-        <div aria-hidden className="pointer-events-none absolute inset-0 bg-mesh-deep opacity-90" />
         <Container className="relative">
           <BreadcrumbEyebrow
             items={[{ label: "Home", href: "/" }, { label: "Demo" }]}

@@ -55,7 +55,7 @@
  *     replaces — it is a fill and never a text colour.
  *   • `--gold-light` (#F5D76E) and `--gold-highlight` (#FFF1A8) are the light
  *     ON the gold rather than the gold itself: the specular in the water
- *     reflection, the top of a lit rim. See `.liquid-gold` further down.
+ *     reflection, the top of a lit rim — the lightest steps of the scale.
  */
 @layer base {
   :root {
@@ -256,79 +256,6 @@
     scrollbar-width: none;
   }
 
-  /* Frosted glass (navbar). Solid fallback first, then glass where supported. */
-  .glass {
-    background: rgb(var(--card) / 0.92);
-  }
-  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glass {
-      background: rgb(var(--card) / 0.66);
-      backdrop-filter: blur(12px) saturate(150%);
-      -webkit-backdrop-filter: blur(12px) saturate(150%);
-    }
-  }
-
-  /**
-   * Glass panel for the demo card + sandbox banner: translucent surface, blur,
-   * and a 1px inner top highlight. Falls back to a solid surface where
-   * backdrop-filter is unsupported (the highlight still applies).
-   */
-  .glass-panel {
-    background: rgb(var(--card) / 0.95);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  }
-  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glass-panel {
-      background: rgb(var(--surface-tint) / 0.55);
-      backdrop-filter: blur(14px) saturate(140%);
-      -webkit-backdrop-filter: blur(14px) saturate(140%);
-    }
-  }
-
-  /**
-   * The atmosphere behind the hero and the top of the page: deep water first
-   * (#09262D → transparent), then a small gold cast entering it from above.
-   *
-   * Bounded to the top ~1100px and absolutely positioned (not fixed) so it
-   * paints once and never re-composites on scroll — keeps LCP fast.
-   *
-   * The gold layer is 0.07 rather than the magenta's 0.10 and sits high and
-   * narrow. It has to read as light *reaching* the page, and a warm wash spread
-   * across the whole top of a viewport stops reading as light and starts
-   * reading as a tint someone applied.
-   */
-  .atmosphere-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1100px;
-    z-index: -10;
-    pointer-events: none;
-    background-image:
-      radial-gradient(72% 60% at 50% -6%, rgba(9, 38, 45, 0.92) 0%, rgba(9, 38, 45, 0.32) 32%, transparent 64%),
-      radial-gradient(38% 34% at 84% 6%, rgb(var(--brand) / 0.07) 0%, transparent 58%);
-  }
-  /**
-   * The wash is sized in pixels but read as a proportion of the screen.
-   *
-   * At 1100px tall behind a 1440×900 desktop viewport it is a soft glow behind
-   * the top of the page. Behind a 390×844 phone it is the *entire* first
-   * screen and most of the second, so the same declaration that reads as
-   * atmosphere on a laptop reads on a phone as a page tinted magenta
-   * throughout — the single strongest "cheap gradient" signal in the product,
-   * on the viewport most people will actually see it in.
-   *
-   * Shorter and dimmer below `sm`, so the hero still sits in light but the
-   * page returns to its near-black surface within the first screen.
-   */
-  @media (max-width: 640px) {
-    .atmosphere-layer {
-      height: 620px;
-      opacity: 0.65;
-    }
-  }
-
   /**
    * Key monetary figures — balances, converted amounts, payouts, prices.
    *
@@ -369,62 +296,6 @@
   }
 
   /**
-   * Brand gradient clipped to text. Only legible on DARK surfaces; never use it
-   * for informational text on light backgrounds.
-   *
-   * The stops moved *up* the scale, not just across the wheel. The magenta
-   * version ran `--brand-soft` → `--brand` → `--brand-deep`, and `--brand-soft`
-   * was 1.8:1 on the page background — a third of every glyph was, in practice,
-   * unreadable, which nothing caught because a gradient has no single colour to
-   * test. The gold equivalents (`--gold-dark`, 2.5:1) would have been no better,
-   * so the ramp is now taken from the legible half of the scale: 9.1:1 at the
-   * dimmest stop, 14.1:1 at the brightest.
-   */
-  .text-gradient {
-    background-image: linear-gradient(
-      120deg,
-      rgb(var(--gold-light)),
-      rgb(var(--gold-soft)) 52%,
-      rgb(var(--gold))
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /**
-   * Hero headline: white descending into gold. `color` is set to an accessible
-   * solid (ink, 17:1 on the dark hero) FIRST, so if background-clip:text is
-   * unsupported the headline is a legible solid. Every gradient stop is ≥4.5:1
-   * on the hero surface, so the clipped version is accessible too — the warmest
-   * stop, `--gold-light`, is 14.1:1 there.
-   *
-   * The headline is the one piece of type that takes the gold, and it takes it
-   * as a *descent*: white at the cap line, gold at the baseline. Typography
-   * elsewhere stays neutral, because gold on this site means "this is the
-   * number that matters", and a page where the prose is also gold has no way
-   * left to say that.
-   */
-  .text-gradient-hero {
-    color: rgb(var(--ink));
-    /* One layer, clipped to the glyphs. A second, wider layer used to ride on
-       top of it and animate its `background-position` — a band of light
-       crossing the headline every seven seconds. A headline that shines on a
-       loop is the single most recognisable ornament of a generated landing
-       page, and it was the only thing on the site moving with nothing to say.
-       The descent it was drawn over is the actual idea, and it is static. */
-    background-image: linear-gradient(180deg, #ffffff 0%, #e9f1f4 52%, #f5d76e 100%);
-    background-repeat: no-repeat;
-    -webkit-background-clip: text;
-    background-clip: text;
-  }
-  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-    .text-gradient-hero {
-      color: transparent;
-    }
-  }
-
-  /**
    * The logo tile: a lit gold face with a dark mark. A mark that changes colour
    * with its surroundings stops being a mark, so the tile owns both halves and
    * `currentColor` on the glyph inherits the second.
@@ -440,16 +311,12 @@
    * and let the tile decide.
    */
   .logo-tile {
-    /* Declared as `--liquid-base` as well as applied, so adding `.liquid-gold`
-       to a tile composites the water onto *this* gradient rather than
-       replacing it with the CTA one. See `.liquid-gold` below. */
-    --liquid-base: linear-gradient(
+    background-image: linear-gradient(
       135deg,
       rgb(var(--gold-light)) 0%,
       rgb(var(--gold)) 46%,
       rgb(var(--gold-deep)) 100%
     );
-    background-image: var(--liquid-base);
     color: rgb(var(--on-brand));
   }
 
@@ -470,51 +337,6 @@
     opacity: 0.18;
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
-  }
-
-  /**
-   * Gradient hairline border: bright gold along the TOP edge, fading out toward
-   * the bottom. Painted into the padding box with a mask so it reads as a 1px
-   * rim on any surface.
-   *
-   * Every alpha here came down when the accent went gold (0.70 → 0.52 at the
-   * top, 0.18 → 0.14 below it). The magenta these replace was ~0.12 luminance;
-   * gold is ~0.60. Ported at the old alphas the same rim that read as a lit
-   * edge reads as a drawn gold line — jewellery rather than light — on every
-   * card at once, which is precisely the "everything is gold" failure mode.
-   */
-  .gradient-ring {
-    position: relative;
-  }
-  .gradient-ring::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      180deg,
-      rgb(var(--brand-strong) / 0.52) 0%,
-      rgb(var(--brand) / 0.14) 26%,
-      rgb(var(--line) / 1) 62%,
-      rgb(var(--line) / 0.6) 100%
-    );
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    transition: background 0.2s ease;
-  }
-  /* When a gradient-ring card also lifts on hover, brighten the top edge. */
-  .card-hover.gradient-ring:hover::before {
-    background: linear-gradient(
-      180deg,
-      rgb(var(--brand-strong) / 0.8) 0%,
-      rgb(var(--brand) / 0.24) 28%,
-      rgb(var(--line) / 1) 64%,
-      rgb(var(--line) / 0.6) 100%
-    );
   }
 
   /**
@@ -556,23 +378,6 @@
     );
   }
 
-  /* Hairline divider. */
-  .divider-gradient {
-    background: linear-gradient(90deg, transparent, rgb(var(--line)), transparent);
-  }
-
-  /* Lift-on-hover for interactive cards — raises to elevation level 2. */
-  .card-hover {
-    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 0.18s ease, border-color 0.18s ease;
-  }
-  .card-hover:hover {
-    transform: translateY(-3px);
-    border-color: rgb(var(--brand) / 0.35);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 20px 44px -18px rgba(0, 0, 0, 0.65),
-      0 16px 44px -18px rgba(212, 175, 55, 0.18);
-  }
-
   /* Soft gold glow on completed progress-rail segments. */
   .rail-done {
     box-shadow: 0 0 10px 0 rgb(var(--brand) / 0.32);
@@ -608,279 +413,6 @@
       animation: none;
     }
   }
-
-  /**
-   * Pointer spotlight — a surface lit from wherever the cursor actually is.
-   *
-   * `--mx`/`--my` are written by `components/ui/PointerGlow.tsx`; the fallbacks
-   * here are what the effect looks like with no script, no pointer, or on a
-   * touch device, which is a soft light at the top centre. That is deliberate:
-   * the resting state has to be a design in its own right, because for a phone
-   * it is the *only* state.
-   *
-   * Painted into `::after` rather than `::before` because `.gradient-ring`
-   * already owns `::before` and the two are used together on the same cards.
-   */
-  .spotlight::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.35s ease;
-    background: radial-gradient(
-      18rem 18rem at var(--mx, 50%) var(--my, 0%),
-      rgb(var(--brand-strong) / 0.10),
-      transparent 60%
-    );
-  }
-  .spotlight:hover::after,
-  .spotlight:focus-within::after {
-    opacity: 1;
-  }
-  /**
-   * Content has to sit above the light, or the light sits on the text.
-   *
-   * The exclusions are load-bearing. This rule and Tailwind's `.absolute` have
-   * the same specificity, and this file wins on source order — so a plain
-   * `.spotlight > *` silently rewrote `position: absolute` to `relative` on
-   * every decorative child of a spotlit surface, which put them back in flow.
-   * Three components were disfigured by it and none of them threw:
-   *
-   *   - `PricingPlanCard` — the blur behind the featured plan became a third
-   *     grid item, so it took column 1, pushed the copy into column 2 and
-   *     wrapped the illustration onto a second row. Every plan card on
-   *     /pricing rendered as a half-empty box with the artwork underneath it.
-   *   - `FeatureBullets` — the large faint index sat inline above the icon
-   *     instead of bleeding off the top-right corner.
-   *   - `ProcessSteps` — the 01/02/03 badges dropped inside the panels rather
-   *     than straddling their top edge, and the connecting rail collapsed.
-   *
-   * Excluding the positioning utilities by name keeps the fix where the
-   * problem is: a child that declares its own position keeps it, and only
-   * static content gets lifted.
-   */
-  .spotlight > *:not(.absolute):not(.fixed) {
-    position: relative;
-    z-index: 1;
-  }
-
-  /**
-   * The reflection crossing a control on hover — the fast, one-shot half of the
-   * water language whose resting half is `.liquid-gold` below.
-   *
-   * Hover-only and un-filled on purpose: it plays once per entry and leaves
-   * nothing behind, so a reduced-motion visitor — whose duration is cut to
-   * 0.001ms — sees the band never leave its off-screen start position.
-   *
-   * It was one white band at 0.32. Two things were wrong with that on gold:
-   * a pure white band across a gold face reads as a scratch of chrome rather
-   * than as light, and a single band travelling at a single speed is the stock
-   * CSS shine — the one shape this identity is explicitly not. It is now the
-   * same double glint the headline uses: a narrow warm leading edge, a wider
-   * cool one behind it, unequally spaced, so the pass reads as one light
-   * refracted rather than one gradient moved.
-   */
-  .sheen {
-    overflow: hidden;
-  }
-  .sheen::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    transform: translateX(-120%);
-    background: linear-gradient(
-      100deg,
-      transparent 30%,
-      rgba(255, 241, 168, 0.30) 39%,
-      transparent 45%,
-      rgba(255, 255, 255, 0.26) 55%,
-      transparent 64%
-    );
-  }
-  .sheen:hover::after {
-    animation: sheen-sweep 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  @keyframes sheen-sweep {
-    to {
-      transform: translateX(120%);
-    }
-  }
-
-  /* ═══════════════════════════════════════════════════════════════════════
-   * The lit gold face — `.liquid-gold`
-   * ═══════════════════════════════════════════════════════════════════════
-   *
-   * The identity in one mechanism: light falling through water onto a gold
-   * surface. One class, no library.
-   *
-   * Three layers of light on top of the gold —
-   *
-   *   1. a broad soft hotspot (the pool of light),
-   *   2. a smaller, dimmer one offset from it,
-   *   3. a wide diagonal ripple comb at 104°, well off the axis of either,
-   *
-   * — composed so the face has depth in it without moving. The three used to
-   * be driven by two infinite loops of mismatched period, plus a section-scale
-   * sibling (`.gold-veil`) doing the same thing behind the closing panel. What
-   * that produced was a button, a logo tile and a panel that never stopped
-   * breathing: the reader's eye was pulled to a control by movement that meant
-   * nothing, on every page, for as long as the page was open. The composition
-   * was always meant to stand as a still — the resting frame was designed, and
-   * a reduced-motion reader only ever saw that one — so it now always is one.
-   * The only light that still moves is `.sheen`, and only on hover, where a
-   * pointer has asked for it.
-   *
-   * ## Why the light is in the background rather than in an overlay
-   *
-   * The obvious build is a blurred `::after` with `mix-blend-mode: screen`. It
-   * looks slightly better and it is wrong here, because a positioned pseudo
-   * element paints *above* inline text: the caustic would cross the button's
-   * own label and lift it toward the fill, and the one moment the label is
-   * hardest to read would be the moment the animation draws the eye to it.
-   * Painting into the element's own `background-image` puts the water under the
-   * type by construction — and since every layer is gold on gold, the effect
-   * can only ever *raise* contrast against the dark `--on-brand` label.
-   *
-   * `--liquid-base` is the last layer and the caller's: set it to whatever gold
-   * fill the surface already had (`.logo-tile` does), and the reflection
-   * composites onto that instead of the default CTA gradient.
-   *
-   * ## Restraint
-   *
-   * This belongs on the surfaces a reader is meant to act on or identify the
-   * product by — the primary button, the logo tile, the one featured panel.
-   * It is not a card treatment. A page where every surface is breathing is not
-   * a premium page, it is a screensaver.
-   */
-  .liquid-gold {
-    background-image:
-      radial-gradient(42% 58% at 24% 30%, rgb(var(--gold-highlight) / 0.34) 0%, transparent 62%),
-      radial-gradient(34% 46% at 76% 66%, rgb(var(--gold-light) / 0.24) 0%, transparent 64%),
-      repeating-linear-gradient(
-        104deg,
-        transparent 0 7%,
-        rgb(var(--gold-highlight) / 0.10) 10%,
-        rgb(var(--gold-light) / 0.05) 13%,
-        transparent 16% 27%
-      ),
-      var(--liquid-base, linear-gradient(180deg, rgb(var(--cta-from)) 0%, rgb(var(--cta-to)) 100%));
-    background-repeat: no-repeat;
-    /*
-     * Every caustic layer is larger than the element, which is what makes any
-     * `background-position` percentage a valid frame: for an over-sized layer
-     * the offset is `(box − layer) × pct`, so 0%–100% all resolve to negative
-     * offsets that still cover the box. Nothing can slide off an edge and
-     * expose the base, at rest or mid-animation.
-     */
-    background-size: 190% 190%, 150% 150%, 260% 260%, 100% 100%;
-    /*
-     * Both hotspots are on the face and offset from each other, so the surface
-     * has depth in it standing still. This used to be one frame of a pair of
-     * infinite loops, kept designed so that a reduced-motion reader or a
-     * screenshot still got a lit face; it is now the only frame there is. A
-     * button whose fill never stops moving is not a premium button.
-     */
-    background-position: 18% 26%, 78% 72%, 12% 0%, 0 0;
-  }
-
-  /**
-   * The emphasis rim: `.gradient-ring` turned up, for the one surface on a page
-   * that is being recommended — the featured pricing plan, the closing CTA.
-   *
-   * This replaces `.border-spin`, a conic rim whose bright arc was animated
-   * around the edge on a nine-second loop. Two things were wrong with it, and
-   * only one of them was taste:
-   *
-   * 1. **It put `--halo` in a border.** The rule three hundred lines up says
-   *    the cool violet is "decoration only — blurred orbs and mesh stops, never
-   *    text, never a fill behind text, **never a border**", and it says so
-   *    because the violet is the only hue on this site that is not magenta. In
-   *    a 1px rim it does not read as a second light source; it reads as a stray
-   *    blue line, which is exactly how it rendered along the bottom edge of
-   *    every pricing card and the closing CTA panel.
-   * 2. **It never stopped.** A perpetually travelling highlight is the visual
-   *    grammar of crypto dashboards and game UI. On a page asking someone to
-   *    pick a paid plan, the effect that says "premium" is a still, brighter
-   *    edge — the same argument the CTA shadow already lost its bloom to.
-   *
-   * Static, brand-only, and stronger at the top where the light is: the same
-   * geometry as `.gradient-ring` so the two can be swapped freely, with a
-   * second stop along the bottom edge so a large panel is closed rather than
-   * fading out into the page.
-   */
-  .gradient-ring-strong {
-    position: relative;
-  }
-  .gradient-ring-strong::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      180deg,
-      rgb(var(--brand-strong) / 0.75) 0%,
-      rgb(var(--brand) / 0.32) 18%,
-      rgb(var(--line-dark) / 1) 55%,
-      rgb(var(--line) / 0.9) 100%
-    );
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  /**
-   * The seam between two stacked sections: a hairline that brightens toward
-   * the middle, with a wide, faint bloom above it.
-   *
-   * Two flat bands meeting at a straight edge is what made the page below the
-   * hero read as a stack of unrelated rectangles. A seam gives the join a
-   * light source, which is what a reader interprets as depth.
-   */
-  .seam-top {
-    position: relative;
-  }
-  .seam-top::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    /* Above the section's own background, below its content — the painting
-       order a negative z-index gives you. Without it the bloom below would
-       wash over the text, since a positioned pseudo-element otherwise paints
-       on top of in-flow content. */
-    z-index: -1;
-    pointer-events: none;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgb(var(--brand-strong) / 0.28) 30%,
-      rgb(var(--brand-strong) / 0.42) 50%,
-      rgb(var(--brand-strong) / 0.28) 70%,
-      transparent
-    );
-  }
-  .seam-top::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: min(70rem, 90%);
-    height: 8rem;
-    transform: translateX(-50%);
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(50% 100% at 50% 0%, rgb(var(--brand) / 0.10), transparent 70%);
-  }
-
   /**
    * Two-light backdrop: warm gold in front, cool `--halo` water behind and
    * lower. The offset between them is the whole effect — matched positions
@@ -995,8 +527,8 @@
    * the component never has to clone a child to reach it.
    *
    * Children move with `translate`, not `transform`, and that is load-bearing.
-   * Nearly everything this wraps is a `.card-hover` surface whose hover state
-   * writes `transform: translateY(-3px)`. Had the reveal used `transform` too,
+   * Several things this wraps carry a hover state that writes
+   * `transform: translateY(...)`. Had the reveal used `transform` too,
    * the two rules would be competing for one property at equal specificity and
    * the cascade would decide by source order — which is how a reveal silently
    * deletes a hover. Independent transform properties multiply instead of

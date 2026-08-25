@@ -41,7 +41,7 @@ export function ComparisonTable({ eyebrow, title, rows }: ComparisonTableProps) 
           */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-y-0 left-1/3 z-10 w-1/3 bg-gradient-to-b from-brand/[0.16] to-brand/[0.05] ring-1 ring-inset ring-brand-strong/25"
+            className="pointer-events-none absolute inset-y-0 left-1/3 z-10 w-1/3 bg-brand/[0.07] ring-1 ring-inset ring-brand-strong/25"
           />
 
           <div className="relative grid grid-cols-3 bg-surface-deep text-xs font-semibold text-white sm:text-sm">

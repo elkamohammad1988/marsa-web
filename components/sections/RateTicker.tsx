@@ -50,7 +50,7 @@ export async function RateTicker() {
 
   return (
     <section
-      className="seam-top relative isolate border-b border-line bg-canvas py-5"
+      className="relative isolate border-y border-line bg-canvas py-5"
       aria-label="Live exchange rates"
     >
       <Container>
@@ -91,7 +91,7 @@ export async function RateTicker() {
                 {[...items, ...items].map((q, i) => (
                   <li
                     key={`${q.code}-${i}`}
-                    className="flex items-center gap-2 whitespace-nowrap rounded-full border border-line/60 bg-surface-tint-2/70 px-3 py-1.5 text-sm transition-colors duration-200 hover:border-brand-strong/40"
+                    className="flex items-center gap-2 whitespace-nowrap rounded-md border border-line/60 bg-surface-tint-2/70 px-3 py-1.5 text-sm"
                     aria-hidden={i >= items.length}
                   >
                     <span aria-hidden>{q.flag}</span>

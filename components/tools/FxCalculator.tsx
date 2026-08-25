@@ -139,7 +139,7 @@ export function FxCalculator() {
             <button
               type="button"
               onClick={load}
-              className="rounded-full bg-brand px-4 py-1.5 text-xs font-medium text-on-brand hover:bg-brand-deep"
+              className="rounded-md bg-brand px-3 py-1.5 text-xs font-medium text-on-brand hover:bg-gold-light"
             >
               Try again
             </button>

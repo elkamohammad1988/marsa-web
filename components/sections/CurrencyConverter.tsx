@@ -117,7 +117,13 @@ export function CurrencyConverter({
         */}
         <div className="grid grid-cols-1 gap-10 xl:grid-cols-[0.9fr_1.1fr] xl:items-center xl:gap-12">
           <div>
-            <HeadingTag className="text-gradient-hero text-display font-bold tracking-tight">
+            {/* The section step, not the page step. This was `text-display` — the
+                size reserved for the one headline at the top of a page — set in
+                a 0.9fr column, so "See Live Exchange Rates" broke over three
+                lines and shouted louder than the h1 above it. A heading that
+                outsizes its own page heading is a hierarchy error before it is
+                a taste one. */}
+            <HeadingTag className="text-3xl font-bold tracking-tight text-ink text-balance md:text-4xl lg:text-[44px] lg:leading-[1.1]">
               {title}
             </HeadingTag>
             <p className="mt-5 max-w-xl text-base text-ink-muted md:text-lg">{subtitle}</p>
@@ -133,7 +139,7 @@ export function CurrencyConverter({
             </ul>
           </div>
 
-          <div className="gradient-ring relative rounded-card-lg border border-line bg-card p-5 shadow-e2 md:p-7">
+          <div className="relative rounded-card-lg border border-line bg-card p-5 shadow-e2 md:p-7">
             {/*
               `minmax(0,1fr)`, not `1fr`.
 
@@ -200,7 +206,7 @@ export function CurrencyConverter({
                 type="button"
                 onClick={swap}
                 aria-label={`Swap ${from} and ${to}`}
-                className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-cta-gradient text-on-brand shadow-cta transition-transform duration-300 hover:rotate-180 hover:shadow-cta-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2"
+                className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-on-brand shadow-cta transition-transform duration-300 hover:rotate-180 hover:shadow-cta-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2"
               >
                 {/*
                   Was the text glyph "⇄" (U+21C4). A character, not an icon:
@@ -282,7 +288,7 @@ export function CurrencyConverter({
                   <button
                     type="button"
                     onClick={load}
-                    className="rounded-full bg-brand px-4 py-1.5 text-xs font-medium text-on-brand hover:bg-brand-deep"
+                    className="rounded-md bg-brand px-3 py-1.5 text-xs font-medium text-on-brand hover:bg-gold-light"
                   >
                     Try again
                   </button>
@@ -304,7 +310,7 @@ export function CurrencyConverter({
                   className={cn(
                     "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
                     range === r.id
-                      ? "bg-cta-gradient text-on-brand"
+                      ? "bg-brand text-on-brand"
                       : "text-ink-muted hover:bg-ink/5 hover:text-ink",
                   )}
                 >

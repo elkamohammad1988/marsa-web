@@ -281,7 +281,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             defaultValue={q}
             placeholder="Search name, email…"
             aria-label="Search submissions"
-            className="h-9 min-w-0 flex-1 rounded-full border border-line bg-canvas px-4 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-brand-strong sm:w-56 sm:flex-none"
+            className="h-9 min-w-0 flex-1 rounded-lg border border-line bg-canvas px-3 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-brand-strong sm:w-56 sm:flex-none"
           />
           <Button type="submit" variant="outline" size="sm">
             Search

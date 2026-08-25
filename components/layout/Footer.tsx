@@ -47,7 +47,7 @@ const socials = [
  */
 export function Footer() {
   return (
-    <footer className="seam-top relative isolate bg-surface-tint-2 pt-16 md:pt-20">
+    <footer className="relative isolate border-t border-line bg-surface-tint-2 pt-16 md:pt-20">
       <Container>
         {/* Signature + newsletter, on one line at desktop. */}
         <div className="flex flex-col gap-8 pb-12 md:flex-row md:items-start md:justify-between md:gap-16">

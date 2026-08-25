@@ -8,49 +8,58 @@ type Size = "sm" | "md" | "lg";
 /**
  * `whitespace-nowrap` is load-bearing, not a nicety.
  *
- * Every variant here is a fixed-height pill (`h-12` at `lg`), so a label that
+ * Every variant here is a fixed-height control (`h-12` at `lg`), so a label that
  * wraps to a second line does not grow the button — it overflows it, and the
- * text is clipped by the radius. That is exactly what "Check IBAN" was doing on
+ * text is clipped. That is exactly what "Check IBAN" was doing on
  * /tools/iban-checker: as a flex item beside a `w-full` input it was allowed to
  * shrink below its content width, so it rendered as "Check" over "IBAN" inside
- * a 48px pill. A pill button with wrapped text always reads as broken, so the
+ * a 48px control. A button with wrapped text always reads as broken, so the
  * rule belongs to the component rather than to each call site.
  *
  * Paired with `flex-none` so the button holds its intrinsic width when it sits
  * in a row next to something greedy.
+ *
+ * ## `rounded-lg`, not `rounded-full`
+ *
+ * Every button on the site was a pill. A pill is a fine shape and it is also
+ * the default shape of every generated landing page, and it was fighting the
+ * product: the account panel, the converter, the demo and the admin tables are
+ * all rectangles with 10px corners, so a fully-round button beside them read as
+ * imported from somewhere else. Matching the button radius to the panel radius
+ * is most of what makes the marketing pages and the application look like one
+ * piece of software.
  */
 const base =
-  "relative inline-flex flex-none items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 ring-offset-canvas disabled:pointer-events-none disabled:opacity-60";
+  "relative inline-flex flex-none items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 ring-offset-canvas disabled:pointer-events-none disabled:opacity-60";
 
 const variants: Record<Variant, string> = {
   /**
-   * Metallic gold CTA: the vertical #ECC860→#B48C20 gradient with the water
-   * reflection moving across it, a warm inset top highlight (shadow-cta) and
-   * near-black `on-brand` text at 6.1:1 in the shade and 11.8:1 in the light.
+   * The gold CTA: one flat fill, near-black label, no plating.
    *
-   * `liquid-gold` supplies the fill *and* the reflection — it defaults
-   * `--liquid-base` to the CTA gradient, so it replaces `bg-cta-gradient`
-   * rather than layering on top of it. The light is painted into the button's
-   * own background, which is what keeps it under the label.
+   * It was `sheen liquid-gold` — a vertical metallic gradient with a two-band
+   * reflection crossing it on hover, an inset highlight rim, a lift and a
+   * brightness multiply. Removing all of it is the single largest visual
+   * change on the site, and the reason is that none of those layers was
+   * carrying information. The button is the only gold fill on any page; it is
+   * already the loudest thing in view before a single effect is applied, and
+   * five effects stacked on the loudest element is how a page reads as
+   * generated rather than designed.
    *
-   * Hover does the three things a lit metal does and nothing more: brightens
-   * 6%, lifts 1px, and lets `sheen` pass one reflection across. `brightness`
-   * rather than a second gradient because it multiplies — the gold gains 6%,
-   * the near-black label gains almost nothing, so the hover state ends up
-   * *more* readable than the rest state rather than less. Active presses back
-   * down to the resting shadow.
-   *
-   * A reduced-motion visitor keeps the gradient, the highlight and the resting
-   * frame of the reflection; only the movement stops.
+   * It is also the more readable button. `bg-brand` carries `text-on-brand` at
+   * **9.03:1**; the gradient it replaces ran 11.75:1 at its lit end down to
+   * **6.07:1** at its shaded end, and a label has to be legible across the
+   * whole fill, not on average. A flat fill has no shaded end. Hover moves one
+   * step up the gold scale to `--gold-light` — **13.41:1** with the same label
+   * — so the interaction still brightens; it does it by changing colour rather
+   * than by lighting a surface. `transition-colors` rather than
+   * `transition-all`: nothing moves, so nothing needs easing.
    */
-  primary:
-    "sheen liquid-gold text-on-brand shadow-cta hover:shadow-cta-hover hover:brightness-[1.06] hover:-translate-y-px active:translate-y-0 active:brightness-100 active:shadow-cta",
+  primary: "bg-brand text-on-brand shadow-cta hover:bg-gold-light hover:shadow-cta-hover",
   outline:
-    "border border-line bg-card/60 text-ink shadow-e1 hover:border-brand-strong/45 hover:bg-brand/[0.08] hover:-translate-y-px active:translate-y-0",
+    "border border-line bg-transparent text-ink hover:border-ink-subtle hover:bg-ink/[0.04]",
   "outline-light": "border border-white/25 text-white hover:bg-white/10 hover:border-white/40",
   "ghost-pill": "text-ink hover:bg-ink/5",
-  white:
-    "bg-white text-surface-deep shadow-sm hover:bg-white/90 hover:-translate-y-0.5 active:translate-y-0",
+  white: "bg-white text-surface-deep hover:bg-white/90",
 };
 
 const sizes: Record<Size, string> = {

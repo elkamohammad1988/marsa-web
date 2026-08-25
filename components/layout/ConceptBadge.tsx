@@ -146,11 +146,10 @@ export function ConceptBadge({ authConfigured }: { authConfigured: boolean }) {
         panel off the right edge.
       */}
       {/*
-        Near-opaque, not `.glass-panel`.
+        Fully opaque, deliberately.
 
-        That utility is 55% alpha over a backdrop blur, which is right for the
-        demo card and the sandbox banner — both sit on quiet, dark surfaces of
-        their own. Anchored under the navbar this panel hangs over whatever the
+        A translucent, blurred surface was tried here and is wrong for this
+        panel specifically. Anchored under the navbar it hangs over whatever the
         page opens with, and on /pricing at 390px that is a display-size
         headline: the disclosure and "Compare Marsa accounts and cards" rendered
         on top of each other, and neither could be read.

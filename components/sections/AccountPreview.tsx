@@ -52,7 +52,7 @@ export function AccountPreview({ className }: { className?: string }) {
 
       <div
         aria-hidden
-        className="gradient-ring relative overflow-hidden rounded-[28px] border border-line/60 bg-card p-5 shadow-e3 sm:p-6"
+        className="relative overflow-hidden rounded-card-lg border border-line/60 bg-card p-5 shadow-e3 sm:p-6"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">

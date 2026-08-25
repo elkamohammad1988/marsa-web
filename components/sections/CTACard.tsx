@@ -28,11 +28,14 @@ export function CTACard({
   return (
     <Section tone="canvas" size="sm">
       <Container>
-        {/* The one surface on the page that carries the bright rim. It is the
-            last thing before the footer and the only ask on the page, so it is
-            where the emphasis earns its keep — a page where every panel is
-            edge-lit has nothing left to emphasise. */}
-        <Reveal className="gradient-ring-strong isolate overflow-hidden rounded-card-lg bg-surface-deep text-white shadow-e3">
+        {/* The closing ask, and the one place a panel is still drawn.
+            It used to carry a bright gradient rim on the argument that the
+            last thing before the footer is where emphasis earns its keep. The
+            argument holds; the rim was not what was making it. Dropping to the
+            deep surface does the same job — this is the only band on a canvas
+            page that goes darker, so it separates itself — and it no longer
+            spends a lit edge to say what a change of surface already says. */}
+        <Reveal className="isolate overflow-hidden rounded-card-lg bg-surface-deep text-white shadow-e3">
           <div className="relative grid grid-cols-1 items-center gap-6 px-6 py-9 md:grid-cols-[1.2fr_1fr] md:gap-10 md:px-10 md:py-11 lg:px-14">
             <div>
               {eyebrow && (

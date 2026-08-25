@@ -133,7 +133,7 @@ export function FunnelView({ report, provider }: { report: FunnelReport; provide
                   aria-hidden
                 >
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-brand-strong to-brand"
+                    className="h-full rounded-full bg-brand"
                     style={{ width: `${width}%` }}
                   />
                 </div>

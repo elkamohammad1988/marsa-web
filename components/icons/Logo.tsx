@@ -55,7 +55,7 @@ export function Logo({
     <span className={cn("group inline-flex items-center gap-2.5 select-none", className)}>
       <span
         aria-hidden
-        className="logo-tile relative grid h-9 w-9 place-items-center rounded-[11px] shadow-glow-sm ring-1 ring-inset ring-gold-highlight/25 transition-transform duration-300 group-hover:-translate-y-0.5"
+        className="logo-tile relative grid h-9 w-9 place-items-center rounded-[10px]"
       >
         <MarsaMark className="h-[22px] w-[22px]" />
       </span>

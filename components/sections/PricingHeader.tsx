@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
-import { PointerGlow } from "@/components/ui/PointerGlow";
 import { cn } from "@/lib/utils";
 import { PricingPlanCard } from "./PricingPlanCard";
 import { plans, businessPlans } from "@/lib/pricing";
@@ -27,7 +26,7 @@ export function PricingHeader() {
             <span
               aria-hidden
               className={cn(
-                "pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-cta-gradient shadow-cta transition-transform duration-300 ease-out",
+                "pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-brand shadow-cta transition-transform duration-300 ease-out",
                 audience === "business" && "translate-x-full",
               )}
             />
@@ -53,11 +52,11 @@ export function PricingHeader() {
           <p className="text-base text-ink-muted md:text-lg">Find the one that fits you</p>
         </div>
 
-        <PointerGlow className="mt-12 flex flex-col gap-6 lg:gap-8">
+        <div className="mt-12 flex flex-col gap-6 lg:gap-8">
           {current.map((plan) => (
             <PricingPlanCard key={plan.id} plan={plan} />
           ))}
-        </PointerGlow>
+        </div>
       </Container>
     </section>
   );

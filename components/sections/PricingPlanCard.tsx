@@ -22,27 +22,30 @@ const planArt: Record<string, ArtName> = {
 
 export function PricingPlanCard({ plan }: { plan: Plan }) {
   /**
-   * The badged plan is the one the page is recommending, so it gets the bright
-   * rim and a step more elevation; the others get the standard one. Never both
-   * on the same element: `.gradient-ring-strong` and `.gradient-ring` are two
-   * implementations of the same `::before`, and whichever loses the cascade
-   * simply vanishes.
+   * The badged plan is the one the page is recommending, so it gets a step
+   * more elevation; the others get the resting one.
+   *
+   * It also carried a brighter gradient rim, and the two rim utilities were
+   * mutually exclusive because they were two implementations of the same
+   * `::before` — whichever lost the cascade simply vanished. Both are gone.
+   * Elevation and the badge mark the recommendation now, which is enough:
+   * three plan cards where one sits higher reads immediately, and it does not
+   * spend a lit edge that every other panel on the site has stopped using.
    */
   const featured = Boolean(plan.badge);
 
   return (
     <article
-      data-glow
       className={cn(
-        "spotlight card-hover relative grid grid-cols-1 items-center gap-6 overflow-hidden rounded-card-lg border border-line bg-card p-6 md:p-8 lg:grid-cols-[1.4fr_1fr] lg:gap-10",
-        featured ? "gradient-ring-strong shadow-e3" : "gradient-ring shadow-e1",
+        "relative grid grid-cols-1 items-center gap-6 overflow-hidden rounded-card-lg border border-line bg-card p-6 md:p-8 lg:grid-cols-[1.4fr_1fr] lg:gap-10",
+        featured ? "shadow-e3" : "shadow-e1",
       )}
     >
       <div>
-        {/* Gold, not white. This badge and the bright rim are the two things
-            marking the recommended plan, and a white pill was the only white
-            fill on the page — it read as a sticker applied to the card rather
-            than as the page's own way of saying "this one". */}
+        {/* Gold, not white. With the rim gone this badge and the extra
+            elevation are what mark the recommended plan, and a white pill was
+            the only white fill on the page — it read as a sticker applied to
+            the card rather than as the page's own way of saying "this one". */}
         {plan.badge && <Badge tone="brand">{plan.badge}</Badge>}
         <h2 className="mt-4 text-3xl font-bold text-ink md:text-4xl">{plan.name}</h2>
         <div className="mt-2 flex items-baseline gap-2">

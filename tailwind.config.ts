@@ -126,65 +126,86 @@ const config: Config = {
         display: ["clamp(2.75rem, 5.5vw, 5rem)", { lineHeight: "1.02", letterSpacing: "-0.035em" }],
         "display-sm": ["clamp(2.1rem, 4vw, 3.25rem)", { lineHeight: "1.08", letterSpacing: "-0.03em" }],
       },
+      /**
+       * Radii — tightened, because the old scale was doing the talking.
+       *
+       * 20 / 28 / 36px on every panel, beside `rounded-full` on every button,
+       * is the single most recognisable silhouette of a generated landing
+       * page: it reads as "soft SaaS" before a word has been read, and it
+       * flattens the difference between a data panel, a marketing card and a
+       * button into one shape. A 28px radius on a 400px-wide card also eats
+       * its corners, so tables and figures inside it never align to the edge.
+       *
+       * 10 / 14 / 18px keeps the surfaces friendly without rounding them into
+       * pills, and lets a corner read as a corner. Money products earn trust
+       * with crisp edges — the numbers are the soft part of nothing.
+       */
       borderRadius: {
-        card: "20px",
-        "card-lg": "28px",
-        hero: "36px",
+        card: "10px",
+        "card-lg": "14px",
+        hero: "18px",
       },
       boxShadow: {
         /**
-         * Elevation system — 3 levels, each a soft black drop plus a faint
-         * gold ambient (rgba(212,175,55,~0.12)). Used consistently:
-         * e1 = resting card, e2 = raised/hover, e3 = floating/modal.
+         * Elevation system — 3 levels of plain black drop.
+         * e1 = resting panel, e2 = raised/hover, e3 = floating/modal.
          *
-         * The ambient tint is what stops a card on a cool surface from reading
-         * as cut out of it: a warm bleed under a cool panel is the shadow a gold
-         * light in the room would actually cast. It stays at the same alphas the
-         * magenta ambient used, because the job was never the hue.
+         * Each level used to carry a warm ambient (rgba(212,175,55,~0.12-0.22))
+         * on the argument that a gold light in the room would cast it. It is a
+         * good argument and it was the wrong call at this scale: applied to
+         * every panel on the site, a coloured shadow stops being a light
+         * direction and becomes a tint under everything, and a page where each
+         * surface glows faintly gold has no way left to say *this* one matters.
+         * The blooms are also the tell people read fastest as generated.
+         *
+         * Depth is now carried by the surface ladder — which is calibrated for
+         * exactly this, each rung ≥1.03 apart — and the shadow only seats an
+         * element on it. Shorter and tighter too: the old spreads (26-74px)
+         * were doing atmosphere, not elevation.
          */
-        e1: "0 1px 2px rgba(0,0,0,0.45), 0 10px 26px -14px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(212,175,55,0.12)",
-        e2: "0 2px 6px rgba(0,0,0,0.5), 0 20px 44px -18px rgba(0,0,0,0.65), 0 16px 44px -18px rgba(212,175,55,0.18)",
-        e3: "0 10px 16px rgba(0,0,0,0.55), 0 34px 74px -26px rgba(0,0,0,0.72), 0 26px 66px -22px rgba(212,175,55,0.22)",
+        e1: "0 1px 2px rgba(0,0,0,0.40), 0 6px 16px -12px rgba(0,0,0,0.55)",
+        e2: "0 2px 4px rgba(0,0,0,0.45), 0 12px 28px -16px rgba(0,0,0,0.6)",
+        e3: "0 6px 12px rgba(0,0,0,0.5), 0 24px 52px -24px rgba(0,0,0,0.68)",
         /**
-         * The metallic CTA stack: inner top highlight + inner rim + a drop.
+         * The CTA's seat. One hairline drop, and nothing else.
          *
-         * The coloured half of that drop used to be `rgba(206,42,140,0.5)` at
-         * rest and `rgba(238,79,165,0.66)` on hover — a magenta bloom bright
-         * enough to be read as a light the button was emitting. That is the
-         * visual grammar of game UI and crypto dashboards. Stripe, Mercury and
-         * Revolut Business all seat a primary button on a neutral drop shadow
-         * with no coloured bloom at all, because on a product that holds
-         * money, "expensive" is conveyed by restraint.
+         * This was a four-layer metallic stack: an inset top highlight, an
+         * inset rim, a black drop and a gold bloom — the plating that made a
+         * flat fill read as a lit metal face. The reasoning was sound and the
+         * result was good, and it is still the wrong button for this product.
          *
-         * The fix is not to delete the glow — the metallic read depends on it —
-         * but to demote it from a light source to an ambient tint, and to give
-         * the button an actual neutral shadow to sit on, which it never had.
-         * Rest drops 0.50 → 0.22; hover 0.66 → 0.30, still a clear brightening
-         * on interaction. The restraint matters *more* under gold, not less:
-         * a glowing gold button is the one thing on this list that would read
-         * as a casino rather than a bank.
+         * A metallic gradient with a highlight rim and a reflection crossing it
+         * is *decoration on the one element that least needs any*: the primary
+         * action is already the only gold fill on the page, at the end of the
+         * only sentence asking for it. Everything the plating added, the colour
+         * had already said. What it cost is that the button stopped looking
+         * made and started looking rendered — and a buyer reads a rendered
+         * button as a template before they read it as craft.
          *
-         * The inner top highlight is warmed from white to `--gold-highlight`.
-         * On a magenta fill a white inset read as a hard edge light; on gold it
-         * read as a chip in the plating. Warm, it reads as the metal catching
-         * the light — which is the whole point of the layer.
+         * So the fill is flat `--brand`, the label is `--on-brand` at 9.0:1,
+         * hover brightens one step up the gold scale, and this shadow does the
+         * one job left: sit the button on the page rather than in it.
          */
-        cta: "inset 0 1px 0 rgba(255,241,168,0.45), inset 0 0 0 1px rgba(255,241,168,0.10), 0 2px 6px -2px rgba(0,0,0,0.5), 0 8px 22px -10px rgba(212,175,55,0.22)",
-        "cta-hover": "inset 0 1px 0 rgba(255,241,168,0.60), inset 0 0 0 1px rgba(255,241,168,0.14), 0 4px 10px -3px rgba(0,0,0,0.55), 0 12px 28px -10px rgba(245,215,110,0.30)",
+        cta: "0 1px 2px rgba(0,0,0,0.35)",
+        "cta-hover": "0 2px 6px -1px rgba(0,0,0,0.4)",
         // Back-compat aliases (older components) → mapped onto the new system.
-        card: "0 1px 2px rgba(0,0,0,0.45), 0 10px 26px -14px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(212,175,55,0.12)",
-        nav: "0 8px 30px -12px rgba(0,0,0,0.6), 0 10px 34px -18px rgba(212,175,55,0.14)",
-        elevated: "0 10px 16px rgba(0,0,0,0.55), 0 34px 74px -26px rgba(0,0,0,0.72), 0 26px 66px -22px rgba(212,175,55,0.22)",
+        card: "0 1px 2px rgba(0,0,0,0.40), 0 6px 16px -12px rgba(0,0,0,0.55)",
+        nav: "0 6px 20px -12px rgba(0,0,0,0.6)",
+        elevated: "0 6px 12px rgba(0,0,0,0.5), 0 24px 52px -24px rgba(0,0,0,0.68)",
         /**
-         * Gold blooms, dimmer than the magenta ones they replace (0.60 → 0.40,
-         * 0.55 → 0.36). Gold sits ~0.45 luminance against surfaces at ~0.006;
-         * at the old alphas the same declaration that read as a soft magenta
-         * halo reads as a lamp, and a lamp behind a logo tile is the single
-         * fastest way to make a payments product look like a slot machine.
+         * Gold blooms, cut again — 0.40 → 0.18, 0.36 → 0.16.
+         *
+         * The previous pass dimmed these from "lamp" to "soft halo" and that
+         * was the right direction stopped one step early. A halo behind a tile
+         * is still a light effect, and this palette now spends its gold on two
+         * things only: the action you should take, and the number you should
+         * read. What is left here is barely a bloom — just enough that a gold
+         * element on the deepest surface is not a cut-out — and most call
+         * sites are better off asking for `e1` instead.
          */
-        glow: "0 20px 60px -28px rgb(var(--brand) / 0.40)",
-        "glow-sm": "0 10px 30px -16px rgb(var(--brand) / 0.36)",
-        "glow-lg": "0 30px 90px -30px rgb(var(--brand) / 0.36)",
+        glow: "0 12px 32px -22px rgb(var(--brand) / 0.18)",
+        "glow-sm": "0 6px 18px -14px rgb(var(--brand) / 0.16)",
+        "glow-lg": "0 18px 48px -28px rgb(var(--brand) / 0.16)",
       },
       backgroundImage: {
         // Decorative gradient (tiles, glows, illustration fills). Lit face at
@@ -241,11 +262,6 @@ const config: Config = {
           "0%": { strokeDashoffset: "220" },
           "100%": { strokeDashoffset: "0" },
         },
-        // Gentle glow breathing for the active progress-rail segment.
-        "rail-pulse": {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(212,175,55,0.0)", opacity: "0.92" },
-          "50%": { boxShadow: "0 0 12px 1px rgba(232,201,90,0.45)", opacity: "1" },
-        },
         /**
          * Demo step change. Short and small on purpose: the panel is what the
          * reader is already looking at, so this is a settle, not an entrance.
@@ -266,7 +282,6 @@ const config: Config = {
         "fade-up": "fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
         "fade-in": "fade-in 0.5s ease both",
         "scale-in": "scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
-        "rail-pulse": "rail-pulse 2.4s ease-in-out infinite",
         marquee: "marquee 38s linear infinite",
         "dash-flow": "dash-flow 3.2s linear infinite",
         "step-in": "step-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both",

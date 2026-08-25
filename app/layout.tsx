@@ -68,7 +68,6 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen bg-canvas antialiased">
         {/* Atmosphere: a fixed, subtle gold glow behind all content. */}
-        <div aria-hidden className="atmosphere-layer" />
         <HydrationSignal />
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <a

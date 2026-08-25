@@ -26,7 +26,7 @@ const OUTBOUND = [
 function Node({ label, meta, align }: { label: string; meta: string; align: "left" | "right" }) {
   return (
     <li
-      className={`flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur-sm ${
+      className={`flex flex-col rounded-card border border-white/10 bg-white/[0.05] px-4 py-3 ${
         align === "right" ? "lg:items-end lg:text-right" : ""
       }`}
     >
@@ -39,7 +39,6 @@ function Node({ label, meta, align }: { label: string; meta: string; align: "lef
 export function CorridorMap() {
   return (
     <section className="relative isolate overflow-hidden bg-surface-deep py-14 md:py-20 lg:py-24">
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-mesh-deep opacity-90" />
 
       <Container className="relative">
         <Reveal className="mx-auto max-w-2xl text-center">
@@ -121,7 +120,7 @@ export function CorridorMap() {
 
             <Reveal delay={120} className="flex justify-center">
               <div className="relative grid h-32 w-32 place-items-center">
-                <span className="logo-tile liquid-gold relative grid h-20 w-20 place-items-center overflow-hidden rounded-[26px] shadow-glow ring-1 ring-inset ring-gold-highlight/30">
+                <span className="relative grid h-20 w-20 place-items-center overflow-hidden rounded-card bg-brand text-on-brand">
                   <MarsaMark className="h-11 w-11" />
                 </span>
               </div>
