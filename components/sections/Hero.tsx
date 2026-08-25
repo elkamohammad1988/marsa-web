@@ -240,30 +240,44 @@ export function Hero({
                 isDark ? "border-white/12" : "border-line",
               )}
             >
+              {/*
+                One label element per statistic, and it is the visible one.
+
+                This carried the label twice: an `sr-only` `<dt>` for the
+                definition-list pairing, and an `aria-hidden` `<span>` drawn
+                under the figure. The first version of that shipped without the
+                `aria-hidden` and a screen reader announced every statistic as
+                "Currencies in one account, 30+, Currencies in one account" —
+                so the fix at the time was to hide the visible copy from the
+                accessibility tree, which stopped the double announcement and
+                left two elements saying the same words.
+
+                A statistic has one name. `flex-col-reverse` lets the `<dt>` be
+                that name and still be drawn *below* its `<dd>`: the DOM keeps
+                the term-then-definition order the element requires, and the
+                reversed axis paints the figure first. Nothing is hidden from
+                anyone, and there is no second copy to drift.
+
+                `CountUp` keeps its own `sr-only` span — that one is the *value*,
+                not a duplicate label. Its visible sibling animates through
+                intermediate frames and is `aria-hidden` so those are never
+                announced; assistive technology gets the authored figure once.
+              */}
               {stats.map((s) => (
-                <div key={s.label}>
-                  <dt className="sr-only">{s.label}</dt>
+                <div key={s.label} className="flex flex-col-reverse">
+                  <dt
+                    className={cn(
+                      "mt-2 text-sm",
+                      isDark ? "text-white/55" : "text-ink-subtle",
+                    )}
+                  >
+                    {s.label}
+                  </dt>
                   <dd>
                     <CountUp
                       value={s.value}
                       className="figure block font-display text-3xl font-bold tabular-nums tracking-tight text-brand-strong md:text-4xl"
                     />
-                    {/* The `dt` above already carries this label, and it is
-                        `sr-only` purely so the definition-list pairing reads in
-                        the right order. Rendering the same words again visibly
-                        made a screen reader announce every statistic as
-                        "Currencies in one account, 30+, Currencies in one
-                        account". The label is drawn here and named there, so
-                        this copy is decoration over a name the reader has. */}
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "mt-2 block text-sm",
-                        isDark ? "text-white/55" : "text-ink-subtle",
-                      )}
-                    >
-                      {s.label}
-                    </span>
                   </dd>
                 </div>
               ))}
