@@ -1,6 +1,4 @@
-import { FeatureIcon } from "@/components/ui/FeatureIcon";
 import { Container } from "@/components/ui/Container";
-import { PointerGlow } from "@/components/ui/PointerGlow";
 import { Section } from "@/components/ui/Section";
 import { Stagger } from "@/components/ui/Stagger";
 
@@ -15,44 +13,66 @@ type FeatureBulletsProps = {
   tone?: "canvas" | "alt" | "tint";
 };
 
+/**
+ * The capability list, as rows on rules rather than as a grid of cards.
+ *
+ * This was three bordered, shadowed, rounded cards side by side, each opening
+ * with a filled icon tile. That layout appears on ten pages here, and some
+ * version of it appears on essentially every generated marketing page in
+ * existence — which is the problem. It is not ugly; it is anonymous, and it
+ * was the single most template-like block in the product.
+ *
+ * What replaced it is the shape the content already had. Each item is a term
+ * and its definition, so it is set as a row: a rule above it, the name in the
+ * left column, the explanation in the right, and nothing drawn around either.
+ * That reads as a specification — the register of documentation written by
+ * someone who knows the system — which is exactly the claim this site is
+ * making about who built it.
+ *
+ * Three things went and are worth naming, because each was doing work that the
+ * layout now does for free:
+ *
+ *   - **The card.** A border plus a shadow plus a radius, three times per row,
+ *     to group text that a single hairline groups better.
+ *   - **The icon tile.** A 48px rounded square with a tinted fill behind a
+ *     6px glyph — decoration at the scale of a control. The glyph survives at
+ *     its real size, in one colour, in its own narrow column, where it marks
+ *     the row instead of announcing it.
+ *   - **The equal-width grid.** Three columns forced every description to the
+ *     length of the longest, so the copy was written to the box. Rows let a
+ *     short answer be short.
+ *
+ * `Stagger` stays: the reveal is per-row and it is the one piece of motion
+ * here, and `tests/animation-visibility.test.ts` holds it to painting without
+ * JavaScript.
+ */
 export function FeatureBullets({ items, tone = "canvas" }: FeatureBulletsProps) {
   return (
     <Section tone={tone} size="md">
       <Container>
         {/* Section landmark heading — visually hidden, keeps the h1→h2→h3
-            document outline correct (the cards below are h3). */}
+            document outline correct (the rows below are h3). */}
         <h2 className="sr-only">What you get with Marsa</h2>
-        {/*
-          There used to be a 72px card index here — `1`, `2`, `3` set in the
-          top-right corner at 4% ink, hung off the edge with `-right-2 -top-4`.
 
-          It was meant to give the row a rhythm and the card a second focal
-          point. What it actually produced was a grey smudge: 4% of near-white
-          on `--card` is below the contrast at which an eye resolves a shape as
-          a glyph, and `overflow-hidden` on the card cropped the half that hung
-          outside — so what rendered was neither a numeral nor nothing, just an
-          unexplained lighter patch in the corner of two of the three cards.
-
-          A large ghosted numeral behind a card is also one of the most worn
-          decorative tics in contemporary UI, and this row does not need it: the
-          icon is already the second focal point, and three of them across the
-          row are already the rhythm.
-        */}
-        <PointerGlow>
-          <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" step={90}>
-            {items.map((it) => (
+        <Stagger className="border-t border-line" step={90}>
+          {items.map((it) => (
+            <div
+              key={it.title}
+              className="grid grid-cols-1 gap-x-10 gap-y-3 border-b border-line py-8 md:grid-cols-12 md:py-10"
+            >
               <div
-                key={it.title}
-                data-glow
-                className="spotlight card-hover gradient-ring group relative overflow-hidden rounded-card border border-line bg-card p-6 shadow-e1"
+                aria-hidden
+                className="text-brand-strong md:col-span-1 [&_svg]:h-6 [&_svg]:w-6"
               >
-                <FeatureIcon tone="brand">{it.icon}</FeatureIcon>
-                <h3 className="mt-4 text-lg font-semibold text-ink">{it.title}</h3>
-                <p className="mt-2 text-sm text-ink-muted">{it.description}</p>
+                {it.icon}
               </div>
-            ))}
-          </Stagger>
-        </PointerGlow>
+              <h3 className="text-lg font-semibold text-ink md:col-span-4 md:text-xl">
+                {it.title}
+              </h3>
+              <p className="max-w-prose text-ink-muted md:col-span-7">{it.description}</p>
+            </div>
+          ))}
+        </Stagger>
       </Container>
     </Section>
   );

@@ -6,7 +6,6 @@ import { CorridorMap } from "@/components/sections/CorridorMap";
 import { FeatureBullets } from "@/components/sections/FeatureBullets";
 import { CurrencyConverter } from "@/components/sections/CurrencyConverter";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
-import { CardShowcase } from "@/components/sections/CardShowcase";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { RegulatedBand } from "@/components/sections/RegulatedBand";
 import { FAQ } from "@/components/sections/FAQ";
@@ -44,11 +43,11 @@ export default function HomePage() {
         title="One account for every currency"
         titleAccent="you get paid in."
         description="Marsa gives you a European multi-currency IBAN: receive marketplace payouts and client invoices from abroad, hold 30+ currencies, convert at the interbank rate, and pay out over SEPA, without a second bank in the middle."
-        chips={[
-          { label: "European IBAN" },
-          { label: "30+ currencies" },
-          { label: "SEPA & SWIFT" },
-        ]}
+        // No chips here. "European IBAN", "30+ currencies" and "SEPA & SWIFT"
+        // were three tags repeating three clauses of the sentence directly
+        // above them, which is the kind of filler that makes a hero look
+        // assembled rather than written. The solution pages still use chips,
+        // where they name things their copy does not.
         primaryCta={{ label: "Open an account", href: "/get-started" }}
         secondaryCta={{ label: "Try the demo", href: "/demo" }}
         footnote="Free plan available · Online application in about 5 minutes · No branch visit"
@@ -106,20 +105,20 @@ export default function HomePage() {
         ]}
       />
 
-      <CardShowcase
-        eyebrow="The Marsa Card"
-        title="Spend anywhere, without the hidden fees"
-        description="Pair your account with a Marsa card for real-time control and interbank rates everywhere you go."
-        bullets={[
-          "Apple Pay & Google Pay",
-          "Real-time spend notifications",
-          "Freeze or unfreeze instantly",
-          "Free ATM withdrawals up to your limit",
-          "Virtual & disposable cards",
-          "Auto-categorised spending",
-        ]}
-        art="card-and-phone"
-      />
+      {/*
+        The card section was cut from the home page.
+
+        It sold six bullets about a physical card — Apple Pay, ATM limits,
+        disposable numbers — for a concept product that has no card, no issuer
+        and no scheme agreement, and unlike every other section here there is
+        nothing a visitor can press to check any of it. On a page whose whole
+        argument is "press this and watch it work", it was the one block
+        arguing the opposite, and it sat between the two sections that make the
+        argument best (the steps and the comparison).
+
+        The component and its other five call sites are untouched; this is a
+        judgement about what belongs on the front page, not about the card.
+      */}
 
       <ComparisonTable
         eyebrow="Marsa Vs Traditional Banks"

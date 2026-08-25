@@ -1,8 +1,6 @@
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { Heading } from "@/components/ui/Heading";
-import { FeatureIcon } from "@/components/ui/FeatureIcon";
-import { PointerGlow } from "@/components/ui/PointerGlow";
 import { IconShield, IconBank, IconLock } from "@/components/icons";
 
 /**
@@ -13,6 +11,11 @@ import { IconShield, IconBank, IconLock } from "@/components/icons";
  * and UK supervision". There is no institution, no supervision and no
  * infrastructure. Describing the architecture a real product would need is
  * both true and more interesting than asserting compliance nobody holds.
+ *
+ * Set as three columns under one rule rather than as three centred cards with
+ * icon tiles, matching `FeatureBullets`. The centred-card treatment made a
+ * statement about *not* holding a licence look like a feature boast, which is
+ * the opposite of what this band is for. Flat columns read as a note.
  */
 export function RegulatedBand() {
   const items = [
@@ -38,30 +41,24 @@ export function RegulatedBand() {
   return (
     <Section tone="canvas" size="md">
       <Container>
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="max-w-2xl">
           <Heading level="h2">The model behind it</Heading>
           <p className="mt-3 text-ink-muted">
             Marsa is a concept, so it holds no authorisation of its own. This is the regulatory
             structure the product it describes would be built on.
           </p>
         </div>
-        <PointerGlow className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className="mt-12 grid grid-cols-1 gap-x-10 gap-y-9 border-t border-line pt-10 md:grid-cols-3">
           {items.map((it) => (
-            <div
-              key={it.title}
-              data-glow
-              className="spotlight card-hover gradient-ring group relative rounded-card-lg border border-line bg-card p-6 text-center shadow-e1"
-            >
-              <div className="flex justify-center">
-                <FeatureIcon tone="brand" size="lg">
-                  {it.icon}
-                </FeatureIcon>
-              </div>
+            <div key={it.title}>
+              <span aria-hidden className="block text-brand-strong [&_svg]:h-6 [&_svg]:w-6">
+                {it.icon}
+              </span>
               <h3 className="mt-4 text-lg font-semibold">{it.title}</h3>
-              <p className="mt-2 text-sm text-ink-muted">{it.description}</p>
+              <p className="mt-2 max-w-prose text-sm text-ink-muted">{it.description}</p>
             </div>
           ))}
-        </PointerGlow>
+        </div>
       </Container>
     </Section>
   );

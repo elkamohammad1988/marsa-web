@@ -3,7 +3,6 @@ import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
 import { Button } from "@/components/ui/Button";
 import { CountUp } from "@/components/ui/CountUp";
-import { PointerGlow } from "@/components/ui/PointerGlow";
 import { BrandArt, type ArtName } from "@/components/art/BrandArt";
 import { BreadcrumbEyebrow } from "./BreadcrumbEyebrow";
 import { cn } from "@/lib/utils";
@@ -17,7 +16,7 @@ type HeroProps = {
   breadcrumb?: { label: string; href?: string }[];
   eyebrow?: string;
   title: string;
-  /** Optional trailing clause rendered in the brand gradient. */
+  /** Optional trailing clause, joined to the title as one sentence. */
   titleAccent?: string;
   description?: string;
   chips?: HeroChip[];
@@ -56,10 +55,11 @@ export function Hero({
   tone = "alt",
   className,
 }: HeroProps) {
-  // `spotlight` and `deep` paint the same surface — the difference between
-  // them is the mesh and glow layered on top further down, not the background.
-  // They used to be two arms of the same ternary returning the identical
-  // string, which read as a distinction that did not exist.
+  // `spotlight` and `deep` now paint exactly the same surface and nothing
+  // else. The distinction survives only because pages name it, and it is worth
+  // keeping as a seam: `spotlight` marks "this hero is the page's stage", which
+  // is where a future difference would belong. Today there is none, and the
+  // flat deep surface is the design rather than a base for layers.
   const isDark = tone === "deep" || tone === "spotlight";
   const toneClasses = isDark
     ? "bg-surface-deep text-white"
@@ -77,17 +77,17 @@ export function Hero({
         className,
       )}
     >
-      {/* The dark hero's own surface, with nothing layered on top of it.
-          It used to carry five more layers: a lightfield wash, three blurred
-          discs each drifting on its own keyframes, a grid and a film grain.
-          None of them said anything. They were there to make the section look
-          expensive, which is the only thing they actually communicated. */}
-      {tone === "spotlight" && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-mesh-deep opacity-55 sm:opacity-100"
-        />
-      )}
+      {/* Nothing is layered on the hero surface any more.
+
+          It carried five decorative layers once — a lightfield wash, three
+          blurred discs drifting on their own keyframes, a grid and a film
+          grain — and a later pass cut them to one three-stop mesh gradient.
+          This removes that too. A radial gradient behind a headline is the
+          cheapest way to make a section look considered and the fastest way to
+          make it look generated, and the deep surface was already doing the
+          work: `--surface-deep` sits a full rung below `--canvas`, so the band
+          reads without help. What is left is a flat, near-black stage for the
+          product panel, which is the thing worth looking at. */}
 
       <Container className="relative">
         {breadcrumb && (
@@ -105,20 +105,30 @@ export function Hero({
           )}
         >
           <div className="animate-fade-up">
+            {/* A label, not a badge. This was a bordered, blurred, shadowed
+                pill — a control's worth of chrome around four words that are
+                not clickable. Set as small caps on the accent it reads as what
+                it is: the line above the headline. */}
             {eyebrow && (
-              <span
-                className={cn(
-                  "mb-5 inline-flex items-center rounded-full px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]",
-                  isDark
-                    ? "border border-white/15 bg-white/[0.04] text-brand-strong backdrop-blur"
-                    : "border border-line bg-card text-brand-strong shadow-card",
-                )}
-              >
+              <span className="mb-5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-strong">
                 {eyebrow}
               </span>
             )}
 
-            <Heading level="display" className="text-gradient-hero">
+            {/*
+              One colour. The headline used to be `text-gradient-hero` — white
+              at the cap line descending into gold at the baseline, clipped to
+              the glyphs.
+
+              It was the best-argued effect on the site and it is still the
+              first thing that reads as generated, because a gradient headline
+              is *the* signature of the genre regardless of how carefully the
+              stops were chosen. It also spent the palette's one loud colour on
+              the element that needed it least: the headline is already the
+              largest thing on the page. Gold now means "act here" or "read this
+              number", and the sentence at the top of the page is neither.
+            */}
+            <Heading level="display" className={isDark ? "text-white" : undefined}>
               {titleAccent ? `${title} ${titleAccent}` : title}
             </Heading>
 
@@ -133,16 +143,18 @@ export function Hero({
               </p>
             )}
 
+            {/* Static text, so the chips no longer lift and glow on hover as
+                though they were controls. Nothing here is clickable. */}
             {chips && chips.length > 0 && (
               <ul className="mt-7 flex flex-wrap items-center gap-2">
                 {chips.map((c) => (
                   <li
                     key={c.label}
                     className={cn(
-                      "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 hover:-translate-y-px",
+                      "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium",
                       isDark
-                        ? "border border-white/10 bg-white/[0.06] text-white backdrop-blur hover:border-brand-strong/40 hover:bg-white/[0.1]"
-                        : "bg-card text-ink shadow-card ring-1 ring-line hover:ring-brand-strong/40",
+                        ? "border-white/12 text-white/80"
+                        : "border-line text-ink-muted",
                     )}
                   >
                     {c.label}
@@ -187,7 +199,7 @@ export function Hero({
               <div className="relative animate-scale-in [animation-delay:120ms]">
                 <div
                   className={cn(
-                    "relative aspect-[4/3] w-full overflow-hidden rounded-[28px] shadow-elevated",
+                    "relative aspect-[4/3] w-full overflow-hidden rounded-card-lg shadow-elevated",
                     isDark
                       ? "border border-white/10 bg-white/[0.03]"
                       : "border border-line bg-surface-tint",
@@ -197,7 +209,7 @@ export function Hero({
                 </div>
 
                 {/* Truthful live-data badge (the tools use real ECB rates). */}
-                <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-full border border-line glass px-3.5 py-2 text-xs font-medium text-ink shadow-elevated md:left-6">
+                <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-full border border-line bg-card px-3.5 py-2 text-xs font-medium text-ink shadow-e2 md:left-6">
                   <span aria-hidden className="h-2 w-2 flex-none rounded-full bg-brand" />
                   Live ECB rates
                 </div>
@@ -206,34 +218,35 @@ export function Hero({
           )}
         </div>
 
+        {/*
+          The figures sit on a rule, not in a box.
+
+          They were a bordered, shadowed, four-cell grid built from `gap-px`
+          over a background — the trick that fakes hairlines between cells. It
+          worked, and it made the most quotable content on the page look like a
+          widget bolted under the hero. The numbers are the point; the frame
+          around them was not carrying anything the alignment does not.
+
+          One rule above, generous space, left-aligned under the copy it
+          belongs to. Gold stays on the figures — this is the strip where
+          "gold means read this number" is actually cashed in — and the label
+          drops to the muted step so the pair reads figure-first.
+        */}
         {stats && stats.length > 0 && (
-          <PointerGlow>
+          <div>
             <dl
               className={cn(
-                "mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-card-lg border shadow-e2 md:mt-16 md:grid-cols-4",
-                isDark ? "border-white/10 bg-white/10" : "border-line bg-line",
+                "mt-14 grid grid-cols-2 gap-x-8 gap-y-9 border-t pt-9 md:mt-20 md:grid-cols-4 md:gap-x-10",
+                isDark ? "border-white/12" : "border-line",
               )}
             >
               {stats.map((s) => (
-                <div
-                  key={s.label}
-                  data-glow
-                  className={cn(
-                    "spotlight relative px-5 py-7 text-center transition-colors duration-300",
-                    isDark ? "bg-surface-deep" : "bg-canvas",
-                  )}
-                >
+                <div key={s.label}>
                   <dt className="sr-only">{s.label}</dt>
                   <dd>
                     <CountUp
                       value={s.value}
-                      className={cn(
-                        // The KPI strip is where "gold means important" is
-                        // cashed in: four numbers, once per page, on their own
-                        // band. 12.3:1 on the dark tone and 11.6:1 on canvas —
-                        // brighter than the white it replaces was on either.
-                        "figure block font-display text-3xl font-bold tabular-nums tracking-tight text-brand-strong md:text-4xl",
-                      )}
+                      className="figure block font-display text-3xl font-bold tabular-nums tracking-tight text-brand-strong md:text-4xl"
                     />
                     {/* The `dt` above already carries this label, and it is
                         `sr-only` purely so the definition-list pairing reads in
@@ -245,7 +258,7 @@ export function Hero({
                     <span
                       aria-hidden
                       className={cn(
-                        "mt-1.5 block text-xs",
+                        "mt-2 block text-sm",
                         isDark ? "text-white/55" : "text-ink-subtle",
                       )}
                     >
@@ -255,7 +268,7 @@ export function Hero({
                 </div>
               ))}
             </dl>
-          </PointerGlow>
+          </div>
         )}
 
       </Container>
