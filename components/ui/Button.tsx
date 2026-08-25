@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 
-type Variant = "primary" | "outline" | "outline-light" | "ghost-pill" | "white";
+type Variant = "primary" | "outline" | "outline-light" | "ghost-pill";
 type Size = "sm" | "md" | "lg";
 
 /**
@@ -77,7 +77,6 @@ const variants: Record<Variant, string> = {
   "outline-light":
     "border border-white/25 text-white hover:bg-white/10 hover:border-white/40 disabled:text-white/45 disabled:border-white/15",
   "ghost-pill": "text-ink hover:bg-ink/5 disabled:text-ink-subtle",
-  white: "bg-white text-surface-deep hover:bg-white/90 disabled:bg-white/60 disabled:text-surface-deep/60",
 };
 
 const sizes: Record<Size, string> = {

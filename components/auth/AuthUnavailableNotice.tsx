@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/Button";
-import { IconLock } from "@/components/icons";
 import { siteConfig } from "@/lib/site";
 
 /**
@@ -34,15 +33,26 @@ export const authOffDescription =
 export function AuthUnavailableNotice() {
   return (
     <div>
-      <div className="rounded-card border border-line bg-surface-tint/50 px-5 py-6 text-center">
-        <span className="mx-auto inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand/[0.12] ring-1 ring-brand/25">
-          <IconLock className="h-5 w-5 text-brand-strong" />
-        </span>
-        <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-ink-muted">
+      {/*
+        A rule and a paragraph, not a second card.
+
+        This was a bordered, tinted panel holding a 44px lock in a tinted
+        circle over centred copy — and it renders *inside* the auth shell's own
+        card, on five pages. A card inside a card is the layout saying "these
+        are two separate objects" about one thought, and the padlock was
+        decoration: the heading two lines above already says accounts are not
+        open, so the icon repeated it in a form nobody can read faster.
+
+        The alignment was the other tell. The panel centred its text while
+        everything around it is left-aligned, which is what makes a block look
+        pasted in rather than written in.
+      */}
+      <div className="border-t border-line pt-5">
+        <p className="text-sm leading-relaxed text-ink-muted">
           The demo is the part of Marsa that needs no account and no configuration. It walks the
           whole product in about a minute.
         </p>
-        <Button href="/demo" size="md" className="mt-5">
+        <Button href="/demo" size="md" className="mt-4">
           Try the interactive demo
         </Button>
       </div>
@@ -54,7 +64,7 @@ export function AuthUnavailableNotice() {
         around it; gold on this muted grey measures 1.20:1. Links that stand
         alone on their own line are deliberately untouched.
       */}
-      <p className="mt-4 text-center text-xs leading-relaxed text-ink-subtle">
+      <p className="mt-6 text-xs leading-relaxed text-ink-subtle">
         Building something similar?{" "}
         <a
           href={`${siteConfig.repoUrl}/blob/main/AUTHENTICATION.md`}

@@ -76,8 +76,17 @@ export default async function BlogListPage({
                       A label, not a link. The whole card is already an anchor
                       to this same post, and nesting a second one is invalid
                       HTML that cost this page its hydration.
+
+                      `outline-light` rather than the solid white fill it
+                      carried. White was the only one on the site, and it read
+                      as a sticker applied to the cover rather than as this
+                      page's own control — the same note `PricingPlanCard`
+                      already records about its badge. It also outranked the
+                      gold primary in the navbar directly above it, which is
+                      backwards: reading an article is the secondary action on
+                      a page whose primary ask is opening an account.
                     */}
-                    <ButtonLabel variant="white" size="md">
+                    <ButtonLabel variant="outline-light" size="md">
                       Read article
                     </ButtonLabel>
                   </div>
