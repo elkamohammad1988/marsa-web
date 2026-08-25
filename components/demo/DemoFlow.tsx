@@ -347,7 +347,16 @@ export function DemoFlow() {
     <div className="mx-auto max-w-5xl">
       {/* Sandbox disclosure — honesty first: nothing here is a real account,
           and we say plainly what anonymous telemetry we collect. */}
-      <p className="mb-4 bg-surface-tint flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-card border border-line-dark px-4 py-2.5 text-center text-xs text-ink-muted">
+      {/* `data-sandbox-notice` is a hook for `scripts/record-demo.mjs`, which
+          frames the phone scene on this banner. It used to find it by its
+          style class (`.glass-panel`), so removing the frosted-surface
+          utility broke the recorder — correctly and loudly, but for a
+          reason that had nothing to do with what the scene is about. A
+          capture script should name the thing, not the paint on it. */}
+      <p
+        data-sandbox-notice
+        className="mb-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-card border border-line-dark bg-surface-tint px-4 py-2.5 text-center text-xs text-ink-muted"
+      >
         <span className="font-semibold text-ink">Interactive sandbox</span>
         Sample data, no real money. The exchange rate is live from the ECB. We log
         anonymous step progress (no cookies, no personal data) to improve the demo.

@@ -30,7 +30,7 @@ type Size = "sm" | "md" | "lg";
  * piece of software.
  */
 const base =
-  "relative inline-flex flex-none items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 ring-offset-canvas disabled:pointer-events-none disabled:opacity-60";
+  "relative inline-flex flex-none items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 ring-offset-canvas disabled:pointer-events-none";
 
 const variants: Record<Variant, string> = {
   /**
@@ -54,12 +54,30 @@ const variants: Record<Variant, string> = {
    * than by lighting a surface. `transition-colors` rather than
    * `transition-all`: nothing moves, so nothing needs easing.
    */
-  primary: "bg-brand text-on-brand shadow-cta hover:bg-gold-light hover:shadow-cta-hover",
+  /*
+   * The disabled state is a colour change, not an opacity wash.
+   *
+   * `disabled:opacity-60` sat in `base` and applied to every variant, which is
+   * fine over a neutral fill and wrong over this one: 60% of `--brand` over a
+   * card composites to a murky olive (~#887732) carrying a near-black label at
+   * about **2.6:1**. WCAG exempts inactive controls from contrast, so nothing
+   * failed — it just looked broken, and it is on camera in the demo's poster
+   * frame, where "Continue" is legitimately disabled until the SEPA transfer is
+   * sent.
+   *
+   * Each variant now names its own disabled appearance instead, which is also
+   * order-independent: `cn` concatenates, so an override living in `base` and a
+   * competitor living in the variant would be settled by Tailwind's emit order
+   * rather than by intent.
+   */
+  primary:
+    "bg-brand text-on-brand shadow-cta hover:bg-gold-light hover:shadow-cta-hover disabled:bg-surface-tint disabled:text-ink-subtle disabled:shadow-none",
   outline:
-    "border border-line bg-transparent text-ink hover:border-ink-subtle hover:bg-ink/[0.04]",
-  "outline-light": "border border-white/25 text-white hover:bg-white/10 hover:border-white/40",
-  "ghost-pill": "text-ink hover:bg-ink/5",
-  white: "bg-white text-surface-deep hover:bg-white/90",
+    "border border-line bg-transparent text-ink hover:border-ink-subtle hover:bg-ink/[0.04] disabled:text-ink-subtle disabled:border-line",
+  "outline-light":
+    "border border-white/25 text-white hover:bg-white/10 hover:border-white/40 disabled:text-white/45 disabled:border-white/15",
+  "ghost-pill": "text-ink hover:bg-ink/5 disabled:text-ink-subtle",
+  white: "bg-white text-surface-deep hover:bg-white/90 disabled:bg-white/60 disabled:text-surface-deep/60",
 };
 
 const sizes: Record<Size, string> = {

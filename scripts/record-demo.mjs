@@ -978,10 +978,16 @@ async function prepareMobile(page) {
 }
 
 async function sceneMobile(page) {
-  // `.glass-panel` is the sandbox banner and the only element on this route
-  // carrying that class. 90px below the top edge clears the navigation pill
-  // and leaves the hero paragraph above it out of frame rather than sliced.
-  await frameOn(page, ".glass-panel", 90);
+  // The sandbox banner, found by what it *is* rather than by how it is
+  // painted. This read `.glass-panel` — a style utility — until the design pass
+  // deleted that class and the recorder threw here mid-take. It threw rather
+  // than filming the wrong region, which is the behaviour you want, but the
+  // coupling was avoidable: `data-sandbox-notice` is a contract the component
+  // owns and a restyle cannot break.
+  //
+  // 90px below the top edge clears the navigation bar and leaves the hero
+  // paragraph above it out of frame rather than sliced.
+  await frameOn(page, "[data-sandbox-notice]", 90);
   await reveal(page, 420);
   await caption(page, "Responsive by design — the same flow at 390px");
   await wait(1600);
