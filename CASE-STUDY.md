@@ -22,13 +22,15 @@ sandbox.
 
 ## The solution
 
-- A **dark-only "Liquid Gold" design system** — metallic gold on deep
-  water-slate, with a reusable water-reflection effect on the surfaces that
-  carry the brand — implemented purely through CSS-variable tokens, so the
-  entire site re-themes from one file and stays coherent (no leftover light
-  sections). The palette it replaced, "Black Rose", was metallic magenta on
-  near-black; the hue swap touched two files and no component logic, which is
-  the claim the token layer exists to make good on.
+- A **dark-only "Liquid Gold" design system** — gold on deep water-slate,
+  implemented purely through CSS-variable tokens, so the entire site re-themes
+  from one file and stays coherent (no leftover light sections). The palette it
+  replaced, "Black Rose", was magenta on near-black; the hue swap touched two
+  files and no component logic, which is the claim the token layer exists to
+  make good on. A later pass removed the effect layer that sat on top of those
+  tokens — reflection, spotlight, gradient rims, frosted chrome, gradient
+  headline — on the grounds that it was decoration competing with the product;
+  the tokens underneath did not move.
 - A **live currency converter and rate ticker** using real ECB reference rates.
 - An **interactive `/demo` sandbox** that walks the full loop — open account →
   KYC → European IBAN → receive a payout → **convert at the live interbank
@@ -148,12 +150,16 @@ worth reading. Magenta was a *dark* accent; gold is a *light* one:
 
 - White on `#D4AF37` = **2.10:1** ✗. Not marginal — unreadable. So `--on-brand`
   became a near-black (`#0C1114`) and the primary button inverted: dark label on
-  a gold face, **6.06:1** at the shaded end of the gradient and **11.75:1** at
-  the lit end. Better than the magenta button ever managed.
-- Hover therefore **brightens** rather than darkens, because on a light fill
-  brightening is what *raises* contrast against the label. It is applied as a
-  6% `brightness` multiply, so the gold gains 6% and the near-black gains
-  almost nothing.
+  a gold face. Under the metallic gradient that ran **11.75:1** at the lit end
+  down to **6.07:1** at the shaded one — better than the magenta button ever
+  managed, but a spread of nearly two to one across a single label.
+- **The gradient is gone, and the button got measurably better for it.** The
+  fill is flat `--brand`, so there is no shaded end to be worst case: the label
+  sits at **9.03:1** everywhere on it. Hover still **brightens** rather than
+  darkens — on a light fill that is what *raises* contrast against a dark label
+  — but it does it by moving one step up the gold scale to `--gold-light`
+  (**13.41:1**) instead of by multiplying brightness over a plating of inset
+  highlights and a moving reflection.
 - The surface ladder kept its lightness values to within 0.0001 and changed only
   its hue — rose-black (R and B above G) to water-slate (B above G above R).
   Every text token came out ahead: muted body copy went from 7.3:1 to **8.4:1**
@@ -205,7 +211,7 @@ All measured on the production build — method reproducible from the repo.
   them — a defect confined to the three routes behind the password, which is
   why the suite as it then stood — well over a thousand checks — and an axe
   pass over the public site had never seen it.
-- **Tests (2026-08-24)** — **1891 / 1891** Vitest across 53 files, covering
+- **Tests (2026-08-24)** — **1878 / 1878** Vitest across 52 files, covering
   IBAN/MOD-97, FX, pagination, storage provider selection, admin auth (HMAC
   round-trip, tamper, expiry), session signing, RLS-backed profile reads, CSV
   injection-safety, and the analytics funnel (unique-session counting,
@@ -265,7 +271,7 @@ is visible commit by commit in the git log.
 > accounts built on Postgres row-level security — policies written and tested,
 > deliberately not wired to a live database — and a first-party analytics
 > backend.
-> Dark "liquid gold" design system on one set of role-named tokens; 1,891
+> Dark "liquid gold" design system on one set of role-named tokens; 1,878
 > passing tests and 0 axe violations across 74 scans; illustrations drawn
 > from those tokens rather than sourced; and a hard line between real software
 > and a build that tells you exactly what it is not. Next.js 15 / React 19 /

@@ -76,8 +76,19 @@ mocked up, and they are only ever as current as the last run — which is a
 weaker guarantee than "cannot drift", the claim that stood here until it turned
 out to be false. The set went a commit stale when a UI cleanup removed
 decoration the images still showed, so **re-run the capture before publishing
-them anywhere**. All seven regenerated 2026-08-24 against the commit that is
-deployed. **Every one carries the concept-build disclosure**, because the site
+them anywhere**.
+
+All seven regenerated **2026-08-25**, against the design pass that removed the
+effect layer — so these show flat surfaces, a solid gold button and a
+single-colour headline, where the previous set showed gradient rims, a
+pointer-tracking spotlight and a headline clipped to a gradient. That is the
+second time this set has had to be re-shot for the same reason, which is the
+argument for the rule above rather than against it. **Note the images now lead
+the deployment**: they are the local production build of this branch, and
+https://marsa-web.vercel.app still serves the previous design until this is
+merged and deployed.
+
+**Every one carries the concept-build disclosure**, because the site
 does — the capture script throws rather than write an unmarked image, and
 [`tests/portfolio-honesty.test.ts`](tests/portfolio-honesty.test.ts)
 fails if that rule is ever softened.
@@ -136,13 +147,23 @@ signed with WebCrypto HMAC, so nothing else is pulled in — including
 
 ## Engineering highlights
 
-**Design system — "Liquid Gold".** Metallic gold (`#D4AF37` / `#E8C95A`) on
-deep water-slate (`#0B1216`), dark-only and coherent, driven entirely by CSS
-custom properties. The palette it replaced was metallic magenta; the swap
-touched two files and no component logic, which is the claim the token layer
-exists to make good on. A slow water-reflection effect carries the identity on
-the surfaces that hold the brand, and stops entirely under
-`prefers-reduced-motion`.
+**Design system — "Liquid Gold".** Gold (`#D4AF37` / `#E8C95A`) on deep
+water-slate (`#0B1216`), dark-only and coherent, driven entirely by CSS custom
+properties. The palette it replaced was magenta; the swap touched two files and
+no component logic, which is the claim the token layer exists to make good on.
+
+The surface treatment is deliberately plain, and it did not start that way. The
+identity used to be carried by effects: a water-reflection gradient on the
+brand surfaces, a pointer-tracking spotlight on every card, gradient rims, a
+frosted navbar, a radial wash behind the hero and a headline clipped to a
+white-into-gold gradient. Each was argued for on its own terms and the sum was
+the problem — a page where everything glows has no way left to say which thing
+matters, and the vocabulary as a whole is the one a reader recognises fastest
+as machine-made. All of it is gone. Gold now marks two things only, the action
+to take and the number to read, and hierarchy is carried by type, spacing and a
+surface ladder whose rungs are ≥1.03 apart by construction. The primary button
+got measurably *better* out of it: a flat fill holds its label at **9.03:1**
+where the gradient ran from 11.75:1 down to 6.07:1 across its own face.
 
 **Provider selection by environment.** Every side-effect layer — storage, email,
 rate limiting, analytics — picks its implementation from environment variables
@@ -221,7 +242,7 @@ npm run verify         # typecheck → lint → tests → production build
 npm audit              # 0 vulnerabilities, dev tree included
 ```
 
-**What the suite covers.** 1,891 automated checks across 53 files, all running
+**What the suite covers.** 1,878 automated checks across 52 files, all running
 in Node — plus 139 browser checks in a separate suite, below:
 
 - **Unit tests for business logic and security boundaries** — IBAN MOD-97, FX

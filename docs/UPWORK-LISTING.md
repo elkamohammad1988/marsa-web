@@ -68,7 +68,7 @@ is unconfigured, and the app refuses the file-store fallback in production
 instead of pretending a lead was saved.
 
 **If a buyer asks why auth is not clickable:** the code, the row-level-security
-migration and 1,891 automated checks are all in the repository and run from a
+migration and 1,878 automated checks are all in the repository and run from a
 clean clone — `https://github.com/elkamohammad1988/marsa-web`, public and
 answering 200 to a signed-out request, re-verified 2026-08-24. What is missing
 from the demo is a database, not a feature. Standing up a live account system
@@ -178,7 +178,7 @@ repository answered 404 to a signed-out visitor. It no longer does:
 >   app reads real ones, server-cached and degrading gracefully, instead of
 >   invented figures that date the moment they ship.
 > - **A test suite and a CI gate.** Typecheck, lint, unit tests and a production
->   build on every push. The reference build runs **1,891 automated checks** —
+>   build on every push. The reference build runs **1,878 automated checks** —
 >   unit tests for business logic and security boundaries, property tests that
 >   recompute accessibility contrast from the design tokens, and
 >   repository-integrity checks — and ships with zero `any` in strict
@@ -289,6 +289,16 @@ first if the listing type accepts one. Regenerate them with
 > it, and the two answer different questions — which is why this section listed
 > the wrong files until 2026-08-24 and would have had you upload the README's
 > gallery under captions written for a different set. Do not mix them.
+
+> ⚠ **The nine files on disk show the previous design.** The 2026-08-25 design
+> pass removed the effect layer — gradient rims, the pointer spotlight, frosted
+> chrome, the gradient headline, the metallic button — and flattened the radius
+> and shadow scales. `portfolio-screenshots/` has been re-shot against it;
+> `upwork-catalog/` deliberately has **not**, because eight of its nine frames
+> are photographed from https://marsa-web.vercel.app and the deployment still
+> serves the old build. Re-shooting them now would produce a gallery that does
+> not match the URL in the listing, which is the one property this set exists to
+> have. **Deploy first, then run `npm run capture:catalog`, then upload.**
 
 All nine are photographed from a **production build of the pushed commit**
 rather than mocked up — but they are only as current as the last run, and
@@ -510,17 +520,25 @@ discover it in week three.
       reachable and what is deliberately closed
 - [x] Every number in the description re-measured. **Measured 2026-08-24 on the
       commit that is pushed**:
-      - `npm test` — **1,891 passing across 53 files**, green. The figure moved
-        three times and every move is worth recording, because the first is the
-        one the gate cannot see. It read 1,886 until an unused icon export was
-        removed along with the invented company page that was its last caller,
-        which took it to 1,885. It then moved to 1,889 on 2026-08-24 when
-        `tests/portfolio-honesty.test.ts` began running its four disclosure
+      - `npm test` — **1,878 passing across 52 files**, green. The figure has
+        moved four times and every move is worth recording, because the first is
+        the one the gate cannot see. It read 1,886 until an unused icon export
+        was removed along with the invented company page that was its last
+        caller, which took it to 1,885. It then moved to 1,889 on 2026-08-24
+        when `tests/portfolio-honesty.test.ts` began running its four disclosure
         assertions against **both** capture scripts instead of only
         `capture.mjs` — four more assertions, no change to the site. It moved
         to 1,891 later the same day with the two `tests/seo.test.ts` cases that
         pin the default share card (§0), for the same reason: an assertion
-        added, nothing about the product changed. Every claim site was
+        added, nothing about the product changed.
+
+        It then went **down** for the first time, to 1,878 on 2026-08-25, and a
+        falling test count is worth more scrutiny than a rising one. The design
+        pass deleted `components/ui/PointerGlow.tsx` — the pointer-tracking
+        spotlight on cards — and `tests/pointer-glow.test.ts` went with it: 13
+        assertions about the performance and accessibility of an effect that no
+        longer exists. No assertion about the *product* was weakened, and the
+        file count fell 53 → 52 for the same reason. Every claim site was
         re-measured and updated in the same pass.
 
         Note what that gate does and does not do: it asserts every artefact

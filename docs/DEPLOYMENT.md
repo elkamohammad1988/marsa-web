@@ -29,7 +29,7 @@ so.
 
 | | Check | How |
 |---|---|---|
-| 1 | The gate is green on `main` | `npm run verify` — typecheck, lint, 1,891 automated checks, production build |
+| 1 | The gate is green on `main` | `npm run verify` — typecheck, lint, 1,878 automated checks, production build |
 | 2 | The **whole** dependency tree is clean | `npm audit` → `found 0 vulnerabilities`. This was `--omit=dev` while the end-of-life ESLint 8 chain carried 13 high advisories; the ESLint 9 migration and a puppeteer-core bump removed every one, so the stricter check is the one that now holds. |
 | 3 | Database migrations are applied | `npm run db:migrate -- --dry` → `0 pending`. **006 is the newest**; 005 is not optional — without it the public anon key can call a definer-rights delete. |
 | 4 | The Supabase secret key has been rotated since it was last pasted anywhere | [H2](PROJECT-PLAN.md#h2--rotate-the-supabase-secret-key) |
