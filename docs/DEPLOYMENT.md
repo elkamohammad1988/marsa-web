@@ -16,13 +16,39 @@ the running site provenanced to a commit anyone can read
 | Design in production | `6426a33` — *refactor(design): remove the decoration that was left under the effect layer*. Every commit after it on `main` is documentation or capture tooling, so the application output is unchanged from it |
 | Verified against | the deployment built from `781c92c`, promoted 2026-08-26 |
 | Environment | **exactly one variable set** — `NEXT_PUBLIC_SITE_URL` |
-| CI | green on both commits |
+| CI | see the note below |
 
 A note on reading the table above: the hash of the commit that *records* a
 deployment can never be the hash of the commit that *was* deployed, because
 writing it down comes second. So this names the commit the design shipped in and
 the commit the verification below was run against, rather than pretending to
 name a moving head.
+
+### CI on these commits
+
+`ci.yml` runs two required jobs in parallel. On `6426a33` and `781c92c` both
+were green. On the documentation-only commit that followed, **`Verify` was green
+and `Browser smoke` failed** — and that is worth writing down rather than
+re-running until it is not.
+
+The failing commit changed one file, `docs/DEPLOYMENT.md`, by fifteen lines. The
+application bytes are identical to `781c92c`, which passed the same job minutes
+earlier, so the change cannot be the cause. The suite is 139 browser tests
+against a compiled build, and it passed locally three consecutive times on the
+same tree (139/139), with the slowest single test at 3.3s — nowhere near a
+per-test timeout.
+
+What does vary is the whole suite's wall clock: 171s, 226s and 351s across those
+three local runs, a two-fold spread driven by machine load alone. The job is
+capped at `timeout-minutes: 20`. A shared runner having a bad few minutes is
+therefore the explanation that fits the evidence, and the honest description is
+**an intermittent failure in the browser gate, cause not conclusively
+identified** — the job log needs repository authentication to read, which this
+run did not have.
+
+It is left as a known issue rather than papered over. Raising the cap to make a
+red build green would be weakening a gate to suit the result, which is the one
+move this repository's gates exist to prevent.
 
 No Supabase credentials, no admin password, no session secrets. That is why
 `/account` and `/admin` redirect and `/api/health` reports `degraded` (HTTP 503)
