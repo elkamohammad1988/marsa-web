@@ -319,6 +319,23 @@ async function signInToAdmin(page, password) {
     polling: 50,
   });
 
+  /*
+   * Watch the sign-in response, because the two ways this fails need different
+   * sentences and the URL cannot tell them apart.
+   *
+   * `/api/admin/login` is rate limited to five attempts per minute, shared
+   * across instances (see the note in `app/api/admin/login/route.ts`). A run
+   * that follows a few manual sign-ins therefore gets a **429**, lands back on
+   * `/admin/login` exactly as a wrong password would, and this function used to
+   * report "the password was rejected" — which sends the next reader to check a
+   * credential that was never wrong. Naming the real cause costs one listener.
+   */
+  let loginStatus = null;
+  const watchLogin = (response) => {
+    if (response.url().includes("/api/admin/login")) loginStatus = response.status();
+  };
+  page.on("response", watchLogin);
+
   await page.type("input[name='password']", password);
   await Promise.all([
     page.waitForNavigation({ waitUntil: "networkidle2", timeout: 30000 }).catch(() => {}),
@@ -330,7 +347,16 @@ async function signInToAdmin(page, password) {
     waitUntil: "networkidle2",
     timeout: 30000,
   });
-  if (page.url().includes("/admin/login")) return "the password was rejected";
+  page.off("response", watchLogin);
+
+  if (page.url().includes("/admin/login")) {
+    if (loginStatus === 429) {
+      return "sign-in was rate limited (5/min) — wait a minute and re-run; the password is fine";
+    }
+    return loginStatus === null
+      ? "the sign-in request never completed"
+      : `the password was rejected (HTTP ${loginStatus})`;
+  }
 
   await page.waitForFunction(() => document.documentElement.dataset.hydrated === "true", {
     timeout: 30000,
@@ -620,13 +646,20 @@ async function main() {
     await advance(page, 1);
     await clickLabel(page, /convert \$/, 2000);
     await settle(page);
-    // `.glass-panel` is the sandbox banner and, on this route, is the only
-    // element carrying that class — so it is a stable anchor for the *top of
-    // the composition*, which the progress rail is not. Anchoring on the rail
-    // is what put "Interactive sandbox" half behind the navigation, and a
-    // frame that loses the sandbox label is the one frame this set must not
-    // contain.
-    await frameOn(page, ".glass-panel", MOBILE_BANNER_GAP);
+    // The sandbox banner is the anchor for the *top of the composition*, which
+    // the progress rail is not: anchoring on the rail is what put "Interactive
+    // sandbox" half behind the navigation, and a frame that loses the sandbox
+    // label is the one frame this set must not contain.
+    //
+    // Found by `data-sandbox-notice`, not by `.glass-panel`. That class was the
+    // frosted-surface utility, and the design pass that removed the effect
+    // layer took it with everything else — so this line threw
+    // `nothing matched .glass-panel` and killed the run at frame 08.
+    // `scripts/record-demo.mjs` had already hit exactly this and had already
+    // been moved onto the attribute hook; this call site was missed. The rule
+    // it encodes is the one written beside the banner in `DemoFlow.tsx`: a
+    // capture script should name the thing, not the paint on it.
+    await frameOn(page, "[data-sandbox-notice]", MOBILE_BANNER_GAP);
     await shot(page, "08-mobile");
 
     console.log("09 contact");

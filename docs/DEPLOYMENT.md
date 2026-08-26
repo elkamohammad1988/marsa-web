@@ -2,12 +2,62 @@
 
 A launch-day runbook, and the record of the one deploy that has happened.
 
-**Currently deployed: https://marsa-web.vercel.app**, from
-`feat/auth-foundation`, with **exactly one environment variable set**
-(`NEXT_PUBLIC_SITE_URL`). No Supabase credentials, no admin password, no session
-secrets. That is why `/account` and `/admin` redirect and `/api/health` reports
-`degraded` rather than `ok` — every check below that depends on a database is
-therefore **not yet satisfied**, and this document does not pretend otherwise.
+**Currently deployed: https://marsa-web.vercel.app**
+
+| | |
+|---|---|
+| Commit | `6426a33` — *refactor(design): remove the decoration that was left under the effect layer* |
+| Branch | `main` |
+| Deployed | 2026-08-26, by pushing `main`; Vercel's git integration built and promoted it |
+| Deployment | `marsa-d9085qf93-elkamohammad1988s-projects.vercel.app`, aliased to the origin above |
+| Environment | **exactly one variable set** — `NEXT_PUBLIC_SITE_URL` |
+
+No Supabase credentials, no admin password, no session secrets. That is why
+`/account` and `/admin` redirect and `/api/health` reports `degraded` (HTTP 503)
+rather than `ok` — every check below that depends on a database is therefore
+**not satisfied on this deployment**, by choice, and this document does not
+pretend otherwise. A 503 from `/api/health` here is the correct answer, not an
+incident.
+
+### What was verified against the deployed origin on 2026-08-26
+
+Every line below was run against `https://marsa-web.vercel.app`, not against a
+local build:
+
+- **Route sweep** — 34 routes × 390 / 768 / 1280 px. No horizontal overflow, no
+  skipped heading level, exactly one `<h1>` per route, no link or button without
+  an accessible name, no `<img>` without `alt`, no console error and no failed
+  request. The single finding is the 404 route's own `404` console message,
+  which is the response being tested.
+- **axe-core 4.12.1** — `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa` over 32
+  routes at 390 and 1280 plus the demo mid-flow. **65 scans, 0 violations.**
+  Animations are settled first, for the reason documented in
+  `tests/smoke/harness/browser.ts`: axe folds an ancestor's opacity into its
+  contrast maths, so a scan that lands mid-reveal reports contrast failures the
+  design does not have.
+- **Interactive flows** — the demo walks end to end (Start → Account → Verify →
+  IBAN → Get paid → Convert → Send → Done) on a live ECB rate; the converter
+  returns `1 EUR = 1.1662 USD` and draws its 30-day history; the IBAN checker
+  accepts `DE89 3704 0044 0532 0130 00` and rejects the same number with a
+  mutated check digit; `/get-started` still states that it discards what you
+  type.
+- **Assets** — 0 broken images, both webfonts report `loaded`, 0 failed
+  requests across ten desktop and five mobile routes.
+- **Headers** — the full set from `next.config.ts` is present on the deployed
+  origin, `X-Powered-By` is absent, and production CSP carries no
+  `'unsafe-eval'`.
+- **Origin** — `robots.txt` and `sitemap.xml` both emit
+  `https://marsa-web.vercel.app`; zero occurrences of `localhost`.
+- **Chrome, mobile** — the navigation opens at 390px with no overflow, and the
+  concept-build disclosure opens on the deployed site.
+- **Links** — all 27 internal links reachable from the home page resolve; none
+  returns 4xx or 5xx.
+
+One request pattern is expected and is **not** a fault: the demo's
+`POST /api/demo/events` beacons are reported by Chrome as `net::ERR_ABORTED`
+while the server answers them `204`. They are fired with `keepalive: true` and
+`.catch(() => {})` because the response is irrelevant, and the same pair appears
+on a local production build — so it is inherent to the beacon, not to the host.
 
 The rest of this runbook is what a *credentialled* deploy needs. The repository
 still has no `vercel.json` and no host-specific code; the deploy is a stock

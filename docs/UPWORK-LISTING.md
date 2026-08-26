@@ -290,23 +290,22 @@ first if the listing type accepts one. Regenerate them with
 > the wrong files until 2026-08-24 and would have had you upload the README's
 > gallery under captions written for a different set. Do not mix them.
 
-> ⚠ **The nine files on disk show the previous design, now by two passes.** The
-> 2026-08-25 pass removed the effect layer — gradient rims, the pointer
-> spotlight, frosted chrome, the gradient headline, the metallic button — and
-> flattened the radius and shadow scales. The 2026-08-26 pass removed what was
-> left under it: the glowing coin from every closing CTA, the halo under every
-> figure, the mesh-and-grain backdrop behind every illustration, the metallic
-> logo tile, the last icon tiles, and the pills on controls that are not round.
-> The pricing page was rebuilt as a three-across comparison and the comparison
-> table as a real `<table>`.
+> ✅ **The nine files on disk are current.** They were regenerated on
+> 2026-08-26, after `main` (commit `6426a33`) was deployed and verified, so the
+> gallery and https://marsa-web.vercel.app now show the same design: the second
+> design pass — the glowing coin gone from every closing CTA, the halo gone from
+> under every figure, the mesh-and-grain backdrop gone from behind every
+> illustration, the metallic logo tile flattened, the last icon tiles removed,
+> the pricing page rebuilt as a three-across comparison and the comparison table
+> rebuilt as a real `<table>`.
 >
-> `portfolio-screenshots/` and `portfolio-video/` have been re-shot against all
-> of that; `upwork-catalog/` deliberately has **not**, because eight of its nine
-> frames are photographed from https://marsa-web.vercel.app and the deployment
-> still serves the old build. Re-shooting them now would produce a gallery that
-> does not match the URL in the listing, which is the one property this set
-> exists to have. **Deploy first, then run `npm run capture:catalog`, then
-> upload.**
+> Eight frames come from the deployed origin. Frame 05 is the operator
+> dashboard, which the credential-free deployment cannot serve, so it is
+> photographed from a local production build — say so in the listing.
+>
+> The rule that produced the previous warning still stands and is the reason
+> this set is captured last: **deploy first, then run
+> `npm run capture:catalog`, then upload.**
 
 All nine are photographed from a **production build of the pushed commit**
 rather than mocked up — but they are only as current as the last run, and
@@ -526,8 +525,9 @@ discover it in week three.
 - [x] **A live demo URL** — https://marsa-web.vercel.app, deployed with zero
       credentials in the production environment. See §0 for exactly what is
       reachable and what is deliberately closed
-- [x] Every number in the description re-measured. **Measured 2026-08-24 on the
-      commit that is pushed**:
+- [x] Every number in the description re-measured. **Measured 2026-08-26 on the
+      commit that is pushed** (`6426a33`, the head of `main` and the commit the
+      production deployment was built from):
       - `npm test` — **1,871 passing across 52 files**, green. The figure has
         moved five times and every move is worth recording, because the first is
         the one the gate cannot see. It read 1,886 until an unused icon export

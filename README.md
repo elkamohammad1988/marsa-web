@@ -84,15 +84,24 @@ illustrations on a flat deep panel. The set they replace still had the metallic
 logo tile, a soft halo under every balance and price, and a two-light mesh
 gradient behind each drawing. That is the third time this set has had to be
 re-shot for the same reason, which is the argument for the rule above rather
-than against it. **Note the images lead the deployment**: they are the local
-production build of this branch, and https://marsa-web.vercel.app still serves
-the previous design until this is merged and deployed.
+than against it. They are photographed from a **local production build**, which
+is what `npm run capture` is pointed at — two of the seven frames need
+credentials the published deployment deliberately does not have.
 
-The Upwork catalog set in `upwork-catalog/` is deliberately **not** regenerated
-here. It is photographed from the deployed URL by rule, because a buyer's first
-check is to open that URL and compare — so it stays as-shot until this branch is
-deployed, and re-shooting it from localhost would break the one property that
-makes it worth anything.
+**The deployment is no longer behind them.** `main` was merged and pushed on
+2026-08-26 (commit `6426a33`), Vercel built and promoted it, and
+https://marsa-web.vercel.app now serves this design. What was verified against
+that origin — a 34-route sweep at three viewports, 65 axe scans with zero
+violations, the demo walked end to end on a live rate — is recorded in
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+The Upwork catalog set in `upwork-catalog/` was regenerated **after** that
+deploy, from the deployed URL, which is its rule: a listing image a buyer cannot
+reproduce by opening the URL in the listing is worth nothing. Eight of its nine
+frames come from https://marsa-web.vercel.app; the ninth is the operator
+dashboard, which needs a password the deployment does not have and is
+photographed from a local production build instead. Neither that directory nor
+`portfolio-video/` is tracked in git.
 
 **Every one carries the concept-build disclosure**, because the site
 does — the capture script throws rather than write an unmarked image, and
