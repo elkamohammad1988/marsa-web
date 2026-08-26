@@ -4,13 +4,25 @@ A launch-day runbook, and the record of the one deploy that has happened.
 
 **Currently deployed: https://marsa-web.vercel.app**
 
+**Production tracks `main`.** Vercel's git integration is connected, so every
+push to `main` builds and promotes automatically — there is no manual deploy
+step and no `vercel --prod` in the loop. That is deliberate: it is what keeps
+the running site provenanced to a commit anyone can read
+([H13](PROJECT-PLAN.md#h13--deploy-time-connect-the-host-to-the-repository)).
+
 | | |
 |---|---|
-| Commit | `6426a33` — *refactor(design): remove the decoration that was left under the effect layer* |
 | Branch | `main` |
-| Deployed | 2026-08-26, by pushing `main`; Vercel's git integration built and promoted it |
-| Deployment | `marsa-d9085qf93-elkamohammad1988s-projects.vercel.app`, aliased to the origin above |
+| Design in production | `6426a33` — *refactor(design): remove the decoration that was left under the effect layer*. Every commit after it on `main` is documentation or capture tooling, so the application output is unchanged from it |
+| Verified against | the deployment built from `781c92c`, promoted 2026-08-26 |
 | Environment | **exactly one variable set** — `NEXT_PUBLIC_SITE_URL` |
+| CI | green on both commits |
+
+A note on reading the table above: the hash of the commit that *records* a
+deployment can never be the hash of the commit that *was* deployed, because
+writing it down comes second. So this names the commit the design shipped in and
+the commit the verification below was run against, rather than pretending to
+name a moving head.
 
 No Supabase credentials, no admin password, no session secrets. That is why
 `/account` and `/admin` redirect and `/api/health` reports `degraded` (HTTP 503)
