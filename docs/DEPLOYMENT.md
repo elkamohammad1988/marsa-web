@@ -14,7 +14,7 @@ the running site provenanced to a commit anyone can read
 |---|---|
 | Branch | `main` |
 | Design in production | `6426a33` — *refactor(design): remove the decoration that was left under the effect layer*. Every commit after it on `main` is documentation or capture tooling, so the application output is unchanged from it |
-| Verified against | the deployment built from `781c92c`, promoted 2026-08-26 |
+| Verified against | the deployment built from `781c92c`, promoted 2026-08-26. Later commits on `main` are documentation and test-harness only — no application code — so the running output is unchanged from `6426a33` |
 | Environment | **exactly one variable set** — `NEXT_PUBLIC_SITE_URL` |
 | CI | see the note below |
 
@@ -73,6 +73,9 @@ wired, `/api/rates?from=EUR&to=JPY` through the harness returns the stub's
 The gate keeps its budget. What changed is that a red `Browser smoke` now means
 the application is broken, rather than that somebody else's API was busy — and
 a gate people re-run by reflex has stopped being a gate.
+
+Confirmed on the commit that landed the stub: both jobs green, `Browser smoke`
+in **142s** — inside the 136-144s healthy band, with the variance source gone.
 
 Live rates are still verified where the claim is actually made: against the
 deployed origin, by hand, in the section above.
