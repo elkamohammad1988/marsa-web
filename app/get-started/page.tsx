@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { CheckBullet } from "@/components/ui/CheckBullet";
-import { Badge } from "@/components/ui/Badge";
 import { GetStartedForm } from "@/components/forms/GetStartedForm";
 import { buildMetadata } from "@/lib/seo";
 import { plans, businessPlans } from "@/lib/pricing";
@@ -46,7 +45,17 @@ export default async function GetStartedPage({
       <Container>
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start lg:gap-16">
           <div className="lg:pt-4">
-            <Badge tone="ink">Concept build</Badge>
+            {/* A label, not a badge.
+
+                This was `<Badge tone="ink">` — a near-white pill, and the
+                brightest object on a page whose brightest object should be the
+                form. The words stay, because the disclosure is the point; what
+                goes is the chrome, which was announcing the same thing the
+                navbar's permanent concept-build marker announces on every route
+                and the paragraph below states in a full sentence. */}
+            <span className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-strong">
+              Concept build
+            </span>
             <h1 className="mt-4 text-display-sm font-bold text-ink">
               Open a Marsa account
             </h1>
@@ -68,7 +77,7 @@ export default async function GetStartedPage({
                 : " — Supabase Auth with Postgres row-level security, written and tested in the repository and switched off in this deployment."}
             </p>
             {selectedPlan && (
-              <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm font-medium text-ink shadow-card">
+              <p className="mt-4 inline-flex items-center gap-2 rounded-md border border-line px-3 py-1.5 text-sm font-medium text-ink">
                 Selected plan: <span className="text-brand-strong">{selectedPlan}</span>
               </p>
             )}
@@ -77,7 +86,7 @@ export default async function GetStartedPage({
             </p>
             <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {benefits.map((b) => (
-                <CheckBullet key={b} tone="brand">
+                <CheckBullet key={b}>
                   {b}
                 </CheckBullet>
               ))}

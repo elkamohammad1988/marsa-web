@@ -40,7 +40,7 @@ export default async function AdminLoginPage() {
 
   return (
     <Container>
-      <div className="mx-auto max-w-md rounded-card-lg border border-line bg-card p-7 shadow-card">
+      <div className="mx-auto max-w-md rounded-card-lg border border-line bg-card p-7 shadow-e1">
         <Heading level="h1" size="panel">
           Marsa admin
         </Heading>
@@ -51,7 +51,7 @@ export default async function AdminLoginPage() {
         {enabled ? (
           <AdminLoginForm />
         ) : (
-          <div className="mt-6 rounded-xl border border-line bg-surface-alt p-4 text-sm text-ink-muted">
+          <div className="mt-6 rounded-card border border-line bg-surface-alt p-4 text-sm text-ink-muted">
             <p className="font-medium text-ink">The operator area is closed on this build</p>
             <p className="mt-1 leading-relaxed">
               Marsa is a concept build, and this deployment runs without credentials on purpose,

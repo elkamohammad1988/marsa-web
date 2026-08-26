@@ -124,12 +124,12 @@ export default function HomePage() {
         eyebrow="Marsa Vs Traditional Banks"
         title="Banking without the friction"
         rows={[
-          { label: "Account Opening", marsa: "Online, ~5 min", traditional: "Branch visit, 1-4 weeks" },
-          { label: "Residency Required", marsa: "No", traditional: "Usually yes" },
-          { label: "Currencies", marsa: "30+", traditional: "1-3" },
-          { label: "SEPA Transfers", marsa: "Free, instant", traditional: "Free, 1-2 days" },
-          { label: "FX Rate", marsa: "Interbank", traditional: "2-4% markup" },
-          { label: "Support", marsa: "Fast, human", traditional: "Generic call centre" },
+          { label: "Account Opening", subject: "Online, ~5 min", comparator: "Branch visit, 1-4 weeks" },
+          { label: "Residency Required", subject: "No", comparator: "Usually yes" },
+          { label: "Currencies", subject: "30+", comparator: "1-3" },
+          { label: "SEPA Transfers", subject: "Free, instant", comparator: "Free, 1-2 days" },
+          { label: "FX Rate", subject: "Interbank", comparator: "2-4% markup" },
+          { label: "Support", subject: "Fast, human", comparator: "Generic call centre" },
         ]}
       />
 
@@ -168,7 +168,7 @@ export default function HomePage() {
         description="Low FX fees, free SEPA transfers, and support across 180+ countries."
         primaryCta={{ label: "Open an account", href: "/get-started" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        art="coin"
+
         footnote="Physical cards available for Europe and UK customers only. All other features (IBAN, SEPA, SWIFT, FX conversion) are available worldwide."
       />
     </>

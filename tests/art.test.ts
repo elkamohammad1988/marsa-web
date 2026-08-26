@@ -46,7 +46,13 @@ describe("every illustration describes itself", () => {
   ];
 
   it("covers every slot the site can render", () => {
-    expect(ART_NAMES).toHaveLength(6);
+    // Four illustrations, not six. `coin` and `coin-warm` were removed with the
+    // effect they were built out of — a blurred gold orb behind a gradient disc
+    // with two halo rings — and the count moves with them rather than the
+    // assertion being loosened: the property under test is that *every slot the
+    // site can render* has a caption, and a slot that no longer exists has
+    // nothing to describe.
+    expect(ART_NAMES).toHaveLength(4);
     expect(BLOG_MOTIFS).toHaveLength(6);
   });
 

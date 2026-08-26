@@ -53,9 +53,10 @@
  *   • `--brand-soft` (#806000) is the dim/secondary/in-progress accent. It is
  *     2.5:1 on the darkest surface, so — exactly like the `--brand-soft` it
  *     replaces — it is a fill and never a text colour.
- *   • `--gold-light` (#F5D76E) and `--gold-highlight` (#FFF1A8) are the light
- *     ON the gold rather than the gold itself: the specular in the water
- *     reflection, the top of a lit rim — the lightest steps of the scale.
+ *   • `--gold-light` (#F5D76E) is the lightest step still in use, and it is a
+ *     state rather than a surface: the primary button's hover. `--gold-highlight`
+ *     (#FFF1A8) was its specular partner and is gone, along with every lit rim
+ *     and reflection that asked for it.
  */
 @layer base {
   :root {
@@ -104,32 +105,32 @@
      * answer and "what is the gold *for*" has another. A component asks for a
      * role; only this block knows the hue.
      */
-    --gold-highlight: 255 241 168; /* #FFF1A8 — specular; the light, not the metal */
-    --gold-light: 245 215 110; /* #F5D76E — lit face of a gold surface */
-    --gold-soft: 232 201 90; /* #E8C95A — bright gold, legible as text */
+    --gold-light: 245 215 110; /* #F5D76E — the primary button's hover step */
     --gold: 212 175 55; /* #D4AF37 — the gold */
-    --gold-deep: 166 124 0; /* #A67C00 — shaded face, gradient underside */
+    --gold-soft: 232 201 90; /* #E8C95A — bright gold, legible as text */
+    --gold-deep: 166 124 0; /* #A67C00 — shaded face, pressed state */
     --gold-dark: 128 96 0; /* #806000 — dim/secondary; a fill, never text */
+    /*
+     * `--gold-highlight` (#FFF1A8) is gone. It was the specular — the light on
+     * the gold rather than the gold itself — and its three callers were the
+     * coin's rim, the nav indicator's lit centre and the skeleton sweep, all of
+     * which are now flat or removed. A scale keeps the steps something asks
+     * for.
+     */
 
     /* Brand roles → the gold scale. */
     --brand: 212 175 55; /* = --gold — CTA, progress, logo, key numbers */
     /*
-     * The second light source, and the only hue on this site that is not gold.
+     * `--halo` (#1A6C7A) used to sit here: a cool deep aqua, the site's only
+     * non-gold hue, placed behind the warm gold in every backdrop so the two
+     * lights could model depth against each other.
      *
-     * A single-hue palette lit by a single-hue glow has nothing to model depth
-     * with: every ambient layer is the same colour as the thing it is lighting,
-     * so stacking them reads as one brighter gold rather than as two lights at
-     * different distances. `--halo` is the *water* — a cool deep aqua placed
-     * behind the warm gold in every backdrop. It was a violet under the magenta
-     * palette, where its only job was to be cool; here it is also the literal
-     * subject, which is why the hero, the CTA panel and the process band read as
-     * something seen through a medium rather than lit from two sides.
-     *
-     * It is decoration only — blurred orbs and mesh stops, never text, never a
-     * fill behind text, never a border. It has no contrast obligation because
-     * nothing is ever read on it.
+     * It was decoration only — blurred orbs and mesh stops, never text, never a
+     * fill behind text — which is exactly why it did not survive. Every layer
+     * that consumed it has gone: the hero mesh, the art-panel mesh, the
+     * blog-cover mesh, the share-card radials and the gradient icon tile. What
+     * models depth now is the surface ladder, which is calibrated for it.
      */
-    --halo: 26 108 122; /* #1A6C7A — cool water light, decoration only */
     --brand-deep: 166 124 0; /* = --gold-deep — depth, pressed state, shaded rim */
     --brand-soft: 128 96 0; /* = --gold-dark — accent-dim / secondary / in-progress */
     --brand-strong: 232 201 90; /* = --gold-soft — text/links/rings/highlights */
@@ -152,17 +153,15 @@
     --danger: 232 138 138; /* readable red on dark */
 
     /*
-     * The gold CTA gradient (vertical) + the text colour that rides on it.
-     *
-     * Light at the top, shaded at the bottom: the reading a metal surface gets
-     * from a light source above it. The stops are inset from the ends of the
-     * gold scale so hover has somewhere brighter to go without leaving the
-     * palette.
+     * `--cta-from` / `--cta-to` are gone. They were the lit top edge and the
+     * shaded underside of the vertical metallic gradient the primary button
+     * used to wear; the button has been a flat `--brand` since the plating came
+     * off, and the drawn in-app button now matches it. Two stops with nothing
+     * to interpolate between are not a gradient, they are a leftover.
      */
-    --cta-from: 236 200 96; /* #ECC860 — lit top edge */
-    --cta-to: 180 140 32; /* #B48C20 — shaded underside */
-    --on-brand: 12 17 20; /* #0C1114 — 6.1:1 at the darkest point of the gradient,
-                             11.8:1 at the lightest. White would be 1.6:1. */
+    --on-brand: 12 17 20; /* #0C1114 — 9.03:1 on the flat --brand fill, and
+                             13.41:1 on the --gold-light hover step. White on
+                             either would be 1.6:1 and 1.4:1. */
 
     /* Text — cooled to match the surfaces. Both are *better* than the rose
        values they replace: muted is 8.36:1 on the page background against 7.3,
@@ -258,85 +257,67 @@
   /**
    * Key monetary figures — balances, converted amounts, payouts, prices.
    *
-   * Renamed from `.num-glow`, because the glow is no longer what it is for.
-   * Three things were wrong with it:
+   * Type settings only. It used to carry a text-shadow as well: `0 0 12px` of
+   * `currentColor` at 16%, a halo under every balance, price and hero
+   * statistic. Two earlier passes dimmed it — 16px/0.35 to 12px/0.14 — each
+   * time on the argument that it "lifts the figure off a dark surface", and
+   * each time that was the argument for keeping a smaller version of the same
+   * mistake.
    *
-   * 1. **It was too bright to read as banking.** At `0 0 16px` / 0.35 alpha
-   *    the hero balance and the pricing figure wore a visible neon halo. A
-   *    glowing number is the vocabulary of crypto dashboards and game UI;
-   *    Stripe, Mercury and Revolut Business all render money as crisp,
-   *    unmodified type, because a balance that glows reads as a mockup of a
-   *    bank rather than a bank. Cut to 12px / 0.14 — enough to lift the figure
-   *    off a dark surface, not enough to notice as an effect.
+   * A glowing number is the vocabulary of crypto dashboards and game UI. Stripe,
+   * Mercury and Revolut Business all render money as crisp, unmodified type,
+   * because a balance that glows reads as a mockup of a bank rather than as a
+   * bank — and this site renders a hundred of them. What actually lifts a figure
+   * is what lifts it here now: the display face, the weight, the size step, and
+   * `--brand-strong` where it is the number a reader is meant to take away.
    *
-   * 2. **The colour was hardcoded and sometimes wrong.** `rgba(238,79,165)` is
-   *    `--brand-strong` spelled out, so the token could never move it — and
-   *    `DemoFlow`'s incoming-payment row combines it with `text-success`,
-   *    which rendered a *green* figure inside a *magenta* halo. The shadow now
-   *    derives from `currentColor`, so every figure glows its own colour and
-   *    that combination is unrepresentable.
-   *
-   * 3. The name described the decoration rather than the role, so a figure
-   *    that should not glow had nothing to opt into. `.figure` is the role.
-   *
-   * `tabular-nums` is folded in because every one of these is a number in a
-   * column or a number that animates, and both need fixed advance widths.
+   * `tabular-nums` stays, and is the reason the class still exists: every one of
+   * these is a number in a column or a number that animates, and both need fixed
+   * advance widths. `.figure` is the role, not the decoration.
    */
   .figure {
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
-    /* Fallback for browsers without color-mix(): the brand halo, dimmed. */
-    text-shadow: 0 0 12px rgb(var(--brand-strong) / 0.14);
-  }
-  @supports (color: color-mix(in srgb, red 50%, transparent)) {
-    .figure {
-      text-shadow: 0 0 12px color-mix(in srgb, currentColor 16%, transparent);
-    }
   }
 
   /**
-   * The logo tile: a lit gold face with a dark mark. A mark that changes colour
-   * with its surroundings stops being a mark, so the tile owns both halves and
-   * `currentColor` on the glyph inherits the second.
+   * The logo tile: one flat gold face with a dark mark.
    *
-   * The mark went white → `--on-brand` because the tile went dark → light. That
-   * is not a preference: white on this gradient is 1.6:1 at the top and 3.8:1 at
-   * the bottom, i.e. the coin in the harbour would have disappeared into the
-   * plating. The near-black clears 12.7:1 at the lit end and 5.0:1 at the
-   * shaded one, and it is what a stamped coin actually looks like.
+   * It was a 135° metallic gradient — `--gold-light` into `--gold` into
+   * `--gold-deep` — and that is the same plating the primary button gave up.
+   * Keeping it on the mark meant the two gold surfaces a reader sees most often
+   * were different golds: the CTA a flat `--brand`, the logo a lit face beside
+   * it in the same navbar. One of them had to move, and the mark is the one
+   * that gains from moving, because a wordmark is an identity rather than a
+   * material. Flat, the tile and the button are the same colour, which says
+   * "this is the brand's gold and this is the brand's action" with one value
+   * instead of two.
    *
-   * Four call sites used to pass `text-white` alongside this class, which won
-   * on source order and would have re-broken it silently; they now pass nothing
-   * and let the tile decide.
+   * `app/icon.svg` and `app/apple-icon.tsx` were flattened in the same pass, so
+   * the favicon, the home-screen icon and the navbar now agree.
+   *
+   * A mark that changes colour with its surroundings stops being a mark, so the
+   * tile owns both halves and `currentColor` on the glyph inherits the second.
+   * The mark is `--on-brand` near-black at 9.03:1, not white, which would be
+   * 1.6:1 — that part is unchanged and is not a preference.
    */
   .logo-tile {
-    background-image: linear-gradient(
-      135deg,
-      rgb(var(--gold-light)) 0%,
-      rgb(var(--gold)) 46%,
-      rgb(var(--gold-deep)) 100%
-    );
+    background-color: rgb(var(--brand));
     color: rgb(var(--on-brand));
   }
 
-  /* Subtle dotted grid, fades toward the edges. */
-  .bg-grid {
-    background-image: radial-gradient(rgb(var(--ink) / 0.05) 1px, transparent 1px);
-    background-size: 24px 24px;
-    -webkit-mask-image: radial-gradient(70% 60% at 50% 40%, #000 0%, transparent 100%);
-    mask-image: radial-gradient(70% 60% at 50% 40%, #000 0%, transparent 100%);
-  }
-
-  /* Fine film grain — kills banding across large tinted areas. */
-  .bg-noise::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.18;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
-  }
+  /*
+   * `.bg-grid` and `.bg-noise` used to live here.
+   *
+   * A dotted radial grid masked to a soft ellipse, and a 140px fractal-noise
+   * film grain composited at 18% in `overlay` blend. Both existed to give a
+   * large tinted area some texture, and both were only ever painted behind the
+   * illustrations — the last atmospheric layers on the site after the hero gave
+   * up its own. They are decoration behind a drawing, which is decoration
+   * competing with the one thing in the frame worth looking at.
+   *
+   * Deleted rather than dimmed. A grain at 6% is a grain.
+   */
 
   /**
    * The active navigation item's indicator: a hairline of gold under the label,
@@ -348,12 +329,12 @@
    * under it, which is what makes the state findable rather than merely
    * present.
    *
-   * Deliberately *not* animated, and that is the one place this identity says
-   * no to itself. The navbar is on every page, at the top, in peripheral
-   * vision, for the whole session. A reflection travelling across a 2px line
-   * there is not "premium", it is a tab that will not stop blinking. The
-   * gradient still has a lit centre, so it reads as the same lit metal as
-   * everything else — it is just holding still.
+   * One colour, and no animation. It was a five-stop gradient — transparent at
+   * both ends, `--gold` at the quarters, `--gold-highlight` at the centre — so
+   * a 2px rule under a nav label was drawn as a lit metal edge. At that size
+   * the specular is invisible as light and visible only as a slightly
+   * inconsistent colour, which is decoration that does not even read as
+   * decoration. A solid rule in the accent says "you are here" exactly as well.
    */
   .nav-current {
     position: relative;
@@ -365,24 +346,28 @@
     right: 0.625rem;
     bottom: 0.1rem;
     height: 2px;
-    border-radius: 999px;
     pointer-events: none;
-    background-image: linear-gradient(
-      90deg,
-      rgb(var(--gold) / 0) 0%,
-      rgb(var(--gold) / 0.8) 24%,
-      rgb(var(--gold-highlight) / 0.9) 50%,
-      rgb(var(--gold) / 0.8) 76%,
-      rgb(var(--gold) / 0) 100%
-    );
+    background-color: rgb(var(--brand-strong));
   }
 
-  /* Soft gold glow on completed progress-rail segments. */
-  .rail-done {
-    box-shadow: 0 0 10px 0 rgb(var(--brand) / 0.32);
-  }
+  /*
+   * `.rail-done` used to put a `0 0 10px` gold bloom on every completed segment
+   * of the demo's progress rail. The segment is already the only gold thing in
+   * a row of grey ones; a glow on top of that is a second way of saying
+   * "complete" that costs a light effect on a control the reader is watching
+   * step by step. The fill is the state.
+   */
 
-  /* Skeleton shimmer for loading states. */
+  /*
+   * Skeleton shimmer for loading states.
+   *
+   * This is feedback, not decoration: a static grey block is indistinguishable
+   * from an empty one, and the sweep is what says "still arriving". It is kept
+   * for that reason and neutralised for another — the sweep used to run through
+   * `--gold-highlight` and `--brand-strong`, which spent the accent on a
+   * placeholder. Gold on this site means the action to take or the number to
+   * read; a box that has not loaded yet is neither.
+   */
   .skeleton {
     position: relative;
     overflow: hidden;
@@ -396,8 +381,8 @@
     background: linear-gradient(
       100deg,
       transparent,
-      rgb(var(--gold-highlight) / 0.10) 42%,
-      rgb(var(--brand-strong) / 0.16) 50%,
+      rgb(var(--ink) / 0.06) 42%,
+      rgb(var(--ink) / 0.10) 50%,
       transparent
     );
     animation: skeleton-sweep 1.6s ease-in-out infinite;
@@ -412,17 +397,6 @@
       animation: none;
     }
   }
-  /**
-   * Two-light backdrop: warm gold in front, cool `--halo` water behind and
-   * lower. The offset between them is the whole effect — matched positions
-   * would just add up to one brighter smudge.
-   *
-   * The ratio inverted with the hue. Under magenta the accent led at 0.22 and
-   * the halo supported at 0.16, because the accent was dark enough to need the
-   * volume. Gold at 0.22 across half a section is a yellow cast, so the water
-   * now leads and the gold is the smaller, warmer light inside it — which is
-   * also the right way round for what this backdrop is supposed to depict.
-   */
   /**
    * Underline that grows from the left on hover, instead of appearing all at
    * once. Uses a background layer rather than `text-decoration` so the growth

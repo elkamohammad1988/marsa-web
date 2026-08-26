@@ -30,7 +30,12 @@ export default function Page() {
         description="European SEPA payments for modern lifestyles. Send money across all 36 SEPA countries for free."
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        art="card-stack"
+        // `phone-home`, not `card-stack`. The showcase further down this page
+        // is *about* the card and draws the stack there, so the hero was
+        // showing the reader the same picture twice — and showing a fan of
+        // cards above a headline about SEPA transfers. The phone screen has the
+        // balance and the Send action on it, which is what this page is for.
+        art="phone-home"
         tone="alt"
       />
 
@@ -83,12 +88,12 @@ export default function Page() {
         eyebrow="Marsa Vs Traditional Banks"
         title="See How SEPA Should Work"
         rows={[
-          { label: "Settlement Time", marsa: "< 10 seconds", traditional: "1-2 business days" },
-          { label: "Transfer Fee", marsa: "€0", traditional: "€0-3 per transfer" },
-          { label: "Daily Limit", marsa: "€50,000", traditional: "€10,000" },
-          { label: "Mobile Support", marsa: "Full-feature", traditional: "Limited" },
-          { label: "Cancel in flight", marsa: "Yes (within 5 sec)", traditional: "No" },
-          { label: "Multi-Currency", marsa: "30+ currencies", traditional: "EUR only" },
+          { label: "Settlement Time", subject: "< 10 seconds", comparator: "1-2 business days" },
+          { label: "Transfer Fee", subject: "€0", comparator: "€0-3 per transfer" },
+          { label: "Daily Limit", subject: "€50,000", comparator: "€10,000" },
+          { label: "Mobile Support", subject: "Full-feature", comparator: "Limited" },
+          { label: "Cancel in flight", subject: "Yes (within 5 sec)", comparator: "No" },
+          { label: "Multi-Currency", subject: "30+ currencies", comparator: "EUR only" },
         ]}
       />
 
@@ -140,7 +145,6 @@ export default function Page() {
         description="Open a free Marsa personal account and start sending SEPA payments today."
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        art="coin"
       />
     </>
   );

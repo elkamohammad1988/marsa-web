@@ -149,13 +149,26 @@ describe("every colour utility resolves to a defined token", () => {
       else names.add(key);
     }
 
-    // `backgroundImage` keys are reachable through `bg-`, so `bg-brand-gradient`
-    // is a real utility even though `brand-gradient` is not a colour.
-    const images = config.slice(config.indexOf("backgroundImage: {"));
-    for (const line of images.split("\n")) {
-      if (/^\s{6}\}/.test(line)) break;
-      const key = line.match(/^\s{8}"?([A-Za-z0-9-]+)"?:/);
-      if (key) names.add(key[1]);
+    /*
+     * `backgroundImage` keys are reachable through `bg-`, so `bg-brand-gradient`
+     * would be a real utility even though `brand-gradient` is not a colour.
+     *
+     * The block is currently absent — the 2026-08-26 design pass removed the
+     * last four decorative fills with the effects that used them — and this is
+     * written to notice that rather than to fall through it. `indexOf` returns
+     * -1 when the key is missing and `slice(-1)` is the *last character of the
+     * file*, so the loop found no keys: the right answer, reached by accident,
+     * and it would go on being "the right answer" if the block ever came back
+     * malformed. A gate that cannot tell absent from unparsed is the shape this
+     * file exists to complain about.
+     */
+    const imagesAt = config.indexOf("backgroundImage: {");
+    if (imagesAt !== -1) {
+      for (const line of config.slice(imagesAt).split("\n")) {
+        if (/^\s{6}\}/.test(line)) break;
+        const key = line.match(/^\s{8}"?([A-Za-z0-9-]+)"?:/);
+        if (key) names.add(key[1]);
+      }
     }
     return names;
   })();

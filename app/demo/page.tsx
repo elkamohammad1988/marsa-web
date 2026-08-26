@@ -66,7 +66,6 @@ export default function DemoPage() {
         description="The rate came from the European Central Bank, the IBAN passes a real ISO 13616 checksum, and every figure was computed by unit-tested arithmetic. The money is the one thing that is not real. There is none here, and no licence to move it."
         primaryCta={{ label: "What's real, and what isn't", href: "/company/compliance" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        art="coin"
       />
     </>
   );

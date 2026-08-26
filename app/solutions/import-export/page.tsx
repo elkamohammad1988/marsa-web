@@ -88,12 +88,12 @@ export default function Page() {
         eyebrow="Marsa Vs Traditional Banks"
         title="Why Trading Businesses Switch"
         rows={[
-          { label: "Supplier Payments", marsa: "SEPA + SWIFT, upfront fees", traditional: "SWIFT only, hidden fees" },
-          { label: "FX Markup", marsa: "Interbank + 0.3%", traditional: "2-4%" },
-          { label: "Currencies Held", marsa: "40+", traditional: "1-2" },
-          { label: "Incoming SWIFT Fee", marsa: "Flat, disclosed", traditional: "Lifting fees apply" },
-          { label: "Settlement Speed", marsa: "Same-day SEPA", traditional: "2-5 days" },
-          { label: "Account Manager", marsa: "Dedicated", traditional: "Call centre" },
+          { label: "Supplier Payments", subject: "SEPA + SWIFT, upfront fees", comparator: "SWIFT only, hidden fees" },
+          { label: "FX Markup", subject: "Interbank + 0.3%", comparator: "2-4%" },
+          { label: "Currencies Held", subject: "40+", comparator: "1-2" },
+          { label: "Incoming SWIFT Fee", subject: "Flat, disclosed", comparator: "Lifting fees apply" },
+          { label: "Settlement Speed", subject: "Same-day SEPA", comparator: "2-5 days" },
+          { label: "Account Manager", subject: "Dedicated", comparator: "Call centre" },
         ]}
       />
 
@@ -129,7 +129,7 @@ export default function Page() {
         title="Trade globally on one account"
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
-        art="coin-warm"
+
       />
     </>
   );

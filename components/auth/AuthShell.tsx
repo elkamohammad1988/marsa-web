@@ -58,7 +58,7 @@ export function AuthShell({
         returning customer wants nothing but the field.
       */}
       <aside className="hidden lg:block lg:pt-2">
-        <Link href="/" className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
+        <Link href="/" className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
           <Logo />
         </Link>
 
@@ -66,12 +66,14 @@ export function AuthShell({
           One account for every currency you get paid in.
         </p>
 
+        {/* The glyph, not a holder for it. Each of these sat inside a 32px
+            circle filled at `bg-brand/[0.12]` and ringed at `brand/25` — the
+            icon-tile pattern, at the top of the page where a returning customer
+            wants the password field and nothing else. */}
         <ul className="mt-8 space-y-4">
           {TRUST.map(({ icon: Icon, label }) => (
-            <li key={label} className="flex items-start gap-3.5">
-              <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/[0.12] ring-1 ring-brand/25">
-                <Icon className="h-4 w-4 text-brand-strong" />
-              </span>
+            <li key={label} className="grid grid-cols-[1.25rem_1fr] gap-x-3.5">
+              <Icon aria-hidden className="mt-1 h-5 w-5 text-brand-strong" />
               <span className="text-[15px] leading-relaxed text-ink-muted">{label}</span>
             </li>
           ))}

@@ -27,10 +27,15 @@ sandbox.
   from one file and stays coherent (no leftover light sections). The palette it
   replaced, "Black Rose", was magenta on near-black; the hue swap touched two
   files and no component logic, which is the claim the token layer exists to
-  make good on. A later pass removed the effect layer that sat on top of those
-  tokens — reflection, spotlight, gradient rims, frosted chrome, gradient
-  headline — on the grounds that it was decoration competing with the product;
-  the tokens underneath did not move.
+  make good on. Two later passes removed the effect layer that sat on top of
+  those tokens — first the reflection, the pointer spotlight, the gradient rims,
+  the frosted chrome and the gradient headline; then the glowing coin in every
+  closing CTA, the halo under every figure, the atmosphere behind every
+  illustration, the metallic logo tile and the last of the icon tiles. Each was
+  decoration competing with the product, and the tokens underneath did not move
+  — what moved is that the ones that existed only to feed an effect
+  (`--halo`, `--gold-highlight`, the CTA gradient stops, the whole
+  `backgroundImage` set) no longer exist either.
 - A **live currency converter and rate ticker** using real ECB reference rates.
 - An **interactive `/demo` sandbox** that walks the full loop — open account →
   KYC → European IBAN → receive a payout → **convert at the live interbank
@@ -160,6 +165,13 @@ worth reading. Magenta was a *dark* accent; gold is a *light* one:
   — but it does it by moving one step up the gold scale to `--gold-light`
   (**13.41:1**) instead of by multiplying brightness over a plating of inset
   highlights and a moving reflection.
+- **The mark went flat with it, and that took a second pass to see.** The button
+  stopped being metallic while `.logo-tile`, `app/icon.svg` and the iOS icon
+  each kept drawing the tile as a 135° gold gradient — so the two gold surfaces
+  a reader sees most often, in the same navbar, were different golds, and the
+  mark was drawn three ways in three files. All three are now the flat
+  `#D4AF37`, carrying the same `--on-brand` at **9.03:1** (white would be
+  1.6:1). A wordmark is an identity, not a material.
 - The surface ladder kept its lightness values to within 0.0001 and changed only
   its hue — rose-black (R and B above G) to water-slate (B above G above R).
   Every text token came out ahead: muted body copy went from 7.3:1 to **8.4:1**
@@ -211,7 +223,7 @@ All measured on the production build — method reproducible from the repo.
   them — a defect confined to the three routes behind the password, which is
   why the suite as it then stood — well over a thousand checks — and an axe
   pass over the public site had never seen it.
-- **Tests (2026-08-24)** — **1878 / 1878** Vitest across 52 files, covering
+- **Tests (2026-08-26)** — **1871 / 1871** Vitest across 52 files, covering
   IBAN/MOD-97, FX, pagination, storage provider selection, admin auth (HMAC
   round-trip, tamper, expiry), session signing, RLS-backed profile reads, CSV
   injection-safety, and the analytics funnel (unique-session counting,
@@ -271,7 +283,7 @@ is visible commit by commit in the git log.
 > accounts built on Postgres row-level security — policies written and tested,
 > deliberately not wired to a live database — and a first-party analytics
 > backend.
-> Dark "liquid gold" design system on one set of role-named tokens; 1,878
+> Dark "liquid gold" design system on one set of role-named tokens; 1,871
 > passing tests and 0 axe violations across 74 scans; illustrations drawn
 > from those tokens rather than sourced; and a hard line between real software
 > and a build that tells you exactly what it is not. Next.js 15 / React 19 /

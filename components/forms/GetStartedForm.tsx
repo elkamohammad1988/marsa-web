@@ -66,7 +66,7 @@ export function GetStartedForm({ defaultType = "personal", defaultPlan }: Props)
     <form
       onSubmit={onSubmit}
       noValidate
-      className="relative rounded-card-lg border border-line bg-card p-6 shadow-card md:p-8"
+      className="relative rounded-card-lg border border-line bg-card p-6 shadow-e1 md:p-8"
     >
       {/*
         Above the first field, not under the button.
@@ -77,7 +77,7 @@ export function GetStartedForm({ defaultType = "personal", defaultPlan }: Props)
         page. The button now names the action it performs and the caveat
         arrives before the first keystroke.
       */}
-      <p className="mb-6 rounded-xl border border-line bg-canvas/50 px-4 py-3 text-sm leading-relaxed text-ink-muted">
+      <p className="mb-6 rounded-card border border-line bg-canvas/50 px-4 py-3 text-sm leading-relaxed text-ink-muted">
         <span className="font-medium text-ink">This form keeps nothing.</span> It checks your
         details against the real validation rules and then discards them. There is no account at
         the end of it, and nobody will reply.

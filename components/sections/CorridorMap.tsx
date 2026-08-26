@@ -1,14 +1,43 @@
 import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
-import { MarsaMark } from "@/components/icons/Logo";
 import { Reveal } from "@/components/ui/Reveal";
+import { Stagger } from "@/components/ui/Stagger";
 
 /**
- * The corridor diagram: money arriving from marketplaces and clients abroad,
- * landing in one Marsa account, then leaving on local rails.
+ * The corridor: money arriving from marketplaces and clients abroad, landing in
+ * one European IBAN, then leaving on local rails.
  *
- * The arcs are a single SVG layer stretched behind a three-column grid, so the
- * diagram reflows on mobile (columns stack, arcs fade out) without any JS.
+ * ## What this was
+ *
+ * A centred heading over a centred paragraph over a three-column diagram: six
+ * bordered cards, a gold tile in the middle, and twelve dashed SVG arcs on an
+ * infinite `dash-flow` animation crawling between them.
+ *
+ * Four things were wrong with it, and they are worth separating because only
+ * one of them is a matter of taste:
+ *
+ * 1. **The arcs were painted in the previous palette.** `stop-color` was
+ *    hardcoded `rgb(216 167 177)` and `rgb(185 137 92)` — dusty pink and brown,
+ *    left behind by the rose-black identity this site replaced with gold. No
+ *    token could reach them, so they had quietly been off-brand since the
+ *    rebrand: the one section claiming to draw the product's central idea was
+ *    drawing it in the wrong colour.
+ * 2. **The motion never stopped.** An infinite animation is a permanent claim
+ *    on peripheral attention, and this one ran on a section a reader passes
+ *    through on the way to the converter.
+ * 3. **The cards were not objects.** Each held a name and a two-word note.
+ *    That is a row.
+ * 4. **The rhythm.** Centred head, centred paragraph, symmetrical grid — the
+ *    third section on the page to take that shape.
+ *
+ * ## What it is now
+ *
+ * The same statement, made by the layout instead of by decoration. The heading
+ * block goes left, where the rest of the page's copy sits. The three columns
+ * survive because the content genuinely has three parts — in, the account, out
+ * — but they are ruled lists under labels, and the middle column says in words
+ * what the arcs were miming. The direction is carried by the reveal variants,
+ * which is where it was always doing the most work.
  */
 
 const INBOUND = [
@@ -23,120 +52,88 @@ const OUTBOUND = [
   { label: "Card spending", meta: "Interbank FX" },
 ];
 
-function Node({ label, meta, align }: { label: string; meta: string; align: "left" | "right" }) {
+function Flow({ items }: { items: { label: string; meta: string }[] }) {
   return (
-    <li
-      className={`flex flex-col rounded-card border border-white/10 bg-white/[0.05] px-4 py-3 ${
-        align === "right" ? "lg:items-end lg:text-right" : ""
-      }`}
-    >
-      <span className="text-sm font-semibold text-white">{label}</span>
-      <span className="text-xs text-white/55">{meta}</span>
-    </li>
+    <Stagger as="ul" className="mt-4 border-t border-white/12" step={70}>
+      {items.map((n) => (
+        <li key={n.label} className="flex flex-col border-b border-white/12 py-3.5">
+          <span className="text-sm font-semibold text-white">{n.label}</span>
+          <span className="mt-0.5 text-xs text-white/55">{n.meta}</span>
+        </li>
+      ))}
+    </Stagger>
+  );
+}
+
+function ColumnLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
+      {children}
+    </h3>
   );
 }
 
 export function CorridorMap() {
   return (
-    <section className="relative isolate overflow-hidden bg-surface-deep py-14 md:py-20 lg:py-24">
+    /*
+      `overflow-hidden` is load-bearing, not tidiness.
 
-      <Container className="relative">
-        <Reveal className="mx-auto max-w-2xl text-center">
-          <Heading level="eyebrow" className="text-brand-soft">
+      The two outer columns enter with `reveal-left` / `reveal-right`, which is
+      a `translate3d(∓32px, 0, 0)` held until the observer fires. Below `md`
+      those columns are full-viewport width, so during the hidden state the
+      right-hand one starts 32px past the right edge of the document — and an
+      untransformed 12px of that survived, which is a horizontal scrollbar on
+      the home page at 390px.
+
+      This section carried `overflow-hidden` before the rewrite and losing it
+      was the regression; `tests/smoke/public-site.smoke.ts` caught it at 390px
+      on the next run. Any section whose children enter along the x-axis has to
+      clip, because the transform is what the document measures.
+    */
+    <section className="overflow-hidden bg-surface-deep py-14 md:py-20 lg:py-24">
+      <Container>
+        <Reveal className="max-w-2xl">
+          <Heading level="eyebrow" className="text-brand-strong">
             One account, both directions
           </Heading>
           <Heading level="h2" className="rise mt-3 text-white">
             Get paid from anywhere. Pay out locally.
           </Heading>
-          <p className="mt-4 text-white/70">
+          <p className="mt-4 text-white/70 md:text-lg">
             Money from marketplaces, platforms and clients abroad lands in your own European IBAN.
             From there you convert at interbank rates and pay out on local rails, without a second
             bank in the middle.
           </p>
         </Reveal>
 
-        <div className="relative mt-12">
-          {/* Connecting arcs — decorative, hidden on stacked layouts. */}
-          <svg
-            aria-hidden
-            viewBox="0 0 1000 320"
-            preserveAspectRatio="none"
-            className="pointer-events-none absolute inset-0 hidden h-full w-full lg:block"
-          >
-            <defs>
-              <linearGradient id="corridor-in" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="rgb(216 167 177)" stopOpacity="0" />
-                <stop offset="100%" stopColor="rgb(216 167 177)" stopOpacity="0.95" />
-              </linearGradient>
-              <linearGradient id="corridor-out" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="rgb(185 137 92)" stopOpacity="0.95" />
-                <stop offset="100%" stopColor="rgb(185 137 92)" stopOpacity="0" />
-              </linearGradient>
-            </defs>
+        <div className="mt-12 grid grid-cols-1 gap-x-12 gap-y-10 md:mt-16 md:grid-cols-3">
+          {/* Each column enters along the axis its own money travels: inbound
+              from the left, outbound to the right, converging on the account in
+              the middle. It is the one place on the site where the direction of
+              a reveal says the same thing as the content it reveals — which is
+              the difference between motion applied to a page and motion
+              designed for one. */}
+          <Reveal variant="left" as="section">
+            <ColumnLabel>Money in</ColumnLabel>
+            <Flow items={INBOUND} />
+          </Reveal>
 
-            {[60, 160, 260].map((y, i) => (
-              <path
-                key={`in-${y}`}
-                d={`M250 ${y} C 360 ${y}, 400 160, 490 160`}
-                fill="none"
-                stroke="url(#corridor-in)"
-                strokeWidth="2"
-                strokeDasharray="10 14"
-                className="animate-dash-flow"
-                style={{ animationDelay: `${i * 0.45}s` }}
-              />
-            ))}
-            {[60, 160, 260].map((y, i) => (
-              <path
-                key={`out-${y}`}
-                d={`M510 160 C 600 160, 640 ${y}, 750 ${y}`}
-                fill="none"
-                stroke="url(#corridor-out)"
-                strokeWidth="2"
-                strokeDasharray="10 14"
-                className="animate-dash-flow"
-                style={{ animationDelay: `${i * 0.45 + 0.2}s` }}
-              />
-            ))}
-          </svg>
-
-          <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-[1fr_auto_1fr] lg:gap-4">
-            {/* Each column enters along the axis its own arcs travel: inbound
-                from the left, outbound to the right, converging on the mark in
-                the middle. It is the one place on the site where the direction
-                of a reveal is saying the same thing as the diagram it is
-                revealing — which is the difference between motion applied to a
-                page and motion designed for one. */}
-            <Reveal variant="left">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
-                Money in
+          <Reveal delay={120} as="section">
+            <ColumnLabel>In one account</ColumnLabel>
+            <div className="mt-4 border-t border-white/12 pt-3.5">
+              <p className="text-sm font-semibold text-white">One European IBAN</p>
+              <p className="mt-2 text-sm leading-relaxed text-white/65">
+                Every payment above settles into the same account, in the currency it arrived in.
+                Nothing is converted until you choose to convert it, and the rate you get is the
+                one the European Central Bank published.
               </p>
-              <ul className="flex flex-col gap-3">
-                {INBOUND.map((n) => (
-                  <Node key={n.label} {...n} align="left" />
-                ))}
-              </ul>
-            </Reveal>
+            </div>
+          </Reveal>
 
-            <Reveal delay={120} className="flex justify-center">
-              <div className="relative grid h-32 w-32 place-items-center">
-                <span className="relative grid h-20 w-20 place-items-center overflow-hidden rounded-card bg-brand text-on-brand">
-                  <MarsaMark className="h-11 w-11" />
-                </span>
-              </div>
-            </Reveal>
-
-            <Reveal variant="right" delay={200}>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/45 lg:text-right">
-                Money out
-              </p>
-              <ul className="flex flex-col gap-3">
-                {OUTBOUND.map((n) => (
-                  <Node key={n.label} {...n} align="right" />
-                ))}
-              </ul>
-            </Reveal>
-          </div>
+          <Reveal variant="right" delay={200} as="section">
+            <ColumnLabel>Money out</ColumnLabel>
+            <Flow items={OUTBOUND} />
+          </Reveal>
         </div>
       </Container>
     </section>

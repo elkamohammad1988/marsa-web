@@ -56,7 +56,7 @@ export function AccountPreview({ className }: { className?: string }) {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="logo-tile grid h-8 w-8 place-items-center rounded-[10px]">
+            <span className="logo-tile grid h-8 w-8 place-items-center rounded-card">
               <MarsaMark className="h-5 w-5" />
             </span>
             <div className="leading-tight">
@@ -100,7 +100,7 @@ export function AccountPreview({ className }: { className?: string }) {
           {BALANCES.map((b) => (
             <li
               key={b.code}
-              className="rounded-xl border border-line/70 bg-canvas/50 px-3 py-2.5"
+              className="rounded-card border border-line/70 bg-canvas/50 px-3 py-2.5"
             >
               <p className="text-[11px] font-semibold tracking-wide text-ink-subtle">{b.code}</p>
               <p className="mt-0.5 text-sm font-semibold text-ink">

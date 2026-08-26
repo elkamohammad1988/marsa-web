@@ -24,7 +24,7 @@ export function FormAlert({
     <p
       role={tone === "error" ? "alert" : "status"}
       className={cn(
-        "rounded-xl border px-4 py-3 text-sm",
+        "rounded-card border px-4 py-3 text-sm",
         tone === "error"
           ? "border-danger/40 bg-danger/[0.08] text-danger"
           : "border-success/40 bg-success/[0.08] text-success",

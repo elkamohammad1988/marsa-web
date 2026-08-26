@@ -53,7 +53,7 @@ export function FxCalculator() {
   }, [amount, rate, bankMarkup]);
 
   return (
-    <div className="rounded-card-lg border border-line bg-card p-6 shadow-card md:p-8">
+    <div className="rounded-card-lg border border-line bg-card p-6 shadow-e1 md:p-8">
       {/* Two equal columns. The middle track used to hold a bare `→` glyph
           between them; with the glyph gone the two fields share the row. */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-end">
@@ -61,7 +61,7 @@ export function FxCalculator() {
           <label htmlFor="calc-amount" className="mb-1.5 block text-sm font-medium text-ink">
             Amount to convert
           </label>
-          <div className="flex items-center gap-2 rounded-xl border border-line px-3">
+          <div className="flex items-center gap-2 rounded-lg border border-line px-3">
             <input
               id="calc-amount"
               type="number"

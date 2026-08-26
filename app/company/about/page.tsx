@@ -4,8 +4,6 @@ import { Section } from "@/components/ui/Section";
 import { Heading } from "@/components/ui/Heading";
 import { BreadcrumbEyebrow } from "@/components/sections/BreadcrumbEyebrow";
 import { CTACard } from "@/components/sections/CTACard";
-import { FeatureIcon } from "@/components/ui/FeatureIcon";
-import { IconGlobe, IconShield, IconLock, IconLightning } from "@/components/icons";
 import { buildMetadata } from "@/lib/seo";
 import { FX_CURRENCIES } from "@/lib/fx";
 import { IBAN_LENGTHS } from "@/lib/iban";
@@ -64,24 +62,35 @@ const stats = [
   },
 ];
 
+/**
+ * Four rules, as a numbered sequence rather than as four cards.
+ *
+ * Each of these carried an icon in a 48px gradient tile: a shield for "say what
+ * is true", a padlock for "make the bug unrepresentable", a lightning bolt for
+ * "no claim without something that checks it", a globe for "one palette". None
+ * of the four glyphs had anything to do with the sentence beside it — they were
+ * there because the card shape has a slot at the top, which is the definition
+ * of decoration. The tiles are gone and so is the last caller of `FeatureIcon`.
+ *
+ * The cards went with them. Four bordered panels holding nothing but a heading
+ * and a paragraph is a border around a paragraph; these are prose, and prose
+ * wants a rule and a number, which is also what says "there are four of these
+ * and they are in an order" without a badge saying it.
+ */
 const principles = [
   {
-    icon: <IconShield />,
     title: "Say what is true, including when it is small",
     text: "A concept describing free SEPA transfers is a product claim about a hypothetical product. A page telling you that you may refer a complaint to the financial ombudsman is a false statement about a legal right. The line is drawn there, and the disclosure sits in the navbar on every page rather than in a footnote.",
   },
   {
-    icon: <IconLock />,
     title: "Make the bug unrepresentable, not fixed",
     text: "A failed database write used to return “accepted but not persisted”, and four separate callers each had to remember to check. The write now either resolves or throws, and there is no value left for a caller to ignore. Much of the work in this repository has that shape: remove the state that allowed the mistake.",
   },
   {
-    icon: <IconLightning />,
     title: "No claim without something that checks it",
     text: "Contrast ratios, IBAN checksums, rate arithmetic, security headers, whether the sitemap points at pages that exist — each is asserted by a test that fails if the claim stops being true. The useful ones guard the shape of a past mistake rather than its instance.",
   },
   {
-    icon: <IconGlobe />,
     title: "One palette, no configuration theatre",
     text: "Dark by default, in a single set of tokens. An earlier version shipped a light theme that was a value-for-value copy of the dark one, plus a script in the document head to switch between them — a closed loop that could not change a rendered colour. It is gone, and the contrast of what remains is measured rather than assumed.",
   },
@@ -135,19 +144,29 @@ export default function Page() {
 
       <Section tone="canvas" size="lg">
         <Container>
-          <div className="mx-auto max-w-3xl text-center">
+          <div className="max-w-2xl">
             <Heading level="h2">How it was built</Heading>
             <p className="mt-3 text-ink-muted">Four rules that settled most of the arguments.</p>
           </div>
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2">
-            {principles.map((p) => (
-              <div key={p.title} className="rounded-card-lg border border-line bg-card p-6">
-                <FeatureIcon tone="brand">{p.icon}</FeatureIcon>
-                <h3 className="mt-4 text-lg font-semibold text-ink">{p.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-muted">{p.text}</p>
-              </div>
+          <ol className="mt-10 border-t border-line md:mt-12">
+            {principles.map((p, i) => (
+              <li
+                key={p.title}
+                className="grid grid-cols-1 gap-x-10 gap-y-2 border-b border-line py-7 md:grid-cols-12 md:py-9"
+              >
+                <span
+                  aria-hidden
+                  className="font-display text-sm font-bold tabular-nums tracking-tight text-brand-strong md:col-span-1"
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="text-lg font-semibold text-ink md:col-span-4">{p.title}</h3>
+                <p className="max-w-prose text-sm leading-relaxed text-ink-muted md:col-span-7">
+                  {p.text}
+                </p>
+              </li>
             ))}
-          </div>
+          </ol>
         </Container>
       </Section>
 
@@ -187,7 +206,6 @@ export default function Page() {
         description="Live ECB rates, offline IBAN validation, and a walkthrough of the onboarding flow. The software, without the company."
         primaryCta={{ label: "Try the demo", href: "/demo" }}
         secondaryCta={{ label: "Check an IBAN", href: "/tools/iban-checker" }}
-        art="coin-warm"
       />
     </>
   );

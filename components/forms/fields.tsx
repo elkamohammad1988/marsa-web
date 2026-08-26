@@ -10,10 +10,22 @@ import type {
 import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
 
+/*
+ * The disabled state names its own colours instead of washing the whole control
+ * out with `disabled:opacity-60`.
+ *
+ * Opacity blends against whatever is behind the field, so what the label
+ * measures depends on the surface the form was dropped onto rather than on
+ * anything decided here — and it dims the border and the placeholder by the
+ * same amount, which is three separate signals fading together. The explicit
+ * pair is `--surface-tint-2` behind `--ink-subtle`: **8.68:1**, unmistakably a
+ * different state from the live field, and the same number wherever the form is
+ * placed. `Button` already worked this way; this is the rest of the form.
+ */
 const control =
   "w-full rounded-lg border bg-canvas px-4 text-sm text-ink placeholder:text-ink-subtle " +
   "transition-colors focus:outline-none focus:ring-2 focus:ring-brand-strong/30 focus:border-brand " +
-  "disabled:cursor-not-allowed disabled:opacity-60";
+  "disabled:cursor-not-allowed disabled:border-line disabled:bg-surface-tint-2 disabled:text-ink-subtle";
 
 function borderClass(hasError?: boolean): string {
   return hasError ? "border-danger/60" : "border-line";

@@ -51,7 +51,11 @@ const base =
   // The native popup inherits the OS surface, not ours; give the options a
   // readable pair explicitly for the browsers that do honour it.
   "[&>option]:bg-card [&>option]:text-ink " +
-  "disabled:cursor-not-allowed disabled:opacity-60";
+  // An explicit colour rather than `disabled:opacity-60`, for the reason spelled
+  // out in `components/forms/fields.tsx`: opacity is a blend against an unknown
+  // surface. `--ink-subtle` is 7.57:1 on the field shell's `--surface-tint` and
+  // 8.68:1 on the tint below it.
+  "disabled:cursor-not-allowed disabled:text-ink-subtle";
 
 const shells: Record<Variant, string> = {
   /** Full-width form control. */

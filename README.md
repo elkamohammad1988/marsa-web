@@ -78,15 +78,21 @@ out to be false. The set went a commit stale when a UI cleanup removed
 decoration the images still showed, so **re-run the capture before publishing
 them anywhere**.
 
-All seven regenerated **2026-08-25**, against the design pass that removed the
-effect layer — so these show flat surfaces, a solid gold button and a
-single-colour headline, where the previous set showed gradient rims, a
-pointer-tracking spotlight and a headline clipped to a gradient. That is the
-second time this set has had to be re-shot for the same reason, which is the
-argument for the rule above rather than against it. **Note the images now lead
-the deployment**: they are the local production build of this branch, and
-https://marsa-web.vercel.app still serves the previous design until this is
-merged and deployed.
+All seven regenerated **2026-08-26**, against the second design pass — so these
+show a flat gold mark beside a flat gold button, figures set as plain type, and
+illustrations on a flat deep panel. The set they replace still had the metallic
+logo tile, a soft halo under every balance and price, and a two-light mesh
+gradient behind each drawing. That is the third time this set has had to be
+re-shot for the same reason, which is the argument for the rule above rather
+than against it. **Note the images lead the deployment**: they are the local
+production build of this branch, and https://marsa-web.vercel.app still serves
+the previous design until this is merged and deployed.
+
+The Upwork catalog set in `upwork-catalog/` is deliberately **not** regenerated
+here. It is photographed from the deployed URL by rule, because a buyer's first
+check is to open that URL and compare — so it stays as-shot until this branch is
+deployed, and re-shooting it from localhost would break the one property that
+makes it worth anything.
 
 **Every one carries the concept-build disclosure**, because the site
 does — the capture script throws rather than write an unmarked image, and
@@ -165,6 +171,45 @@ surface ladder whose rungs are ≥1.03 apart by construction. The primary button
 got measurably *better* out of it: a flat fill holds its label at **9.03:1**
 where the gradient ran from 11.75:1 down to 6.07:1 across its own face.
 
+A second pass took the remainder, because "the effect layer" turned out to have
+had a floor under it. What went, and what it cost:
+
+- **The coin.** The brand mark drawn as a struck disc inside a blurred gold orb,
+  ringed by two concentric hairlines and seated on a gold bloom, in every
+  closing CTA and two pricing plans — thirteen slots. A glowing sphere with halo
+  rings in a dark box is the most legible signature of a generated page, and
+  unlike the phone and the card it depicted nothing. The CTA spends the space on
+  the ask instead. Six illustrations became four.
+- **The halo under every number.** `.figure` carried a `text-shadow` of
+  `currentColor` at 16%, dimmed twice across two passes and each time kept. A
+  balance that glows reads as a mockup of a bank; the class is now type settings
+  only, and `tabular-nums` is the reason it still exists.
+- **The atmosphere behind the drawings.** A two-light mesh gradient, a masked
+  dotted grid and a film grain sat behind every illustration and blog cover. The
+  hero gave those up first; the art panels are flat deep surfaces now, which is
+  the right ground for something whose whole job is to be looked at.
+- **The metallic mark.** `.logo-tile`, `app/icon.svg` and the iOS home-screen
+  icon each drew the tile as a 135° gold gradient — three treatments of one
+  mark, beside a button that had already gone flat. All three are `#D4AF37`, so
+  the brand's gold and the brand's action are now the same value.
+- **The icon tiles.** A 44-48px filled square behind a 20px glyph, on the about
+  page, the contact page and the sign-in panel. `components/ui/FeatureIcon.tsx`
+  had no callers left and is deleted.
+- **One radius system.** Panels 10/14px, controls 8px (12px for a group
+  wrapping them), labels 6px, and `rounded-full` only where the thing is
+  actually round. The same Personal/Business switch had been a pill on
+  `/pricing` and a 12px group on `/get-started`; thirty-odd pills were tabs,
+  buttons and badges. The rule is written out in `tailwind.config.ts`.
+- **Disabled states name their colours.** `opacity-50` on the pagination step
+  measured **4.82:1** — a value nobody chose, one surface change from failing.
+  It, and the two form controls still washing out at `opacity-60`, now set
+  explicit tokens the way `Button` already did.
+
+The dead tokens went with them: `backgroundImage` entirely (`brand-gradient`,
+`cta-gradient`, `radial-glow`, `mesh-deep`), the `--halo` second light source,
+`--cta-from` / `--cta-to`, `--gold-highlight`, `shadow-glow`, the `shadow-card`
+and `shadow-elevated` aliases, and the `dash-flow` keyframe.
+
 **Provider selection by environment.** Every side-effect layer — storage, email,
 rate limiting, analytics — picks its implementation from environment variables
 behind one interface. Zero config runs the whole app on a file store; set
@@ -242,7 +287,7 @@ npm run verify         # typecheck → lint → tests → production build
 npm audit              # 0 vulnerabilities, dev tree included
 ```
 
-**What the suite covers.** 1,878 automated checks across 52 files, all running
+**What the suite covers.** 1,871 automated checks across 52 files, all running
 in Node — plus 139 browser checks in a separate suite, below:
 
 - **Unit tests for business logic and security boundaries** — IBAN MOD-97, FX

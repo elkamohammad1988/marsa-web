@@ -81,11 +81,12 @@ export function FunnelView({ report, provider }: { report: FunnelReport; provide
           2. The remainder of the track is drawn, faintly, as the portion
              lost. A funnel step is a ratio, and only showing the numerator
              hides the thing the chart exists to show.
-          3. Drop-off is no longer `text-brand-strong`. Magenta is this site's
-             affirmative colour — it is the CTA, the logo and the progress
-             rail — so painting an attrition figure in it told the reader that
-             losing 13% of sessions was on-brand good news. It is now muted,
-             and only the single worst step is called out, in `warning`.
+          3. Drop-off is no longer `text-brand-strong`. The brand accent is
+             this site's affirmative colour — it is the CTA, the mark and the
+             progress rail — so painting an attrition figure in it told the
+             reader that losing 13% of sessions was on-brand good news. It is
+             now muted, and only the single worst step is called out, in
+             `warning`.
         */
         <div className="mt-6 overflow-hidden rounded-card bg-card shadow-e1 ring-1 ring-line">
           {report.rows.map((row, i) => {
@@ -117,7 +118,7 @@ export function FunnelView({ report, provider }: { report: FunnelReport; provide
                     {row.dropPct > 0 && (
                       <span
                         className={
-                          "ml-2.5 rounded-full px-1.5 py-0.5 text-[11px] font-medium tabular-nums " +
+                          "ml-2.5 rounded-md px-1.5 py-0.5 text-[11px] font-medium tabular-nums " +
                           (isWorstDrop
                             ? "bg-warning/10 text-warning"
                             : "bg-ink/[0.06] text-ink-subtle")

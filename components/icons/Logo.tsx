@@ -30,7 +30,7 @@ export function MarsaMark({ className }: { className?: string }) {
 
 type LogoProps = {
   className?: string;
-  /** Wordmark colour. The mark tile is always the gold gradient. */
+  /** Wordmark colour. The mark tile is always the flat brand gold. */
   tone?: "white" | "ink";
   /** Hide the wordmark and render only the mark tile. */
   markOnly?: boolean;
@@ -55,7 +55,7 @@ export function Logo({
     <span className={cn("group inline-flex items-center gap-2.5 select-none", className)}>
       <span
         aria-hidden
-        className="logo-tile relative grid h-9 w-9 place-items-center rounded-[10px]"
+        className="logo-tile relative grid h-9 w-9 place-items-center rounded-card"
       >
         <MarsaMark className="h-[22px] w-[22px]" />
       </span>

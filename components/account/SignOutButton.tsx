@@ -19,7 +19,7 @@ export function SignOutButton({ className }: { className?: string }) {
       <button
         type="submit"
         className={cn(
-          "inline-flex h-9 items-center rounded-full border border-line px-4 text-sm font-medium text-ink",
+          "inline-flex h-9 items-center rounded-lg border border-line px-4 text-sm font-medium text-ink",
           "transition-colors hover:bg-ink/5",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas",
           className,

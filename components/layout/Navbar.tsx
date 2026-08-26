@@ -263,7 +263,7 @@ export function Navbar({ authConfigured }: { authConfigured: boolean }) {
                               aria-current={current ? "page" : undefined}
                               onClick={() => setOpenGroup(null)}
                               className={cn(
-                                "block rounded-xl px-3 py-2 text-sm transition-colors hover:bg-brand/[0.06] hover:text-ink",
+                                "block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-brand/[0.06] hover:text-ink",
                                 "focus-visible:bg-brand/[0.06] focus-visible:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-brand-strong",
                                 current
                                   ? "bg-brand/[0.08] text-brand-strong"

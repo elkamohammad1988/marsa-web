@@ -199,7 +199,7 @@ export function Hero({
               <div className="relative animate-scale-in [animation-delay:120ms]">
                 <div
                   className={cn(
-                    "relative aspect-[4/3] w-full overflow-hidden rounded-card-lg shadow-elevated",
+                    "relative aspect-[4/3] w-full overflow-hidden rounded-card-lg",
                     isDark
                       ? "border border-white/10 bg-white/[0.03]"
                       : "border border-line bg-surface-tint",
@@ -208,11 +208,18 @@ export function Hero({
                   <BrandArt name={art} />
                 </div>
 
-                {/* Truthful live-data badge (the tools use real ECB rates). */}
-                <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-full border border-line bg-card px-3.5 py-2 text-xs font-medium text-ink shadow-e2 md:left-6">
-                  <span aria-hidden className="h-2 w-2 flex-none rounded-full bg-brand" />
-                  Live ECB rates
-                </div>
+                {/*
+                  The "Live ECB rates" badge is gone, and not only because it
+                  was a shadowed pill floating half outside the frame it
+                  belonged to — the shape the brief names as a floating badge.
+
+                  It was also attached to the wrong thing. It rendered on every
+                  hero that takes an `art` prop, so a *drawing* of a phone was
+                  captioned as live data on ten pages. The rates really are
+                  live, in the two places that read them: the converter and the
+                  ticker, both of which stamp their own source and time. A claim
+                  belongs on the thing making it.
+                */}
               </div>
             )
           )}

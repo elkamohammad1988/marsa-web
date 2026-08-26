@@ -20,12 +20,18 @@
  * `lib/blog.ts` and the test suite can both reach them without importing JSX.
  */
 
-/** The six product illustrations, drawn by `BrandArt.tsx`. */
+/**
+ * The four product illustrations, drawn by `BrandArt.tsx`.
+ *
+ * There were six. `coin` and `coin-warm` drew the Marsa mark as a glowing disc
+ * inside a blurred orb with two halo rings, and they are gone with the effect —
+ * see the note where `Coin` used to be in `BrandArt.tsx`. What is left all
+ * depicts the product rather than the brand: two phone screens and two views of
+ * the card.
+ */
 export type ArtName =
   | "card-and-phone"
   | "card-stack"
-  | "coin"
-  | "coin-warm"
   | "phone-accounts"
   | "phone-home";
 
@@ -43,9 +49,6 @@ export const ART_CAPTIONS: Record<ArtName, string> = {
     "Illustration of a Marsa payment card resting against a phone showing an account balance of €12,480.55 with send and convert actions.",
   "card-stack":
     "Illustration of three Marsa payment cards fanned out, each unbranded and marked as a concept.",
-  coin: "Illustration of the Marsa mark struck as a coin coming to rest, with ripples spreading out around it.",
-  "coin-warm":
-    "Illustration of the Marsa mark struck as a warm-toned coin, with ripples spreading out around it.",
   "phone-accounts":
     "Illustration of the Marsa app listing euro, dollar and pound balances side by side, with an option to open another currency.",
   "phone-home":

@@ -82,12 +82,12 @@ export default function Page() {
         eyebrow="Marsa Vs Generic EMIs"
         title="Why Sellers Choose Marsa"
         rows={[
-          { label: "Amazon Acceptance", marsa: "Yes, EU IBAN", traditional: "Limited" },
-          { label: "Stripe Acceptance", marsa: "Yes", traditional: "Often rejected" },
-          { label: "FX Markup", marsa: "0% up to €10k", traditional: "1-3%" },
-          { label: "USD Receiving", marsa: "Local ACH", traditional: "SWIFT only" },
-          { label: "Payout Speed", marsa: "Same day", traditional: "2-5 days" },
-          { label: "Support", marsa: "Dedicated", traditional: "Generic" },
+          { label: "Amazon Acceptance", subject: "Yes, EU IBAN", comparator: "Limited" },
+          { label: "Stripe Acceptance", subject: "Yes", comparator: "Often rejected" },
+          { label: "FX Markup", subject: "0% up to €10k", comparator: "1-3%" },
+          { label: "USD Receiving", subject: "Local ACH", comparator: "SWIFT only" },
+          { label: "Payout Speed", subject: "Same day", comparator: "2-5 days" },
+          { label: "Support", subject: "Dedicated", comparator: "Generic" },
         ]}
       />
 
@@ -123,7 +123,7 @@ export default function Page() {
         title="Open your EU e-commerce business account"
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
-        art="coin-warm"
+
       />
     </>
   );

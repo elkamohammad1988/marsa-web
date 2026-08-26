@@ -73,7 +73,7 @@ export default async function AccountDirectoryPage() {
       )}
 
       {!failed && (
-        <section className="overflow-hidden rounded-card-lg border border-line bg-card shadow-card">
+        <section className="overflow-hidden rounded-card-lg border border-line bg-card shadow-e1">
           {/* Horizontal scroll is confined to the table, so the page itself
               never scrolls sideways on a narrow screen. */}
           <ScrollRegion label="Accounts table" className="rounded-none">

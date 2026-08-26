@@ -71,12 +71,12 @@ export default function Page() {
         eyebrow="Marsa Vs Traditional Banks"
         title="Built for cross-border operations"
         rows={[
-          { label: "Currencies Supported", marsa: "30+", traditional: "1-3" },
-          { label: "FX Markup", marsa: "0% (up to €10k)", traditional: "2-4%" },
-          { label: "Local Receiving", marsa: "EU + UK + US", traditional: "Home country only" },
-          { label: "Bulk Payments", marsa: "Native + API", traditional: "Manual" },
-          { label: "SWIFT Out", marsa: "Low flat fee", traditional: "€20-40" },
-          { label: "Support", marsa: "Dedicated", traditional: "Generic" },
+          { label: "Currencies Supported", subject: "30+", comparator: "1-3" },
+          { label: "FX Markup", subject: "0% (up to €10k)", comparator: "2-4%" },
+          { label: "Local Receiving", subject: "EU + UK + US", comparator: "Home country only" },
+          { label: "Bulk Payments", subject: "Native + API", comparator: "Manual" },
+          { label: "SWIFT Out", subject: "Low flat fee", comparator: "€20-40" },
+          { label: "Support", subject: "Dedicated", comparator: "Generic" },
         ]}
       />
 
@@ -128,7 +128,6 @@ export default function Page() {
         title="Your Business, Limitless"
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
-        art="coin-warm"
       />
     </>
   );

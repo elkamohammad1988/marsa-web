@@ -18,7 +18,7 @@ export default function AdminLoading() {
           <Skeleton className="h-7 w-40" />
           <Skeleton className="h-4 w-56" />
         </div>
-        <Skeleton className="h-9 w-28 rounded-full" />
+        <Skeleton className="h-9 w-28 rounded-lg" />
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -32,9 +32,9 @@ export default function AdminLoading() {
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-8 w-24 rounded-full" />
+          <Skeleton key={i} className="h-8 w-24 rounded-lg" />
         ))}
-        <Skeleton className="ml-auto h-9 w-64 rounded-full" />
+        <Skeleton className="ml-auto h-9 w-64 rounded-lg" />
       </div>
 
       <div className="mt-6 overflow-hidden rounded-card border border-line bg-card">

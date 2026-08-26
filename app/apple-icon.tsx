@@ -5,12 +5,16 @@ export const contentType = "image/png";
 
 /**
  * Home-screen icon for iOS. iOS ignores transparency and rounds the corners
- * itself, so this is drawn edge-to-edge on the gold gradient with the mark
- * scaled up for legibility at 60px.
+ * itself, so this is drawn edge-to-edge on the brand gold with the mark scaled
+ * up for legibility at 60px.
+ *
+ * Flat `#D4AF37`, matching `.logo-tile` and `app/icon.svg`. It was a 135°
+ * metallic gradient; all three were flattened together, because a mark drawn
+ * three ways in three places is three marks.
  *
  * The mark is `--on-brand` near-black, not white: on a home screen this sits at
- * 60px next to other apps, and a white glyph on gold (1.6:1 at the lit end)
- * would read as a blank gold square at that size.
+ * 60px next to other apps, and a white glyph on this gold (1.6:1) would read as
+ * a blank gold square at that size. The near-black clears 9.03:1.
  */
 export default function AppleIcon() {
   return new ImageResponse(
@@ -22,7 +26,7 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #F5D76E 0%, #D4AF37 46%, #A67C00 100%)",
+          background: "#D4AF37",
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}

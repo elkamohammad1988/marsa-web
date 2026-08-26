@@ -102,7 +102,6 @@ export default function Page() {
         description="The privacy policy and terms on this site are written as illustrations of what a real operator would have to publish, not as agreements anybody has entered into."
         primaryCta={{ label: "Read The Privacy Policy", href: "/legal/privacy" }}
         secondaryCta={{ label: "Read The Terms", href: "/legal/terms" }}
-        art="coin"
       />
     </>
   );

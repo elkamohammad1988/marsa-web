@@ -117,7 +117,7 @@ export function ConceptBadge({ authConfigured }: { authConfigured: boolean }) {
            attribute that exists to be found cannot drift with the design. */
         data-disclosure=""
         className={cn(
-          "inline-flex flex-none items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors duration-200",
+          "inline-flex flex-none items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors duration-200",
           "sm:gap-2 sm:px-3 sm:py-1.5 sm:text-[11px] sm:tracking-[0.12em]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas",
           open
@@ -176,7 +176,7 @@ export function ConceptBadge({ authConfigured }: { authConfigured: boolean }) {
               triggerRef.current?.focus();
             }}
             aria-label="Close"
-            className="-mr-1 -mt-1 rounded-full p-1 text-ink-subtle transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+            className="-mr-1 -mt-1 rounded-lg p-1 text-ink-subtle transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
           >
             <IconClose aria-hidden className="h-4 w-4" />
           </button>

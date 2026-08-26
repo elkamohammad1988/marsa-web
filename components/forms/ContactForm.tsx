@@ -61,7 +61,7 @@ export function ContactForm({ defaultTopic = "general" }: { defaultTopic?: Conta
     <form
       onSubmit={onSubmit}
       noValidate
-      className="rounded-card-lg border border-line bg-card p-6 shadow-card md:p-8"
+      className="rounded-card-lg border border-line bg-card p-6 shadow-e1 md:p-8"
     >
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <TextField

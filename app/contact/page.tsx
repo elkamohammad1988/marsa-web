@@ -74,10 +74,21 @@ export default async function ContactPage({
               the form below to send what you write.
             </p>
 
-            <ul className="mt-8 flex flex-col gap-5">
+            {/* Rows on rules, matching `FeatureBullets` and `RegulatedBand`.
+
+                Each item opened with a 44px rounded tile filled at `bg-brand/10`
+                holding a 20px glyph — an icon tile, which is the shape this pass
+                removed everywhere else on the site. The glyph survives at its
+                own size in its own narrow column, where it marks the row rather
+                than announcing it, and a hairline does the grouping the tile's
+                fill was doing. */}
+            <ul className="mt-8 border-t border-line">
               {highlights.map((h) => (
-                <li key={h.title} className="flex items-start gap-4">
-                  <span className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-card bg-brand/10 text-brand-strong [&_svg]:h-5 [&_svg]:w-5">
+                <li
+                  key={h.title}
+                  className="grid grid-cols-[1.25rem_1fr] gap-x-4 border-b border-line py-5"
+                >
+                  <span aria-hidden className="mt-0.5 text-brand-strong [&_svg]:h-5 [&_svg]:w-5">
                     {h.icon}
                   </span>
                   <div>

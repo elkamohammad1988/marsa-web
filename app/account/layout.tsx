@@ -46,7 +46,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
                 <li>
                   <Link
                     href="/account"
-                    className="inline-flex h-9 items-center rounded-full px-3 text-sm font-medium text-ink-muted transition-colors hover:bg-ink/5 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+                    className="inline-flex h-9 items-center rounded-lg px-3 text-sm font-medium text-ink-muted transition-colors hover:bg-ink/5 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
                   >
                     Overview
                   </Link>
@@ -55,7 +55,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
                   <li>
                     <Link
                       href="/account/admin"
-                      className="inline-flex h-9 items-center rounded-full px-3 text-sm font-medium text-ink-muted transition-colors hover:bg-ink/5 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+                      className="inline-flex h-9 items-center rounded-lg px-3 text-sm font-medium text-ink-muted transition-colors hover:bg-ink/5 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
                     >
                       Accounts
                     </Link>

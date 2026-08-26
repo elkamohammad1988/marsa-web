@@ -22,7 +22,7 @@ export function IbanChecker() {
   }
 
   return (
-    <div className="rounded-card-lg border border-line bg-card p-6 shadow-card md:p-8">
+    <div className="rounded-card-lg border border-line bg-card p-6 shadow-e1 md:p-8">
       <form onSubmit={onSubmit} noValidate>
         <label htmlFor="iban-input" className="mb-1.5 block text-sm font-medium text-ink">
           Enter an IBAN
@@ -39,7 +39,7 @@ export function IbanChecker() {
             autoComplete="off"
             autoCapitalize="characters"
             placeholder="GB82 WEST 1234 5698 7654 32"
-            className="h-12 w-full rounded-xl border border-line bg-canvas px-4 font-mono text-sm uppercase tracking-wide text-ink placeholder:text-ink-subtle focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-strong/30"
+            className="h-12 w-full rounded-lg border border-line bg-canvas px-4 font-mono text-sm uppercase tracking-wide text-ink placeholder:text-ink-subtle focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-strong/30"
             aria-describedby={result ? "iban-result" : undefined}
           />
           <Button type="submit" variant="primary" size="lg" className="sm:w-auto">

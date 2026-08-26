@@ -60,11 +60,15 @@ function PaymentCard({
         className,
       )}
     >
-      {/* Face: mesh light, then a diagonal sheen so the plastic reads as a
-          physical object rather than a flat swatch. */}
-      <div className="absolute inset-0 bg-mesh-deep opacity-95" />
+      {/* Face: one diagonal light, corner to corner.
+          It used to be three stacked layers — a two-light mesh gradient, this
+          diagonal, and a rotated band of `white/[0.07]` sweeping across the
+          middle to read as a reflection. The reflection is the one to name: a
+          moving highlight on a still object is the shape the brief calls a fake
+          reflection, and it was doing the same job as the diagonal underneath
+          it. A card is a physical thing under a light, so it keeps the light;
+          it does not keep the studio. */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/[0.13] via-transparent to-black/25" />
-      <div className="absolute -left-1/4 top-0 h-[200%] w-1/2 -rotate-[24deg] bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
 
       <div className="relative flex h-full flex-col justify-between p-[7%]">
         <div className="flex items-start justify-between">
@@ -144,8 +148,10 @@ function Phone({
         className,
       )}
     >
+      {/* No wash behind the screen. A `bg-radial-glow` used to sit over the top
+          third of it — a gold radial fading down, which is what a phone screen
+          does not do. The canvas fill is the screen. */}
       <div className="relative flex h-full flex-col overflow-hidden rounded-[11%/5.5%] bg-canvas">
-        <div className="absolute inset-x-0 top-0 h-1/3 bg-radial-glow" />
         {/* Notch */}
         <span className="absolute left-1/2 top-[2%] h-[1.6%] w-[26%] -translate-x-1/2 rounded-full bg-white/15" />
         <div className="relative flex h-full flex-col px-[8%] pb-[7%] pt-[9%]">{children}</div>
@@ -177,9 +183,14 @@ function HomeScreen() {
           <span
             key={label}
             className={cn(
-              "flex-1 rounded-full py-[5%] text-center text-[0.5em] font-semibold leading-none",
+              // `rounded-lg`, flat `bg-brand`: the drawing depicts the button
+              // this product actually ships. It used to be a `rounded-full`
+              // pill filled with `bg-cta-gradient` — the metallic CTA the real
+              // `Button` gave up — so the illustration of the app was showing a
+              // control the app no longer has.
+              "flex-1 rounded-lg py-[5%] text-center text-[0.5em] font-semibold leading-none",
               i === 0
-                ? "bg-cta-gradient text-on-brand shadow-cta"
+                ? "bg-brand text-on-brand"
                 : "border border-line bg-card text-ink",
             )}
           >
@@ -262,56 +273,23 @@ function AccountsScreen() {
   );
 }
 
-/**
- * The Marsa mark as a struck disc, with the ripples it lands in.
+/*
+ * `Coin` used to live here: the Marsa mark drawn as a struck disc inside a
+ * blurred gold orb (`opacity-40 blur-2xl`), ringed by two concentric hairlines
+ * standing in for ripples, lit by a white-to-black rim gradient and seated on
+ * `shadow-glow`.
  *
- * Everything is inset *inwards* from one square box rather than bleeding
- * outwards from the disc: the ripples are the widest part of the drawing, so if
- * they were negative insets they would be the first thing clipped by a slot
- * shorter than it is wide — which is every slot on this site.
+ * It rendered in thirteen slots — every closing CTA on the site, plus two
+ * pricing plans — and it is the object this pass exists to remove. A glowing
+ * sphere with halo rings floating in a dark box is the single most legible
+ * signature of a generated page, and unlike the phone and the card it depicted
+ * nothing: a logo is not a product screen, so a reader learned no more from it
+ * than from the wordmark in the navbar. The `warm` variant was the same drawing
+ * in amber.
+ *
+ * It is not redrawn flatter, because a flatter ornament in the same slot is
+ * still an ornament. `CTACard` now spends the space on the ask instead.
  */
-function Coin({ tone }: { tone: "brand" | "warm" }) {
-  return (
-    <div className="relative aspect-square h-full max-h-full">
-      <span className="absolute inset-0 rounded-full border border-white/[0.05]" />
-      <span className="absolute inset-[9%] rounded-full border border-white/[0.09]" />
-
-      <span
-        className={cn(
-          "absolute inset-[20%] rounded-full opacity-40 blur-2xl",
-          tone === "warm" ? "bg-warning" : "bg-brand",
-        )}
-      />
-
-      <span
-        className={cn(
-          /*
-           * The mark is dark on the metal, exactly as it is in `.logo-tile`.
-           *
-           * It was `text-white`, which was correct while the disc was magenta
-           * and became invisible when it went gold: white on `--gold-light` is
-           * 1.4:1 at the lit end of this gradient. The mark did not disappear
-           * from the page so much as dissolve into it, and because the drawing
-           * is `aria-hidden` decoration no contrast gate had an opinion. The
-           * same glyph was rendering dark-on-gold in the navbar and
-           * white-on-gold here — one mark, two treatments.
-           *
-           * `--on-brand` clears 12.7:1 at the lit end and 5.0:1 at the shaded
-           * one, and holds on the `warm` gradient too (7.4:1 → 4.0:1).
-           */
-          "absolute inset-[20%] grid place-items-center overflow-hidden rounded-full text-on-brand ring-1 ring-inset ring-gold-highlight/30",
-          tone === "warm"
-            ? "bg-[linear-gradient(135deg,rgb(var(--warning))_0%,rgb(var(--brand-deep))_100%)] shadow-e3"
-            : "bg-brand-gradient shadow-glow",
-        )}
-      >
-        {/* Rim light along the top edge, the way a struck disc catches it. */}
-        <span className="absolute inset-0 rounded-full bg-gradient-to-b from-white/30 via-transparent to-black/25" />
-        <MarsaMark className="relative h-[52%] w-[52%]" />
-      </span>
-    </div>
-  );
-}
 
 /* ----------------------------------------------------------------- scenes */
 
@@ -369,10 +347,6 @@ const SCENES: Record<ArtName, () => React.ReactNode> = {
       <PaymentCard className="absolute left-0 top-[28%] w-[84%] rotate-[3deg] shadow-e3" />
     </div>
   ),
-
-  coin: () => <Coin tone="brand" />,
-
-  "coin-warm": () => <Coin tone="warm" />,
 
   "phone-accounts": () => (
     <Phone className="h-full shadow-e3">
@@ -436,13 +410,15 @@ export function BrandArt({ name, surface = "filled", className }: BrandArtProps)
         className,
       )}
     >
-      {surface === "filled" && (
-        <>
-          <span className="pointer-events-none absolute inset-0 bg-mesh-deep opacity-90" />
-          <span className="pointer-events-none absolute inset-0 bg-grid opacity-50" />
-          <span className="pointer-events-none absolute inset-0 bg-noise" />
-        </>
-      )}
+      {/* `filled` is now a flat deep panel and nothing else.
+          Three layers used to sit on it: a two-light mesh gradient, a dotted
+          grid masked to a soft ellipse, and a film grain at 18% in `overlay`
+          blend. Together they are the atmospheric backdrop the hero already
+          gave up — the same argument applies here, and it applies harder,
+          because this panel exists to frame a *drawing*. Anything painted
+          behind the drawing is competing with it. The surface ladder puts
+          `--surface-deep` a full rung below `--canvas`, so the frame reads
+          without help. */}
       <div className="relative flex h-full w-full items-center justify-center text-[clamp(7px,4.4cqh,20px)]">
         <Scene />
       </div>

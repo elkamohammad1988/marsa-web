@@ -87,12 +87,12 @@ export default function Page() {
         eyebrow="Marsa Vs Traditional Banks"
         title="A business account without the friction"
         rows={[
-          { label: "Account Opening", marsa: "Fully Online", traditional: "In-person, 2-6 weeks" },
-          { label: "EU IBAN", marsa: "Yes", traditional: "Often denied to non-residents" },
-          { label: "Multi-Currency", marsa: "30+ currencies", traditional: "Limited" },
-          { label: "Bulk Payments", marsa: "Native + API", traditional: "Manual" },
-          { label: "SWIFT Fees", marsa: "Low flat fee", traditional: "€20-40 per transfer" },
-          { label: "Support", marsa: "Dedicated Manager", traditional: "Generic call center" },
+          { label: "Account Opening", subject: "Fully Online", comparator: "In-person, 2-6 weeks" },
+          { label: "EU IBAN", subject: "Yes", comparator: "Often denied to non-residents" },
+          { label: "Multi-Currency", subject: "30+ currencies", comparator: "Limited" },
+          { label: "Bulk Payments", subject: "Native + API", comparator: "Manual" },
+          { label: "SWIFT Fees", subject: "Low flat fee", comparator: "€20-40 per transfer" },
+          { label: "Support", subject: "Dedicated Manager", comparator: "Generic call center" },
         ]}
       />
 
@@ -143,7 +143,6 @@ export default function Page() {
         title="Manage your business finance globally with Marsa"
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
-        art="coin-warm"
       />
     </>
   );

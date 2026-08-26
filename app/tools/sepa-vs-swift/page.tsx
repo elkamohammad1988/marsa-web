@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
-import { ScrollRegion } from "@/components/ui/ScrollRegion";
 import { Heading } from "@/components/ui/Heading";
 import { BreadcrumbEyebrow } from "@/components/sections/BreadcrumbEyebrow";
+import { ComparisonTable, type ComparisonRow } from "@/components/sections/ComparisonTable";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTACard } from "@/components/sections/CTACard";
 import { buildMetadata } from "@/lib/seo";
@@ -15,15 +15,31 @@ export const metadata: Metadata = buildMetadata({
   path: "/tools/sepa-vs-swift",
 });
 
-type Row = { feature: string; sepa: string; swift: string };
-
-const rows: Row[] = [
-  { feature: "Coverage", sepa: "36 SEPA countries", swift: "200+ countries worldwide" },
-  { feature: "Currency", sepa: "Euro only", swift: "Any currency" },
-  { feature: "Speed", sepa: "Seconds (SEPA Instant) to 1 day", swift: "1-5 business days" },
-  { feature: "Cost", sepa: "Free or very low", swift: "€15-40+ plus FX markup" },
-  { feature: "Intermediary banks", sepa: "None", swift: "Often 1-3 (lifting fees)" },
-  { feature: "Best for", sepa: "Euro payments within Europe", swift: "Cross-border, non-euro payments" },
+/*
+ * This page hand-rolled its own comparison out of `div`s on a `grid-cols-3`:
+ * zebra striping, a dark header row, a rounded bordered card around the lot.
+ * It was the site's *second* comparison table, styled unlike the first, which
+ * renders on ten other pages — so a visitor moving between them saw the same
+ * kind of content presented two ways.
+ *
+ * It was also not a table. No `<table>`, no `<th>`, no `scope` — the column a
+ * value belongs to was conveyed by horizontal position and nothing else, which
+ * is exactly the information a screen reader cannot recover.
+ *
+ * `ComparisonTable` now takes its column headings, so one component serves both
+ * "us against a bank" and "one rail against another".
+ */
+const rows: ComparisonRow[] = [
+  { label: "Coverage", subject: "36 SEPA countries", comparator: "200+ countries worldwide" },
+  { label: "Currency", subject: "Euro only", comparator: "Any currency" },
+  { label: "Speed", subject: "Seconds (SEPA Instant) to 1 day", comparator: "1-5 business days" },
+  { label: "Cost", subject: "Free or very low", comparator: "€15-40+ plus FX markup" },
+  { label: "Intermediary banks", subject: "None", comparator: "Often 1-3 (lifting fees)" },
+  {
+    label: "Best for",
+    subject: "Euro payments within Europe",
+    comparator: "Cross-border, non-euro payments",
+  },
 ];
 
 export default function Page() {
@@ -46,29 +62,11 @@ export default function Page() {
         </Container>
       </Section>
 
-      <Section tone="canvas" size="md">
-        <Container>
-          <ScrollRegion label="SEPA and SWIFT compared">
-            <div className="min-w-[640px] overflow-hidden rounded-card-lg border border-line">
-              <div className="grid grid-cols-3 bg-surface-deep text-sm font-semibold text-white">
-                <div className="px-5 py-4">Feature</div>
-                <div className="px-5 py-4 text-center">SEPA</div>
-                <div className="px-5 py-4 text-center">SWIFT</div>
-              </div>
-              {rows.map((r, i) => (
-                <div
-                  key={r.feature}
-                  className={`grid grid-cols-3 text-sm ${i % 2 === 0 ? "bg-card" : "bg-surface-tint-2"}`}
-                >
-                  <div className="px-5 py-4 font-medium text-ink">{r.feature}</div>
-                  <div className="px-5 py-4 text-center text-ink">{r.sepa}</div>
-                  <div className="px-5 py-4 text-center text-ink-muted">{r.swift}</div>
-                </div>
-              ))}
-            </div>
-          </ScrollRegion>
-        </Container>
-      </Section>
+      <ComparisonTable
+        columns={{ subject: "SEPA", comparator: "SWIFT" }}
+        label="SEPA and SWIFT compared"
+        rows={rows}
+      />
 
       <Section tone="canvas" size="md">
         <Container>
@@ -126,7 +124,7 @@ export default function Page() {
         description="Open a Marsa account for free SEPA transfers and low-cost SWIFT payments worldwide."
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        art="coin"
+
       />
     </>
   );

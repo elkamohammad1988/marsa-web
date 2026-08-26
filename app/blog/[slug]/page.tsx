@@ -133,7 +133,6 @@ export default async function BlogPostPage({
         description="Interbank FX rates, free SEPA transfers, and support across 180+ countries."
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        art="coin"
       />
     </>
   );

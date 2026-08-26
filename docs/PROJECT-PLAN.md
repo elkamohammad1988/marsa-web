@@ -1173,15 +1173,23 @@ same judgement the original H9 asked for.
 npm run dev
 ```
 
-Then look at `/` (the card-and-phone showcase and the coin CTA), `/pricing` (all
-six plan illustrations, which is where the sizing is tightest), and `/blog` (six
-distinct covers, plus the featured slot where the title sits on the art). Check
-in particular that:
+Then look at `/personal/multi-currency-iban` (the card-and-phone showcase),
+`/business/eu-business-account` (the hero slot, where the sizing is tightest),
+and `/blog` (six distinct covers, plus the featured slot where the title sits on
+the art). Check in particular that:
 
-- nothing is clipped in the 5:4 slots on `/pricing`
+- nothing is clipped in the 4:3 hero and showcase slots
 - the type inside the phone screens scales sensibly at small sizes
-- the coin's ripple rings are not cropped by the container
 - the featured blog cover has enough contrast behind its overlaid title
+
+Two items here named surfaces that no longer exist and have been rewritten
+rather than ticked off. The coin — the mark drawn as a glowing disc inside a
+blurred orb — was removed in the 2026-08-26 design pass along with its ripple
+rings, so "the ripple rings are not cropped" has nothing left to check. And
+`/pricing` no longer carries plan illustrations at all: the card that held one
+in a second column was rebuilt as a three-across comparison, because a drawing
+that was the same for "Free" and "€14.99 / month" was the reason three plans
+could not sit side by side.
 
 Anything that looks wrong is a fix, not a re-decision — say what looks off and I
 will adjust it.

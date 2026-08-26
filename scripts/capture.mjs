@@ -75,10 +75,12 @@ const ORIGIN = process.env.CAPTURE_ORIGIN ?? "http://localhost:3000";
  *
  * They were 2x desktop and 3x mobile, which produced a 2880 x 1800 hero at
  * 2.0 MB and a 1170 x 2532 mobile shot at 1.8 MB — 6.2 MB across the eight.
- * Both are dominated by the `bg-noise` overlay, whose whole job is
- * high-frequency dither, which is precisely what a lossless PNG cannot
- * compress. Re-encoding saved 9-28% on the flat frames and nothing at all on
- * those two.
+ * Both were dominated by the `bg-noise` overlay, whose whole job was
+ * high-frequency dither — precisely what a lossless PNG cannot compress.
+ * Re-encoding saved 9-28% on the flat frames and nothing at all on those two.
+ * That overlay was deleted in the 2026-08-26 design pass, so the worst case it
+ * describes no longer arises; the scale below is kept because it was chosen
+ * against the display sizes, not against the file sizes.
  *
  * Nothing renders them at that size. GitHub lays a README image out at roughly
  * 880 CSS px and Upwork asks for at least 1280 wide. 1.5x desktop gives

@@ -16,6 +16,26 @@
  * on a pricing table, the one screen where a buyer is looking hardest.
  *
  * Stripe, Mercury and Linear all set button and heading copy in sentence case.
+ *
+ * ## Two fields left, and why
+ *
+ * **`badge` is now on one plan per audience, not on all three.** Every plan
+ * carried one, which is the same as none carrying one: a mark that everything
+ * wears marks nothing. Worse, four of the six restated the sentence directly
+ * under them — "Ideal for first steps" over *"A no-cost account for freelancers
+ * starting out"*, "For frequent travellers" over *"Designed for frequent
+ * travellers"*, "For founders" over *"perfect for early-stage operations"* —
+ * and Business Enterprise wore the word "Custom" as a badge above a price that
+ * read "Custom". What survives is "Most popular" on one plan in each set, which
+ * is the only one of the six saying something the copy does not.
+ *
+ * **`secondaryCta` is gone.** All six were `{ label: "Compare cards", href:
+ * "/pricing" }`, rendered on `/pricing` — a button that reloads the page it
+ * sits on. `CTACard` had the same bug and it was fixed there by pointing
+ * somewhere real; here there is nowhere real to point, because comparing the
+ * plans is what the page already is. A plan card wants one obvious action
+ * anyway, and six buttons across three cards with half of them inert is the
+ * opposite of an obvious action.
  */
 export type PlanFeature = string;
 
@@ -28,7 +48,6 @@ export type Plan = {
   description: string;
   features: PlanFeature[];
   primaryCta: { label: string; href: string };
-  secondaryCta: { label: string; href: string };
   audience: "personal" | "business";
 };
 
@@ -36,7 +55,6 @@ export const plans: Plan[] = [
   {
     id: "classic",
     name: "Marsa Classic",
-    badge: "Ideal for first steps",
     price: "Free",
     description:
       "A no-cost account for freelancers starting out. The tools to manage money from day one, without paying a cent.",
@@ -49,7 +67,6 @@ export const plans: Plan[] = [
       "Encrypted login",
     ],
     primaryCta: { label: "Get started for free", href: "/get-started?type=personal&plan=classic" },
-    secondaryCta: { label: "Compare cards", href: "/pricing" },
     audience: "personal",
   },
   {
@@ -69,13 +86,11 @@ export const plans: Plan[] = [
       "Spending insights",
     ],
     primaryCta: { label: "Get Marsa Plus", href: "/get-started?type=personal&plan=plus" },
-    secondaryCta: { label: "Compare cards", href: "/pricing" },
     audience: "personal",
   },
   {
     id: "premium",
     name: "Marsa Premium",
-    badge: "For frequent travellers",
     price: "€14.99",
     priceSuffix: "/ month",
     description:
@@ -89,7 +104,6 @@ export const plans: Plan[] = [
       "Concierge",
     ],
     primaryCta: { label: "Go Premium", href: "/get-started?type=personal&plan=premium" },
-    secondaryCta: { label: "Compare cards", href: "/pricing" },
     audience: "personal",
   },
 ];
@@ -98,7 +112,6 @@ export const businessPlans: Plan[] = [
   {
     id: "biz-starter",
     name: "Business Starter",
-    badge: "For founders",
     price: "Free",
     description:
       "Open an EU business account in one day. Multi-currency IBAN, no monthly fee, perfect for early-stage operations.",
@@ -111,7 +124,6 @@ export const businessPlans: Plan[] = [
       "Accounting exports",
     ],
     primaryCta: { label: "Open a business account", href: "/get-started?type=business&plan=biz-starter" },
-    secondaryCta: { label: "Compare plans", href: "/pricing" },
     audience: "business",
   },
   {
@@ -131,13 +143,11 @@ export const businessPlans: Plan[] = [
       "Priority support",
     ],
     primaryCta: { label: "Get the Growth plan", href: "/get-started?type=business&plan=biz-growth" },
-    secondaryCta: { label: "Compare plans", href: "/pricing" },
     audience: "business",
   },
   {
     id: "biz-enterprise",
     name: "Business Enterprise",
-    badge: "Custom",
     price: "Custom",
     description:
       "Tailored for enterprises and marketplaces. Custom SWIFT pricing, white-labelled cards, and treasury services.",
@@ -150,7 +160,6 @@ export const businessPlans: Plan[] = [
       "Compliance suite",
     ],
     primaryCta: { label: "Talk to sales", href: "/contact?topic=sales" },
-    secondaryCta: { label: "Compare plans", href: "/pricing" },
     audience: "business",
   },
 ];

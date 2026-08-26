@@ -123,20 +123,35 @@ export function Footer() {
           <p className="text-xs text-ink-subtle">
             © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
           </p>
-          <ul className="flex flex-wrap items-center gap-x-2 gap-y-2">
-            {footerBadges.map((b) => (
-              <li key={b.label}>
+          {/*
+            Four facts and one link, and they no longer look the same.
+
+            All five rendered as identical filled, ringed, `rounded-full` chips
+            — so four pieces of static text wore a control's chrome, and the one
+            that *is* a control was indistinguishable from them except on hover.
+            That is the shape the brief rules out twice over: static text must
+            not look clickable, and a link must be findable without a pointer.
+
+            The four facts are now plain small type separated by rules, which is
+            what a strip of build metadata is. "Source on GitHub" keeps the link
+            treatment the rest of this footer uses, so it reads as the one thing
+            here you can go and do.
+          */}
+          <ul className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-ink-subtle">
+            {footerBadges.map((b, i) => (
+              <li
+                key={b.label}
+                className={i > 0 ? "border-l border-line pl-3" : undefined}
+              >
                 {b.href ? (
                   <a
                     href={b.href}
-                    className="inline-block rounded-full bg-card px-2.5 py-1 text-[11px] text-ink-muted ring-1 ring-line transition-colors hover:text-ink hover:ring-line-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong"
+                    className="rounded-sm font-medium text-ink-muted underline decoration-line-dark underline-offset-4 transition-colors hover:text-brand-strong hover:decoration-brand-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
                   >
                     {b.label}
                   </a>
                 ) : (
-                  <span className="inline-block rounded-full bg-card px-2.5 py-1 text-[11px] text-ink-subtle ring-1 ring-line">
-                    {b.label}
-                  </span>
+                  b.label
                 )}
               </li>
             ))}

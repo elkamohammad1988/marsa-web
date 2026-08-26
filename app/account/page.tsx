@@ -29,7 +29,7 @@ function initials(profile: Profile): string {
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-card-lg border border-line bg-card p-6 shadow-card">
+    <section className="rounded-card-lg border border-line bg-card p-6 shadow-e1">
       <Heading level="h3">{title}</Heading>
       <div className="mt-5">{children}</div>
     </section>
@@ -141,7 +141,7 @@ export default async function AccountPage() {
             {permissionsFor(profile.role).map((permission) => (
               <li
                 key={permission}
-                className="rounded-full border border-line bg-canvas/60 px-3 py-1 font-mono text-xs text-ink-muted"
+                className="rounded-md border border-line bg-canvas/60 px-3 py-1 font-mono text-xs text-ink-muted"
               >
                 {permission}
               </li>

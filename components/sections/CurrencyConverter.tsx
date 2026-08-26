@@ -206,7 +206,24 @@ export function CurrencyConverter({
                 type="button"
                 onClick={swap}
                 aria-label={`Swap ${from} and ${to}`}
-                className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-on-brand shadow-cta transition-transform duration-300 hover:rotate-180 hover:shadow-cta-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2"
+                /*
+                  Colour on hover, not a spin.
+
+                  This used to carry `hover:rotate-180` over 300ms. A rotation
+                  is a plausible metaphor for "swap" and this was the wrong
+                  trigger for it: hovering has not swapped anything, so the
+                  control performed the action's animation for merely being
+                  pointed at, and then performed nothing when actually pressed.
+                  It also spun the arrows into a position that reads the same
+                  either way, so the motion could not even be followed.
+
+                  `hover:bg-gold-light` is the same hover the primary button
+                  uses, which is the point: this is a button, and it should
+                  answer a pointer the way every other button here does. The
+                  `shadow-cta` pair went with it — a 40px circle does not need
+                  to be seated on the page.
+                */
+                className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-on-brand transition-colors duration-150 hover:bg-gold-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong focus-visible:ring-offset-2"
               >
                 {/*
                   Was the text glyph "⇄" (U+21C4). A character, not an icon:

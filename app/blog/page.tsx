@@ -56,11 +56,11 @@ export default async function BlogListPage({
                 in proportion to the space it sits in.
               */}
               <div className="relative aspect-[16/10] w-full overflow-hidden sm:aspect-[16/7] lg:aspect-[21/8]">
-                <BlogCover
-                  motif={featuredPost.cover}
-                  category={featuredPost.category}
-                  className="transition-transform duration-500 group-hover:scale-105"
-                />
+                {/* No `group-hover:scale-105`. See the note in `BlogCard`: the
+                    cover is vector markup sized by a container query, so a zoom
+                    enlarges type that was set to fit its box. The card answers
+                    a pointer through its label instead. */}
+                <BlogCover motif={featuredPost.cover} category={featuredPost.category} />
                 {/* Scrim: the title sits on the art, so it needs its own
                     contrast floor rather than borrowing the art's. */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />

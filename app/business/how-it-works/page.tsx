@@ -27,7 +27,7 @@ export default function Page() {
         description="Personal and business accounts with a multi-currency IBAN. In minutes, from any country."
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
-        art="coin-warm"
+        art="phone-home"
         tone="deep"
       />
 
@@ -58,12 +58,12 @@ export default function Page() {
         eyebrow="Marsa Business"
         title="Marsa Vs Traditional Banks"
         rows={[
-          { label: "Account Opening", marsa: "Fully online", traditional: "In-person, 2-6 weeks" },
-          { label: "Non-EU Companies", marsa: "Yes", traditional: "Often rejected" },
-          { label: "EU IBAN", marsa: "Provided", traditional: "Limited" },
-          { label: "Bulk Payments", marsa: "API + CSV", traditional: "Manual" },
-          { label: "FX Markup", marsa: "0% (up to €10k)", traditional: "2-4%" },
-          { label: "Support", marsa: "Dedicated", traditional: "Generic" },
+          { label: "Account Opening", subject: "Fully online", comparator: "In-person, 2-6 weeks" },
+          { label: "Non-EU Companies", subject: "Yes", comparator: "Often rejected" },
+          { label: "EU IBAN", subject: "Provided", comparator: "Limited" },
+          { label: "Bulk Payments", subject: "API + CSV", comparator: "Manual" },
+          { label: "FX Markup", subject: "0% (up to €10k)", comparator: "2-4%" },
+          { label: "Support", subject: "Dedicated", comparator: "Generic" },
         ]}
       />
 
@@ -99,7 +99,7 @@ export default function Page() {
         title="Manage your business finance globally"
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
-        art="card-and-phone"
+
       />
     </>
   );

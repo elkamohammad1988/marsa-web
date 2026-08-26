@@ -88,12 +88,12 @@ export default function Page() {
         eyebrow="Marsa Vs Traditional Banks"
         title="Why founders start with Marsa"
         rows={[
-          { label: "Formation + Account", marsa: "One flow", traditional: "Two separate processes" },
-          { label: "Account Opening Time", marsa: "From day one", traditional: "2-6 weeks" },
-          { label: "IBAN Type", marsa: "Dedicated EU IBAN", traditional: "Local IBAN, if approved" },
-          { label: "Cards", marsa: "Physical + virtual", traditional: "Ordered separately" },
-          { label: "Currencies", marsa: "Multi-currency", traditional: "1-2" },
-          { label: "Onboarding", marsa: "Fully digital", traditional: "In-branch appointment" },
+          { label: "Formation + Account", subject: "One flow", comparator: "Two separate processes" },
+          { label: "Account Opening Time", subject: "From day one", comparator: "2-6 weeks" },
+          { label: "IBAN Type", subject: "Dedicated EU IBAN", comparator: "Local IBAN, if approved" },
+          { label: "Cards", subject: "Physical + virtual", comparator: "Ordered separately" },
+          { label: "Currencies", subject: "Multi-currency", comparator: "1-2" },
+          { label: "Onboarding", subject: "Fully digital", comparator: "In-branch appointment" },
         ]}
       />
 
@@ -145,7 +145,7 @@ export default function Page() {
         title="Start your EU company with Marsa"
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
-        art="coin-warm"
+
       />
     </>
   );

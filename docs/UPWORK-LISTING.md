@@ -68,7 +68,7 @@ is unconfigured, and the app refuses the file-store fallback in production
 instead of pretending a lead was saved.
 
 **If a buyer asks why auth is not clickable:** the code, the row-level-security
-migration and 1,878 automated checks are all in the repository and run from a
+migration and 1,871 automated checks are all in the repository and run from a
 clean clone — `https://github.com/elkamohammad1988/marsa-web`, public and
 answering 200 to a signed-out request, re-verified 2026-08-24. What is missing
 from the demo is a database, not a feature. Standing up a live account system
@@ -178,7 +178,7 @@ repository answered 404 to a signed-out visitor. It no longer does:
 >   app reads real ones, server-cached and degrading gracefully, instead of
 >   invented figures that date the moment they ship.
 > - **A test suite and a CI gate.** Typecheck, lint, unit tests and a production
->   build on every push. The reference build runs **1,878 automated checks** —
+>   build on every push. The reference build runs **1,871 automated checks** —
 >   unit tests for business logic and security boundaries, property tests that
 >   recompute accessibility contrast from the design tokens, and
 >   repository-integrity checks — and ships with zero `any` in strict
@@ -290,15 +290,23 @@ first if the listing type accepts one. Regenerate them with
 > the wrong files until 2026-08-24 and would have had you upload the README's
 > gallery under captions written for a different set. Do not mix them.
 
-> ⚠ **The nine files on disk show the previous design.** The 2026-08-25 design
-> pass removed the effect layer — gradient rims, the pointer spotlight, frosted
-> chrome, the gradient headline, the metallic button — and flattened the radius
-> and shadow scales. `portfolio-screenshots/` has been re-shot against it;
-> `upwork-catalog/` deliberately has **not**, because eight of its nine frames
-> are photographed from https://marsa-web.vercel.app and the deployment still
-> serves the old build. Re-shooting them now would produce a gallery that does
-> not match the URL in the listing, which is the one property this set exists to
-> have. **Deploy first, then run `npm run capture:catalog`, then upload.**
+> ⚠ **The nine files on disk show the previous design, now by two passes.** The
+> 2026-08-25 pass removed the effect layer — gradient rims, the pointer
+> spotlight, frosted chrome, the gradient headline, the metallic button — and
+> flattened the radius and shadow scales. The 2026-08-26 pass removed what was
+> left under it: the glowing coin from every closing CTA, the halo under every
+> figure, the mesh-and-grain backdrop behind every illustration, the metallic
+> logo tile, the last icon tiles, and the pills on controls that are not round.
+> The pricing page was rebuilt as a three-across comparison and the comparison
+> table as a real `<table>`.
+>
+> `portfolio-screenshots/` and `portfolio-video/` have been re-shot against all
+> of that; `upwork-catalog/` deliberately has **not**, because eight of its nine
+> frames are photographed from https://marsa-web.vercel.app and the deployment
+> still serves the old build. Re-shooting them now would produce a gallery that
+> does not match the URL in the listing, which is the one property this set
+> exists to have. **Deploy first, then run `npm run capture:catalog`, then
+> upload.**
 
 All nine are photographed from a **production build of the pushed commit**
 rather than mocked up — but they are only as current as the last run, and
@@ -520,8 +528,8 @@ discover it in week three.
       reachable and what is deliberately closed
 - [x] Every number in the description re-measured. **Measured 2026-08-24 on the
       commit that is pushed**:
-      - `npm test` — **1,878 passing across 52 files**, green. The figure has
-        moved four times and every move is worth recording, because the first is
+      - `npm test` — **1,871 passing across 52 files**, green. The figure has
+        moved five times and every move is worth recording, because the first is
         the one the gate cannot see. It read 1,886 until an unused icon export
         was removed along with the invented company page that was its last
         caller, which took it to 1,885. It then moved to 1,889 on 2026-08-24
@@ -540,6 +548,25 @@ discover it in week three.
         longer exists. No assertion about the *product* was weakened, and the
         file count fell 53 → 52 for the same reason. Every claim site was
         re-measured and updated in the same pass.
+
+        It fell again on 2026-08-26, to **1,871**, and the seven are individually
+        accountable. Five of them are one deleted component counted once per
+        gate: `components/ui/FeatureIcon.tsx` — the gradient icon tile — lost its
+        last caller when `/company/about` set its four build rules as a numbered
+        sequence instead of four cards, and five suites here enumerate every file
+        under `app/` and `components/` and assert one case per file
+        (`dead-code`, `forms-collect-nothing`, `heading-scale`,
+        `nested-anchors`, `scroll-regions`). Delete a file and each of them has
+        one fewer case to run; none of them lost an assertion about behaviour.
+
+        The other two are in `tests/art.test.ts`, which runs one case per
+        illustration the site can render. There were six; `coin` and `coin-warm`
+        — the brand mark drawn as a glowing disc inside a blurred orb with two
+        halo rings — went with the effect they were made of, so there are four.
+        The suite's own count assertion moved 6 → 4 with them, which is the
+        correct direction for a gate that reads *"every slot the site can render
+        has a description"*: a slot that no longer exists has nothing to
+        describe. No file count changed; the suite is still 52 files.
 
         Note what that gate does and does not do: it asserts every artefact
         quotes the *same* number, not that the number is *right* — a run cannot

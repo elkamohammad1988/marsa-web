@@ -243,12 +243,20 @@ export function BlogCover({
         className,
       )}
     >
-      <span className="pointer-events-none absolute inset-0 bg-mesh-deep opacity-90" />
-      <span className="pointer-events-none absolute inset-0 bg-grid opacity-40" />
-      <span className="pointer-events-none absolute inset-0 bg-noise" />
+      {/* A flat deep panel, and the motif on it.
 
-      <span className="relative mb-[4%] inline-flex w-fit items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 text-[0.56em] font-semibold uppercase leading-none tracking-[0.16em] text-brand-strong">
-        <span className="h-1 w-1 rounded-full bg-brand-strong" />
+          Three layers used to sit between them: a two-light mesh gradient, a
+          masked dotted grid, and a film grain in `overlay` blend. They were the
+          same backdrop `BrandArt` painted, and they went for the same reason —
+          a cover exists to show its motif, and anything painted behind the
+          motif is competing with it at the exact scale (a 3-up card) where the
+          motif has least room to win. */}
+
+      {/* The category, as a label rather than as a chip. It was a bordered,
+          filled, `rounded-full` pill with a dot in front of it — a control's
+          chrome, inside a picture, around a word that cannot be clicked and is
+          repeated in the card's own metadata directly beneath. */}
+      <span className="relative mb-[4%] block text-[0.56em] font-semibold uppercase leading-none tracking-[0.18em] text-brand-strong">
         {category}
       </span>
 

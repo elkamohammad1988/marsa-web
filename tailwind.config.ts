@@ -70,24 +70,36 @@ const config: Config = {
           soft: withAlpha("--brand-soft"),
           strong: withAlpha("--brand-strong"),
         },
-        // The gold scale itself, for the few places that need a specific step
-        // rather than a role — chiefly the specular highlights in the water
-        // reflection. Prefer the `brand-*` roles everywhere else.
+        /*
+         * One step of the raw gold scale, not six.
+         *
+         * `gold-highlight`, `gold-soft`, `gold-deep`, `gold-dark` and the
+         * `gold` DEFAULT were the specular ends of the scale, and every caller
+         * they had was a light effect: the coin's rim, the nav indicator's lit
+         * centre, the skeleton sweep, the gradient icon tile, the metallic
+         * button. All of those are gone, and a colour nothing can ask for is
+         * not a palette, it is a note.
+         *
+         * `gold-light` survives because it is a *state*: the primary button's
+         * hover is one step brighter up the scale (13.41:1 against the same
+         * near-black label), and that is a real interaction rather than a
+         * decoration. Prefer the `brand-*` roles everywhere else.
+         */
         gold: {
-          DEFAULT: withAlpha("--gold"),
           light: withAlpha("--gold-light"),
-          soft: withAlpha("--gold-soft"),
-          deep: withAlpha("--gold-deep"),
-          dark: withAlpha("--gold-dark"),
-          highlight: withAlpha("--gold-highlight"),
         },
         accent: {
           DEFAULT: withAlpha("--accent"),
         },
-        // The cool second light source — see `--halo` in globals.css. Blurred
-        // decoration only: it is never a text colour and never a fill behind
-        // text, so it carries no contrast obligation.
-        halo: withAlpha("--halo"),
+        /*
+         * `halo` — the cool second light source — is gone.
+         *
+         * It existed only to sit behind the warm gold in a blurred backdrop, and
+         * every backdrop that used it has been removed: the hero mesh, the art
+         * panel mesh, the blog-cover mesh, the share-card radials and the one
+         * gradient icon tile. A decorative-only colour with nothing decorative
+         * left to colour is a token that reads as configurable and is not.
+         */
         // Text/icon colour guaranteed readable on the rose button fill.
         "on-brand": withAlpha("--on-brand"),
         warning: withAlpha("--warning"),
@@ -138,6 +150,34 @@ const config: Config = {
        * 10 / 14 / 18px keeps the surfaces friendly without rounding them into
        * pills, and lets a corner read as a corner. Money products earn trust
        * with crisp edges — the numbers are the soft part of nothing.
+       *
+       * ## The whole rule, in four lines
+       *
+       * These three keys are only the *panel* track. The full system, which
+       * this pass unified and which every new element should follow:
+       *
+       *   • **Panels** — cards, sheets, tables, alerts, drawn tiles:
+       *     `rounded-card` (10px), or `rounded-card-lg` (14px) for the large
+       *     ones. `rounded-hero` (18px) is the outermost frame.
+       *   • **Controls** — button, input, select, textarea, tab, a segment of a
+       *     segmented control, a link styled as a control: `rounded-lg` (8px).
+       *     A group *wrapping* controls takes `rounded-xl` (12px), which is not
+       *     a fourth opinion but arithmetic: 8px of inner corner plus 4px of
+       *     padding is a 12px outer corner, and any other value leaves the two
+       *     radii non-concentric.
+       *   • **Labels** — badges, status chips, inline metadata: `rounded-md`
+       *     (6px). A label is not a control and must not borrow its shape.
+       *   • **`rounded-full`** — only where the element genuinely *is* a circle
+       *     or a capsule track: status dots, avatars, circular icon holders,
+       *     progress rails and their fills, the spinner.
+       *
+       * What this replaced was not a scale, it was a habit. The same
+       * Personal/Business switch rendered as a pill on `/pricing` and as a
+       * 12px group on `/get-started`; `rounded-xl` sat on alerts, inner panels,
+       * a text input and a dropdown item alike; `rounded-[10px]` was
+       * `rounded-card` spelled out longhand in three files; and thirty-odd
+       * pills were tabs, buttons and badges wearing the one shape reserved for
+       * things that are actually round.
        */
       borderRadius: {
         card: "10px",
@@ -187,45 +227,57 @@ const config: Config = {
          */
         cta: "0 1px 2px rgba(0,0,0,0.35)",
         "cta-hover": "0 2px 6px -1px rgba(0,0,0,0.4)",
-        // Back-compat aliases (older components) → mapped onto the new system.
-        card: "0 1px 2px rgba(0,0,0,0.40), 0 6px 16px -12px rgba(0,0,0,0.55)",
-        nav: "0 6px 20px -12px rgba(0,0,0,0.6)",
-        elevated: "0 6px 12px rgba(0,0,0,0.5), 0 24px 52px -24px rgba(0,0,0,0.68)",
-        /**
-         * Gold blooms, cut again — 0.40 → 0.18, 0.36 → 0.16.
+        /*
+         * `card` and `elevated` are gone. They were byte-for-byte copies of
+         * `e1` and `e3`, kept as back-compat aliases through the elevation
+         * rework — so the codebase had two names for one shadow and no way to
+         * tell from a call site which system it was written against. Every
+         * caller now names the level.
          *
-         * The previous pass dimmed these from "lamp" to "soft halo" and that
-         * was the right direction stopped one step early. A halo behind a tile
-         * is still a light effect, and this palette now spends its gold on two
-         * things only: the action you should take, and the number you should
-         * read. What is left here is barely a bloom — just enough that a gold
-         * element on the deepest surface is not a cut-out — and most call
-         * sites are better off asking for `e1` instead.
+         * `nav` stays: it is its own value, not an alias, and the navbar is the
+         * one element that needs a drop wide enough to separate it from a page
+         * scrolling underneath it without reading as a raised panel.
          */
-        glow: "0 12px 32px -22px rgb(var(--brand) / 0.18)",
+        nav: "0 6px 20px -12px rgba(0,0,0,0.6)",
+        /*
+         * `glow` is gone. It was a gold bloom under a gold element, dimmed
+         * twice across two passes (0.40 → 0.18) on the argument that a gold
+         * tile on the deepest surface would otherwise read as a cut-out. Its
+         * last caller was the coin, which is also gone. A shadow the colour of
+         * the thing casting it is a light effect, and this palette now spends
+         * its gold on two things only: the action to take, and the number to
+         * read.
+         */
       },
-      backgroundImage: {
-        // Decorative gradient (tiles, glows, illustration fills). Lit face at
-        // the top-left, shaded face at the bottom-right — a gold surface under
-        // a single light, rather than three arbitrary stops of the same hue.
-        "brand-gradient":
-          "linear-gradient(135deg, rgb(var(--gold-light)) 0%, rgb(var(--gold)) 52%, rgb(var(--gold-deep)) 100%)",
-        // Interactive CTA — vertical metallic gold. Pair only with text-on-brand.
-        "cta-gradient":
-          "linear-gradient(180deg, rgb(var(--cta-from)) 0%, rgb(var(--cta-to)) 100%)",
-        "radial-glow":
-          "radial-gradient(60% 60% at 50% 0%, rgb(var(--brand) / 0.14) 0%, transparent 72%)",
-        // Layered light sources for hero / section backdrops. Gold leads, the
-        // water halo sits behind and lower, and the floor is deep water.
-        "mesh-deep":
-          "radial-gradient(58% 68% at 14% 4%, rgb(var(--brand) / 0.11) 0%, transparent 58%), radial-gradient(46% 58% at 86% 16%, rgb(var(--halo) / 0.26) 0%, transparent 60%), radial-gradient(72% 82% at 50% 112%, rgba(9,38,45,0.55) 0%, transparent 64%)",
-      },
+      /*
+       * `backgroundImage` is gone, and with it the last four decorative fills:
+       *
+       *   • `brand-gradient` and `cta-gradient` — the 135° and 180° metallic
+       *     golds. The button gave up its plating two passes ago; the mark, the
+       *     favicon, the home-screen icon and the drawn in-app button gave up
+       *     theirs in this one, so nothing asks for a gold gradient any more.
+       *   • `radial-glow` — a gold radial over the top third of the drawn phone
+       *     screen.
+       *   • `mesh-deep` — the two-light backdrop behind the illustrations and
+       *     the blog covers. The hero dropped it first; the art panels kept it
+       *     until this pass, where they became flat deep panels.
+       *
+       * `tests/dead-code.test.ts` reads these keys as valid `bg-*` roots, so a
+       * class naming one of them now fails the same gate that catches a typo.
+       */
       ringOffsetColor: {
         canvas: "rgb(var(--canvas))",
       },
       maxWidth: {
         container: "1200px",
       },
+      /*
+       * `dash-flow` is gone with the corridor arcs it animated — twelve dashed
+       * paths crawling between six cards, on an infinite loop, in a colour left
+       * over from the previous palette. `marquee` is the only infinite
+       * animation left, and it is a ticker, where continuous motion is the
+       * content rather than an effect.
+       */
       keyframes: {
         "fade-up": {
           "0%": { opacity: "0", transform: "translateY(18px)" },
@@ -242,11 +294,6 @@ const config: Config = {
         marquee: {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
-        },
-        /* Dash offset animation for the money-route arcs. */
-        "dash-flow": {
-          "0%": { strokeDashoffset: "220" },
-          "100%": { strokeDashoffset: "0" },
         },
         /**
          * Demo step change. Short and small on purpose: the panel is what the
@@ -269,7 +316,6 @@ const config: Config = {
         "fade-in": "fade-in 0.5s ease both",
         "scale-in": "scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
         marquee: "marquee 38s linear infinite",
-        "dash-flow": "dash-flow 3.2s linear infinite",
         "step-in": "step-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both",
         "row-in": "row-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both",
       },

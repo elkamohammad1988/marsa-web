@@ -57,8 +57,7 @@ export default async function BlogOpengraphImage({
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px",
-          background:
-            "radial-gradient(900px 520px at 8% -6%, rgba(212,175,55,0.20), transparent 60%), radial-gradient(760px 460px at 92% 10%, rgba(26,108,122,0.34), transparent 60%), linear-gradient(160deg, #0f1c21 0%, #070d10 100%)",
+          background: "#05090B",
           color: "#fff",
           fontFamily: "sans-serif",
         }}
@@ -72,7 +71,7 @@ export default async function BlogOpengraphImage({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "linear-gradient(135deg, #F5D76E, #D4AF37 46%, #A67C00)",
+              background: "#D4AF37",
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}

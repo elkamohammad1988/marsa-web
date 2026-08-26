@@ -50,7 +50,7 @@ export default function NotFound() {
                 <li key={p.href}>
                   <Link
                     href={p.href}
-                    className="inline-flex rounded-full bg-card px-4 py-2 text-sm font-medium text-ink shadow-card hover:text-brand-strong"
+                    className="inline-flex rounded-lg border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-ink-subtle hover:text-brand-strong"
                   >
                     {p.label}
                   </Link>

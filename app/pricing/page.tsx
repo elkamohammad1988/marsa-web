@@ -51,7 +51,6 @@ export default function PricingPage() {
         // Not "See Pricing": this is the pricing page, and a call to action
         // that reloads the page it sits on is a dead control.
         secondaryCta={{ label: "Try the demo", href: "/demo" }}
-        art="coin"
         footnote="Physical cards available for Europe and UK customers only. All other features (IBAN, SEPA, SWIFT, FX conversion) are available worldwide."
       />
     </>

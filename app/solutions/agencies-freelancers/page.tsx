@@ -89,12 +89,12 @@ export default function Page() {
         eyebrow="Marsa Vs Traditional Banks"
         title="Why Independent Businesses Choose Marsa"
         rows={[
-          { label: "Client Payment Options", marsa: "Local EUR, USD, GBP", traditional: "SWIFT wire only" },
-          { label: "FX on payouts", marsa: "Interbank + 0.3%", traditional: "3-4%" },
-          { label: "SEPA Payouts", marsa: "Free, same day", traditional: "€5-15 each" },
-          { label: "Monthly Fee", marsa: "From €0", traditional: "€10-25" },
-          { label: "Client Sub-Accounts", marsa: "Yes", traditional: "No" },
-          { label: "Setup Time", marsa: "Under 48h", traditional: "1-3 weeks" },
+          { label: "Client Payment Options", subject: "Local EUR, USD, GBP", comparator: "SWIFT wire only" },
+          { label: "FX on payouts", subject: "Interbank + 0.3%", comparator: "3-4%" },
+          { label: "SEPA Payouts", subject: "Free, same day", comparator: "€5-15 each" },
+          { label: "Monthly Fee", subject: "From €0", comparator: "€10-25" },
+          { label: "Client Sub-Accounts", subject: "Yes", comparator: "No" },
+          { label: "Setup Time", subject: "Under 48h", comparator: "1-3 weeks" },
         ]}
       />
 
@@ -130,7 +130,7 @@ export default function Page() {
         title="Invoice the world, keep more of it"
         primaryCta={{ label: "Open a business account", href: "/get-started?type=business" }}
         secondaryCta={{ label: "Talk to sales", href: "/contact?topic=sales" }}
-        art="coin"
+
       />
     </>
   );

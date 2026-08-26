@@ -87,12 +87,12 @@ export default function Page() {
         eyebrow="Marsa Vs Traditional Banks"
         title="A modern account without the banking friction"
         rows={[
-          { label: "Account Opening", marsa: "Online, 5 min", traditional: "Branch visit, 2-4 weeks" },
-          { label: "Verification", marsa: "Fully Digital", traditional: "Paper documentation" },
-          { label: "Multi-Currency", marsa: "30+ currencies", traditional: "Usually EUR only" },
-          { label: "FX Fees", marsa: "Real interbank rate", traditional: "2-4% markup" },
-          { label: "SEPA Transfers", marsa: "Free, instant", traditional: "Free, 1-2 days" },
-          { label: "Mobile App", marsa: "Native, full-feature", traditional: "Limited" },
+          { label: "Account Opening", subject: "Online, 5 min", comparator: "Branch visit, 2-4 weeks" },
+          { label: "Verification", subject: "Fully Digital", comparator: "Paper documentation" },
+          { label: "Multi-Currency", subject: "30+ currencies", comparator: "Usually EUR only" },
+          { label: "FX Fees", subject: "Real interbank rate", comparator: "2-4% markup" },
+          { label: "SEPA Transfers", subject: "Free, instant", comparator: "Free, 1-2 days" },
+          { label: "Mobile App", subject: "Native, full-feature", comparator: "Limited" },
         ]}
       />
 
@@ -143,7 +143,6 @@ export default function Page() {
         description="Open a free Marsa personal account and start receiving SEPA payments in minutes."
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        art="coin"
       />
     </>
   );

@@ -69,7 +69,6 @@ export default function Page() {
         description="Open a Marsa account and convert 30+ currencies at the real interbank rate."
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "Try the converter", href: "/tools/currency-converter" }}
-        art="coin-warm"
       />
     </>
   );

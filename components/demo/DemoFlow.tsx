@@ -111,7 +111,7 @@ function StepAction({
 }) {
   if (done) {
     return (
-      <p className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/[0.12] px-4 py-2 text-sm font-medium text-success">
+      <p className="inline-flex items-center gap-2 rounded-md border border-success/30 bg-success/[0.12] px-4 py-2 text-sm font-medium text-success">
         <svg aria-hidden viewBox="0 0 24 24" fill="none" className="h-4 w-4">
           <path
             d="M4 12.5l5 5L20 6.5"
@@ -362,7 +362,10 @@ export function DemoFlow() {
         anonymous step progress (no cookies, no personal data) to improve the demo.
       </p>
 
-      {/* Progress rail — completed segments glow; the active one gently pulses. */}
+      {/* Progress rail. Done and active are both `bg-brand`; everything
+          ahead is `bg-line`. Completed segments used to carry a `.rail-done`
+          bloom on top of the fill, which is a light effect saying what the
+          fill already said. */}
       <ol className="mb-6 flex items-center gap-1.5" aria-label="Demo progress">
         {DEMO_STEPS.map((s, i) => {
           const done = i < idx;
@@ -372,7 +375,7 @@ export function DemoFlow() {
               <span
                 className={cn(
                   "h-1.5 w-full rounded-full transition-colors",
-                  done && "rail-done bg-brand",
+                  done && "bg-brand",
                   active && "bg-brand",
                   !done && !active && "bg-line",
                 )}
@@ -451,7 +454,7 @@ export function DemoFlow() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <span className="logo-tile grid h-8 w-8 place-items-center rounded-[10px]">
+              <span className="logo-tile grid h-8 w-8 place-items-center rounded-card">
                 <MarsaMark className="h-5 w-5" />
               </span>
               <div className="leading-tight">
@@ -465,7 +468,7 @@ export function DemoFlow() {
             </div>
             <span
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium",
+                "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-medium",
                 accountLive
                   ? "border-line bg-canvas/60 text-ink-muted"
                   : "border-line bg-canvas/60 text-ink-subtle",
@@ -491,7 +494,7 @@ export function DemoFlow() {
                       // moved, which a counting animation on its own does not.
                       // A colour change rather than motion, so it still reads
                       // under `prefers-reduced-motion`.
-                      "rounded-xl border bg-canvas/50 px-3 py-2.5 transition-colors duration-500",
+                      "rounded-card border bg-canvas/50 px-3 py-2.5 transition-colors duration-500",
                       flash.has(ccy)
                         ? "border-brand-strong/50 bg-brand/[0.07]"
                         : "border-line/70",
@@ -513,7 +516,7 @@ export function DemoFlow() {
               // Grows into the slack and centres itself in it, so the empty
               // state *is* the panel's resting design rather than a small
               // notice with a large hole beneath it.
-              <div className="mt-3 flex flex-1 flex-col items-center justify-center gap-2.5 rounded-xl border border-dashed border-line px-4 py-8 text-center">
+              <div className="mt-3 flex flex-1 flex-col items-center justify-center gap-2.5 rounded-card border border-dashed border-line px-4 py-8 text-center">
                 <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink/[0.04] ring-1 ring-line">
                   <IconClock className="h-4 w-4 text-ink-subtle" />
                 </span>
@@ -674,7 +677,7 @@ export function DemoFlow() {
                           onClick={() => setAccountType(t)}
                           aria-pressed={accountType === t}
                           className={cn(
-                            "rounded-xl border px-4 py-3 text-left text-sm capitalize transition-colors",
+                            "rounded-lg border px-4 py-3 text-left text-sm capitalize transition-colors",
                             accountType === t
                               ? "border-brand bg-brand/[0.06] text-ink"
                               : "border-line text-ink-muted hover:border-brand/40",
@@ -736,7 +739,7 @@ export function DemoFlow() {
                     Done. You now hold a European multi-currency IBAN in your own name, ready to
                     receive in 30+ currencies.
                   </p>
-                  <div className="rounded-xl border border-line bg-surface-tint-2 p-4">
+                  <div className="rounded-card border border-line bg-surface-tint-2 p-4">
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-subtle">
                       Your IBAN
                     </p>
@@ -771,7 +774,7 @@ export function DemoFlow() {
                     Move {money(DEMO_SCRIPT.convertUsd, "USD")} into euros at the real mid-market
                     rate, the same number banks quote each other, with no hidden spread.
                   </p>
-                  <div className="rounded-xl border border-line bg-surface-tint-2 p-4 text-sm">
+                  <div className="rounded-card border border-line bg-surface-tint-2 p-4 text-sm">
                     {rateState === "loading" && <span className="text-ink-subtle">Loading live rate…</span>}
                     {rateState === "error" && (
                       <div className="flex items-center justify-between gap-3">

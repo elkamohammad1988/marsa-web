@@ -1,7 +1,6 @@
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { Heading } from "@/components/ui/Heading";
-import { Badge } from "@/components/ui/Badge";
 import { CheckBullet } from "@/components/ui/CheckBullet";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
@@ -47,8 +46,16 @@ export function CardShowcase({
             <BrandArt name={art} />
           </Reveal>
           <Reveal variant={reverse ? "left" : "right"} delay={110}>
-            {eyebrow && <Badge tone="brand">{eyebrow}</Badge>}
-            <Heading level="h2" className="mt-4">
+            {/* A label above the headline, not a gold pill. `Badge tone="brand"`
+                put a filled capsule there — the same fill as the primary button
+                two blocks below it, on text that does nothing when pressed. The
+                eyebrow now matches every other eyebrow on the site. */}
+            {eyebrow && (
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-strong">
+                {eyebrow}
+              </span>
+            )}
+            <Heading level="h2" className="mt-3">
               {title}
             </Heading>
             {description && (
@@ -56,7 +63,7 @@ export function CardShowcase({
             )}
             <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {bullets.map((b) => (
-                <CheckBullet key={b} tone="brand">
+                <CheckBullet key={b}>
                   {b}
                 </CheckBullet>
               ))}

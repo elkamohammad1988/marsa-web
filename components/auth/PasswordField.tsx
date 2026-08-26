@@ -63,7 +63,7 @@ export function PasswordField({
           onClick={() => setRevealed((r) => !r)}
           aria-pressed={revealed}
           className={cn(
-            "rounded-full px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors",
+            "rounded-lg px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors",
             "hover:bg-ink/5 hover:text-ink",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong",
           )}

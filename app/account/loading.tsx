@@ -27,8 +27,8 @@ export default function AccountLoading() {
             <Skeleton className="h-4 w-56" />
           </div>
           <div className="flex gap-2">
-            <Skeleton className="h-9 w-24 rounded-full" />
-            <Skeleton className="h-9 w-24 rounded-full" />
+            <Skeleton className="h-9 w-24 rounded-lg" />
+            <Skeleton className="h-9 w-24 rounded-lg" />
           </div>
         </div>
 
@@ -37,7 +37,7 @@ export default function AccountLoading() {
 
           <div className="mt-6 rounded-card-lg border border-line bg-card p-6">
             <div className="flex items-center gap-4">
-              <Skeleton className="h-14 w-14 rounded-full" />
+              <Skeleton className="h-14 w-14 rounded-lg" />
               <div className="space-y-2">
                 <Skeleton className="h-5 w-40" />
                 <Skeleton className="h-4 w-56" />

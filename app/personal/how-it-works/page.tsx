@@ -61,12 +61,12 @@ export default function Page() {
         eyebrow="Compare Marsa"
         title="Marsa Personal Vs Traditional Banks"
         rows={[
-          { label: "Account Opening", marsa: "Online, 5 min", traditional: "Branch visit, 1-3 weeks" },
-          { label: "Residency Required", marsa: "No", traditional: "Yes" },
-          { label: "Multi-Currency", marsa: "30+ currencies", traditional: "EUR only" },
-          { label: "FX Fees", marsa: "Interbank rate", traditional: "2-4% markup" },
-          { label: "SWIFT Fees", marsa: "Low flat fee", traditional: "€20-40 per transfer" },
-          { label: "Mobile App", marsa: "Award-winning", traditional: "Limited features" },
+          { label: "Account Opening", subject: "Online, 5 min", comparator: "Branch visit, 1-3 weeks" },
+          { label: "Residency Required", subject: "No", comparator: "Yes" },
+          { label: "Multi-Currency", subject: "30+ currencies", comparator: "EUR only" },
+          { label: "FX Fees", subject: "Interbank rate", comparator: "2-4% markup" },
+          { label: "SWIFT Fees", subject: "Low flat fee", comparator: "€20-40 per transfer" },
+          { label: "Mobile App", subject: "Award-winning", comparator: "Limited features" },
         ]}
       />
 
@@ -101,7 +101,6 @@ export default function Page() {
         title="Simplify your finance wherever life takes you"
         primaryCta={{ label: "Open a personal account", href: "/get-started?type=personal" }}
         secondaryCta={{ label: "See Pricing", href: "/pricing" }}
-        art="card-stack"
       />
     </>
   );

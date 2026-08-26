@@ -176,15 +176,15 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             Storage:{" "}
             <span className="font-medium text-ink">{store?.provider ?? "none"}</span>
             {!store ? (
-              <span className="ml-2 rounded-full bg-danger/[0.12] px-2 py-0.5 text-xs font-medium text-danger">
+              <span className="ml-2 rounded-md bg-danger/[0.12] px-2 py-0.5 text-xs font-medium text-danger">
                 not configured
               </span>
             ) : store.durable ? (
-              <span className="ml-2 rounded-full bg-success/[0.12] px-2 py-0.5 text-xs font-medium text-success">
+              <span className="ml-2 rounded-md bg-success/[0.12] px-2 py-0.5 text-xs font-medium text-success">
                 durable
               </span>
             ) : (
-              <span className="ml-2 rounded-full bg-accent/[0.14] px-2 py-0.5 text-xs font-medium text-ink">
+              <span className="ml-2 rounded-md bg-accent/[0.14] px-2 py-0.5 text-xs font-medium text-ink">
                 local files, set SUPABASE_URL to persist
               </span>
             )}
@@ -244,7 +244,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         <a
           href={`/admin${buildQuery({ q })}`}
           className={cn(
-            "rounded-full border px-3 py-1.5 text-sm",
+            "rounded-lg border px-3 py-1.5 text-sm",
             kind ? "border-line text-ink-muted hover:text-ink" : "border-brand bg-brand/[0.08] text-ink",
           )}
         >
@@ -255,7 +255,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             key={k}
             href={`/admin${buildQuery({ kind: k, q })}`}
             className={cn(
-              "rounded-full border px-3 py-1.5 text-sm",
+              "rounded-lg border px-3 py-1.5 text-sm",
               kind === k
                 ? "border-brand bg-brand/[0.08] text-ink"
                 : "border-line text-ink-muted hover:text-ink",
@@ -339,7 +339,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                       {formatWhen(item.createdAt)}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-ink/[0.05] px-2 py-0.5 text-xs font-medium text-ink-muted">
+                      <span className="rounded-md bg-ink/[0.05] px-2 py-0.5 text-xs font-medium text-ink-muted">
                         {item.kind}
                       </span>
                     </td>
@@ -406,7 +406,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                             pseudo-element is what older Safari still draws its
                             triangle from, and a stray marker inside a pill is
                             the kind of detail that reads as unfinished. */}
-                        <summary className="inline-flex cursor-pointer list-none items-center rounded-full border border-line px-3 py-1 text-xs text-ink-muted transition hover:border-danger hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger group-open/erase:border-danger group-open/erase:text-danger [&::-webkit-details-marker]:hidden">
+                        <summary className="inline-flex cursor-pointer list-none items-center rounded-lg border border-line px-3 py-1 text-xs text-ink-muted transition hover:border-danger hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger group-open/erase:border-danger group-open/erase:text-danger [&::-webkit-details-marker]:hidden">
                           Delete
                           <span className="sr-only"> the {item.kind} submission{title ? ` from ${title}` : ""}</span>
                         </summary>
@@ -430,7 +430,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                             />
                             <button
                               type="submit"
-                              className="rounded-full bg-danger/[0.14] px-3 py-1 text-xs font-medium text-danger transition hover:bg-danger/[0.22] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                              className="rounded-lg bg-danger/[0.14] px-3 py-1 text-xs font-medium text-danger transition hover:bg-danger/[0.22] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
                             >
                               Erase permanently
                             </button>
@@ -456,7 +456,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             {page > 1 && (
               <a
                 href={`/admin${buildQuery({ kind, q, page: page - 1 })}`}
-                className="rounded-full border border-line px-3 py-1.5 hover:bg-ink/5"
+                className="rounded-lg border border-line px-3 py-1.5 hover:bg-ink/5"
               >
                 Previous
               </a>
@@ -464,7 +464,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             {page < pages && (
               <a
                 href={`/admin${buildQuery({ kind, q, page: page + 1 })}`}
-                className="rounded-full border border-line px-3 py-1.5 hover:bg-ink/5"
+                className="rounded-lg border border-line px-3 py-1.5 hover:bg-ink/5"
               >
                 Next
               </a>
