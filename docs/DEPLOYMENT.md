@@ -46,9 +46,15 @@ therefore the explanation that fits the evidence, and the honest description is
 identified** — the job log needs repository authentication to read, which this
 run did not have.
 
-It is left as a known issue rather than papered over. Raising the cap to make a
-red build green would be weakening a gate to suit the result, which is the one
-move this repository's gates exist to prevent.
+The next push re-ran the same two jobs against the same application tree and
+**both were green**, `Browser smoke` included, which is the evidence that
+settles it as intermittent rather than caused. The badge reads `passing`.
+
+It is left recorded as a known intermittent rather than papered over. Raising
+the cap to make a red build green would be weakening a gate to suit the result,
+which is the one move this repository's gates exist to prevent — and a flake
+that nobody wrote down is a flake that gets re-diagnosed from scratch the next
+time somebody sees it.
 
 No Supabase credentials, no admin password, no session secrets. That is why
 `/account` and `/admin` redirect and `/api/health` reports `degraded` (HTTP 503)
