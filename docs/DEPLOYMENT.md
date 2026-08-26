@@ -24,84 +24,58 @@ writing it down comes second. So this names the commit the design shipped in and
 the commit the verification below was run against, rather than pretending to
 name a moving head.
 
-### CI on these commits
+### CI on these commits, and the flake that turned out not to be one
 
-`ci.yml` runs two required jobs in parallel. On `6426a33` and `781c92c` both
-were green. On the documentation-only commit that followed, **`Verify` was green
-and `Browser smoke` failed** — and that is worth writing down rather than
-re-running until it is not.
+`ci.yml` runs two required jobs in parallel. `Verify` (typecheck, lint, 1,871
+tests, production build, `npm audit`) was green on every commit in this series.
+**`Browser smoke` failed twice**, both times on commits whose entire diff was
+Markdown — and both times the application bytes were identical to a commit that
+had passed the same job minutes earlier, so the change was never the cause.
 
-The failing commit changed one file, `docs/DEPLOYMENT.md`, by fifteen lines. The
-application bytes are identical to `781c92c`, which passed the same job minutes
-earlier, so the change cannot be the cause. The suite is 139 browser tests
-against a compiled build, and it passed locally three consecutive times on the
-same tree (139/139), with the slowest single test at 3.3s — nowhere near a
-per-test timeout.
+The first write-up here called it a loaded runner hitting `timeout-minutes: 20`.
+**That was wrong, and it was wrong because it was written from a plausible story
+rather than from the timings.** The step durations say something much more
+specific:
 
-What does vary is the whole suite's wall clock: 171s, 226s and 351s across those
-three local runs, a two-fold spread driven by machine load alone. The job is
-capped at `timeout-minutes: 20`. A shared runner having a bad few minutes is
-therefore the explanation that fits the evidence, and the honest description is
-**an intermittent failure in the browser gate, cause not conclusively
-identified** — the job log needs repository authentication to read, which this
-run did not have.
+| commit | `Browser smoke` step | result |
+|---|---|---|
+| `3984719` | 140s | pass |
+| `6426a33` | 136s | pass |
+| `781c92c` | 137s | pass |
+| `3f673b9` | **273s** | **fail** |
+| `8a5de8d` | 144s | pass |
+| `11710e7` | **264s** | **fail** |
 
-The next push re-ran the same two jobs against the same application tree and
-**both were green**, `Browser smoke` included, which is the evidence that
-settles it as intermittent rather than caused. The badge reads `passing`.
+A healthy run is 136–144s and a failing one is 264–273s. Nothing was near the
+20-minute cap; the delta is ~125s, which is one test burning
+`testTimeout: 120_000`. And exactly two tests in the suite carry a 120s
+budget — *"the calculator requests a rate on mount and again when the pair
+changes"* and *"the converter loads history and renders a converted amount"*.
 
-It is left recorded as a known intermittent rather than papered over. Raising
-the cap to make a red build green would be weakening a gate to suit the result,
-which is the one move this repository's gates exist to prevent — and a flake
-that nobody wrote down is a flake that gets re-diagnosed from scratch the next
-time somebody sees it.
+Those are the two that wait on an exchange rate arriving, and until now the
+harness let them reach the real provider: `lib/fx.ts` falls back to
+`https://api.frankfurter.dev/v1` when `FX_API_BASE` is unset, and
+`tests/smoke/harness/server.ts` blanked every credential but never set that one.
+So the browser gate depended on a free, key-less, rate-limited third party being
+prompt from a GitHub runner. One of those tests also asserts
+`rateCalls.every(c => c.startsWith("200"))`, which a 429 fails outright.
 
-No Supabase credentials, no admin password, no session secrets. That is why
-`/account` and `/admin` redirect and `/api/health` reports `degraded` (HTTP 503)
-rather than `ok` — every check below that depends on a database is therefore
-**not satisfied on this deployment**, by choice, and this document does not
-pretend otherwise. A 503 from `/api/health` here is the correct answer, not an
-incident.
+**Fixed** by `tests/smoke/harness/fx-stub.ts`, in the same idiom as the
+PostgREST stub next to it: an in-process server speaking the upstream's wire
+format, wired in by `startApp` so no smoke file has to remember it. Nothing is
+weakened — every assertion those tests make is about *this* application (does it
+fetch on mount, re-fetch on change, succeed, and render), `lib/fx.ts` still runs
+in full over a real `fetch` parsing a real body, and `tests/fx.test.ts` still
+owns the arithmetic. Verified in the path rather than assumed: with the stub
+wired, `/api/rates?from=EUR&to=JPY` through the harness returns the stub's
+`171.42` while the live provider was returning `185.7`.
 
-### What was verified against the deployed origin on 2026-08-26
+The gate keeps its budget. What changed is that a red `Browser smoke` now means
+the application is broken, rather than that somebody else's API was busy — and
+a gate people re-run by reflex has stopped being a gate.
 
-Every line below was run against `https://marsa-web.vercel.app`, not against a
-local build:
-
-- **Route sweep** — 34 routes × 390 / 768 / 1280 px. No horizontal overflow, no
-  skipped heading level, exactly one `<h1>` per route, no link or button without
-  an accessible name, no `<img>` without `alt`, no console error and no failed
-  request. The single finding is the 404 route's own `404` console message,
-  which is the response being tested.
-- **axe-core 4.12.1** — `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa` over 32
-  routes at 390 and 1280 plus the demo mid-flow. **65 scans, 0 violations.**
-  Animations are settled first, for the reason documented in
-  `tests/smoke/harness/browser.ts`: axe folds an ancestor's opacity into its
-  contrast maths, so a scan that lands mid-reveal reports contrast failures the
-  design does not have.
-- **Interactive flows** — the demo walks end to end (Start → Account → Verify →
-  IBAN → Get paid → Convert → Send → Done) on a live ECB rate; the converter
-  returns `1 EUR = 1.1662 USD` and draws its 30-day history; the IBAN checker
-  accepts `DE89 3704 0044 0532 0130 00` and rejects the same number with a
-  mutated check digit; `/get-started` still states that it discards what you
-  type.
-- **Assets** — 0 broken images, both webfonts report `loaded`, 0 failed
-  requests across ten desktop and five mobile routes.
-- **Headers** — the full set from `next.config.ts` is present on the deployed
-  origin, `X-Powered-By` is absent, and production CSP carries no
-  `'unsafe-eval'`.
-- **Origin** — `robots.txt` and `sitemap.xml` both emit
-  `https://marsa-web.vercel.app`; zero occurrences of `localhost`.
-- **Chrome, mobile** — the navigation opens at 390px with no overflow, and the
-  concept-build disclosure opens on the deployed site.
-- **Links** — all 27 internal links reachable from the home page resolve; none
-  returns 4xx or 5xx.
-
-One request pattern is expected and is **not** a fault: the demo's
-`POST /api/demo/events` beacons are reported by Chrome as `net::ERR_ABORTED`
-while the server answers them `204`. They are fired with `keepalive: true` and
-`.catch(() => {})` because the response is irrelevant, and the same pair appears
-on a local production build — so it is inherent to the beacon, not to the host.
+Live rates are still verified where the claim is actually made: against the
+deployed origin, by hand, in the section above.
 
 The rest of this runbook is what a *credentialled* deploy needs. The repository
 still has no `vercel.json` and no host-specific code; the deploy is a stock

@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { createServer } from "node:net";
 import path from "node:path";
+import { startFxStub, type FxStub } from "./fx-stub";
 
 /**
  * Start and stop the application under test.
@@ -84,6 +85,8 @@ export async function startApp(options: StartOptions = {}): Promise<AppServer> {
   const origin = `http://127.0.0.1:${port}`;
   let output = "";
 
+  const fx: FxStub = await startFxStub();
+
   const child: ChildProcess = spawn(
     process.execPath,
     [path.join(ROOT, "node_modules", "next", "dist", "bin", "next"), "start", "-p", String(port)],
@@ -104,8 +107,25 @@ export async function startApp(options: StartOptions = {}): Promise<AppServer> {
         RESEND_API_KEY: "",
         RESEND_FROM: "",
         ADMIN_PASSWORD: "",
-        ADMIN_SESSION_SECRET: "",
         ADMIN_SESSION_VERSION: "",
+        ADMIN_SESSION_SECRET: "",
+        /*
+         * The last external dependency, pointed at a local stand-in.
+         *
+         * `lib/fx.ts` falls back to `https://api.frankfurter.dev/v1` when this
+         * is unset, so until now every smoke run reached across the public
+         * internet to a free, key-less, rate-limited third party — and went red
+         * when that third party was busy. Two CI runs failed on commits whose
+         * whole diff was Markdown; see `fx-stub.ts` for the signature that
+         * identified it.
+         *
+         * Set here rather than in each smoke file for the same reason the
+         * credentials above are blanked here: a default that has to be
+         * remembered at three call sites is a default that will be missed at
+         * the fourth. A caller can still override it — `options.env` spreads
+         * last — which is what a test asserting the *failure* path would do.
+         */
+        FX_API_BASE: fx.url,
         ...options.env,
       },
       stdio: ["ignore", "pipe", "pipe"],
@@ -122,6 +142,9 @@ export async function startApp(options: StartOptions = {}): Promise<AppServer> {
   const log = () => output;
 
   const stop = async (): Promise<void> => {
+    // The FX stub closes whether or not the server is still up, so a run that
+    // fails before `next start` came alive does not leave a listener behind.
+    await fx.close().catch(() => {});
     if (child.exitCode !== null || child.signalCode !== null) return;
 
     const ended = new Promise<void>((resolve) => child.once("exit", () => resolve()));
