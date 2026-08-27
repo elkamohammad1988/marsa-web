@@ -290,25 +290,36 @@ first if the listing type accepts one. Regenerate them with
 > the wrong files until 2026-08-24 and would have had you upload the README's
 > gallery under captions written for a different set. Do not mix them.
 
-> ✅ **The nine files on disk are current.** They were regenerated on
-> 2026-08-26, after `main` (commit `6426a33`) was deployed and verified, so the
-> gallery and https://marsa-web.vercel.app now show the same design: the second
-> design pass — the glowing coin gone from every closing CTA, the halo gone from
-> under every figure, the mesh-and-grain backdrop gone from behind every
-> illustration, the metallic logo tile flattened, the last icon tiles removed,
-> the pricing page rebuilt as a three-across comparison and the comparison table
-> rebuilt as a real `<table>`.
+> ✅ **The nine files on disk are current, and their provenance is checkable.**
+> Regenerated 2026-08-27 against the deployed design (which shipped in
+> `6426a33`), so the gallery and https://marsa-web.vercel.app show the same
+> thing: the glowing coin gone from every closing CTA, the halo gone from under
+> every figure, the mesh-and-grain backdrop gone from behind every illustration,
+> the metallic logo tile flattened, the last icon tiles removed, the pricing page
+> rebuilt as a three-across comparison and the comparison table rebuilt as a real
+> `<table>`.
 >
-> Eight frames come from the deployed origin. Frame 05 is the operator
-> dashboard, which the credential-free deployment cannot serve, so it is
-> photographed from a local production build — say so in the listing.
+> **Eight frames come from the deployed origin; frame 05 does not.** The
+> operator dashboard is behind a password the credential-free deployment does
+> not hold, so it is photographed from a local production build. That is a real
+> limitation of the set, not a detail — say so in the listing.
+>
+> **How that is verified rather than asserted.** `npm run capture:catalog`
+> writes `upwork-catalog/provenance.json` alongside the images: for each frame,
+> the URL `page.url()` reported at the moment of capture, plus its SHA-256. The
+> images themselves carry nothing — `sharp` re-encodes each PNG and drops
+> metadata — and two pages rendered from the same commit are pixel-identical
+> whether they came from Vercel or from `next start`, so comparing images can
+> never settle where one came from. Re-check the set at any time with the
+> `verify` command recorded inside that file; it reports `ok` or `CHANGED` per
+> frame next to the URL it came from.
 >
 > The rule that produced the previous warning still stands and is the reason
 > this set is captured last: **deploy first, then run
 > `npm run capture:catalog`, then upload.**
 
-All nine are photographed from a **production build of the pushed commit**
-rather than mocked up — but they are only as current as the last run, and
+Eight are photographed from the **deployed origin** and the ninth from a local
+production build of the same commit (frame 05, above) rather than mocked up — but they are only as current as the last run, and
 treating that as "cannot drift" is how a set went stale once already: the UI
 cleanup of 2026-08-22 removed decoration that images taken two days earlier
 still showed, including the thumbnail. **Re-run `npm run capture:catalog`
