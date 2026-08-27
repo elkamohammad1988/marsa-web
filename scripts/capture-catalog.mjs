@@ -56,6 +56,7 @@
 import puppeteer from "puppeteer-core";
 import sharp from "sharp";
 import { mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 
 const CHROME =
@@ -545,6 +546,23 @@ async function typeInto(page, selector, value) {
  * gradients, which is its worst case. `sharp` gives identical pixels at roughly
  * two thirds of the bytes, and it is already a dependency.
  */
+/**
+ * Every frame written, with the URL it was actually photographed from.
+ *
+ * This exists because the images carry no provenance of their own. `sharp`
+ * re-encodes each PNG and drops metadata, so a finished file is a grid of
+ * pixels and nothing else — and the one question that matters about this set,
+ * *"did frame 01 come from the deployed site or from somebody's laptop?"*, was
+ * answerable only by trusting whoever ran the command. Two pages rendered from
+ * the same commit are pixel-identical whether they were served from Vercel or
+ * from `next start`, so comparing images cannot settle it either.
+ *
+ * `page.url()` is read at the moment of capture rather than reconstructed from
+ * `ORIGIN`, so a redirect, a typo in `CATALOG_ORIGIN` or a frame that silently
+ * landed on `/admin/login` shows up in the record as the URL it really was.
+ */
+const captured = [];
+
 async function shot(page, name) {
   await requireDisclosure(page);
   const raw = await page.screenshot({ type: "png" });
@@ -553,9 +571,50 @@ async function shot(page, name) {
   const best = optimised.length < raw.length ? optimised : raw;
   writeFileSync(out, best);
   const meta = await sharp(best).metadata();
+  captured.push({
+    file: `${name}.png`,
+    sourceUrl: page.url(),
+    width: meta.width,
+    height: meta.height,
+    bytes: best.length,
+    sha256: createHash("sha256").update(best).digest("hex"),
+  });
   console.log(
     `  ok  ${name}.png  ${meta.width}x${meta.height}  ${(best.length / 1048576).toFixed(2)} MB`,
   );
+}
+
+/**
+ * Write the record next to the images, and say plainly which frames are not
+ * from the deployed origin.
+ *
+ * Frame 05 is the operator dashboard, which the credential-free deployment
+ * cannot serve, so it is photographed from `ADMIN_ORIGIN` — that is a genuine
+ * limitation of the set and belongs in the record rather than in a caveat
+ * somebody has to remember. `verify` is the command that re-checks the hashes,
+ * so the record is falsifiable rather than merely asserted.
+ */
+function writeProvenance() {
+  const record = {
+    capturedAt: new Date().toISOString(),
+    origin: ORIGIN,
+    adminOrigin: ADMIN_ORIGIN,
+    note:
+      "sourceUrl is page.url() at the moment of capture. Frames served from " +
+      "adminOrigin are not from the public deployment; see 05-operator-dashboard.",
+    verify: "node -e \"const{createHash}=require('crypto'),fs=require('fs');" +
+      "for(const f of require('./upwork-catalog/provenance.json').frames)" +
+      "console.log(f.file, createHash('sha256').update(fs.readFileSync('upwork-catalog/'+f.file))" +
+      ".digest('hex')===f.sha256?'ok':'CHANGED', f.sourceUrl)\"",
+    frames: captured,
+  };
+  writeFileSync(resolve(OUT, "provenance.json"), `${JSON.stringify(record, null, 2)}
+`);
+
+  const offOrigin = captured.filter((f) => !f.sourceUrl.startsWith(ORIGIN));
+  console.log(`
+  provenance.json written — ${captured.length} frames from ${ORIGIN}`);
+  for (const f of offOrigin) console.log(`  ! ${f.file} came from ${f.sourceUrl}`);
 }
 
 /* ------------------------------------------------------------------ *
@@ -667,6 +726,7 @@ async function main() {
     await fitToMain(page, DESKTOP);
     await shot(page, "09-contact");
 
+    writeProvenance();
     console.log("\nDone.");
   } finally {
     await browser.close();

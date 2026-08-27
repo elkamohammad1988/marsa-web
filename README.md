@@ -100,8 +100,15 @@ deploy, from the deployed URL, which is its rule: a listing image a buyer cannot
 reproduce by opening the URL in the listing is worth nothing. Eight of its nine
 frames come from https://marsa-web.vercel.app; the ninth is the operator
 dashboard, which needs a password the deployment does not have and is
-photographed from a local production build instead. Neither that directory nor
-`portfolio-video/` is tracked in git.
+photographed from a local production build instead.
+
+That split is recorded rather than asserted: the capture writes
+`upwork-catalog/provenance.json` with, per frame, the URL the browser was on at
+the moment of capture and the file's SHA-256, so anyone can re-check which
+frames came from the deployed origin. The images cannot carry that themselves —
+they are re-encoded and stripped of metadata, and a page rendered from the same
+commit looks identical whether it was served by Vercel or by `next start`.
+Neither that directory nor `portfolio-video/` is tracked in git.
 
 **Every one carries the concept-build disclosure**, because the site
 does — the capture script throws rather than write an unmarked image, and
