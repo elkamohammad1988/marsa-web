@@ -156,8 +156,38 @@ describe("deleting says honestly what it did", () => {
   it("does not take the neighbouring records with it", async () => {
     // The failure this guards: rewriting the file from a bounded read window
     // would delete everything outside the window as a side effect.
+    //
+    // The fifty rows are written in one `writeFile` rather than by fifty
+    // awaited `store.save()` calls, and that is a fix for a real race rather
+    // than a tidy-up.
+    //
+    // `save()` is `mkdir` then `appendFile` — two syscalls per record, so the
+    // loop was a hundred sequential filesystem operations inside a test running
+    // under vitest's *default* 5s budget. When a busy disk pushed it past that,
+    // vitest failed this test and moved on **while the loop was still going**,
+    // and the damage landed on the next test rather than this one: `afterEach`
+    // removed the directory, `beforeEach` made a new one and re-stubbed
+    // `DATA_DIR` to it, and `dataDir()` is resolved per call by design — so the
+    // abandoned writes followed the environment into the fresh directory. The
+    // next test then read its own two records plus a tail of `row-NN`
+    // strangers, and failed with an assertion that pointed at nothing wrong
+    // with the code. Observed three times in eight runs under load, always as
+    // this timeout plus a bogus failure in the test after it.
+    //
+    // Fifty is not negotiable — the count has to exceed the bounded read window
+    // for the assertion below to mean anything — so the cost had to go instead.
+    // `save()` writes exactly one JSON line per record, newline-terminated,
+    // into `<kind>.jsonl` (see `FileSubmissionStore.save`), and `submission()`
+    // defaults to `lead`, so these are the same bytes by the same rule, in one
+    // operation instead of a hundred.
+    const rows = Array.from({ length: 50 }, (_, i) => submission(`row-${i}`));
+    await fs.writeFile(
+      path.join(dir, "lead.jsonl"),
+      rows.map((r) => JSON.stringify(r) + "\n").join(""),
+      "utf8",
+    );
+
     const store = new FileSubmissionStore();
-    for (let i = 0; i < 50; i++) await store.save(submission(`row-${i}`));
 
     await deleteSubmission(deleteRequest("row-25"));
 

@@ -117,13 +117,42 @@ describe("append and read", () => {
 });
 
 describe("bounded reads (B5)", () => {
-  /** One record per line, each comfortably over 40 bytes. */
+  /**
+   * One record per line, each comfortably over 40 bytes.
+   *
+   * Written in a single `writeFile` rather than through `append()`, and that is
+   * a fix rather than a shortcut.
+   *
+   * `append()` is `mkdir` **then** `appendFile` — two syscalls per record, by
+   * design, so the store survives its directory being removed underneath it.
+   * Building a 50-record fixture through it is therefore 100 sequential awaited
+   * filesystem operations, `beforeEach` clears the file so all four tests below
+   * pay it again, and every one of them runs under vitest's *default* 5s
+   * budget. On an idle machine that is about a second; with the browser suite
+   * compiling and three `next start` servers on the same disk it is not, and
+   * `never returns a half-record from the start of the window` was observed
+   * timing out at exactly 5000ms — a timeout, never a wrong assertion.
+   *
+   * Nothing is given up. This block is `bounded reads (B5)`: what is under test
+   * is `read()`'s byte window, and `read()` opens a file and slices bytes — it
+   * cannot tell how those bytes arrived. `append()` has its own coverage in the
+   * block above, including the failed-write path. The bytes here are exactly
+   * what `append()` produces, `JSON.stringify(record) + "
+"` per line, so the
+   * fixture is identical and the flakiness is gone at its source rather than
+   * absorbed by a wider timeout.
+   */
   async function writeRecords(count: number) {
-    const store = new JsonlStore<Record>("records.jsonl");
-    for (let i = 1; i <= count; i++) {
-      await store.append({ id: i, note: `record number ${i} with padding to give it some size` });
-    }
-    return store;
+    const lines = Array.from(
+      { length: count },
+      (_, i) =>
+        `${JSON.stringify({
+          id: i + 1,
+          note: `record number ${i + 1} with padding to give it some size`,
+        })}
+`,
+    ).join("");
+    await fs.writeFile(path.join(TMP_DIR, "records.jsonl"), lines, "utf8");
   }
 
   it("reads the whole file when it fits inside the window", async () => {
