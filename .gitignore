@@ -21,8 +21,6 @@ next-env.d.ts.bak
 # Environment — never commit real values.
 # .env.example is the documented template and IS tracked.
 # ---------------------------------------------------------------------------
-.env
-.env.*
 !.env.example
 
 # ---------------------------------------------------------------------------
@@ -92,7 +90,6 @@ $RECYCLE.BIN/
 *.swp
 *.swo
 *~
-.vscode/*
 !.vscode/settings.json
 !.vscode/launch.json
 !.vscode/extensions.json
@@ -196,3 +193,7 @@ upwork-catalog/
 /.*.mp4
 /.*.json
 !/.eslintrc.json
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+config.bat
